@@ -269,6 +269,41 @@ Which produces Figure \ref{compileSummaryPlots1-fig}:
 
 \myincfig{compileSummaryPlots1}{1\textwidth}{Compiled summary multi-plot}
 
+This plot includes many sub-plots, all in a single frame. The sub-plots are:
+  \begin{itemize}
+    \item \emph{(a)}: Minimum phred quality score, by read position. Described in section \ref{subsec:plotDesc-1} 
+    \item \emph{(b)}: Lower-quartile phred quality score, by read position. Described in section \ref{subsec:plotDesc-1} 
+    \item \emph{(c)}: Median phred quality score, by read position. Described in section \ref{subsec:plotDesc-1} 
+    \item \emph{(d)}: Upper-quartile phred quality score, by read position. Described in section \ref{subsec:plotDesc-1} 
+    \item \emph{(e)}: Maximum phred quality score, by read position. Described in section \ref{subsec:plotDesc-1} 
+    \item \emph{(f)}: Clipping profile. Described in section \ref{subsec:plotDesc-3}
+    \item \emph{(g)}: Deletion profile. Described in section \ref{subsec:plotDesc-4}
+    \item \emph{(h)}: Insertion profile. Described in section \ref{subsec:plotDesc-4}
+    \item \emph{(i)}: Splicing profile. Described in section \ref{subsec:plotDesc-4}
+    \item \emph{(j)}: Insertion length distribution. Described in section \ref{subsec:plotDesc-8}
+    \item \emph{(k)}: Deletion length distribution. Described in section \ref{subsec:plotDesc-8}
+    \item \emph{(l)}: GC content distribution. Described in section \ref{subsec:plotDesc-2}
+    \item \emph{(m)}: N-rate, by read position. Described in section \ref{subsec:plotDesc-7}
+    \item \emph{(n)}: Read drop rate. Described in section \ref{subsec:plotDesc-20}
+    \item \emph{(o)}: Insert size distribution. Described in section \ref{subsec:plotDesc-5}
+    \item \emph{(p)}: Cumulative gene assignment diversity. Described in section \ref{subsec:plotDesc-9}
+    \item \emph{(q)}: Gene body coverage, overall. Described in section \ref{subsec:plotDesc-6}
+    \item \emph{(r)}: Gene body coverage, upper-middle quartile genes. Described in section \ref{subsec:plotDesc-6}
+    \item \emph{(s)}: Gene body coverage, low expression genes. Described in section \ref{subsec:plotDesc-6}
+    \item \emph{(t)}: Read mapping location rates. Described in section \ref{subsec:plotDesc-12}
+    \item \emph{(u)}: Observed splice junction loci counts. Described in section \ref{subsec:plotDesc-13}
+    \item \emph{(v)}: Splice junction event distribution. Described in section \ref{subsec:plotDesc-14}
+    \item \emph{(w)}: Splice junction events per read-pair. Described in section \ref{subsec:plotDesc-14b}
+    \item \emph{(x)}: Strandedness test. Described in section \ref{subsec:plotDesc-15}
+    \item \emph{(y)}: Read-mapping statistics. Described in section \ref{subsec:plotDesc-17}
+    \item \emph{(z)}: Chromosome counts. Described in section \ref{subsec:plotDesc-18}
+    \item \emph{(aa)}: Comparison of normalization factors. Described in section \ref{subsec:plotDesc-19}
+    \item \emph{(ab)}: Leading-clipped nucleotide rates. Described in section \ref{subsec:plotDesc-11}
+    \item \emph{(ac)}: Trailing-clipped nucleotide rates. Described in section \ref{subsec:plotDesc-11b}
+    \item \emph{(ad)}: Raw nucleotide rate by read position. Described in section \ref{subsec:plotDesc-10}
+    \item \emph{(ae)}: Aligned nucleotide rate by read position. Described in section \ref{subsec:plotDesc-10b}
+  \end{itemize}
+
 \pagebreak
 %----------
 \subsubsection{Colored by Lane/Batch} \label{subsec:plotterDesc2}
@@ -527,7 +562,7 @@ makePlot.genebody.coverage.lowExpress(byLane.plotter);
 
 \pagebreak
 %----------
-\subsubsection{N-Rate} \label{subsec:plotDesc7}
+\subsubsection{N-Rate} \label{subsec:plotDesc-7}
 %----------
 
 \myincfig{indivPlot-7}{0.65\textwidth}{PLOT NAME}
@@ -797,6 +832,21 @@ This plot can be generated individually with the command:
 
 <<indivPlot-19,results="hide">>=
 makePlot.norm.factors(byLane.plotter);
+@
+
+\pagebreak
+%----------
+\subsubsection{Read drop rate} \label{subsec:plotDesc-20}
+%----------
+
+\myincfig{indivPlot-20}{0.65\textwidth}{Drop rates}
+
+For each bam file, Figure \ref{indivPlot-20-fig} displays the rates and reasons for reads being dropped from QC analysis. Note that in the example dataset reads were never dropped. This is a consequence of the pre-processing steps in the example pipeline.
+
+This plot can be generated individually with the command:
+
+<<indivPlot-20,results="hide">>=
+makePlot.dropped.rates(byLane.plotter);
 @
 
 %-----------------------------------------------------------
