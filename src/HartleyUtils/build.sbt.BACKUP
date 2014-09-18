@@ -1,0 +1,16 @@
+import AssemblyKeys._
+
+assemblySettings
+
+scalaVersion := "2.11.1"
+
+libraryDependencies <++= (scalaVersion)(sv =>
+  Seq(
+    "org.scala-lang" % "scala-reflect" % "2.11.1"
+  )
+)
+
+jarName in assembly := "QoRT.jar"
+
+mainClass in assembly := Some("runner.runner")
+

@@ -1,0 +1,5 @@
+package internalTests
+
+object readWriteRaceTest {
+
+}

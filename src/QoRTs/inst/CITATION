@@ -1,0 +1,17 @@
+citHeader("To cite package QoRT in publications use:")
+
+year <- sub(".*(2[[:digit:]]{3})-.*", "\\1", meta$Date, perl = TRUE)
+vers <- paste("R package version", meta$Version)
+
+citEntry(entry = "Manual",
+         title = "???",
+         author = personList(as.person("Stephen Hartley")),
+         year = year,
+         note = vers,
+
+         textVersion =
+         paste0("Stephen Hartley,",
+                "(",
+                year,
+                "). ???. ",
+                vers, "."))
