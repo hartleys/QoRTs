@@ -22,7 +22,9 @@ import internalUtils.commonSeqUtils._;
 import internalUtils.optionHolder._;
 
 object qcClippingSequence {
-
+/*
+ * THIS ENTIRE OBJECT IS DEPRECIATED!
+ */
   
   val CLIPPING_SEQ_BYTE = 'S'.toByte;
   val MISSING_SEQ_BYTE = 'H'.toByte;
@@ -400,7 +402,8 @@ class qcClippingSequence(readLen : Int, writeClippedNVC : Boolean)  extends QCUt
      qcClippingSequence.writeTabulatedSequence(outfile, maxLeadClip, maxTailClip, nvcCounter, readLengthSet, writeClippedNVC);
   }
   
-  
+  def getUtilityName : String = "DEPRECIATED";
+
   
 }
 

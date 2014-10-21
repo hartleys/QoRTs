@@ -9,32 +9,32 @@ DEFAULTDEBUGMODE <- TRUE;
 #Input can come in two forms:
 #(1) Single Decoder
 #    This requires a single "decoder" file, which MUST have the following column names:
-#    lanebam.ID	lane.ID	group.ID	sample.ID	qc.data.dir
-#       Other than these 4 required columns, it can have as many other columns as desired.
-#       However: all column names must be UNIQUE.
+#    unique.ID	lane.ID	group.ID	sample.ID	qc.data.dir
+#       Other than these 4 required columns, it can have as many additional columns as desired. Column names must be unique.
 #       OPTIONAL FIELDS:
 #          input.read.pair.count: the # of input reads. this must be included for mapping rate to be calculated.
 #          multi.mapped.read.pair.count: the # of reads that were multi mapped by the aligner. this must be included for multi-mapping rate to be calculated.
 #       RESERVED FIELDS: Do not name any field this:
 #          cycle.CT
+#          lanebam.ID (a synonym for unique.ID)
 
 #(2) Dual Decoder:
 #    This requires two "decoder" files.
-#    Lanebam Decoder:
-#        The Lanebam Decoder must have the following column names:
-#        lanebam.ID	lane.ID	sample.ID
+#    Replicate Decoder:
+#        The Replicate Decoder lists the technical replicates of each sample, and must have the following column names:
+#        unique.ID	lane.ID	sample.ID
 #           Other than these 3 required columns, it can have any other columns desired, as long as the column names are unique.
 #        OPTIONAL FIELDS:
 #           input.read.pair.count: the # of input reads. this must be included for mapping rate to be calculated.
 #           multi.mapped.read.pair.count: the # of reads that were multi mapped by the aligner. this must be included for multi-mapping rate to be calculated.
 #        RESERVED FIELDS: Do not name any field this:
 #           cycle.CT
+#           lanebam.ID (a synonym for unique.ID)
 #    Sample Decoder:
 #        The Sample Decoder must have the following column names:
 #        sample.ID	group.ID
 #            other than these 2 required columns, it can have any other columns desired, as long as the column names are unique.
-
-#OPTIONAL FIELDS
+#
 
 read.qc.results.data <- function(infile.dir, decoder.files = NULL, decoder.data.frame = NULL, calc.DESeq2 = FALSE, calc.edgeR = FALSE, debugMode = DEFAULTDEBUGMODE ) {
    decoder <- NULL;
@@ -61,17 +61,21 @@ read.qc.results.data <- function(infile.dir, decoder.files = NULL, decoder.data.
 
 get.decoder.from.single.file <- function(decoder.file){
   decoder <- read.table(decoder.file,header=TRUE,stringsAsFactors=F);
-  if(is.null(decoder$lanebam.ID)) stop("Decoder formatting error: no column labelled lanebam.ID");
+  
+  if(! is.null(decoder$lanebam.ID)){
+    decoder$unique.ID <- decoder$lanebam.ID;
+  }
+  if(is.null(decoder$unique.ID)) stop("Decoder formatting error: no column labelled unique.ID");
   if(is.null(decoder$lane.ID)) stop("Decoder formatting error: no column labelled lane.ID");
   if(is.null(decoder$group.ID)) stop("Decoder formatting error: no column labelled group.ID");
   if(is.null(decoder$sample.ID)) stop("Decoder formatting error: no column labelled sample.ID");
   
   if(is.null(decoder$qc.data.dir)){
-     message("qc.data.dir not found, assuming qc.data.dir = lanebam.ID");
-     decoder$qc.data.dir <- decoder$lanebam.ID;
+     message("qc.data.dir not found, assuming qc.data.dir = unique.ID");
+     decoder$qc.data.dir <- decoder$unique.ID;
   }  
   
-  if(length(unique(decoder$lanebam.ID)) < length(decoder$lanebam.ID)) stop("Decoder formatting error: lanebam.ID must be unique!");
+  if(length(unique(decoder$unique.ID)) < length(decoder$unique.ID)) stop("Decoder formatting error: unique.ID must be unique!");
   #more checks?
   if( length(unique(names(decoder))) != length(names(decoder)) ) stop("Decoder formatting error: column names must be unique!");
   return(decoder);
@@ -80,14 +84,18 @@ get.decoder.from.single.file <- function(decoder.file){
 get.decoder.from.dual.file <- function(lanebam.decoder, sample.decoder){
   sample.decoder <- read.table(sample.decoder,header=TRUE,stringsAsFactors=F);
   lanebam.decoder <- read.table(lanebam.decoder,header=TRUE,stringsAsFactors=F);
-  if(is.null(lanebam.decoder$lanebam.ID)) stop("Lanebam Decoder formatting error: no column labelled lanebam.ID");
-  if(is.null(lanebam.decoder$lane.ID)) stop("Lanebam Decoder formatting error: no column labelled lane.ID");
-  if(is.null(lanebam.decoder$sample.ID)) stop("Lanebam Decoder formatting error: no column labelled sample.ID");
+  if(! is.null(lanebam.decoder$lanebam.ID)){
+    lanebam.decoder$unique.ID <- lanebam.decoder$lanebam.ID;
+  }
+  
+  if(is.null(lanebam.decoder$unique.ID)) stop("Replicate Decoder formatting error: no column labelled unique.ID");
+  if(is.null(lanebam.decoder$lane.ID)) stop("Replicate Decoder formatting error: no column labelled lane.ID");
+  if(is.null(lanebam.decoder$sample.ID)) stop("Replicate Decoder formatting error: no column labelled sample.ID");
   if(is.null(lanebam.decoder$qc.data.dir)){
-     message("qc.data.dir not found, assuming qc.data.dir = lanebam.ID");
-     lanebam.decoder$qc.data.dir <- lanebam.decoder$lanebam.ID;
+     message("qc.data.dir not found, assuming qc.data.dir = unique.ID");
+     lanebam.decoder$qc.data.dir <- lanebam.decoder$unique.ID;
   } 
-  if(length(unique(lanebam.decoder$lanebam.ID)) < length(lanebam.decoder$lanebam.ID)) stop("Lanebam Decoder formatting error: lanebam.ID must be unique!");
+  if(length(unique(lanebam.decoder$unique.ID)) < length(lanebam.decoder$unique.ID)) stop("Lanebam Decoder formatting error: unique.ID must be unique!");
   if( length(unique(names(lanebam.decoder))) != length(names(lanebam.decoder)) ) stop("Lanebam Decoder formatting error: column names must be unique!");
 
   if(is.null(sample.decoder$sample.ID)) stop("Sample Decoder formatting error: no column labelled sample.ID");
@@ -124,13 +132,15 @@ get.decoder.from.dual.file <- function(lanebam.decoder, sample.decoder){
 ###############################################################
 
 read.in.results.data.with.decoder <- function(decoder, infile.dir = "", calc.DESeq2 = FALSE, calc.edgeR = FALSE , debugMode){
-
-  if(is.null(decoder$lanebam.ID)) stop("Decoder formatting error: no column labelled lanebam.ID");
+  if(! is.null(decoder$lanebam.ID)){
+    decoder$unique.ID <- decoder$lanebam.ID;
+  }
+  if(is.null(decoder$unique.ID)) stop("Decoder formatting error: no column labelled unique.ID");
   if(is.null(decoder$lane.ID)) stop("Decoder formatting error: no column labelled lane.ID");
   if(is.null(decoder$group.ID)) stop("Decoder formatting error: no column labelled group.ID");
   if(is.null(decoder$sample.ID)) stop("Decoder formatting error: no column labelled sample.ID");
   if(is.null(decoder$qc.data.dir)) stop("Decoder formatting error: no column labelled qc.data.dir");
-  if(length(unique(decoder$lanebam.ID)) < length(decoder$lanebam.ID)) stop("Decoder formatting error: lanebam.ID must be unique!");
+  if(length(unique(decoder$unique.ID)) < length(decoder$unique.ID)) stop("Decoder formatting error: unique.ID must be unique!");
   #more checks?
   if( length(unique(names(decoder))) != length(names(decoder)) ) stop("Decoder formatting error: column names must be unique!");
 
@@ -141,25 +151,25 @@ read.in.results.data.with.decoder <- function(decoder, infile.dir = "", calc.DES
   }
 
   
-  for(i in 1:length(decoder$lanebam.ID)){
+  for(i in 1:length(decoder$unique.ID)){
     if(! file.exists(paste0(infile.dir,decoder$qc.data.dir[i]))){
        stop("Directory not found: ",paste0(infile.dir,decoder$qc.data.dir[i]));
     }
   }
 
   res <- new("QoRT_QC_Results");
-  res@lanebam.list <- decoder$lanebam.ID;
+  res@lanebam.list <- decoder$unique.ID;
   res@sample.list <- unique(decoder$sample.ID);
   res@lane.list <- unique(decoder$lane.ID);
   res@group.list <- unique(decoder$group.ID);
   
-  res@decoder <- cbind.data.frame(decoder,cycle.CT = rep(-1,length(decoder$lanebam.ID)));
+  res@decoder <- cbind.data.frame(decoder,cycle.CT = rep(-1,length(decoder$unique.ID)));
 
-  lanebam.list <- as.list(decoder$lanebam.ID);
-  names(lanebam.list) <- decoder$lanebam.ID
+  lanebam.list <- as.list(decoder$unique.ID);
+  names(lanebam.list) <- decoder$unique.ID
   
   qc.data.dir.list <- as.list(decoder$qc.data.dir);
-  names(qc.data.dir.list) <- decoder$lanebam.ID
+  names(qc.data.dir.list) <- decoder$unique.ID
 
   res@qc.data <- lapply(QC_INTERNAL_SCALAQC_FILE_LIST, FUN=function(scalaqc_file){
     if(debugMode) ts <- timestamp();
@@ -183,7 +193,8 @@ read.in.results.data.with.decoder <- function(decoder, infile.dir = "", calc.DES
 ##################################################################################################################################
 
 QC_INTERNAL_SCALAQC_FILE_LIST <- list( summary = "QCsummary.txt",
-                                       gc = "QC.gc.txt.gz",
+                                       gc.paired = "QC.gc.txt.gz",
+                                       gc.unpaired = "QC.gc.RB.txt.gz",
                                        quals.r1 = "QC.quals.r1.txt.gz", 
                                        quals.r2 = "QC.quals.r2.txt.gz",
                                        cigarOpDistribution.byReadCycle.R1 = "QC.cigarOpDistribution.byReadCycle.R1.txt.gz",
@@ -224,8 +235,8 @@ read.in.scalaQC.files <- function(infile.prefix, lanebam.list, qc.data.dir.list,
         stop("File not found: ",infiles[i]);
       }
     }
-    out <- lapply(lanebam.list,FUN=function(lanebam.ID){
-      i <- which(unlist(lanebam.list) == lanebam.ID);
+    out <- lapply(lanebam.list,FUN=function(unique.ID){
+      i <- which(unlist(lanebam.list) == unique.ID);
       d <- tryCatch({
          read.table(infiles[i],header=T,stringsAsFactors=F);
       }, warning = function(w){
@@ -253,7 +264,7 @@ read.in.scalaQC.files <- function(infile.prefix, lanebam.list, qc.data.dir.list,
 #sample.list="character",
 #lane.list="character",
 #group.list="character",
-#decoder="data.frame", #decoder has columns: lanebam.ID	sample.ID	lane.ID	group.ID	cycle.CT	and then any number of user-defined columns (which are ignored internally)
+#decoder="data.frame", #decoder has columns: unique.ID	sample.ID	lane.ID	group.ID	cycle.CT	and then any number of user-defined columns (which are ignored internally)
 #qc.data="list" #List of Lists. Each element corresponds to one qc test, and is composed of a list, one element for each lanebam.
 
 ########################################################################################################################
@@ -263,8 +274,37 @@ read.in.scalaQC.files <- function(infile.prefix, lanebam.list, qc.data.dir.list,
 ########################################################################################################################
 ########################################################################################################################
 
+
+check.all.completed.without.error <- function(res){
+   summaries <- res@qc.data[["summary"]];
+   if(is.null(summaries)){
+     stop("FATAL ERROR: Samplerun summaries not found! Re-run QC jar utility!");
+   }
+   anyFailed <- c();
+   
+   for(lanebam in names(summaries)){
+      currSummary <- summaries[[lanebam]];
+      if(is.null(currSummary)){
+         anyFailed <- c(anyFailed,lanebam);
+      } else if(! ("COMPLETED_WITHOUT_ERROR" %in% currSummary$FIELD)){
+         anyFailed <- c(anyFailed,lanebam);
+      } else if(currSummary$COUNT[currSummary$FIELD == "COMPLETED_WITHOUT_ERROR"] != 1){
+         anyFailed <- c(anyFailed,lanebam);
+      }
+   }
+   
+   if(length(anyFailed) > 0){
+      for(lanebam in anyFailed){
+        message("NOTE: SampleRun \"",lanebam,"\" marked incomplete!");
+      }
+      stop("FATAL ERROR: SampleRuns incomplete! Re-run QC jar utility for the noted samples above!");
+   }
+}
+
 calc.results.data <- function(res, calc.DESeq2, calc.edgeR ){
+   
    res <- fix.summary.to.numeric(res);
+   check.all.completed.without.error(res);
    res <- calc.quals(res);
    res <- calc.gene.CDF(res);
    res <- calc.gene.CDF.bySample(res);
@@ -276,6 +316,7 @@ calc.results.data <- function(res, calc.DESeq2, calc.edgeR ){
    res <- add.to.summary(res);
    return(res);
 }
+
 
 fix.summary.to.numeric <- function(res){
    buf <- res@qc.data[["summary"]];
@@ -290,6 +331,7 @@ fix.summary.to.numeric <- function(res){
 
 add.to.summary <- function(res){
    summary <- res@qc.data[["summary"]];
+   summary.names <- names(summary);
    summary <- lapply(summary,function(dl){
       known.few <- dl$COUNT[dl$FIELD == "SpliceLoci_Known_FewReads"]
       known.many <- dl$COUNT[dl$FIELD == "SpliceLoci_Known_ManyReads"]
@@ -304,9 +346,118 @@ add.to.summary <- function(res){
 
       dl;
    })
-   res@qc.data[["summary"]] <- summary;
+   names(summary) <- summary.names;
+   
+ #message("names(res@qc.data) = ",paste0(names(res@qc.data),collapse=","));
+ #message("debug 1");
+   summary <- INTERNAL.calcAndAdd.averages(summary = summary, summary.names = summary.names, data.list = res@qc.data[["insert.size"]], x.name = "InsertSize", y.name = "Ct", data.title = "InsertSize")
+ #message("debug 2");
+   summary <- INTERNAL.calcAndAdd.averages(summary = summary, summary.names = summary.names, data.list = res@qc.data[["gc.unpaired"]], x.name = "NUM_BASES_GC", y.name = "CT", data.title = "GC_Unpaired")
+ #message("debug 3");
+   summary <- INTERNAL.calcAndAdd.averages(summary = summary, summary.names = summary.names, data.list = res@qc.data[["gc.paired"]], x.name = "NUM_BASES_GC", y.name = "CT", data.title = "GC_Paired")
+ #message("debug 4");
+   raw.data.list <- res@qc.data[["geneBodyCoverage.by.expression.level"]];
+   step.size <- raw.data.list[[1]]$QUANTILE[2] - raw.data.list[[1]]$QUANTILE[1];
+   genebody.data.list <- lapply(raw.data.list,function(df){ data.frame(Quantile = df$QUANTILE - (step.size / 2), GeneBodyCoverage = apply(df[,c("X1.bottomHalf","X2.upperMidQuartile","X3.75to90","X4.high")],1,sum)) });
+   genebodyUM.data.list <- lapply(raw.data.list,function(df){ data.frame(Quantile = df$QUANTILE - (step.size / 2), GeneBodyCoverage = df[,"X2.upperMidQuartile"]) });
+   genebodyLOW.data.list <- lapply(raw.data.list,function(df){ data.frame(Quantile = df$QUANTILE - (step.size / 2), GeneBodyCoverage = df[,"X1.bottomHalf"])});
+ # message("debug 5");   
+   summary <- INTERNAL.calcAndAdd.averages(summary = summary, summary.names = summary.names, data.list = genebody.data.list, x.name = "Quantile", y.name = "GeneBodyCoverage", data.title = "GeneBodyCoverage_Overall");      
+ # message("debug 6");
+   summary <- INTERNAL.calcAndAdd.averages(summary = summary, summary.names = summary.names, data.list = genebodyLOW.data.list, x.name = "Quantile", y.name = "GeneBodyCoverage", data.title = "GeneBodyCoverage_LowExpress");
+ # message("debug 7");
+   summary <- INTERNAL.calcAndAdd.averages(summary = summary, summary.names = summary.names, data.list = genebodyUM.data.list, x.name = "Quantile", y.name = "GeneBodyCoverage", data.title = "GeneBodyCoverage_UMQuartile");
+ # message("debug 8");
 
+   summary <- lapply(names(res@calc.data[["LANEBAM_GENE_CDF"]]),function(n){
+      genecdf <- res@calc.data[["LANEBAM_GENE_CDF"]][[n]];
+      dl <- summary[[n]];
+      
+      dl[dim(dl)[1] + 1,] <- c(FIELD = "geneDiversityProfile_top1count", COUNT = genecdf[1]);
+      dl[dim(dl)[1] + 1,] <- c(FIELD = "geneDiversityProfile_top10count", COUNT = genecdf[10]);
+      dl[dim(dl)[1] + 1,] <- c(FIELD = "geneDiversityProfile_top100count", COUNT = genecdf[100]);
+      dl[dim(dl)[1] + 1,] <- c(FIELD = "geneDiversityProfile_top1000count", COUNT = genecdf[1000]);
+      readct <- genecdf[length(genecdf)];
+      dl[dim(dl)[1] + 1,] <- c(FIELD = "geneDiversityProfile_top1pct", COUNT = genecdf[1] / readct);
+      dl[dim(dl)[1] + 1,] <- c(FIELD = "geneDiversityProfile_top10pct", COUNT = genecdf[10] / readct);
+      dl[dim(dl)[1] + 1,] <- c(FIELD = "geneDiversityProfile_top100pct", COUNT = genecdf[100] / readct);
+      dl[dim(dl)[1] + 1,] <- c(FIELD = "geneDiversityProfile_top1000pct", COUNT = genecdf[1000] / readct);
+
+      dl;
+   })
+   names(summary) <- summary.names;
+   #message("1");
+   if("input.read.pair.count" %in% names(res@decoder)){
+     #message("2");
+     summary <- lapply(1:length(summary.names),function(i){
+       #message("3");
+       unique.ID <- summary.names[i];
+       #message("4: unique.ID = ",unique.ID);
+       dl <- summary[[i]];
+       #message("5");
+       irpc <- res@decoder$input.read.pair.count[res@decoder$unique.ID == unique.ID];
+       totalReadPairs = dl$COUNT[dl$FIELD == "TOTAL_READ_PAIRS"];
+       readPairsOk = dl$COUNT[dl$FIELD == "READ_PAIR_OK"];
+       #message("6");
+       dl[dim(dl)[1] + 1,] <- c(FIELD = "input.read.pair.count", COUNT = irpc);
+       #message("6.1: irpc = ",irpc);
+       #message("6.1: totalReadPairs = ",totalReadPairs);
+       #message("6.1: readPairsOk = ",readPairsOk);
+       dl[dim(dl)[1] + 1,] <- c(FIELD = "total.aligned.rate", COUNT = as.numeric(totalReadPairs) / as.numeric(irpc));
+       #message("6.2");
+       dl[dim(dl)[1] + 1,] <- c(FIELD = "aligned.and.pf.rate", COUNT = as.numeric(readPairsOk) / as.numeric(irpc));
+       #message("7");
+       ##READ_PAIR_OK
+       ##TOTAL_READ_PAIRS
+       
+       if("multi.mapped.read.pair.count" %in% names(res@decoder)){
+         mmrpc <- res@decoder$multi.mapped.read.pair.count[res@decoder$unique.ID == unique.ID];
+         dl[dim(dl)[1] + 1,] <- c(FIELD = "multi.mapped.read.pair.count", COUNT = mmrpc);
+         dl[dim(dl)[1] + 1,] <- c(FIELD = "multi.mapped.rate", COUNT = as.numeric(mmrpc) / as.numeric(irpc));
+
+       }
+       #message("8");
+       dl;
+     })
+   }
+   #message("9");
+   names(summary) <- summary.names;
+   
+   res@qc.data[["summary"]] <- summary;
+   #message("10");
    return(res);
+}
+
+INTERNAL.calcAndAdd.averages <- function(summary, summary.names, data.list, x.name, y.name, data.title){ 
+   summary <- lapply(1:length(names(data.list)),function(i){
+ #message(">   ",data.title, " - ",n," - ",length(data.list));
+ #message(">      x.name contained? (", x.name %in% names(data.list[[1]]), ")");
+ #message(">      y.name contained? (", y.name %in% names(data.list[[1]]), ")");
+      dl <- summary[[i]];
+      currdl <- data.list[[i]];
+      dl[dim(dl)[1] + 1,] <- c(FIELD = paste0(data.title,"_Mean"), COUNT = INTERNAL.calc.mean(currdl,x.name,y.name));
+      dl[dim(dl)[1] + 1,] <- c(FIELD = paste0(data.title,"_Median"), COUNT = INTERNAL.calc.median(currdl,x.name,y.name));
+      dl;
+   })
+   names(summary) <- summary.names;
+   summary;
+}
+
+INTERNAL.calc.median <- function(dl, x.name, y.name){
+          curr.x <- dl[[x.name]];
+          curr.y <- dl[[y.name]];
+          curr.y <- curr.y / sum(curr.y);
+          curr.cs <- cumsum(curr.y);
+          index.median <- which(curr.cs > 0.5)[1];
+          return(curr.x[index.median]);
+}
+
+INTERNAL.calc.mean <- function(dl, x.name, y.name){
+   sum(
+         as.numeric(dl[[x.name]]) *
+         as.numeric(dl[[y.name]]) /
+         sum(as.numeric(dl[[y.name]]))
+      );
 }
 
 calc.NVC.rates <- function(res){
@@ -349,7 +500,7 @@ calc.samplewise.norm.factors <- function(res, calc.DESeq2 , calc.edgeR ){
     });
     
     mapped.reads.by.sample <- sapply( samples, function(s){
-      bamfiles.for.sample <- res@decoder$lanebam.ID[res@decoder$sample.ID == s];
+      bamfiles.for.sample <- res@decoder$unique.ID[res@decoder$sample.ID == s];
       sum(unlist( mapped.reads[bamfiles.for.sample] ));
     })
     norm.factors <- data.frame(sample.ID = samples, M = mapped.reads.by.sample / 1000000);
@@ -362,7 +513,7 @@ calc.samplewise.norm.factors <- function(res, calc.DESeq2 , calc.edgeR ){
     
     if(calc.DESeq2 & "DESeq2" %in% rownames(installed.packages())){
       message("Calculating DESeq2 Normalization Factors (Geometric normalization)...\n");
-      require("DESeq2");
+      suppressPackageStartupMessages(require("DESeq2"));
       
       tryCatch({
         norm.factors$Norm_Geo <- estimateSizeFactorsForMatrix(count.matrix);
@@ -377,7 +528,7 @@ calc.samplewise.norm.factors <- function(res, calc.DESeq2 , calc.edgeR ){
     
     if(calc.edgeR & "edgeR" %in% rownames(installed.packages())){
       message("Calculating edgeR Normalization Factors (all edgeR normalizations)...\n");
-      require("edgeR");
+      suppressPackageStartupMessages(require("edgeR"));
       
       tryCatch({
         norm.factors$Norm_TMM <- calcNormFactors(count.matrix, method="TMM");
@@ -418,7 +569,7 @@ calc.lanebamwise.norm.factors <- function(res, calc.DESeq2 , calc.edgeR){
     mapped.reads <- sapply( res@qc.data[["summary"]], function(df){
        as.numeric(df$COUNT[df$FIELD == "READ_PAIR_OK"]);
     });
-    norm.factors <- data.frame(lanebam.ID = names(mapped.reads), M = unlist(mapped.reads) / 1000000);
+    norm.factors <- data.frame(unique.ID = names(mapped.reads), M = unlist(mapped.reads) / 1000000);
     
     norm.factors$Norm_TC <- norm.factors$M / mean(norm.factors$M);
 
@@ -434,14 +585,14 @@ calc.lanebamwise.norm.factors <- function(res, calc.DESeq2 , calc.edgeR){
     
     if(calc.DESeq2 & "DESeq2" %in% rownames(installed.packages())){
       message("Calculating DESeq2 Normalization Factors (Geometric normalization)...\n");
-      require("DESeq2");
+      suppressPackageStartupMessages(require("DESeq2"));
       
       norm.factors$Norm_Geo <- estimateSizeFactorsForMatrix(count.matrix);
     }
     
     if(calc.edgeR & "edgeR" %in% rownames(installed.packages())){
       message("Calculating edgeR Normalization Factors (all edgeR normalizations)...\n");
-      require("edgeR");
+      suppressPackageStartupMessages(require("edgeR"));
       norm.factors$Norm_TMM <- calcNormFactors(count.matrix, method="TMM");
       norm.factors$Norm_UQ <- calcNormFactors(count.matrix, method="upperquartile");
       norm.factors$Norm_RLE <- calcNormFactors(count.matrix, method="RLE");
@@ -459,20 +610,20 @@ calc.lanebamwise.bysample.norm.factors <- function(res){
     });
 
     norm.factors.bySample <- res@calc.data[["norm.factors.bySample"]];
-    #norm.factors <- data.frame(lanebam.ID = res@decoder$lanebam.ID, sample.ID = res@decoder$sample.ID, lanebam.norm = rep(1,length(res@decoder$sample.ID)));
+    #norm.factors <- data.frame(unique.ID = res@decoder$unique.ID, sample.ID = res@decoder$sample.ID, lanebam.norm = rep(1,length(res@decoder$sample.ID)));
     
     
     bySample.list <- lapply(1:length(samples), function(i){
       s <- samples[i];
       in.df <- norm.factors.bySample[norm.factors.bySample$sample.ID == s,];
-      bamfiles.for.sample <- res@decoder$lanebam.ID[res@decoder$sample.ID == s];
+      bamfiles.for.sample <- res@decoder$unique.ID[res@decoder$sample.ID == s];
       curr.mapped.reads <- unlist(mapped.reads[bamfiles.for.sample]);
       lanebam.norm.factor <- curr.mapped.reads / mean(curr.mapped.reads);
       all.sample.norm.factors <- data.frame(t(sapply(1:length(bamfiles.for.sample),function(j){
         as.numeric(c(in.df[-1] * lanebam.norm.factor[j]));
       })));
-      all.sample.norm.factors <- cbind(lanebam.ID = bamfiles.for.sample,all.sample.norm.factors);
-      names(all.sample.norm.factors) <- c("lanebam.ID",names(in.df[-1]));
+      all.sample.norm.factors <- cbind(unique.ID = bamfiles.for.sample,all.sample.norm.factors);
+      names(all.sample.norm.factors) <- c("unique.ID",names(in.df[-1]));
       all.sample.norm.factors;
     });
 
@@ -493,14 +644,14 @@ calc.mapping.rates <- function(res){
       mm.reads <- res@decoder$multi.mapped.read.pair.count;
       mm.rate <- mm.reads / total.reads;
     }
-    out.list <- lapply(1:length(res@decoder$lanebam.ID),function(i){
+    out.list <- lapply(1:length(res@decoder$unique.ID),function(i){
        if(is.null(res@decoder$multi.mapped.read.pair.count)){
          data.frame(FIELD = c("total.reads","mapped.reads","mapping.rate"), COUNT = c(total.reads[i], mapped.reads[i], mapping.rate[i]));
        } else {
          data.frame(FIELD = c("total.reads","mapped.reads","mapping.rate","mm.reads","mm.rate"), COUNT = c(total.reads[i], mapped.reads[i], mapping.rate[i],mm.reads[i], mm.rate[i]));
        }
     });
-    names(out.list) <-  res@decoder$lanebam.ID;
+    names(out.list) <-  res@decoder$unique.ID;
 
     res@calc.data[["map.rates"]] <- out.list;
   }
@@ -509,13 +660,13 @@ calc.mapping.rates <- function(res){
 
 calc.quals <- function(res){
    if(! is.null(res@qc.data[["quals.r1"]])){
-      res@decoder$cycle.CT <- get.cycleCt(res@qc.data[["quals.r1"]], res@decoder$lanebam.ID);
+      res@decoder$cycle.CT <- get.cycleCt(res@qc.data[["quals.r1"]], res@decoder$unique.ID);
    }
    return(res);
 }
 
-get.cycleCt <- function(data.list, lanebam.IDs){
-   return(sapply(lanebam.IDs, FUN=function(lid){
+get.cycleCt <- function(data.list, unique.IDs){
+   return(sapply(unique.IDs, FUN=function(lid){
       get.lanebam.cycleCt(data.list[[lid]]);
    }));
 }
@@ -552,7 +703,7 @@ calc.gene.CDF.TEMPVERSION <- function(res){
 calc.gene.CDF.bySample <- function(res){
   #res@qc.data[["geneCounts"]];
   gene.ct.bySample <- lapply(res@sample.list, function(sample){
-    lanebam.set <- res@decoder$lanebam.ID[res@decoder$sample.ID == sample];
+    lanebam.set <- res@decoder$unique.ID[res@decoder$sample.ID == sample];
     if(length(lanebam.set) == 1){
        return(res@qc.data[["geneCounts"]][[lanebam.set[1]]]);
     } else {
@@ -570,7 +721,7 @@ calc.gene.CDF.bySample <- function(res){
   names(gene.ct.bySample) <- res@sample.list;
   
   out <- lapply(res@sample.list, function(sample){
-    lanebam.set <- res@decoder$lanebam.ID[res@decoder$sample.ID == sample];
+    lanebam.set <- res@decoder$unique.ID[res@decoder$sample.ID == sample];
     if(length(lanebam.set) == 1){
        return(res@calc.data[["LANEBAM_GENE_CDF"]][[lanebam.set[1]]]);
     } else {
@@ -600,7 +751,7 @@ calc.raw.NVC <- function(res){
 calc.gene.CDF.bySample.OLDVERSION <- function(res){
   #res@qc.data[["geneCounts"]];
   out <- lapply(res@sample.list, function(sample){
-    lanebam.set <- res@decoder$lanebam.ID[res@decoder$sample.ID == sample];
+    lanebam.set <- res@decoder$unique.ID[res@decoder$sample.ID == sample];
     if(length(lanebam.set) == 1){
        return(res@calc.data[["LANEBAM_GENE_CDF"]][[lanebam.set[1]]]);
     } else {
@@ -627,11 +778,11 @@ calc.gene.CDF.bySample.OLDVERSION <- function(res){
 #DEPRECIATED:
 read.in.results.data.with.single.decoder.file <- function(infile.dir,decoder.file){
   decoder <- read.table(decoder.file,header=TRUE,stringsAsFactors=F);
-  if(is.null(decoder$lanebam.ID)) stop("Decoder formatting error: no column labelled lanebam.ID");
+  if(is.null(decoder$unique.ID)) stop("Decoder formatting error: no column labelled unique.ID");
   if(is.null(decoder$lane.ID)) stop("Decoder formatting error: no column labelled lane.ID");
   if(is.null(decoder$group.ID)) stop("Decoder formatting error: no column labelled group.ID");
   if(is.null(decoder$sample.ID)) stop("Decoder formatting error: no column labelled sample.ID");
-  if(length(unique(decoder$lanebam.ID)) < length(decoder$lanebam.ID)) stop("Decoder formatting error: lanebam.ID must be unique!");
+  if(length(unique(decoder$unique.ID)) < length(decoder$unique.ID)) stop("Decoder formatting error: unique.ID must be unique!");
   #more checks?
   if( length(unique(names(decoder))) != length(names(decoder)) ) stop("Decoder formatting error: column names must be unique!");
   read.in.results.data.with.decoder(decoder, infile.dir);
@@ -641,10 +792,10 @@ read.in.results.data.with.single.decoder.file <- function(infile.dir,decoder.fil
 read.in.results.data.with.two.decoder.files <- function(infile.dir, lanebam.decoder, sample.decoder){
   sample.decoder <- read.table(sample.decoder,header=TRUE,stringsAsFactors=F);
   lanebam.decoder <- read.table(lanebam.decoder,header=TRUE,stringsAsFactors=F);
-  if(is.null(lanebam.decoder$lanebam.ID)) stop("Lanebam Decoder formatting error: no column labelled lanebam.ID");
+  if(is.null(lanebam.decoder$unique.ID)) stop("Lanebam Decoder formatting error: no column labelled unique.ID");
   if(is.null(lanebam.decoder$lane.ID)) stop("Lanebam Decoder formatting error: no column labelled lane.ID");
   if(is.null(lanebam.decoder$sample.ID)) stop("Lanebam Decoder formatting error: no column labelled sample.ID");
-  if(length(unique(lanebam.decoder$lanebam.ID)) < length(lanebam.decoder$lanebam.ID)) stop("Lanebam Decoder formatting error: lanebam.ID must be unique!");
+  if(length(unique(lanebam.decoder$unique.ID)) < length(lanebam.decoder$unique.ID)) stop("Lanebam Decoder formatting error: unique.ID must be unique!");
   if( length(unique(names(lanebam.decoder))) != length(names(lanebam.decoder)) ) stop("Lanebam Decoder formatting error: column names must be unique!");
 
   if(is.null(sample.decoder$sample.ID)) stop("Sample Decoder formatting error: no column labelled sample.ID");

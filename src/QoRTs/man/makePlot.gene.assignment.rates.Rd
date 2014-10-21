@@ -14,7 +14,7 @@ makePlot.gene.assignment.rates(plotter,  debugMode, \dots)
 }
 \arguments{
   \item{plotter}{
-    A QoRT_Plotter object.
+    A \code{QoRT_Plotter} reference object. See \code{\link{build.plotter}}.
   }
   \item{debugMode}{
     Logical. If TRUE, debugging data will be printed to the console.
@@ -25,9 +25,20 @@ makePlot.gene.assignment.rates(plotter,  debugMode, \dots)
   }
 }
 \details{
-   TODO!
+  For each bam-file, this function plots the rate (y-axis) for which the bam-file's read-pairs are assigned to the given categories.
+  
+The categories are:
+  \itemize{
+    \item \emph{Unique Gene}: The read-pair overlaps with the exonic segments of one and only one gene. For many downstream analyses tools, such as DESeq, DESeq2, and EdgeR, only read-pairs in this category are used.
+    \item \emph{Ambig Gene}: The read-pair overlaps with the exons of more than one gene.
+    \item \emph{No Gene}: The read-pair does not overlap with the exons of any annotated gene.
+    \item \emph{No Gene, Intronic}: The read-pair does not overlap with the exons of any annotated gene, but appears in a region that is bridged by an annotated splice junction.
+    \item \emph{No Gene, 1kb from gene}: The read-pair does not overlap with the exons of any annotated gene, but is within 1 kilobase from the nearest annotated gene.
+    \item \emph{No Gene, 10kb from gene}: The read-pair does not overlap with the exons of any annotated gene, but is within 10 kilobases from the nearest annotated gene.
+    \item \emph{No Gene, middle of nowhere}: The read-pair does not overlap with the exons of any annotated gene, and is \emph{more} than 10 kilobases from the nearest annotated gene.
+  }
 }
 
 \seealso{
-
+  \code{\link{build.plotter}}
 }

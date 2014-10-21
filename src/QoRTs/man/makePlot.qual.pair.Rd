@@ -14,7 +14,7 @@
 }
 \arguments{
   \item{plotter}{
-    A QoRTs_Plotter object.
+    A \code{QoRT_Plotter} reference object. See \code{\link{build.plotter}}.
   }
   \item{y.name}{
     The name of the quality score metric to plot. Must be one of:
@@ -50,11 +50,9 @@ Note that the Phred score is always an integer, and as such these
 plots would normally be very difficult to read because lines 
 would be plotted directly on top of one another. To reduce this 
 problem, the lines are vertically offset from one another. Most
-plotters offset each libe by lane.ID.
-
-MORE DETAILS!
+plotters offset each line by lane.ID.
 }
 
 \seealso{
-
+  \code{\link{build.plotter}}
 }

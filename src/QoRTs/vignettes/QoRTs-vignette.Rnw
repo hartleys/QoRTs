@@ -1,0 +1,1111 @@
+%\VignetteIndexEntry{QoRTs Vignette}
+%\VignettePackage{QoRTs}
+%\VignetteEngine{knitr::knitr_notangle}
+
+\documentclass[12pt]{article}
+
+<<knitr, echo=FALSE, results="hide">>=
+library("knitr")
+library("Cairo")
+opts_chunk$set(tidy=FALSE,dev="CairoPNG",fig.show="hide",
+               fig.width=6.5,fig.height=5.5,fig.keep="high",
+               message=FALSE)
+@
+
+<<style, eval=TRUE, echo=FALSE, results="asis">>=
+BiocStyle::latex()
+@
+
+\usepackage[sort]{cite}
+\usepackage{hyperref}
+
+%------------------------------------------------------------
+% newcommands
+%------------------------------------------------------------
+\newcommand{\myincfig}[3]{%
+  \begin{figure}[h]
+  \centering
+  \includegraphics[width=#2]{figure/#1-1}
+  \caption{\label{figure/#1}#3}
+  \label{#1-fig}
+  \end{figure}
+}
+\newcommand{\myincfigTwo}[3]{%
+  \begin{figure}[h]
+  \centering
+  \includegraphics[width=#2]{figure/#1-1}
+  \includegraphics[width=#2]{figure/#1-2}  
+  \caption{\label{figure/#1}#3}
+  \label{#1-fig}
+  \end{figure}
+}
+\newcommand{\myincfigThree}[3]{%
+  \begin{figure}[h]
+  \centering
+  \includegraphics[width=#2]{figure/#1-1}
+  \includegraphics[width=#2]{figure/#1-2}  
+  \includegraphics[width=#2]{figure/#1-3}  
+  \caption{\label{figure/#1}#3}
+  \label{#1-fig}
+  \end{figure}
+}
+
+\title{QoRTs Package User Manual}
+\author{Stephen Hartley\\
+National Human Genome Research Institute\\
+National Institutes of Health}
+\date{8 August 2014\\
+Revised 9 October 2014\\
+v0.0.20}
+
+\begin{document}
+
+\maketitle
+
+\tableofcontents
+
+<<setup,echo=FALSE,results="hide">>=
+options(width=80, signif=3, digits=3, prompt=" ", continue=" ")
+set.seed(0xdada)
+require("QoRTs")
+require("QoRTsExampleData");
+
+## To create bitmap versions of plots with many dots, circumventing
+##   Sweave's fig=TRUE mechanism...
+##   (pdfs are too large)
+openBitmap = function(nm, rows=1, cols=1, height = 600, width = 800, cex = 1.2) {
+  CairoPNG(paste("QoRT-", nm, ".png", sep=""), 
+       width=width*cols, height=height*rows, pointsize=14)
+  par(mfrow=c(rows, cols), cex=cex)
+}
+@ 
+
+%-----------------------------------------------------------
+\section{Overview} \label{sec:praeludium}
+%-----------------------------------------------------------
+
+The QoRTs software package is a fast, efficient, and portable toolkit designed primarily to aid in the detection and identification of errors, biases, and artifacts produced by paired-end high-throughput RNA-Seq technology. It can produce a wide variety of graphs, plots, and tables that allow the data to be visualized in various ways. Data can be compiled and contrasted in multiple ways to allow systematic errors or artifacts to reveal themselves more easily. While it will not directly assign pass/fail status, it is a powerful tool for bioinformaticians to detect and identify features in the data.
+
+In (hopefully) most cases, these plots and graphs will not reveal anything other than mixed statistical noise. Next-Gen sequencing technologies have matured to the point where gross systematic errors and batch-specific biases are relatively modest and rare. However: mistakes can still occur, and basing conclusions on flawed data can be disastrous.
+
+In addition to its primary function as a quality control tool, QoRTs simultaneously generates the feature-count files necessary for analysis with the \Biocpkg{DESeq}/\Biocpkg{DESeq2}\cite{DESeq} or \Biocpkg{edgeR}\cite{edgeR} differential expression analysis tools, as well as the \Biocpkg{DEXSeq}\cite{DEXSeq} differential-exon-usage analysis tool.
+
+The QoRTs java utility is written in the Scala programming language (v2.11.1). However, it has been compiled to java byte-code and does not require an installation of Scala (or any other external libraries) in order to function. Thus, the entire QoRTs toolkit can be used in almost any operating system that supports java and R.
+
+%-----------------------------------------------------------
+\section{Requirements}  \label{sec:reqs}
+%-----------------------------------------------------------
+
+The QoRTs software package comes in two distinct parts: a java jar-file and an R package. Installing the R package only requires R version 3.0.2 or higher. Running the java jar-file requires any version of java 6 or higher. The java utility does the bulk of the data processing, and will generally require at least 10-20gb of RAM. The R package is only responsible for some light data processing and for plotting/visualization, and thus has much lower resource requirements. It should run adequately on any reasonably-powerful 64-bit workstation.
+
+QoRTs is designed to run on paired-end next-gen RNA-Seq data. The data must be aligned (or "mapped") to a reference genome before QoRTs can be run. RNA-Star\cite{STAR}, GSNAP\cite{GSNAP}, and TopHat2\cite{TopHat2} are all popular aligners for use with RNA-Seq data. The use of short-read or unspliced aligners such as BowTie, ELAND, BWA, or Novoalign is not recommended.
+
+QoRTs requires that the bam files be sorted by read name. This can be accomplished via samtools using the command:
+\begin{verbatim}
+samtools sort -n unsorted.bam sorted
+\end{verbatim}
+
+\noindent or via novosort, which may be faster and more memory-efficient:
+\begin{verbatim}
+novosort -n unsorted.bam > sorted.bam
+\end{verbatim}
+
+In addition, QoRTs requires transcript annotations in the form of a gtf file. If you are using a annotation guided aligner it is likely you already have a transcript gtf file for your reference genome. We recommend you use the same annotation gtf for alignment, QC, and downstream analysis. We have found the Ensembl "Gene Sets" gtf\footnote{Which can be acquired from the Ensembl website at \url{http://www.ensembl.org}} suitable for these purposes. However, any format that adheres to the gtf file specification\footnote{See the gtf file specification at \url{http://genome.ucsc.edu/FAQ/FAQformat.html}} will work.
+
+In general, it is assumed that the dataset consists of sequencing data derived from multiple biological samples, each with a known biological condition or "group". Using barcoding, it is possible to build a combined library of multiple distinct samples which can be run together on the sequencing machine and then demultiplexed afterward.  This is often desirable, because mitigates and minimizes the effect of batch effects on downstream analysis. To produce sufficient data for downstream analysis, it may be necessary to run such combined libraries on multiple lanes. In this case, it is recommended that alignment and QoRTs QC analyses be performed BEFORE merging the data from these "technical replicates". This can make it easier to distinguish lane-/batch-specific sequencing artifacts from sample-specific abnormalities.
+
+%-----------------------------------------------------------
+\section{Preparations} \label{sec:prep}
+%-----------------------------------------------------------
+
+The QoRTs package comes in two distinct parts: a java jar executable and an R package. First the java jar executable must be run on each bam file in the dataset. The bulk of the data processing takes place in this step. Second, the R package can be used to produce compiled graphs, plots, and tables.
+
+%----------
+\subsection{Bam file decoder} \label{sec:decoder}
+%----------
+
+Several QoRTs functions will require a "decoder" file, which describes each sample and all of its technical replicates (if any). 
+
+\noindent \emph{Required Fields}:
+  \begin{itemize}
+    \item \emph{unique.ID}: A unique identifier for the row.
+    \item \emph{lane.ID}: The ID of the lane or batch.
+    \item \emph{group.ID}: The ID of the "group". For example: "Case" or "Control".
+    \item \emph{sample.ID}: The ID of the biological sample from which the data originated. Each sample can have multiple rows, representing technical replicates (in which the same sample is sequenced on multiple lanes or runs).
+    \item \emph{qc.data.dir}: The directory in which the java utility saved all the output data. If this column does not exist, by default it will be set to be unique.ID.
+  \end{itemize}
+
+\noindent \emph{Optional Fields}: The following additional fields are optional. Note that you should not use these names 
+  \begin{itemize}
+    \item \emph{input.read.pair.count}: The number of reads in the original fastq file, before alignment.
+    \item \emph{multi.mapped.read.pair.count}: The number of reads that were multi-mapped by the aligner.
+    \item \emph{cycle.CT}: The number of bases in each read. By default this will be auto-detected from the data and need not be included.
+  \end{itemize}
+In addition, the decoder can contain any other additional columns as desired, as long as all of the column names are distinct and do not match the column names listed above.
+
+%----------
+\subsection{Example data} \label{subsec:exampledata}
+%----------
+
+The separate R package \Rpackage{QoRTsExampleData} contains an example dataset with an example decoder:
+
+%
+<<GetExampleDataDirectory>>=
+directory <- system.file("extdata/", package="QoRTsExampleData", 
+                         mustWork=TRUE);
+decoder.file <- system.file("extdata/decoder.txt", 
+                            package="QoRTsExampleData", 
+                            mustWork=TRUE);
+decoder.data <- read.table(decoder.file,
+                           header=T,
+                           stringsAsFactors=F);
+print(decoder.data);
+@
+
+%-----------------------------------------------------------
+\section{Processing of aligned RNA-Seq data}  \label{sec:initialProcessing}
+%-----------------------------------------------------------
+
+The first step is to process the aligned RNA-Seq data. The bulk of the data-processing is performed by the QoRTs.jar java utility. This tool produces an array of output files, analyzing and tabulating the data in various ways. This utility requires about 10-20gb of RAM for most genomes, and takes roughly 4-7 minutes to process 1 million read-pairs.
+
+\begin{verbatim}
+java -jar /path/to/jarfile/QoRTs.jar QC
+                   mybamfile.bam
+                   Rattus_norvegicus.RGSC3.4.69.gtf.gz
+                   /qc/data/dir/path/
+\end{verbatim}
+
+In the above command (which must be entered as a single line), you must replace \verb|/path/to/jarfile/| with the file-path to the directory in which the jar file is kept. The path \verb|/qc/data/dir/path/| should be replaced with the path you want the QC data to be written. This should match the path located in the decoder in the qc.data.dir column for this sample-run.
+
+\emph{IMPORTANT NOTE:} As mentioned in section \ref{sec:reqs}, input bam files MUST be sorted by \emph{NAME}. QoRTs can also be set to read bam files from a stdin, by simply substituting '-' (without quotes) for the bamfile name. See section \ref{sec:reqs} for more details.
+
+The bam processing tool includes numerous options. A full description of these options can be found by entering the command:
+\begin{verbatim}
+java -jar /path/to/jarfile/QoRTs.jar QC --man
+\end{verbatim}
+
+There are a number of crucial points that require attention when using the QoRTs.jar QC command.
+
+\emph{Stranded data:} By default, QoRTs assumes that the data is NOT strand-specific. For strand-specific data, the \verb|--stranded| flag must be added to the command line, like so:
+
+\begin{verbatim}
+java -jar /path/to/jarfile/QoRTs.jar QC
+                   --stranded
+                   mybamfile.bam
+                   Rattus_norvegicus.RGSC3.4.69.gtf.gz
+                   /qc/data/dir/path/
+\end{verbatim}
+
+\emph{Stranded library type:} The \verb|--fr_secondStrand| option may be required depending on the stranded library type. QoRTs does not attempt to automatically detect the platform and protocol used for stranded data. There are two types of strand-specific protocols, which are described by the TopHat/CuffLinks documentation at \url{http://cufflinks.cbcb.umd.edu/manual.html#library} as \verb|fr-firststrand| and \verb|fr-secondstrand|. In HTSeq, these same library type options are defined as \verb|-s reverse| and \verb|-s yes| respectively. According to the CuffLinks manual, \verb|fr-firststrand| (the default used by QoRTs for stranded data) applies to dUTP, NSR, and NNSR protocols, whereas \verb|fr-secondstrand| applies to "Directional Illumina (ligation)" and "Standard SOLiD" protocols. If you are unsure which library type applies to your dataset, don't worry: one of the tests will report stranded library type. If you use this test to determine library type, be aware that you may have to re-run QoRTs with the correct library type set.
+
+
+%-----------------------------------------------------------
+\section{Visualization}  \label{sec:visualization}
+%-----------------------------------------------------------
+
+Next, you must read in all the QC output from the java utility, using the command below. This command requires 2 arguments: a root directory and a decoder (which can be either a data frame or a file). We will be using the example data found in package \Rpackage{QoRTexampleData}, which is described in Section \ref{subsec:exampledata}
+
+%
+<<getRes, results="hide">>=
+res <- read.qc.results.data(directory, decoder.data.frame = decoder.data,
+                            calc.DESeq2 = TRUE, calc.edgeR = TRUE);
+@
+
+Note that the \Robject{calc.DESeq2} and \Robject{calc.edgeR} options are optional, and tell QoRTs to attempt to load the \Biocpkg{DESeq2} and \Biocpkg{edgeR} packages respectively, and use the packages to calculate their respective normalization size factors. This is not strictly needed for most purposes, but allows QoRTs to plot the normalization factors against one another. See section \ref{subsec:plotDesc-19} for more information.
+
+%----------
+\subsection{Generating all default plots}
+%----------
+
+To generate all the default compiled plots all at once, use the command:
+
+%
+<<compileAllPlots, eval = FALSE>>=
+makePlot.all.std(res, 
+             outfile.dir = "./", 
+             plot.device.name = "CairoPNG");
+@
+
+This will usually take some time to run, but will produce all the compiled summary plots described in the rest of this section, including separate highlight plots for every sample in the dataset.
+
+%----------
+\subsection{Plotting by sample, lane, or group} \label{subsec:plotterDesc}
+%----------
+
+QoRTs includes automated methods for organizing and plotting the results in numerous different ways. The intent is to make patterns and biases more visible to the user.
+
+All plotting functions in QoRTs require a \Robject{QoRT\_Plotter} object. A \Robject{QoRT\_Plotter} is a \Robject{RefClass} object that contains all the QC data along with a set of parameters that determine how to color and draw each bam file's data. A full accounting of all possible options available in the is beyond the scope of this manual, but can be found in the help docs for the \Robject{QoRT\_Plotter} class.
+
+\pagebreak
+%----------
+\subsubsection{Summary Plots} \label{subsec:plotterDesc1}
+%----------
+
+The simplest QoRTs plotter is the summary plotter. The summary plotter can be created using the command:
+
+<<makePlotter-1,results="hide">>=
+summary.plotter <- build.plotter.summary(res);
+@
+
+This plotter will plot all the bam-files on top of one another in semi-transparent gray. For example:
+
+<<plotterExamples-1,results="hide", fig.width=6.5, fig.height=5.5>>=
+makePlot.insert.size(summary.plotter);
+@
+
+Which produces Figure \ref{plotterExamples-1-fig}:
+
+\myincfig{plotterExamples-1}{0.65\textwidth}{Phred Quality Score Plots}
+
+The above example plot displays the "Insert Size" of each bam file, as described in Section \ref{subsec:plotDesc-5}.
+
+In addition, a compiled multi-plot in this style, containing all the standard QC plots, can be generated with the command:
+<<compileSummaryPlots1, fig.width=30, fig.height=25>>=
+makePlot.summary.basic(res);
+@
+
+Which produces Figure \ref{compileSummaryPlots1-fig}:
+
+\myincfig{compileSummaryPlots1}{1\textwidth}{Compiled summary multi-plot}
+
+This plot includes many sub-plots, all in a single frame. The sub-plots are:
+  \begin{itemize}
+    \item \emph{(a)}: Minimum phred quality score, by read position. Described in section \ref{subsec:plotDesc-1} 
+    \item \emph{(b)}: Lower-quartile phred quality score, by read position. Described in section \ref{subsec:plotDesc-1} 
+    \item \emph{(c)}: Median phred quality score, by read position. Described in section \ref{subsec:plotDesc-1} 
+    \item \emph{(d)}: Upper-quartile phred quality score, by read position. Described in section \ref{subsec:plotDesc-1} 
+    \item \emph{(e)}: Maximum phred quality score, by read position. Described in section \ref{subsec:plotDesc-1} 
+    \item \emph{(f)}: Clipping profile. Described in section \ref{subsec:plotDesc-3}
+    \item \emph{(g)}: Deletion profile. Described in section \ref{subsec:plotDesc-4}
+    \item \emph{(h)}: Insertion profile. Described in section \ref{subsec:plotDesc-4}
+    \item \emph{(i)}: Splicing profile. Described in section \ref{subsec:plotDesc-4}
+    \item \emph{(j)}: Insertion length distribution. Described in section \ref{subsec:plotDesc-8}
+    \item \emph{(k)}: Deletion length distribution. Described in section \ref{subsec:plotDesc-8}
+    \item \emph{(l)}: GC content distribution. Described in section \ref{subsec:plotDesc-2}
+    \item \emph{(m)}: N-rate, by read position. Described in section \ref{subsec:plotDesc-7}
+    \item \emph{(n)}: Read drop rate. Described in section \ref{subsec:plotDesc-20}
+    \item \emph{(o)}: Insert size distribution. Described in section \ref{subsec:plotDesc-5}
+    \item \emph{(p)}: Cumulative gene assignment diversity. Described in section \ref{subsec:plotDesc-9}
+    \item \emph{(q)}: Gene body coverage, overall. Described in section \ref{subsec:plotDesc-6}
+    \item \emph{(r)}: Gene body coverage, upper-middle quartile genes. Described in section \ref{subsec:plotDesc-6}
+    \item \emph{(s)}: Gene body coverage, low expression genes. Described in section \ref{subsec:plotDesc-6}
+    \item \emph{(t)}: Read mapping location rates. Described in section \ref{subsec:plotDesc-12}
+    \item \emph{(u)}: Observed splice junction loci counts. Described in section \ref{subsec:plotDesc-13}
+    \item \emph{(v)}: Splice junction event distribution. Described in section \ref{subsec:plotDesc-14}
+    \item \emph{(w)}: Splice junction events per read-pair. Described in section \ref{subsec:plotDesc-14b}
+    \item \emph{(x)}: Read-mapping statistics. Described in section \ref{subsec:plotDesc-17}
+    \item \emph{(y)}: Chromosome counts. Described in section \ref{subsec:plotDesc-18}
+    \item \emph{(z)}: Comparison of normalization factors. Described in section \ref{subsec:plotDesc-19}
+    \item \emph{(aa)}: Comparison of normalization factors relative to TC normalization. Described in section \ref{subsec:plotDesc-19b}
+    \item \emph{(ab)}: Strandedness test. Described in section \ref{subsec:plotDesc-15}
+    \item \emph{(ac)}: Leading-clipped nucleotide rates. Described in section \ref{subsec:plotDesc-11}
+    \item \emph{(ad)}: Trailing-clipped nucleotide rates. Described in section \ref{subsec:plotDesc-11b}
+    \item \emph{(ae)}: Raw nucleotide rate by read position. Described in section \ref{subsec:plotDesc-10}
+    \item \emph{(af)}: Aligned nucleotide rate by read position. Described in section \ref{subsec:plotDesc-10b}
+  \end{itemize}
+
+A printable pdf version of this multi-plot, with 6 plots on each page, can be generated with using the options:
+<<compileSummaryPlots1b, eval = FALSE>>=
+makePlot.summary.basic(res, plot.device.name = "pdf");
+@
+The R PDF device uses vector drawings, however, some of the plots are too large to be efficiently stored as vectors. Thus, it is strongly recommended that the png R package be installed, as well as either the Cairo package or png device support. This will allow QoRTs to rasterize the plotting areas of certain large plots (in particular: the gene diversity plots and the various NVC plots). Unless these conditions are met the function above will issue a warning, and the resultant pdfs may be very large and difficult to print. Setting the \verb|rasterize.large.plots| parameter to \verb|FALSE| will deactivate these warnings. The \verb|raster.height| and \verb|raster.width| parameters can be used to increase the pixel resolution of the rasterized plots, if desired.
+
+\pagebreak
+%----------
+\subsubsection{Colored by Lane/Batch} \label{subsec:plotterDesc2}
+%----------
+
+In order to more easily detect batch effects, it is possible to color each bam-file by lane/batch. For this, you make a plotter with the command:
+
+<<makePlotter-2,results="hide">>=
+byLane.plotter <- build.plotter.colorByLane(res);
+@
+
+The plotter will draw all the bam-files on top of one another, but color them based on their lane.ID. The plotter can then be used to create various QC plots, for example:
+
+<<plotterExamples-2,results="hide", fig.width=6.5, fig.height=5.5>>=
+makePlot.insert.size(byLane.plotter);
+makePlot.legend.over("topright",byLane.plotter);
+@
+
+Which produces Figure \ref{plotterExamples-2-fig}:
+
+\myincfig{plotterExamples-2}{0.75\textwidth}{Phred Quality Score Plots}
+
+The above example plot displays the "Insert Size" of each bam file, as described in Section \ref{subsec:plotDesc-5}.
+
+In addition, a compiled multi-plot in this style, containing all the standard QC plots, can be generated with the command:
+<<compileSummaryPlots2, eval = FALSE>>=
+makePlot.summary.colorByLane(res);
+@
+
+\pagebreak
+%----------
+\subsubsection{Colored by Group/Phenotype} \label{subsec:plotterDesc3}
+%----------
+
+Next, it is sometimes useful to color samples by group.ID.
+
+<<makePlotter-3,results="hide">>=
+byGroup.plotter <- build.plotter.colorByGroup(res);
+@
+
+This plotter can then be used to create various QC plots, for example:
+<<plotterExamples-3,results="hide", fig.width=6.5, fig.height=5.5>>=
+makePlot.insert.size(byGroup.plotter);
+makePlot.legend.over("topright",byGroup.plotter);
+@
+
+Which produces Figure \ref{plotterExamples-3-fig}:
+
+\myincfig{plotterExamples-3}{0.75\textwidth}{Phred Quality Score Plots}
+
+The above example plot displays the "Insert Size" of each bam file, as described in Section \ref{subsec:plotDesc-5}.
+
+In addition, a compiled multi-plot in this style, containing all the standard QC plots, can be generated with the command:
+<<compileSummaryPlots3, eval = FALSE>>=
+makePlot.summary.colorByGroup(res);
+@
+
+\pagebreak
+%----------
+\subsubsection{Basic Sample Highlight} \label{subsec:plotterDesc4}
+%----------
+
+Sometimes it is useful to highlight an individual sample.
+
+<<makePlotter-4,results="hide">>=
+sample.D1.plotter <- build.plotter.highlightBySample("D1",res);
+@
+
+This plotter can then be used to create various QC plots, for example:
+
+<<plotterExamples-4,results="hide", fig.width=6.5, fig.height=5.5>>=
+makePlot.insert.size(sample.D1.plotter);
+makePlot.legend.over("topright",sample.D1.plotter);
+@
+
+Which produces Figure \ref{plotterExamples-4-fig}:
+
+\myincfig{plotterExamples-4}{0.75\textwidth}{Phred Quality Score Plots}
+
+The above example plot displays the "Insert Size" of each bam file, as described in Section \ref{subsec:plotDesc-5}.
+
+In addition, a compiled multi-plot in this style, containing all the standard QC plots, can be generated with the command:
+<<compileSummaryPlots4, eval = FALSE>>=
+makePlot.summary.sample.highlight(res,
+                   curr.sample = "D1");
+@
+
+\pagebreak
+%----------
+\subsubsection{Sample Highlight, Colored by Lane} \label{subsec:plotterDesc5}
+%----------
+
+Sometimes it can be useful to highlight an individual sample. However, if that sample has multiple bam files ("technical replicates", derived from multiple separate lanes/runs on the same library), it can be useful to color the different runs with different distinct colors. With this plotter, only the "highlighted" sample is colored, all other samples are colored Gray.
+
+<<makePlotter-5,results="hide">>=
+sample.D1.colorByLane.plotter <- 
+            build.plotter.highlightBySample.colorByLane("D1",res);
+@
+
+This plotter can then be used to create various QC plots, for example:
+
+<<plotterExamples-5,results="hide", fig.width=6.5, fig.height=5.5>>=
+makePlot.insert.size(sample.D1.colorByLane.plotter);
+makePlot.legend.over("topright",sample.D1.colorByLane.plotter);
+@
+
+Which produces Figure \ref{plotterExamples-5-fig}:
+
+\myincfig{plotterExamples-5}{0.75\textwidth}{Phred Quality Score Plots}
+
+The above example plot displays the "Insert Size" of each bam file, as described in Section \ref{subsec:plotDesc-5}.
+
+In addition, a compiled multi-plot in this style, containing all the standard QC plots, can be generated with the command:
+<<compileSummaryPlots5, eval = FALSE>>=
+makePlot.summary.sample.highlight.andColorByLane(res,
+                   curr.sample = "D1");
+@
+
+\pagebreak
+%-----------------------------------------------------------
+\subsection{Description of Individual Plots} \label{subsec:plotDesc}
+%-----------------------------------------------------------
+
+QoRTs is capable of producing a wide variety of different plots and graphs. While most of these plots will not be particularly interesting or informative in the majority of cases, they may reveal artifacts or errors if and when they occur.
+
+%MORE INFO HERE
+
+The example plots in the following section all use the \verb|byLane.plotter| object (from Section \ref{subsec:plotterDesc2}), which colors each bamfile by its lane ID.
+
+\pagebreak
+%----------
+\subsubsection{Phred Quality Score} \label{subsec:plotDesc-1}
+%----------
+
+%  \begin{figure}[h]
+%  \centering
+%  \includegraphics[width=0.33\textwidth]{figure/indivPlot-1-1}
+%  \includegraphics[width=0.33\textwidth]{figure/indivPlot-1-2}
+%  \includegraphics[width=0.33\textwidth]{figure/indivPlot-1-3}
+%  \caption{Phred Quality Score Metrics}
+%  \label{indivPlot-Fig-1}
+%  \end{figure}
+
+\myincfigThree{indivPlot-1}{0.34\textwidth}{Phred Quality Score Plots}
+
+The plots shown in Figure \ref{indivPlot-1-fig} displays information about the phred quality score (y-axis) as a function of the position in the read (x-axis). Five statistics can be plotted: minimum, maximum, upper and lower quartiles, and median. These statistics are calculated individually for each bam file and each read position (ie, each plotted line corresponds to a bam file).
+
+Note that the Phred score is always an integer, and as such these plots would normally be very difficult to read because lines would be plotted directly on top of one another. To reduce this problem, the plots are vertically offset from one another. 
+
+These plots can be generated individually with the commands:
+
+<<indivPlot-1,results="hide", fig.width=6.5, fig.height=5.5>>=
+makePlot.qual.pair(byLane.plotter,"min");
+makePlot.qual.pair(byLane.plotter,"lowerQuartile");
+makePlot.qual.pair(byLane.plotter,"median");
+@
+
+\noindent Additional options (Not shown):
+<<indivPlot-1-4, results="hide", eval = FALSE>>=
+makePlot.qual.pair(byLane.plotter,"upperQuartile");
+makePlot.qual.pair(byLane.plotter,"max");
+@
+
+\pagebreak
+%----------
+\subsubsection{GC Content} \label{subsec:plotDesc-2}
+%----------
+
+\myincfig{indivPlot-2}{0.65\textwidth}{GC Bias}
+
+For each bam file, Figure \ref{indivPlot-2-fig} displays a histogram showing the frequency that different proportions of G and C (versus A, T, and N) appear in the bam-file's reads. Each plotted line corresponds to a bam-file. At the bottom of the plot the mean average G/C content is also plotted. Once again, the means are offset from one another by lane, to allow for easy detection of batch effects.
+
+This plot can be generated individually with the command:
+
+<<indivPlot-2,results="hide", fig.width=6.5, fig.height=5.5>>=
+makePlot.gc(byLane.plotter);
+@
+
+The \verb|paired| option can be used to calculate the GC-distribution for read-pairs rather than for all reads individually. This is disabled by default because it often results in a jagged distribution when a appreciable proportion of the reads have an insert size equal to or smaller than the read length. When this occurs, the read-pair will almost always have an even number of G/C nucleotides.
+
+\pagebreak
+%----------
+\subsubsection{Clipping Profile} \label{subsec:plotDesc-3}
+%----------
+
+\myincfig{indivPlot-3}{0.65\textwidth}{Clipping Profile}
+
+For each bam file, Figure \ref{indivPlot-3-fig} displays the rate (y-axis) at which the aligner soft-clips the reads as a function of read position (x-axis). Note that this will only be informative when using aligners that are capable of soft-clipped alignment (such as RNA-Star or GSNAP, but \emph{not} TopHat).
+
+This plot can be generated individually with the command:
+
+<<indivPlot-3,results="hide">>=
+makePlot.clipping(byLane.plotter);
+@
+
+\pagebreak
+%----------
+\subsubsection{Cigar Op Profile} \label{subsec:plotDesc-4}
+%----------
+
+\myincfigThree{indivPlot-4}{0.34\textwidth}{Cigar Operation Profiles}
+
+For each bam file, Figure  \ref{indivPlot-4-fig} displays the rate (y-axis) of various cigar operations as a function of read position (x-axis). All 9 legal cigar operations can be plotted, but for most purposes only Deletions, Insertions, and Splice junctions will be informative.
+
+This plot can be generated with the command:
+
+<<indivPlot-4,results="hide">>=
+makePlot.cigarOp.byCycle(byLane.plotter, "Del");
+makePlot.cigarOp.byCycle(byLane.plotter, "Ins");
+makePlot.cigarOp.byCycle(byLane.plotter, "Splice");
+@
+
+\pagebreak
+%----------
+\subsubsection{Insert Size} \label{subsec:plotDesc-5}
+%----------
+
+\myincfig{indivPlot-5}{0.65\textwidth}{Insert Size}
+
+For each bam file, Figure \ref{indivPlot-5-fig} displays a histogram of the "insert size". Each line corresponds to one bam-file, and displays the rate (y-axis) at which that bam-file's reads possess a given insert size (x-axis).
+
+\emph{Definition: "Insert Size":} The "insert size" is the length (in base-pairs) between the two sequencing adapters for a pair of paired-end reads. In other words, it is the size of the original RNA fragment.
+
+\emph{Insert Size Estimation:} The Insert size is calculated using the alignment of the paired reads. When the two paired reads are aligned such that they overlap with one another the insert size can be calculated exactly. In such cases, the calculation of the insert size does \emph{not} depend on the transcript annotation. However, when there is no overlap the exact insert size can be uncertain. Multiple splice junctions may lie in the region between the endpoints of the two paired reads, and there is no real way to determine which junctions the fragment used, if any. QoRTs uses the set of all splice junctions found between the endpoints of the two reads, and uses the shortest possible path from endpoint to endpoint. In some cases this may \emph{under-estimate} the insert size, as the actual path may not be the shortest possible path. In other cases this may also \emph{over-estimate} the insert size, if the RNA fragment includes novel splice junctions not found in the transcript annotation. However, in most cases this method appears to produce a reasonably good approximation of the insert size.
+
+Note that the median average insert sizes for each bam-file are plotted below the main plot. Each point corresponds to one bam-file.
+
+This plot can be generated individually with the command:
+
+<<indivPlot-5,results="hide">>=
+makePlot.insert.size(byLane.plotter);
+@
+
+\pagebreak
+%----------
+\subsubsection{Gene-Body Coverage} \label{subsec:plotDesc-6}
+%----------
+
+\myincfigThree{indivPlot-6}{0.34\textwidth}{Gene-Body Coverage}
+
+For each bam-file, the leftmost plot of Figure \ref{indivPlot-6-fig} displays the coverage profile across quantiles of all genes' lengths, from 5' to 3'. The middle plot displays the coverage profile for only the genes that are in the upper-middle quartile by read-count. The leftmost plot displays the coverage profile for the genes that are in the two lower quartiles.
+
+\emph{Minor notes:} To calculate the coverage profile, all the transcripts for each gene are merged together into a single "flat" pseudo-transcript which contains all exonic regions belonging to the gene. For each gene, the pseudo-transcript is broken up into 40 equal-length counting bins, so that each bin contains 2.5\% of the total gene length. Each read-pair is counted once for every counting bin with which it overlaps.
+Any genes that overlap with other genes are automatically excluded.
+Any reads that overlap with more than one gene are automatically excluded.
+Any genes that have zero reads on a given bam file are automatically excluded for the purposes of finding the gene quantiles.
+
+This plot can be generated individually with the command:
+
+<<indivPlot-6,results="hide">>=
+makePlot.genebody.coverage(byLane.plotter);
+makePlot.genebody.coverage.UMQuartile(byLane.plotter);
+makePlot.genebody.coverage.lowExpress(byLane.plotter);
+@
+
+
+\pagebreak
+%----------
+\subsubsection{N-Rate} \label{subsec:plotDesc-7}
+%----------
+
+\myincfig{indivPlot-7}{0.65\textwidth}{PLOT NAME}
+
+Figure \ref{indivPlot-7-fig} displays the rate (y-axis) at which the read sequence is "N" (or "missing"), as a function of the read position (x-axis). Each line corresponds to one bam-file.
+
+This plot can be generated individually with the command:
+
+<<indivPlot-7,results="hide">>=
+makePlot.missingness.rate(byLane.plotter);
+@
+
+\pagebreak
+%----------
+\subsubsection{Cigar Length Distribution} \label{subsec:plotDesc-8}
+%----------
+
+\myincfigTwo{indivPlot-8}{0.45\textwidth}{Cigar Length Distribution}
+
+The plots in Figure \ref{indivPlot-8-fig} display histograms of cigar operation length.
+
+These plots can be generated individually with the commands:
+
+<<indivPlot-8,results="hide">>=
+makePlot.cigarLength.distribution(byLane.plotter, "Ins");
+makePlot.cigarLength.distribution(byLane.plotter, "Del")
+@
+
+\pagebreak
+%----------
+\subsubsection{Cumulative Gene Diversity} \label{subsec:plotDesc-9}
+%----------
+
+\myincfig{indivPlot-9}{0.95\textwidth}{Cumulative Gene Diversity}
+
+For each bam-file, Figure \ref{indivPlot-9-fig} displays the cumulative gene diversity. For each bam-file, the genes are sorted by read-count. Then, a cumulative function is calculated for the percent of the total proportion of reads as a function of the number of genes. Intercepts are plotted as well, showing the cumulative percent for 1 gene, 10 genes, 100 genes, 1000 genes, and 10000 genes. 
+
+So, for example, across all the bam-files, around 50 to 55 percent of the read-pairs were found to map to the top 1000 genes. Around 20 percent of the reads were found in the top 100 genes. And so on.
+
+This can be used as an indicator of whether a large proportion of the reads stem from of a small number of genes.
+
+Note that this is restricted to only the reads that map to a single unique gene. Reads that map to more than one gene, or that map to intronic or intergenic areas are ignored.
+
+This plot can be generated individually with the command:
+
+% <<plot9-2b,results="hide", eval=FALSE, echo = FALSE>>=
+% ##For gene-specific:
+% makePlot.gene.cdf.bySample(byLane.plotter);
+% @
+<<indivPlot-9,results="hide">>=
+makePlot.gene.cdf(byLane.plotter);
+@
+
+\pagebreak
+%----------
+\subsubsection{Nucleotide Rates, by Cycle} \label{subsec:plotDesc-10}
+%----------
+
+\myincfig{indivPlot-10}{0.65\textwidth}{Nucleotide rates, by cycle}
+
+For each bam-file, Figure \ref{indivPlot-10-fig} displays the rate at which each nucleotide appears (y-axis), as a function of the position in the read (x-axis). The color scheme for NVC plots is different from the other plots. Rather than being used for emphasis or to allow cross-comparisons by sample, biological-condition, or lane, the colors are used to indicate the four nucleotides: A (green), T (red), G (orange), or C (blue). Depending on the type of plotter being used, sample-runs will be marked and differentiated by marking the lines with shapes (R points). In many cases the points will be unreadable due to overplotting, but clear outliers that stray from the general trends can be readily identified.
+
+When used with a "sample.highlight" type plotter (see \ref{subsec:plotterDesc4}), "highlighted" samples will be drawn with a deeper shade of the given color.
+
+This plot displays the "raw" nucleotide rates, including bases that are soft-clipped by the aligner.
+
+This plot can be generated individually with the command:
+
+<<indivPlot-10,results="hide">>=
+makePlot.raw.NVC(byLane.plotter);
+@
+
+\pagebreak
+%----------
+\subsubsection{Aligned Nucleotide Rates, by Cycle} \label{subsec:plotDesc-10b}
+%----------
+
+\myincfig{indivPlot-10b}{0.65\textwidth}{Aligned nucleotide rates, by cycle}
+
+Figure \ref{indivPlot-10b-fig} is identical to Figure \ref{indivPlot-10-fig} (described in section \ref{subsec:plotDesc-10}), except that it only counts bases that are \emph{not} soft clipped off by the aligner.
+
+This plot can be generated individually with the command:
+
+<<indivPlot-10b,results="hide">>=
+makePlot.minus.clipping.NVC(byLane.plotter);
+@
+
+\pagebreak
+%----------
+\subsubsection{Leading Clipped Nucleotide Rates} \label{subsec:plotDesc-11}
+%----------
+
+\myincfigTwo{indivPlot-11}{0.45\textwidth}{Leading-clipped nucleotide rates}
+
+The left plot in Figure \ref{indivPlot-11-fig} displays the nucleotide rate (y-axis) as a function of read position (x-axis), for the first 6 bases of reads in which \emph{exactly} 6 bases were clipped off the 5' end. The right plot displays the nucleotide rate (y-axis) as a function of read position (x-axis), for the first 12 bases of reads in which \emph{exactly} 12 bases were clipped off the 5' end.
+
+This plot can be generated individually with the command:
+
+<<indivPlot-11,results="hide">>=
+makePlot.NVC.lead.clip(byLane.plotter, clip.amt = 6);
+makePlot.NVC.lead.clip(byLane.plotter, clip.amt = 12);
+@
+
+Any integer can be used as the \verb|clip.amt| value.
+
+\pagebreak
+%----------
+\subsubsection{Trailing Clipped Nucleotide Rates} \label{subsec:plotDesc-11b}
+%----------
+
+\myincfigTwo{indivPlot-11b}{0.45\textwidth}{Trailing-clipped nucleotide rates}
+
+The left plot in Figure \ref{indivPlot-11b-fig} displays the nucleotide rate (y-axis) as a function of read position (x-axis), for the last 6 bases of reads in which \emph{exactly} 6 bases were clipped off the 3' end. The right plot displays the nucleotide rate (y-axis) as a function of read position (x-axis), for the last 12 bases of reads in which \emph{exactly} 12 bases were clipped off the 3' end.
+
+\emph{Note concerning the example data:} In the example dataset an extremely strong trend is easily visible. The specific sequence observed matches that of the sequencing adapter used. The pattern appears in reads coming from fragments that are smaller than the read length. In these cases, the 3' end of each read will continue into the adapter sequence after sequencing the entire template fragment. Thus: for the left and right plots the sequence comes from reads with an insert size of exactly 95 and 89, respectively (ie 101 base pairs minus 6 or 12).
+
+These plots can be generated individually with the command:
+
+<<indivPlot-11b,results="hide">>=
+makePlot.NVC.tail.clip(byLane.plotter, clip.amt = 6);
+makePlot.NVC.tail.clip(byLane.plotter, clip.amt = 12);
+@
+
+Any integer can be used as the \verb|clip.amt| value.
+
+\pagebreak
+%----------
+\subsubsection{Mapping location rates} \label{subsec:plotDesc-12}
+%----------
+
+\myincfig{indivPlot-12}{0.65\textwidth}{Gene assignment rates}
+
+For each bam-file, Figure \ref{indivPlot-12-fig} displays the rate (y-axis) for which the bam-file's read-pairs are assigned to the given categories.
+
+\noindent The categories are:
+  \begin{itemize}
+    \item \emph{Unique Gene}: The read-pair overlaps with the exonic segments of one and only one gene. For many downstream analyses tools, such as DESeq, DESeq2 \cite{DESeq} and \Biocpkg{EdgeR} \cite{edgeR}, only read-pairs in this category are used.
+    \item \emph{Ambig Gene}: The read-pair overlaps with the exons of more than one gene.
+    \item \emph{No Gene}: The read-pair does not overlap with the exons of any annotated gene.
+    \item \emph{No Gene, Intronic}: The read-pair does not overlap with the exons of any annotated gene, but appears in a region that is bridged by an annotated splice junction.
+    \item \emph{No Gene, 1kb from gene}: The read-pair does not overlap with the exons of any annotated gene, but is within 1 kilobase from the nearest annotated gene.
+    \item \emph{No Gene, 10kb from gene}: The read-pair does not overlap with the exons of any annotated gene, but is within 10 kilobases from the nearest annotated gene.
+    \item \emph{No Gene, middle of nowhere}: The read-pair does not overlap with the exons of any annotated gene, and is \emph{more} than 10 kilobases from the nearest annotated gene.
+  \end{itemize}
+
+This plot can be generated individually with the command:
+
+<<indivPlot-12,results="hide">>=
+makePlot.gene.assignment.rates(byLane.plotter);
+@
+
+\pagebreak
+%----------
+\subsubsection{Splice Junction Loci} \label{subsec:plotDesc-13}
+%----------
+
+\myincfig{indivPlot-13}{0.65\textwidth}{Splice junction loci}
+
+For each bam-file, Figure \ref{indivPlot-13-fig} displays the number (y-axis) of splice junction \emph{loci} of each type that appear in the bam-file's reads. Splice junctions are split into 4 groups, first by whether the splice junction appears in the transcript annotation gtf ("known" vs "novel"), and then by whether the splice junction has 4 or more reads covering it, or 1-3 reads ("Hi" vs "Lo").
+
+This plot can be used to detect a number of anomalies. For example: whether mapping or sequencing artifacts caused a disproportionate discovery of novel splice junctions in one sample or batch.
+
+This plot can be generated individually with the command:
+
+<<indivPlot-13,results="hide">>=
+makePlot.splice.junction.loci.counts(byLane.plotter);
+@
+
+\pagebreak
+%----------
+\subsubsection{Number of Splice Junction Events} \label{subsec:plotDesc-14d}
+%----------
+
+\myincfig{indivPlot-14d}{0.65\textwidth}{Number of splice junction events}
+
+For each bam-file, Figure \ref{indivPlot-14d-fig} displays the number (y-axis) of all splice junction events falling into each of six categories. A splice junction "event" is one instance of a read-pair bridging a splice junction. Some reads may contain multiple splice junction events, some may contain none. If a splice junction appears on both reads of a read-pair, this is still only counted as a single "event".
+
+The six categories are:
+      \itemize{
+        \item Known: The splice junction locus is found in the supplied transcript annotation gtf file.
+        \item Novel: The splice junction locus is NOT found in the supplied transcript annotation gtf file.
+        \item Known, 1-3 reads: The locus is known, and is only covered by 1-3 read-pairs.
+        \item Known, 4+ reads: The locus is known, and is covered by 4 or more read-pairs.
+        \item Novel, 1-3 reads: The locus is novel, and is only covered by 1-3 read-pairs.
+        \item Novel, 4+ reads: The locus is novel, and is covered by 4 or more read-pairs.
+      }
+
+Note that because different samples/runs may have different total read counts and/or library sizes, this function is generally not the best for comparing between samples. In general, the event rates per read-pair should be used, see the next section, \ref{subsec:plotDesc-14}.
+
+This plot is used to detect whether sample-specific or batch effects have a substantial or biased effect on splice junction appearance, either due to differences in the original RNA, or due to artifacts that alter the rate at which the aligner maps across splice junctions.
+
+This plot can be generated individually with the command:
+
+<<indivPlot-14d,results="hide">>=
+makePlot.splice.junction.event.counts(byLane.plotter);
+@
+
+\pagebreak
+%----------
+\subsubsection{Splice Junction Event Rates per Read-Pair} \label{subsec:plotDesc-14}
+%----------
+
+\myincfig{indivPlot-14}{0.65\textwidth}{Splice junction events}
+
+For each bam-file, Figure \ref{indivPlot-14-fig} displays the rate (y-axis) at which each type of splice junction events appear, per read-pair. 
+
+This plot is used to detect whether sample-specific or batch effects have a substantial or biased effect on splice junction appearance, either due to differences in the original RNA, or due to artifacts that alter the rate at which the aligner maps across splice junctions.
+
+This plot can be generated individually with the command:
+
+<<indivPlot-14,results="hide">>=
+makePlot.splice.junction.event.ratesPerRead(byLane.plotter);
+@
+
+\pagebreak
+%----------
+\subsubsection{Breakdown of Splice Junction Events} \label{subsec:plotDesc-14c}
+%----------
+
+\myincfig{indivPlot-14c}{0.65\textwidth}{Proportions of splice junction events}
+
+For each bam-file, Figure \ref{indivPlot-14c-fig} displays the proportion (y-axis) of all splice junction events falling into the six categories.
+
+This plot is used to detect whether sample-specific or batch effects have a substantial or biased effect on splice junction appearance, either due to differences in the original RNA, or due to artifacts that alter the rate at which the aligner maps across splice junctions.
+
+This plot can be generated individually with the command:
+
+<<indivPlot-14c,results="hide">>=
+makePlot.splice.junction.event.proportions(byLane.plotter);
+@
+
+\pagebreak
+%----------
+\subsubsection{Breakdown of Splice Junction Events, by locus type} \label{subsec:plotDesc-14b}
+%----------
+
+\myincfig{indivPlot-14b}{0.65\textwidth}{Splice junction events}
+
+For each bam-file, Figure \ref{indivPlot-14b-fig} displays the proportion (y-axis) at which splice junction events appear on known vs novel splice junction loci, the proportion of known splice junction events that occur on low-coverage junctions (1-3 read-pairs) vs high-coverage junctions (4 or more read-pairs), and the proportion of novel splice junction events that occur on low vs high coverage junctions.
+
+This plot is used to detect whether sample-specific or batch effects have a substantial or biased effect on splice junction appearance, either due to differences in the original RNA, or due to artifacts that alter the rate at which the aligner maps across splice junctions.
+
+This plot can be generated individually with the command:
+
+<<indivPlot-14b,results="hide">>=
+makePlot.splice.junction.event.proportionsByType(byLane.plotter);
+@
+
+\pagebreak
+%----------
+\subsubsection{Strandedness test} \label{subsec:plotDesc-15}
+%----------
+
+\myincfig{indivPlot-15}{0.65\textwidth}{Strandedness}
+
+Figure \ref{indivPlot-15-fig} displays the rate at which reads appear to follow the two possible library-type strandedness rules. (See section \ref{sec:initialProcessing} for more information on stranded library types).
+
+This plot is used to detect whether your data is indeed stranded, and whether you are using the correct stranded data library type option. For unstranded libraries, one would expect all points to fall very close to the 50-50 center line. For stranded libraries, all points should fall closer to 99% vs 1%, with the vast majority of reads matching the selected library type. 
+
+If (and only if) all the bam files were run using the same strandedness and library type options, then green target boxes will be drawn around the areas where the points should appear. If points appear substantially outside these boxes, then you may be running QoRTs using the wrong library type options.
+
+This plot can be generated individually with the command:
+
+<<indivPlot-15,results="hide">>=
+makePlot.strandedness.test(byLane.plotter);
+@
+
+\pagebreak
+%----------
+\subsubsection{Mapping stats} \label{subsec:plotDesc-17}
+%----------
+
+\myincfig{indivPlot-17}{0.65\textwidth}{Mapping stats}
+
+For each bam file, Figure \ref{indivPlot-17-fig} displays the mapping rates and counts. 
+
+This plot can be generated individually with the command:
+
+<<indivPlot-17,results="hide">>=
+makePlot.mapping.rates(byLane.plotter);
+@
+
+\pagebreak
+%----------
+\subsubsection{Chromosome counts} \label{subsec:plotDesc-18}
+%----------
+
+\myincfig{indivPlot-18}{0.65\textwidth}{Mapping stats}
+
+For each bam file, Figure \ref{indivPlot-18-fig} displays the number of read-pairs mapping to each category of chromosome.
+
+The \Robject{chromosome.name.style} must be set to match the style of your chromosome names. By default it assumes the chromosomes are named chr1, chr2, chr3, etc.
+
+For more information, see the help document using the command \Robject{help(makePlot.chrom.type.rates)}.
+
+This plot can be generated individually with the command:
+
+<<indivPlot-18,results="hide">>=
+makePlot.chrom.type.rates(byLane.plotter);
+@
+
+\pagebreak
+%----------
+\subsubsection{Normalization Factors} \label{subsec:plotDesc-19}
+%----------
+
+\myincfig{indivPlot-19}{0.65\textwidth}{Normalization Factors}
+
+For each bam file, Figure \ref{indivPlot-19-fig} displays the normalization factors.
+
+By default, QoRTs will automatically detect whether \Biocpkg{DESeq2} and \Biocpkg{edgeR} are installed and will use these tools to calculate their respective normalization size factors. If neither package is found, then it will only plot the total count normalization.
+
+This plot can be generated individually with the command:
+
+<<indivPlot-19,results="hide">>=
+makePlot.norm.factors(byLane.plotter);
+@
+
+\pagebreak
+%----------
+\subsubsection{Normalization Factors} \label{subsec:plotDesc-19b}
+%----------
+
+\myincfig{indivPlot-19b}{0.65\textwidth}{Normalization Factors vs TC}
+
+For each bam file, Figure \ref{indivPlot-19b-fig} displays the ratio of the alternate normalization factors to the Total Count normalization factors.
+
+By default, QoRTs will automatically detect whether \Biocpkg{DESeq2} and \Biocpkg{edgeR} are installed and will use these tools to calculate their respective normalization size factors. If neither package is found, then it will only plot the total count normalization.
+
+This plot can be generated individually with the command:
+
+<<indivPlot-19b,results="hide">>=
+makePlot.norm.factors.vs.TC(byLane.plotter);
+@
+
+\pagebreak
+%----------
+\subsubsection{Read drop rate} \label{subsec:plotDesc-20}
+%----------
+
+\myincfig{indivPlot-20}{0.65\textwidth}{Drop rates}
+
+For each bam file, Figure \ref{indivPlot-20-fig} displays the rates and reasons for reads being dropped from QC analysis. Note that in the example dataset reads were never dropped. This is a consequence of the pre-processing steps in the example pipeline.
+
+This plot can be generated individually with the command:
+
+<<indivPlot-20,results="hide">>=
+makePlot.dropped.rates(byLane.plotter);
+@
+
+%-----------------------------------------------------------
+\section{Other Minor Utilities} \label{sec:minorUtils}
+%-----------------------------------------------------------
+
+In addition to the standard quality-control tools described in the previous sections, QoRTs also includes a number of other minor utilities intended to assist in data visualization, cleaning, and preparation for downstream analyses. 
+
+%----------
+\subsection{Optional: Generating a flattened annotation file} \label{sec:flatAnnoGen}
+%----------
+
+Before counting exons and splice junctions, QoRTs generates a set of non-overlapping exonic fragments out of all the exons in the genome annotation gtf file. It then assigns each exonic fragment a unique identifier. Similarly, it assigns every splice junction its own unique identifier. A gtf file listing all these genomic features and their unique identifiers can be created using the following command:
+
+\begin{verbatim}
+java -jar /path/to/jarfile/QoRTs.jar makeFlatGtf 
+                                     input.gtf 
+                                     flattened.gff
+\end{verbatim}
+
+\emph{strandedness:} You must use the \verb|--stranded| option to create the flattened gff for use with stranded datasets. DO NOT mix stranded flattened gff with unstranded data, or vice versa.
+
+\emph{DEXSeq:} DEXSeq also requires a flattened annotation file, which is formatted similarly. In order to produce a flattened gff file that DEXSeq can read, include the \verb|--DEXSeqFmt| option.
+
+This gtf file conforms to the UCSC gff file definition, (found here: \url{http://genome.ucsc.edu/FAQ/FAQformat.html}). It will contain 4 different feature types (column 3): "aggregate\_gene", "exonic\_part", "splice\_site", and "novel\_splice\_site".
+
+%----------
+\subsection{Generating genome browser tracks} \label{sec:wigglePlots}
+%----------
+
+In addition to the standard QC plots, which examine the data as a whole, it is sometimes desirable to be able to query and examine coverage information at specific genetic loci. In particular, when identifying candidate genes via genome-wide analyses, it is often vital to examine the locus for artifacts before carrying out costly and time-consuming validation experiments.
+
+\subsubsection{Generating wiggle tracks}
+
+QoRTs includes a utility to generate ".wig", or "wiggle plot" files. These wiggle plot files include counts for the mean coverage for each equal-sized window across the whole genome. These files are designed to be used with the UCSC browser or similar interfaces, and allow easy and intuitive visualization of your data.
+
+\begin{verbatim}
+java -jar /path/to/jarfile/QoRTs.jar bamToWiggle 
+                                     infile.bam 
+                                     trackName
+                                     chromLengthFile
+                                     outfilePrefix
+\end{verbatim}
+
+The chromLengthFile is a simple tab-delimited text file that includes each chromosome in the first column and the chromosome's length (in base-pairs) in the second column. If the wiggle file is intended for use with a standard genome on the UCSC genome browser, then the UCSC utility \verb|fetchChromSizes| should be used to generate this file. (see \url{http://genome.ucsc.edu/goldenPath/help/bigWig.html} for more information on \verb|fetchChromSizes|, as well as information on how to compress your wig files into smaller and more efficient bigWig files)
+
+\noindent Common options and flags for this function include:
+  \begin{itemize}
+    \item \verb|--sizefactor 1.0|: A float value. All the coverage values will be divided by this factor. Useful for comparing two samples that may have different normalization factors.
+    \item \verb|--stranded|: Flag to indicate that data should be treated as stranded.
+    \item \verb|--stranded_fr_secondstrand|: Flag to indicate that the data is of the fr\_secondstrand stranded library type. (See section \ref{sec:initialProcessing} for more information on the two stranded library types) 
+    \item \verb|--negativeReverseStrand|: If this flag is set, then the negative strand will be counted in negative numbers. This can be useful for plotting both strands in a single multiwig track, via a trackhub. (see \url{http://genome.ucsc.edu/goldenPath/help/trackDb/trackDbDoc.html})
+  \end{itemize}
+
+\subsubsection{Merging wiggle tracks}
+
+QoRTs includes a utility for summing or averaging multiple wiggle files, either with or without normalization factors.
+
+\begin{verbatim}
+java -jar /path/to/jarfile/QoRTs.jar mergeWig  
+                                     filelist.txt
+                                     outfile.wig.gz
+\end{verbatim}
+
+The filelist.txt is a simple text file that contains the list of wiggle files to merge (one filename per line). \emph{Optionally}, the filelist.txt can contain a second (tab-delimited) column which includes normalization factors for each wiggle file. If this is selected, the each wiggle file will be normalized by the factor given (ie, the coverage count will be divided by the corresponding factor, before being added to the total). 
+
+% MORE INFO HERE
+
+\noindent Common options and flags for this function include:
+  \begin{itemize}
+    \item \verb|--calcMean|: If this flag is raised, the utility will calculate the average rather than the total coverage for each window.
+    \item \verb|--ignoreSizeFactors|: By default the utility attempts to auto-detect the presence of normalization factors in the filelist.txt file. If this flag is raised, the utility will ignore all but the first column of filelist.txt, and set all size factors to 1.
+    \item \verb|--makeNegative|: If this flag is raised, the output will be multiplied by -1.
+  \end{itemize}
+
+For more information and a full accounting of all parameters and options, use the command:
+\begin{verbatim}
+java -jar /path/to/jarfile/QoRTs.jar mergeWig ?
+\end{verbatim}
+
+\subsubsection{Generating splice-junction tracks}
+
+Splice junction counts can be made into a separate bed track using the command:
+
+\begin{verbatim}
+java -jar /path/to/jarfile/QoRTs.jar makeSpliceBed 
+                                         filelist.txt
+                                         outfile.bed
+\end{verbatim}
+
+\noindent Common options and flags for this function include:
+  \begin{itemize}
+    \item \emph{--rgb}: The color to use for each bed entry.
+  \end{itemize}
+
+\subsubsection{Merging splice-junction tracks}
+
+For more information and a full accounting of all parameters and options, use the command:
+\begin{verbatim}
+java -jar /path/to/jarfile/QoRTs.jar makeSpliceBed ?
+\end{verbatim}
+
+%----------
+\subsection{Merging Count Data} \label{sec:mergeCounts}
+%----------
+
+For the purposes of quality control it is generally preferable to run QoRTs on each sample-run individually, so that potential technical artifacts related to sequencing run or lane can be identified. However, for most downstream purposes these "technical replicates" will be combined and treated as a single sample. Differential expression tools like \Biocpkg{DESeq}, \Biocpkg{DESeq2}\cite{DESeq}, \Biocpkg{DEXSeq}\cite{DEXSeq}, and \Biocpkg{EdgeR}\cite{edgeRsoftware} assume that each set of gene counts (or exon counts, for \Biocpkg{DEXSeq}) is derived from a different biological  sample.
+
+Thus, the java utility includes a function for quickly and easily calculating merged sample-wise counts.
+
+\begin{verbatim}
+java -jar /path/to/jarfile/QoRTs.jar mergeAllCounts 
+                                    decoder.txt 
+                                    /path/to/qc/results/dir/ 
+                                    ./merged/
+\end{verbatim}
+
+Alternatively, the merger can be performed for a single sample directly, via the command:
+
+\begin{verbatim}
+java -jar /path/to/jarfile/QoRTs.jar mergeCounts 
+          ./CtrlDay1_RG1/,./CtrlDay1_RG2/,./CtrlDay1_RG3/
+          ./merged/CD1/ 
+\end{verbatim}
+
+The list of QC data directories must be separated by commas and contain no whitespace.
+
+For more information and a full accounting of all parameters and options, use the command:
+\begin{verbatim}
+java -jar /path/to/jarfile/QoRTs.jar mergeAllCounts ?
+and
+java -jar /path/to/jarfile/QoRTs.jar mergeCounts ?
+\end{verbatim}
+
+%----------
+\subsection{Importing data into other tools} \label{sec:useWithOtherTools}
+%----------
+
+In addition to providing quality control information, QoRTs also provides the requisite input files needed for the DESeq/DESeq2 \cite{DESeq}, \Biocpkg{DEXSeq}\cite{DEXSeq}, and \Biocpkg{EdgeR}\cite{edgeR,edgeRsoftware,edgeRGLM} analysis tools. These files will be identical to those that would be generated by HTSeq (using the default "union rule" option).
+
+%MORE INFO HERE? COMPARE SPEED?
+
+All the data files can be found in the \verb|qc.data.dir| directory. The files for use with \Biocpkg{DESeq}, \Biocpkg{DESeq2}, and \Biocpkg{EdgeR} will be named \verb|QC.geneCounts.formatted.for.DESeq.txt.gz| and the files for use with \Biocpkg{DEXSeq} will be named \verb|QC.exonCounts.formatted.for.DEXSeq.txt.gz|
+
+%\pagebreak
+%%-----------------------------------------------------------
+% \section{(Advanced) Documentation of the raw QC data} \label{sec:rawDataDoc}
+%%-----------------------------------------------------------
+
+%ADD MORE INFO HERE.
+
+%%-----------------------------------------------------------
+%\section{Closing Remarks} \label{sec:remarks}
+%%-----------------------------------------------------------
+%ADD MORE INFO HERE.
+
+%--------------------------------------------------
+\section{References}
+%--------------------------------------------------
+\begingroup
+\renewcommand{\section}[2]{}%
+\bibliography{QoRTs-vignette}
+\endgroup
+
+
+%-----------------------------------------------------------
+\section{Session Information}
+%-----------------------------------------------------------
+
+The session information records the versions of all the packages used in the generation of the present document.
+
+<<sessionInfo>>=
+sessionInfo()
+@
+
+%-----------------------------------------------------------
+\section{Legal} \label{sec:legal}
+%-----------------------------------------------------------
+
+This software is "United States Government Work" under the terms of the United States Copyright Act.  It was written as part of the authors' official duties for the United States Government and thus cannot be copyrighted.  This software is freely available to the public for use without a copyright notice.  Restrictions cannot be placed on its present or future use.
+
+Although all reasonable efforts have been taken to ensure the accuracy and reliability of the software and data, the National Human Genome Research Institute (NHGRI) and the U.S. Government does not and cannot warrant the performance or results that may be obtained by using this software or data.  NHGRI and the U.S. Government disclaims all warranties as to performance, merchantability or fitness for any particular purpose.
+
+In any work or product derived from this material, proper attribution of the authors as the source of the software or data should be made, using "NHGRI Genome Technology Branch" as the citation.
+
+NOTE: The Scala package includes (internally) the sam-JDK library (sam-1.113.jar), from picard tools. 
+The MIT license and copyright information can be accessed using the command:
+\begin{verbatim}
+java -jar /path/to/jarfile/QoRTs.jar ? samjdkinfo
+\end{verbatim}
+
+\end{document}

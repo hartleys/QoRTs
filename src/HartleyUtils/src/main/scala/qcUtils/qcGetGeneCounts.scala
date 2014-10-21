@@ -460,11 +460,11 @@ class qcGetGeneCounts( stranded : Boolean,
       }
       //writer2.write("no_feature	"+utilCounts("_no_feature")+"\n")
       //writer2.write("ambiguous	"+utilCounts("_ambiguous")+"\n")
-      writer2.write("no_feature	"+readNoFeature+"\n")
-      writer2.write("ambiguous	"+readAmbiguous+"\n")
-      writer2.write("too_low_aQual	0\n")
-      writer2.write("not_aligned	0\n")
-      writer2.write("alignment_not_unique	0\n")
+      writer2.write("no_feature	"+readNoFeature+"\n");
+      writer2.write("ambiguous	"+readAmbiguous+"\n");
+      writer2.write("too_low_aQual	NA\n");
+      writer2.write("not_aligned	"+coda(internalUtils.commonSeqUtils.CODA_MATE_UNMAPPED)+"\n");
+      writer2.write("alignment_not_unique	"+coda(internalUtils.commonSeqUtils.CODA_NOT_UNIQUE_ALIGNMENT)+"\n");
       close(writer2);
     }
     if(writeGeneCounts){
@@ -517,6 +517,9 @@ class qcGetGeneCounts( stranded : Boolean,
     //geneBody_calculateGeneBodyCoverage_summaries(outfile : String, geneBody_intervalBreaks : Seq[Double], coverageLevelThresholds : Seq[(String,Double)], geneBody_CoverageCountArrays : Map[String,Array[Int]], geneCounts : scala.collection.mutable.Map[String,Int])
     qcGetGeneCounts.geneBody_calculateGeneBodyCoverage_summaries(outfile, geneBody_intervalBreaks, qcGetGeneCounts.default_coverageLevelThresholds, geneBody_CoverageCountArrays, geneCounts);
   }
+  
+  def getUtilityName : String = "GeneCalcs";
+
 }
 
 

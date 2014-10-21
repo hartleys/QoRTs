@@ -190,6 +190,8 @@ class qcJunctionDistribution(readLen : Int)  extends QCUtility[Unit]  {
     qcJunctionDistribution.writeOpLengthDistribution(opLengthDistribution1, outfile + ".cigarOpLengths.byOp.R1.txt");
     qcJunctionDistribution.writeOpLengthDistribution(opLengthDistribution2, outfile + ".cigarOpLengths.byOp.R2.txt");
   }
+  
+  def getUtilityName : String = "DEPRECIATED!!!";
 }
 
 

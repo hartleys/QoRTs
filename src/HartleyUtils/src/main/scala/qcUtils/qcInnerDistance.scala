@@ -439,7 +439,7 @@ class qcInnerDistance(annoHolder : qcGtfAnnotationBuilder, stranded : Boolean, f
   val STAGGERED_FULL_BLOCK_OF_ADAPTOR_ALIGNED = -444444;
    */
   
-  
+  def getUtilityName : String = "InsertSize";
 }
 
 

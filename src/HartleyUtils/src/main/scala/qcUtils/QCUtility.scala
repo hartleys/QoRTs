@@ -6,6 +6,7 @@ import internalUtils.fileUtils._;
 abstract class QCUtility[+B <: Any] {
    def runOnReadPair(r1 : SAMRecord, r2 : SAMRecord, readNum : Int) : B;
    def writeOutput(outfile : String, summaryWriter : WriterUtil);
+   def getUtilityName : String;
 }
 
 object QCUtility {
@@ -28,6 +29,7 @@ object QCUtility {
     def writeOutput(outfile : String, summaryWriter : WriterUtil){
       //do nothing!
     }
+    def getUtilityName : String = "blankStringQCUtility";
   }
   
   class blankUnitQCUtility extends QCUtility[Unit] {
@@ -37,5 +39,6 @@ object QCUtility {
     def writeOutput(outfile : String, summaryWriter : WriterUtil){
       //do nothing!
     }
+    def getUtilityName : String = "blankUnitQCUtility";
   }
 }

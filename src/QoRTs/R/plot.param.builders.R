@@ -164,7 +164,7 @@ build.plotter.simple <- function(res, offset.by, compiled.params, plot.type){
   lanebam.offsets <- offsets[lanebam.offset.indices];
 
   lanebam.params <- data.frame( plot.priority = rep(2,lanebam.ct),
-                                           lanebam.ID = res@decoder$lanebam.ID,
+                                           unique.ID = res@decoder$unique.ID,
                                            lines.col = rep(compiled.params@highlight.points.color[2], lanebam.ct),
                                            points.col = rep(compiled.params@highlight.points.color[2], lanebam.ct),
                                            points.pch = rep(compiled.params@highlight.points.pch[2], lanebam.ct),
@@ -191,7 +191,7 @@ build.plotter.highlight.and.color <- function(curr.highlight, res, compiled.para
     stop("Error parsing results: ", check.isValid(res));
   }
   if(length(highlight.by) != length(color.highlighted.by)) stop("error!");
-  if(length(highlight.by) != length(res@decoder$lanebam.ID)) stop("error!");
+  if(length(highlight.by) != length(res@decoder$unique.ID)) stop("error!");
    if(! (curr.highlight %in% highlight.by)){
       stop("FATAL ERROR! ","Cannot find highlighted element ", curr.highlight," in the highlight list!");
    }
@@ -280,7 +280,7 @@ build.plotter.highlight.and.color <- function(curr.highlight, res, compiled.para
   lanebam.offsets <- offsets[lanebam.offset.indices];
 
   lanebam.params <- data.frame( plot.priority = ifelse(is.highlighted, 2,1),
-                                           lanebam.ID = res@decoder$lanebam.ID,
+                                           unique.ID = res@decoder$unique.ID,
                                            lines.col = lines.col,
                                            points.col = points.col,
                                            points.pch = points.pch,
@@ -311,7 +311,7 @@ build.plotter.color <- function(res, compiled.params, color.by, plot.type, offse
   }
   
   #if(length(highlight.by) != length(color.by)) stop("error!");
-  #if(length(highlight.by) != length(res@decoder$lanebam.ID)) stop("error!");
+  #if(length(highlight.by) != length(res@decoder$unique.ID)) stop("error!");
 
   
   #plotParams <- new("QoRT_Plotter");
@@ -396,7 +396,7 @@ build.plotter.color <- function(res, compiled.params, color.by, plot.type, offse
   lanebam.offsets <- offsets[lanebam.offset.indices];
 
   lanebam.params <- data.frame( plot.priority = ifelse(is.highlighted, 2,1),
-                                           lanebam.ID = res@decoder$lanebam.ID,
+                                           unique.ID = res@decoder$unique.ID,
                                            lines.col = lines.col,
                                            points.col = points.col,
                                            points.pch = points.pch,
@@ -422,7 +422,7 @@ build.plotter.highlight <- function(curr.highlight, res, compiled.params, highli
     #THROW AN ERROR!
     stop("Error parsing results: ", check.isValid(res));
   }
-  if(length(highlight.by) != length(res@decoder$lanebam.ID)) stop("error!");
+  if(length(highlight.by) != length(res@decoder$unique.ID)) stop("error!");
    if(! (curr.highlight %in% highlight.by)){
       stop("FATAL ERROR! ","Cannot find highlighted element ", curr.highlight," in the highlight list!");
    }
@@ -476,7 +476,7 @@ build.plotter.highlight <- function(curr.highlight, res, compiled.params, highli
   lanebam.offsets <- offsets[lanebam.offset.indices];
 
   lanebam.params <- data.frame( plot.priority = ifelse(is.highlighted, 2,1),
-                                           lanebam.ID = res@decoder$lanebam.ID,
+                                           unique.ID = res@decoder$unique.ID,
                                            lines.col = ifelse(is.highlighted, compiled.params@highlight.lines.color[1], compiled.params@highlight.lines.color[2]),
                                            points.col = ifelse(is.highlighted, compiled.params@highlight.points.color[1], compiled.params@highlight.points.color[2]),
                                            points.pch = ifelse(is.highlighted, compiled.params@highlight.points.pch[1], compiled.params@highlight.points.pch[2]),

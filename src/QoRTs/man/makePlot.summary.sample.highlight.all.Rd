@@ -11,26 +11,32 @@
 }
 \usage{
   makePlot.summary.sample.highlight.all(res, 
-                     outfile.prefix = "./", 
+                     outfile.dir = "./", 
                      plotter.params = list(), 
                      plot.device.name = "png", 
                      plotting.device.params = list(),
                      verbose = TRUE, debugMode,
-                     \dots)
+                      rasterize.large.plots,
+                      raster.height = 1000, 
+                      raster.width = 1000,
+                      \dots)
 
   makePlot.summary.sample.highlight.andColorByLane.all(res, 
-                     outfile.prefix = "./", 
+                     outfile.dir = "./", 
                      plotter.params = list(), 
                      plot.device.name = "png", 
                      plotting.device.params = list(),
                      verbose = TRUE, debugMode,
+                      rasterize.large.plots,
+                      raster.height = 1000, 
+                      raster.width = 1000,
                      \dots)
 }
 \arguments{
   \item{res}{
     A \code{QoRT_QC_Results} object, created by \code{\link{read.qc.results.data}}.
   }
-  \item{outfile.prefix}{
+  \item{outfile.dir}{
     A file prefix, used for all output files. Usually the directory to
     which you want all files to be written.
   }
@@ -61,15 +67,34 @@
   \item{debugMode}{
     Logical. If TRUE, debugging data will be printed to the console.
   }
+  \item{rasterize.large.plots}{
+    Logical. If TRUE, then if the currently selected plotting device
+    is a vector device (or the "curr" device), then certain large plots
+    will have their plotting areas rasterized. The axis labels, titles,
+    and text will all remain vectorized, only the plotting areas will
+    be flattened. \emph{Note that this requires the png package.}
+    
+    By default, this parameter will be set to TRUE when a vector
+    device is selected.
+  }
+  \item{raster.height}{
+    Numeric. If rasterize.plotting.area is TRUE, then this is the
+    height of the plotting area raster image, in pixels.
+  }
+  \item{raster.width}{
+    Numeric. If rasterize.plotting.area is TRUE, then this is the
+    width of the plotting area raster image, in pixels. Double-pane plots
+    will be twice this width.
+  }
   \item{\dots}{ 
     Arguments to be passed to methods, such as
     \link{graphical parameters} (see \code{\link{par}}).
   }
 }
 \details{
-  WIP, Documentation Incomplete!
+  Generates a sample highlight plot for each sample in the dataset.
 }
 
 \seealso{
-
+  \code{\link{build.plotter}}, \code{\link{makePlot.summary}}
 }

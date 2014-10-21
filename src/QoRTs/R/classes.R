@@ -14,7 +14,7 @@ setClass("QoRT_QC_Results",representation(
                                      sample.list="character",
                                      lane.list="character",
                                      group.list="character",
-                                     decoder="data.frame", #decoder has columns: lanebam.ID	sample.ID	lane.ID	group.ID	cycle.CT	and then any number of user-defined columns (which are ignored internally)
+                                     decoder="data.frame", #decoder has columns: unique.ID	sample.ID	lane.ID	group.ID	cycle.CT	and then any number of user-defined columns (which are ignored internally)
                                      qc.data="list", #List of Lists. Each element corresponds to one qc test, and is composed of a list, one element for each lanebam.
                                      calc.data="list" #List of Lists. Same as above, except it holds data calculated within R rather than raw scala output. Each element corresponds to one qc test, and is composed of a list, one element for each lanebam.
                                      ));
@@ -49,9 +49,9 @@ check.isValid <- function(object){
 #                   drop.groups = NULL
 #                   ){
 #  decoder <- res@decoder;
-#  final.keep <- rep(TRUE,length(decoder$lanebam.ID));
+#  final.keep <- rep(TRUE,length(decoder$unique.ID));
 #  if(! is.null(keep.lanebams)){
-#    final.keep <- final.keep & decoder$lanebam.ID %in% as.character(keep.lanebams);
+#    final.keep <- final.keep & decoder$unique.ID %in% as.character(keep.lanebams);
 #  }
 #  if(! is.null(keep.samples)){
 #    final.keep <- final.keep & decoder$sample.ID %in% as.character(keep.samples);
@@ -65,7 +65,7 @@ check.isValid <- function(object){
 #
 #
 #  if(! is.null(drop.lanebams)){
-#    final.keep <- final.keep &  (! (decoder$lanebam.ID %in% as.character(drop.lanebams)));
+#    final.keep <- final.keep &  (! (decoder$unique.ID %in% as.character(drop.lanebams)));
 #  }
 #  if(! is.null(drop.samples)){
 #    final.keep <- final.keep &  (! (decoder$sample.ID %in% as.character(drop.samples)));
@@ -95,7 +95,7 @@ QoRT_Plotter <- setRefClass("QoRT_Plotter",fields = list(
                        showLegend = "logical",
                        nvc.colors = "list",
                        nvc.colors.light = "list",
-                       lanebam.params = "data.frame" #has columns:	plot.priority	lanebam.ID	lines.col	points.col	points.pch	lines.lty	lines.lwd	lines.alpha	lines.lwd	points.alpha	horiz.offsets	vert.offsets
+                       lanebam.params = "data.frame" #has columns:	plot.priority	unique.ID	lines.col	points.col	points.pch	lines.lty	lines.lwd	lines.alpha	lines.lwd	points.alpha	horiz.offsets	vert.offsets
                        ));
 
 #setMethod("show","QoRT_Plotter",

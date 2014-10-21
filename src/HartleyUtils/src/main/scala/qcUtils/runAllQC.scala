@@ -44,6 +44,8 @@ object runAllQC {
                                                              "chromCounts");
   final val QC_DEFAULT_OFF_FUNCTION_LIST : Set[String] = Set("FPKM","makeAllBrowserTracks", "cigarMatch");
   final val QC_FUNCTION_LIST : Set[String] = QC_DEFAULT_ON_FUNCTION_LIST ++ QC_DEFAULT_OFF_FUNCTION_LIST;
+  final val COMPLETED_OK_FILENAME = "QORTS_COMPLETED_OK";
+  final val MASTERLEVEL_FUNCTION_LIST = List[String]("GeneCalcs", "InsertSize","NVC","CigarOpDistribution","QualityScoreDistribution","GCDistribution","JunctionCalcs","StrandCheck","chromCounts","cigarMatch");
 
   
   //"InsertSize","NVC","CigarOpDistribution","QualityScoreDistribution","GCDistribution","GeneCalcs",
@@ -118,6 +120,10 @@ object runAllQC {
                     new UnaryArgument( name = "noGzipOutput",
                                          arg = List("--noGzipOutput"), // name of value
                                          argDesc = "Flag to indicate that output files should NOT be compressed into the gzip format. By default almost all output files are compressed to save space." // description
+                                       ) ::
+                    new UnaryArgument( name = "parallelFileRead",
+                                         arg = List("--parallelFileRead"), // name of value
+                                         argDesc = "Flag to indicate that bam file reading should be run in paralell for increased speed. Note that in this mode you CANNOT read from stdin. Also note that for this to do anything useful, the numThreads option must be set to some number greater than 1. Also note that additional threads above 9 will have no appreciable affect on speed." // description
                                        ) ::
                     new BinaryOptionArgument[String](
                                          name = "readGroup", 
@@ -195,7 +201,8 @@ object runAllQC {
           parser.get[Boolean]("noMultiMapped"),
           parser.get[Boolean]("keepMultiMapped"),
           parser.get[Int]("numThreads"),
-          parser.get[Option[String]]("readGroup")
+          parser.get[Option[String]]("readGroup"),
+          parser.get[Boolean]("parallelFileRead")
       );
       }
     }
@@ -217,10 +224,19 @@ object runAllQC {
           noMultiMapped : Boolean,
           keepMultiMapped : Boolean,
           numThreads : Int,
-          readGroup : Option[String]){
+          readGroup : Option[String],
+          parallelFileRead : Boolean){
+
     reportln("Starting ALLQC:","note");
     val initialTimeStamp = TimeStampUtil();
     standardStatusReport(initialTimeStamp);
+
+    val COMPLETED_OK_FILEPATH = outfile + COMPLETED_OK_FILENAME;
+    val COMPLETED_OK_OLDFILE = new java.io.File(COMPLETED_OK_FILEPATH);
+    if(COMPLETED_OK_OLDFILE.exists()){
+      report("Deleting old \"QORTS_COMPLETED_OK\" file.","note");
+      COMPLETED_OK_OLDFILE.delete();
+    }
     
     val stdGtfCodes = new internalUtils.GtfTool.GtfCodes();
     val flatGtfCodes = new internalUtils.GtfTool.GtfCodes();
@@ -270,8 +286,13 @@ object runAllQC {
     
     setQcOptions(noGzipOutput);
     val anno_holder = new qcGtfAnnotationBuilder(gtffile , flatgtffile , stranded , stdGtfCodes, flatGtfCodes);
-
-    runOnSeqFile(initialTimeStamp = initialTimeStamp, infile = infile, outfile = outfile, anno_holder = anno_holder, testRun = testRun, runFunc = runFunc, stranded = stranded, fr_secondStrand = fr_secondStrand, dropChrom = dropChrom, keepMultiMapped = keepMultiMapped, noMultiMapped = noMultiMapped, numThreads = numThreads, readGroup )
+    
+    if(parallelFileRead){
+      runOnSeqFile_PAR(initialTimeStamp = initialTimeStamp, infile = infile, outfile = outfile, anno_holder = anno_holder, testRun = testRun, runFunc = runFunc, stranded = stranded, fr_secondStrand = fr_secondStrand, dropChrom = dropChrom, keepMultiMapped = keepMultiMapped, noMultiMapped = noMultiMapped, numThreads = numThreads, readGroup )
+    } else {
+      runOnSeqFile(initialTimeStamp = initialTimeStamp, infile = infile, outfile = outfile, anno_holder = anno_holder, testRun = testRun, runFunc = runFunc, stranded = stranded, fr_secondStrand = fr_secondStrand, dropChrom = dropChrom, keepMultiMapped = keepMultiMapped, noMultiMapped = noMultiMapped, numThreads = numThreads, readGroup )
+    }
+    
   }
   
   def runOnSeqFile(initialTimeStamp : TimeStampUtil, 
@@ -288,7 +309,7 @@ object runAllQC {
                    numThreads : Int,
                    readGroup : Option[String]){
     
-    
+    val COMPLETED_OK_FILEPATH = outfile + COMPLETED_OK_FILENAME;
     val (samFileAttributes, recordIter) = initSamRecordIterator(infile);
     val pairedIter : Iterator[(SAMRecord,SAMRecord)] = 
       if(noMultiMapped){
@@ -405,7 +426,145 @@ object runAllQC {
     reportln("                               (" + minutesPerMillionPF + " minutes per million read-pairs used)","note");
     reportln("Time spent on file output:     " + TimeStampUtil.timeDifferenceFormatter(finalTimeStamp.compareTo(outputIterationTimeStamp)),"note");
     reportln("Total runtime:                 " + TimeStampUtil.timeDifferenceFormatter(finalTimeStamp.compareTo(initialTimeStamp)),"note");
+    
+    val completedOkWriter = openWriter(COMPLETED_OK_FILEPATH);
+    completedOkWriter.write("# Note: if this file EXISTS, then QoRTs completed without errors.");
+    completedOkWriter.close();
   }
+  
+  def runOnSeqFile_PAR(initialTimeStamp : TimeStampUtil, 
+                   infile : String, 
+                   outfile : String, 
+                   anno_holder : qcGtfAnnotationBuilder, 
+                   testRun  :Boolean, 
+                   runFunc : Set[String], 
+                   stranded : Boolean, 
+                   fr_secondStrand : Boolean, 
+                   dropChrom : Set[String], 
+                   keepMultiMapped : Boolean, 
+                   noMultiMapped : Boolean, 
+                   numThreads : Int,
+                   readGroup : Option[String]){
+    
+    val COMPLETED_OK_FILEPATH = outfile + COMPLETED_OK_FILENAME;
+    
+    val runMasterLevelFunctions = runFunc.filter(MASTERLEVEL_FUNCTION_LIST.contains(_)).toVector;
+
+    val samFileAttributes = peekSamRecordIterator(infile);
+    
+    if(infile == "-"){
+      error("FATAL ERROR: Cannot perform multithreaded file reading when reading from standard input! Set infile to a file name, rather than '-'!");
+    }
+    
+    val readLength = samFileAttributes.readLength;
+    val isSortedByName = samFileAttributes.isSortedByName;
+    val isSortedByPosition = samFileAttributes.isSortedByPosition;
+    val isDefinitelyPairedEnd = samFileAttributes.isDefinitelyPairedEnd;
+    val minReadLength = samFileAttributes.minReadLength;
+    
+    if(readLength != minReadLength){reportln("Warning: Read length is not consistent! In the first 1000 reads, read length varies from "+minReadLength+" to " +readLength+"!\nThis may cause odd things to happen. In general, it is STRONGLY recommended that you always avoid hard clipping of reads.","warning")}
+    if(! isDefinitelyPairedEnd){ reportln("Warning: Have not found any matched read pairs in the first 1000 reads. Is data paired end? WARNING: This utility is only designed for use on paired end data!","warning"); }
+    if(isSortedByPosition){ reportln("SAM/BAM file looks like it might be sorted by position. If so: this mode is not currently supported!","warning"); }
+    if(! isSortedByName) error("FATAL ERROR: SAM/BAM file is not sorted by name! Sort the file by name!");
+    reportln("SAMRecord Reader Generated. Based on the first 1000 reads, the reads appear to be of length: "+readLength+".","note");
+    standardStatusReport(initialTimeStamp);
+
+    val coda : Array[Int] = internalUtils.commonSeqUtils.getNewCauseOfDropArray;
+    val coda_options : Array[Boolean] = internalUtils.commonSeqUtils.CODA_DEFAULT_OPTIONS.toArray;
+    if(keepMultiMapped) coda_options(internalUtils.commonSeqUtils.CODA_NOT_UNIQUE_ALIGNMENT) = false;
+    if(! readGroup.isEmpty) coda_options(internalUtils.commonSeqUtils.CODA_NOT_MARKED_RG) = true;
+    
+
+    val qcAllVector : Vector[QCUtility[Any]] = runMasterLevelFunctions.map((funcName : String) => {
+      if(funcName == "GeneCalcs") new qcGetGeneCounts(stranded,fr_secondStrand,anno_holder,coda,coda_options,40, runFunc.contains("FPKM"), runFunc.contains("writeGenewiseGeneBody"), runFunc.contains("writeDESeq"), runFunc.contains("writeGeneCounts"));
+      else if(funcName == "InsertSize") new qcInnerDistance(anno_holder, stranded, fr_secondStrand, readLength);
+      else if(funcName == "NVC") new qcNVC(readLength, runFunc.contains("writeClippedNVC"));
+      else if(funcName == "CigarOpDistribution") new qcCigarDistribution(readLength) ;
+      else if(funcName == "QualityScoreDistribution") new qcQualityScoreCounter(readLength, qcQualityScoreCounter.MAX_QUALITY_SCORE);
+      else if(funcName == "GCDistribution") new qcGCContentCount(readLength)  ;
+      else if(funcName == "JunctionCalcs") new qcJunctionCounts(anno_holder, stranded, fr_secondStrand, runFunc.contains("writeDEXSeq"), runFunc.contains("writeSpliceExon"), runFunc.contains("writeKnownSplices"), runFunc.contains("writeNovelSplices")) ;
+      else if(funcName == "StrandCheck") new qcStrandTest(anno_holder, stranded, fr_secondStrand) ;
+      else if(funcName == "chromCounts") new qcChromCount( fr_secondStrand);
+      else if(funcName == "cigarMatch") new qcCigarMatch(readLength);
+      else QCUtility.getBlankUnitUtil;
+    })
+    
+    val qcALL = parConvert(qcAllVector, numThreads);
+    
+    reportln("QC Utilities Generated! ("+numThreads+" Threads)","note");
+    standardStatusReport(initialTimeStamp);
+    val samIterationTimeStamp = TimeStampUtil();
+    
+    qcALL.foreach((qcu : QCUtility[Any]) => {
+       val coda_buffer : Array[Int] = if(qcu.getUtilityName == "GeneCalcs") {
+         coda;
+       } else {
+         internalUtils.commonSeqUtils.getNewCauseOfDropArray;
+       }
+       val recordIter : Iterator[SAMRecord] = (new SAMFileReader(new File(infile))).iterator;
+       val pairedIter : Iterator[(SAMRecord,SAMRecord)] = if(noMultiMapped){
+           if(testRun) samRecordPairIterator(recordIter, false, 200000) else samRecordPairIterator(recordIter)
+         } else {
+           if(testRun) samRecordPairIterator_withMulti(recordIter, false, 200000) else samRecordPairIterator_withMulti(recordIter)
+         }
+       var readNum = 0;
+       for(pair <- pairedIter){
+         val (r1,r2) = pair;
+         readNum += 1;
+         if(internalUtils.commonSeqUtils.useReadPair(r1,r2,coda_buffer, coda_options, dropChrom, readGroup)){
+           qcu.runOnReadPair(r1, r2, readNum);
+         }
+       }
+    })
+    
+    standardStatusReport(initialTimeStamp);
+    
+    val outputIterationTimeStamp = TimeStampUtil();
+    reportln("Read Stats:\n" + internalUtils.commonSeqUtils.causeOfDropArrayToString(coda, coda_options),"note");
+    
+    val summaryWriter = openWriter(outfile + "summary.txt");
+    val strandedCode = if(! stranded){ 0 } else {if(fr_secondStrand) 2; else 1;}
+
+    summaryWriter.write("FIELD	COUNT\n");
+    summaryWriter.write("Stranded_Rule_Code	"+strandedCode+"\n");
+    
+    val readNum = coda(internalUtils.commonSeqUtils.CODA_TOTAL_READ_PAIRS);
+    val iterationMinutes = (outputIterationTimeStamp.compareTo(samIterationTimeStamp) / 1000).toDouble / 60.toDouble;
+    val minutesPerMillion = iterationMinutes / (readNum.toDouble / 1000000.toDouble);
+    val minutesPerMillionPF = iterationMinutes / ((coda(internalUtils.commonSeqUtils.CODA_READ_PAIR_OK)).toDouble / 1000000.toDouble);
+    
+    summaryWriter.write("BENCHMARK_MinutesOnSamIteration	" + "%1.2f".format(iterationMinutes) + "\n");
+    summaryWriter.write("BENCHMARK_MinutesPerMillionReads	" + "%1.2f".format(minutesPerMillion) + "\n");
+    summaryWriter.write("BENCHMARK_MinutesPerMillionGoodReads	" + "%1.2f".format(minutesPerMillionPF) + "\n");
+    
+    reportln("Writing Output...","note");
+    qcALL.seq.foreach( _.writeOutput(outfile, summaryWriter) );
+    reportln("Done.","note");
+    
+    summaryWriter.write("COMPLETED_WITHOUT_ERROR	1\n");
+    
+    close(summaryWriter);
+    
+    if(runFunc.contains("makeAllBrowserTracks")){
+      reportln("Making (optional) browser tracks...","note");
+      //TO DO!
+      reportln("Done making browser tracks.","note");
+    }
+    
+    val finalTimeStamp = TimeStampUtil();
+    reportln("Time spent on setup:           " + TimeStampUtil.timeDifferenceFormatter(samIterationTimeStamp.compareTo(initialTimeStamp)),"note");
+    reportln("Time spent on SAM iteration:   " + TimeStampUtil.timeDifferenceFormatter(outputIterationTimeStamp.compareTo(samIterationTimeStamp)),"note");
+    reportln("                               (" + minutesPerMillion + " minutes per million read-pairs)","note");
+    reportln("                               (" + minutesPerMillionPF + " minutes per million read-pairs used)","note");
+    reportln("Time spent on file output:     " + TimeStampUtil.timeDifferenceFormatter(finalTimeStamp.compareTo(outputIterationTimeStamp)),"note");
+    reportln("Total runtime:                 " + TimeStampUtil.timeDifferenceFormatter(finalTimeStamp.compareTo(initialTimeStamp)),"note");
+    
+    val completedOkWriter = openWriter(COMPLETED_OK_FILEPATH);
+    completedOkWriter.write("# Note: if this file EXISTS, then QoRTs completed without errors.");
+    completedOkWriter.close();
+  }
+  
+  
   /*
    * SETTING GLOBAL OPTIONS:
    */

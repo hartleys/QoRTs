@@ -1,4 +1,133 @@
 
+
+check.rasterize.or.warn <- function(varname = "rasterize.plotting.area"){
+    if(! can.plot.raster()){
+       message(paste0("cannot open raster images, because package \"png\" not found. Install package png (with command install.packages(\"png\")) or set ",varname," to FALSE!"));
+       warning(paste0("cannot open raster images, because package \"png\" not found. Install package png (with command install.packages(\"png\")) or set ",varname," to FALSE!"));
+       return(FALSE);
+    }
+    if(! can.rasterize()){
+       message(paste0("cannot rasterize plots, because no viable raster device found. Install R with png support, install the R package Cairo (with command install.packages(\"Cairo\")), or set ",varname," to FALSE!"));
+       warning(paste0("cannot rasterize plots, because no viable raster device found. Install R with png support, install the R package Cairo (with command install.packages(\"Cairo\")), or set ",varname," to FALSE!"));
+       return(FALSE);
+    }
+    return(TRUE);
+}
+check.rasterize.or.die <- function(varname = "rasterize.plotting.area"){
+    if(! can.plot.raster()){
+       stop(paste0("ERROR: cannot open raster images, because package png not found. Install package png (with command install.packages(\"png\")) or set ",varname," to FALSE!"));
+    }
+    if(! can.rasterize()){
+       stop(paste0("ERROR: cannot rasterize plots, because no viable raster device found. Install R with png support, install the R package Cairo (with command install.packages(\"Cairo\")), or set ",varname," to FALSE!"));
+    }
+}
+
+can.plot.raster <- function(){
+   if(! suppressWarnings(require(png))){
+     #warning("Cannot rasterize plots! Package png not found. Recommend installing package png.");
+     return(FALSE);
+   }
+   return(TRUE);
+}
+rasterizationDevices <- c("png","CairoPNG");
+can.rasterize <- function(){
+   for(d in rasterizationDevices){
+     if(is.available.raster.device(d)){
+        return(TRUE);
+     }
+   }
+   #warning("Cannot rasterize plots! No working raster device found. Install R with png support or install package Cairo.");
+   return(FALSE);
+}
+can.select.raster.device <- function(){
+   for(d in rasterizationDevices){
+     if(is.available.raster.device(d)){
+        return(TRUE);
+     }
+   }
+   return(FALSE);
+}
+autoselect.raster.device <- function(){
+   if(is.available.raster.device("png")){
+     message("selecting png raster device.");
+     rasterDev <- get("png");
+     outDev <- function(...){
+       outDev(units = "px", ...);
+     }
+     return(outDev);
+   } else if(is.available.raster.device("CairoPNG")){
+     message("selecting CairoPNG raster device.");
+     rasterDev <- get("CairoPNG");
+     return(rasterDev);
+   } else {
+     stop("Error: no viable raster (png) device found! Install package CairoPNG or reinstall R with png capabilities activated!");
+   }
+}
+is.available.raster.device <- function(d){
+   if(d == "png"){
+     capabilities()[["png"]];
+   } else if(d == "CairoPNG"){
+     if(suppressWarnings(require("Cairo"))){
+       return(TRUE);
+     } else {
+       return(FALSE);
+     }
+   } else {
+     return(FALSE);
+   }
+}
+
+make.mixed.raster.vector.function <- function(use.raster.device = NULL, raster.height = 1000, raster.width = 1000, debugMode = TRUE, ...){
+  if(! require(png)){
+    stop("FATAL ERROR: cannot make hybrid raster/vector drawings without package \"png\". Install package png or set rasterize.plotting.area to FALSE");
+  }
+
+  if(is.null(use.raster.device)){
+    use.raster.device <- autoselect.raster.device();
+  }
+  usetempfile <- tempfile();
+  if(debugMode) message("writing temp raster image to: ",usetempfile);
+  initRaster <- function(){
+    use.raster.device(filename = usetempfile, height=raster.height, width=raster.width, bg = "transparent", ...);
+    par(mar = c(0,0,0,0));
+  }
+  
+  closeRaster <- function(){
+    dev.off();
+  }
+  
+  printRaster <- function(){
+    require(png);
+    imgData <- png::readPNG(usetempfile);
+    rasterData <- as.raster(imgData);
+    usr <- par("usr");
+    xlog <- par("xlog");
+    ylog <- par("ylog");
+    if(xlog){
+       usr[1:2] <- 10 ^ usr[1:2];
+    }
+    if(ylog){
+       usr[3:4] <- 10 ^ usr[3:4];
+    }
+    rasterImage(rasterData, usr[1], usr[3], usr[2], usr[4]);
+    
+    if(debugMode) message("deleting temp raster image: ",usetempfile);
+    unlink(usetempfile);
+  }
+  
+  return(list(initRaster = initRaster, closeRaster = closeRaster, printRaster = printRaster, usetempfile = usetempfile));
+}
+
+
+
+write.table.with.first.col <- function(t, file, rownamesTitle = "RowNames"){
+  out <- cbind.data.frame(row.names(t), t, stringsAsFactors=F);
+  names(out)[1] <- rownamesTitle;
+  
+  write.table(out, file = file, sep="\t", row.names=F,col.names=T, quote=F);
+}
+
+
 plotting.limits <- function(){
    usr <- par("usr");
    x.log <- par("xlog");

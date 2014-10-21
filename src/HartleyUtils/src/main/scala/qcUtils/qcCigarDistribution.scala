@@ -134,6 +134,9 @@ class qcCigarDistribution(readLen : Int)  extends QCUtility[Unit]  {
     qcCigarDistribution.writeOpLengthDistribution(opLengthDistribution1, outfile + ".cigarOpLengths.byOp.R1.txt");
     qcCigarDistribution.writeOpLengthDistribution(opLengthDistribution2, outfile + ".cigarOpLengths.byOp.R2.txt");
   }
+  
+  def getUtilityName : String = "CigarOpDistribution";
+
 }
 
 

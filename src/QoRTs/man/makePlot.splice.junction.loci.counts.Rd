@@ -16,7 +16,7 @@ makePlot.splice.junction.loci.counts(plotter,
 }
 \arguments{
   \item{plotter}{
-    A QoRT_Plotter object.
+    A \code{QoRT_Plotter} reference object. See \code{\link{build.plotter}}.
   }
   \item{calc.rate}{
     Logical. If TRUE, the proportion of loci in each category will be calculated and plotted, rather than the raw number.
@@ -33,9 +33,9 @@ makePlot.splice.junction.loci.counts(plotter,
   }
 }
 \details{
-   TODO!
+   This function plots the number (y-axis) of splice junction \emph{loci} of each type that appear in the bam-file's reads. Splice junctions are split into 4 groups, first by whether the splice junction appears in the transcript annotation gtf ("known" vs "novel"), and then by whether the splice junction has 4 or more reads covering it, or 1-3 reads ("Hi" vs "Lo").
 }
 
 \seealso{
-
+  \code{\link{build.plotter}}, \code{\link{makePlot.splice.junction.event}}
 }

@@ -14,7 +14,7 @@
 }
 \arguments{
   \item{plotter}{
-    A QoRT_Plotter object.
+    A \code{QoRT_Plotter} reference object. See \code{\link{build.plotter}}.
   }
   \item{r2.buffer}{
     Buffer space to place between the plotting of read 1 and read 2.
@@ -35,5 +35,5 @@
 }
 
 \seealso{
-
+  \code{\link{build.plotter}}
 }

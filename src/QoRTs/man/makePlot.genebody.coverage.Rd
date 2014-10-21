@@ -22,7 +22,7 @@
 }
 \arguments{
   \item{plotter}{
-    A QoRTs_Plotter object.
+    A \code{QoRT_Plotter} reference object. See \code{\link{build.plotter}}.
   }
   \item{plot.medians}{
     A logical value indicating whether or not to plot the median 
@@ -48,9 +48,11 @@
   y-axis: Rate at which reads falls into the given quantile of the
   genes' bodies.
   
-  INCOMPLETE!!!!!
+  \code{makePlot.genebody.coverage} plots the gene body coverage across all genes.
+  \code{makePlot.genebody.coverage.UMQuartile} plots the gene body coverage across the genes that fall in the upper-middle quartile of total expression for each sample-run (excluding genes with zero reads).
+  \code{makePlot.genebody.coverage.lowExpress} plots the gene body coverage across the genes that fall in the lower two quartiles of total expression for each sample-run (excluding genes with zero reads).
 }
 
 \seealso{
-
+  \code{\link{build.plotter}}
 }

@@ -49,11 +49,15 @@ makePlot.qual.pair <- function(plotter, y.name, r2.buffer = NULL, debugMode = DE
     if(debugMode){ message("Finished: ",plot.name," plot.",getTimeAndDiff(ts)); }
 }}
 
-makePlot.gc <- function(plotter, plot.medians = NULL, plot.means = TRUE, debugMode = DEFAULTDEBUGMODE, ...){
+makePlot.gc <- function(plotter, plot.medians = NULL, plot.means = TRUE, debugMode = DEFAULTDEBUGMODE, paired = FALSE, ...){
+  if(! paired){
+    makePlot.gc.unpaired(plotter = plotter, plot.medians = plot.medians, plot.means = plot.means, debugMode = debugMode, ...);
+  } else {
+  
   res <- plotter$res;
   plot.name <- "GC Content";
   if(debugMode){ ts <- timestamp() }
-  if(is.null(plotter$res@qc.data[["gc"]]) ){
+  if(is.null(plotter$res@qc.data[["gc.paired"]]) ){
     
     message(paste0("Warning: Skipping ",plot.name," plotting. Data not found!"));
     blank.plot(c(plot.name,"Data Not Found\nSkipping..."));
@@ -65,12 +69,40 @@ makePlot.gc <- function(plotter, plot.medians = NULL, plot.means = TRUE, debugMo
       plot.means <- FALSE;
   }
 
-  makePlot.generic(res@qc.data[["gc"]], plotter, 
+  makePlot.generic(res@qc.data[["gc.paired"]], plotter, 
                x.name = "NUM_BASES_GC",y.name = "CT",norm.x = TRUE,avg.y = TRUE,plot.type = "lines", plot.means = plot.means, plot.medians = plot.medians, ...);
   title(xlab = "% G/C");
   title(ylab = "Frequency");
   #abline(v=50);
   internal.plot.main.title("GC Content", plotter, ...);
+  
+    if(debugMode){ message("Finished: ",plot.name," plot.",getTimeAndDiff(ts)); }
+}}}
+
+makePlot.gc.unpaired <- function(plotter, plot.medians = NULL, plot.means = TRUE, debugMode = DEFAULTDEBUGMODE, ...){
+  res <- plotter$res;
+  plot.name <- "GC Content, Unpaired";
+  if(debugMode){ ts <- timestamp() }
+  if(is.null(plotter$res@qc.data[["gc.unpaired"]]) ){
+    
+    message(paste0("Warning: Skipping ",plot.name," plotting. Data not found!"));
+    blank.plot(c(plot.name,"Data Not Found\nSkipping..."));
+  } else {
+
+  if(is.null(plot.medians)){
+      plot.medians <- FALSE;
+  } else if(plot.means & plot.medians){
+      plot.means <- FALSE;
+  }
+
+  makePlot.generic(res@qc.data[["gc.unpaired"]], plotter, 
+               x.name = "NUM_BASES_GC",y.name = "CT",norm.x = TRUE,
+               avg.y = TRUE,plot.type = "lines", 
+               plot.means = plot.means, plot.medians = plot.medians, ...);
+  title(xlab = "% G/C");
+  title(ylab = "Frequency");
+  #abline(v=50);
+  internal.plot.main.title("GC Content, Unpaired", plotter, ...);
   
     if(debugMode){ message("Finished: ",plot.name," plot.",getTimeAndDiff(ts)); }
 }}
@@ -476,15 +508,26 @@ makePlot.cigarLength.distribution <- function(plotter,op, r2.buffer = NULL, perM
 ####################################################################################
 ####################################################################################
 
-makePlot.gene.cdf <- function(plotter, sampleWise = FALSE, plot.intercepts = TRUE, label.intercepts = FALSE, debugMode = DEFAULTDEBUGMODE, ...){
+makePlot.gene.cdf <- function(plotter, sampleWise = FALSE, plot.intercepts = TRUE, label.intercepts = FALSE, debugMode = DEFAULTDEBUGMODE,
+                              rasterize.plotting.area = FALSE, raster.height = 1000, raster.width = 1000,
+                              ...){
+  if(rasterize.plotting.area){
+    check.rasterize.or.die("rasterize.plotting.area");
+  }
   if(sampleWise){
-    makePlot.gene.cdf.sampleWise(plotter, plot.intercepts = plot.intercepts, label.intercepts = label.intercepts, ...);
+    makePlot.gene.cdf.sampleWise(plotter, plot.intercepts = plot.intercepts, label.intercepts = label.intercepts,
+    rasterize.plotting.area = rasterize.plotting.area, raster.height = raster.height, raster.width = raster.width, debugMode = debugMode,
+    ...);
   } else {
-    makePlot.gene.cdf.bamWise(plotter, plot.intercepts = plot.intercepts, label.intercepts = label.intercepts, ...);
+    makePlot.gene.cdf.bamWise(plotter, plot.intercepts = plot.intercepts, label.intercepts = label.intercepts, 
+    rasterize.plotting.area = rasterize.plotting.area, raster.height = raster.height, raster.width = raster.width, debugMode = debugMode,
+    ...);
   } 
 }
 
-makePlot.gene.cdf.bamWise <- function(plotter, plot.intercepts = TRUE, label.intercepts = FALSE, debugMode = DEFAULTDEBUGMODE,...){
+makePlot.gene.cdf.bamWise <- function(plotter, plot.intercepts = TRUE, label.intercepts = FALSE, debugMode = DEFAULTDEBUGMODE,
+                                      rasterize.plotting.area = FALSE, raster.height = 1000, raster.width = 1000,
+                                      ...){
   res <- plotter$res;
   plot.name <- "Cumulative Gene Assignment Diversity";
   if(debugMode){ ts <- timestamp() }
@@ -493,13 +536,16 @@ makePlot.gene.cdf.bamWise <- function(plotter, plot.intercepts = TRUE, label.int
     message(paste0("Warning: Skipping ",plot.name," plotting. Data not found!"));
     blank.plot(c(plot.name,"Data Not Found\nSkipping..."));
   } else {
-  makePlot.gene.cdf.helper(plotter$res@calc.data[["LANEBAM_GENE_CDF"]], plotter, plot.intercepts = plot.intercepts, label.intercepts = label.intercepts, ...);
-  internal.plot.main.title("Cumulative Gene Assignment Diversity", plotter, ...);
-  
+    makePlot.gene.cdf.helper(plotter$res@calc.data[["LANEBAM_GENE_CDF"]], plotter, plot.intercepts = plot.intercepts, label.intercepts = label.intercepts, rasterize.plotting.area = rasterize.plotting.area, raster.height = raster.height, raster.width = raster.width, debugMode = debugMode, ...);
+    internal.plot.main.title("Cumulative Gene Assignment Diversity", plotter, ...);
     if(debugMode){ message("Finished: ",plot.name," plot.",getTimeAndDiff(ts)); }
-}}
+  }
+  
+}
 
-makePlot.gene.cdf.sampleWise <- function(plotter, plot.intercepts = TRUE, label.intercepts = TRUE, debugMode = DEFAULTDEBUGMODE,...){
+makePlot.gene.cdf.sampleWise <- function(plotter, plot.intercepts = TRUE, label.intercepts = TRUE, debugMode = DEFAULTDEBUGMODE,
+                                         rasterize.plotting.area = FALSE, raster.height = 1000, raster.width = 1000,
+                                         ...){
   res <- plotter$res;
   plot.name <- "Cumulative Gene Assignment Diversity, sampleWise";
   if(debugMode){ ts <- timestamp() }
@@ -508,11 +554,14 @@ makePlot.gene.cdf.sampleWise <- function(plotter, plot.intercepts = TRUE, label.
     message(paste0("Warning: Skipping ",plot.name," plotting. Data not found!"));
     blank.plot(c(plot.name,"Data Not Found\nSkipping..."));
   } else {
-  makePlot.gene.cdf.bySample.helper(plotter$res@calc.data[["SAMPLE_GENE_CDF"]], plotter$title.highlight.name, plot.intercepts = plot.intercepts, label.intercepts = label.intercepts, ...);
-  internal.plot.main.title("Cumulative Gene Assignment Diversity", plotter, ...);
+    makePlot.gene.cdf.bySample.helper(plotter$res@calc.data[["SAMPLE_GENE_CDF"]], plotter$title.highlight.name, plot.intercepts = plot.intercepts, label.intercepts = label.intercepts, 
+                                      rasterize.plotting.area = rasterize.plotting.area, raster.height = raster.height, raster.width = raster.width, debugMode = debugMode,
+                                      ...);
+    internal.plot.main.title("Cumulative Gene Assignment Diversity", plotter, ...);
   
     if(debugMode){ message("Finished: ",plot.name," plot.",getTimeAndDiff(ts)); }
-}}
+  }
+}
 
 ####################################################################################
 ####################################################################################
@@ -520,7 +569,12 @@ makePlot.gene.cdf.sampleWise <- function(plotter, plot.intercepts = TRUE, label.
 
 makePlot.raw.NVC <- function(plotter,  r2.buffer = NULL,  points.highlighted = TRUE,
                          label.majority.bases = FALSE, label.majority.bases.threshold = 0.5, label.majority.bases.cex = 0.5, 
+                         rasterize.plotting.area = FALSE, raster.height = 1000, raster.width = 2000,
                          show.base.legend = TRUE, debugMode = DEFAULTDEBUGMODE, ...){
+  if(rasterize.plotting.area){
+    check.rasterize.or.die("rasterize.plotting.area");
+  }
+
   res <- plotter$res;
   plot.name <- "NVC, Raw";
   if(debugMode){ ts <- timestamp() }
@@ -545,6 +599,7 @@ makePlot.raw.NVC <- function(plotter,  r2.buffer = NULL,  points.highlighted = T
                              r2.buffer = r2.buffer, points.highlighted = points.highlighted,
                              label.major = label.majority.bases, label.cutoff = label.majority.bases.threshold, blank.label.char = blank.label.char,label.major.cex = label.majority.bases.cex,
                              show.base.legend = show.base.legend, nvc.colors = plotter$nvc.colors, nvc.colors.light = plotter$nvc.colors.light,
+                             rasterize.plotting.area = rasterize.plotting.area, raster.height = raster.height, raster.width = raster.width, debugMode = debugMode,
                              ...);
   internal.plot.main.title("Raw Nucleotide Rate by Cycle", plotter, plot.type = "NVC", ...);
   internal.plot.read.labels(plotter,"bottom",r2.buffer,xlim[2]);
@@ -556,7 +611,11 @@ makePlot.raw.NVC <- function(plotter,  r2.buffer = NULL,  points.highlighted = T
 
 makePlot.minus.clipping.NVC <- function(plotter,  r2.buffer = NULL, points.highlighted = TRUE,
                                     label.majority.bases = FALSE, label.majority.bases.threshold = 0.5, label.majority.bases.cex = 0.5, 
+                                    rasterize.plotting.area = FALSE, raster.height = 1000, raster.width = 2000,
                                     show.base.legend = TRUE, debugMode = DEFAULTDEBUGMODE, ...){
+  if(rasterize.plotting.area){
+    check.rasterize.or.die("rasterize.plotting.area");
+  }
   res <- plotter$res;
   plot.name <- "NVC, Aligned bases only";
   if(debugMode){ ts <- timestamp() }
@@ -591,6 +650,7 @@ makePlot.minus.clipping.NVC <- function(plotter,  r2.buffer = NULL, points.highl
                              r2.buffer = r2.buffer, points.highlighted = points.highlighted,
                              label.major = label.majority.bases, label.cutoff = label.majority.bases.threshold, blank.label.char = blank.label.char,label.major.cex = label.majority.bases.cex,
                              show.base.legend = show.base.legend, nvc.colors = plotter$nvc.colors, nvc.colors.light = plotter$nvc.colors.light,
+                             rasterize.plotting.area = rasterize.plotting.area, raster.height = raster.height, raster.width = raster.width, debugMode = debugMode,
                              ...);
   internal.plot.main.title("Nucleotide Rate by Cycle, Aligned bases only", plotter, plot.type = "NVC", ...);
   internal.plot.read.labels(plotter,"bottom",r2.buffer,xlim[2]);
@@ -601,7 +661,11 @@ makePlot.minus.clipping.NVC <- function(plotter,  r2.buffer = NULL, points.highl
 
 makePlot.NVC.lead.clip <- function(plotter, clip.amt = 10,  r2.buffer = clip.amt / 10, points.highlighted = TRUE,
                               label.majority.bases = TRUE, label.majority.bases.threshold = 0.5, label.majority.bases.cex = 1, 
+                              rasterize.plotting.area = FALSE, raster.height = 1000, raster.width = 1000,
                               show.base.legend = TRUE, debugMode = DEFAULTDEBUGMODE, ...){
+  if(rasterize.plotting.area){
+    check.rasterize.or.die("rasterize.plotting.area");
+  }
   res <- plotter$res;
   plot.name <- "Lead Clipping NVC";
   if(debugMode){ ts <- timestamp() }
@@ -628,6 +692,7 @@ makePlot.NVC.lead.clip <- function(plotter, clip.amt = 10,  r2.buffer = clip.amt
                              r2.buffer = r2.buffer, points.highlighted = points.highlighted,
                              label.major = label.majority.bases, label.cutoff = label.majority.bases.threshold, blank.label.char = "-",label.major.cex = label.majority.bases.cex,
                              show.base.legend = show.base.legend, nvc.colors = plotter$nvc.colors, nvc.colors.light = plotter$nvc.colors.light,
+                             rasterize.plotting.area = rasterize.plotting.area, raster.height = raster.height, raster.width = raster.width, debugMode = debugMode,
                              ...);
   internal.plot.main.title(paste0("Nucleotide Rate by Cycle, Leading Clipped bases (",clip.amt,")"), plotter, plot.type = "NVC", ...);
   internal.plot.read.labels(plotter,"bottom",r2.buffer,xlim[2]);
@@ -637,7 +702,11 @@ makePlot.NVC.lead.clip <- function(plotter, clip.amt = 10,  r2.buffer = clip.amt
 }}
 makePlot.NVC.tail.clip <- function(plotter, clip.amt = 10,  r2.buffer = clip.amt / 10, points.highlighted = TRUE, 
                                label.majority.bases = TRUE, label.majority.bases.threshold = 0.5, label.majority.bases.cex = 1, 
+                               rasterize.plotting.area = FALSE, raster.height = 1000, raster.width = 1000,
                                show.base.legend = TRUE, debugMode = DEFAULTDEBUGMODE, ...){
+  if(rasterize.plotting.area){
+    check.rasterize.or.die("rasterize.plotting.area");
+  }
   res <- plotter$res;
   plot.name <- "Tail Clipping NVC";
   if(debugMode){ ts <- timestamp() }
@@ -666,6 +735,7 @@ makePlot.NVC.tail.clip <- function(plotter, clip.amt = 10,  r2.buffer = clip.amt
                              label.major = label.majority.bases, label.cutoff = label.majority.bases.threshold, blank.label.char = "-",label.major.cex = label.majority.bases.cex,
                              count.x.from.end = TRUE, 
                              show.base.legend = show.base.legend, nvc.colors = plotter$nvc.colors, nvc.colors.light = plotter$nvc.colors.light,
+                             rasterize.plotting.area = rasterize.plotting.area, raster.height = raster.height, raster.width = raster.width, debugMode = debugMode,
                              ...);
   internal.plot.main.title(paste0("Nucleotide Rate by Cycle, Trailing Clipped bases (",clip.amt,")"), plotter, plot.type = "NVC", ...);
   internal.plot.read.labels(plotter,"bottom",r2.buffer,xlim[2]);
@@ -678,7 +748,14 @@ makePlot.NVC.tail.clip <- function(plotter, clip.amt = 10,  r2.buffer = clip.amt
 ####################################################################################
 ####################################################################################
 
-makePlot.NVC.lead.clip.matchByClipPosition <- function(plotter, clip.amt = 10,  r2.buffer = clip.amt / 10, label.majority.bases = TRUE, label.majority.bases.threshold = 0.5, label.majority.bases.cex = 1, show.base.legend = TRUE, load.results = TRUE, debugMode = DEFAULTDEBUGMODE, ...){
+makePlot.NVC.lead.clip.matchByClipPosition <- function(plotter, clip.amt = 10,  r2.buffer = clip.amt / 10, 
+                                                       label.majority.bases = TRUE, label.majority.bases.threshold = 0.5, label.majority.bases.cex = 1, 
+                                                       rasterize.plotting.area = FALSE, raster.height = 1000, raster.width = 1000,
+                                                       show.base.legend = TRUE, load.results = TRUE, debugMode = DEFAULTDEBUGMODE, 
+                                                       ...){
+  if(rasterize.plotting.area){
+    check.rasterize.or.die("rasterize.plotting.area");
+  }
   res <- plotter$res;
   #print(clip.amt)
   #print(r2.buffer)
@@ -735,7 +812,8 @@ makePlot.NVC.lead.clip.matchByClipPosition <- function(plotter, clip.amt = 10,  
                              r2.buffer = r2.buffer,
                              x.axis.labels = clip.amt:1,
                              label.major = label.majority.bases, label.cutoff = label.majority.bases.threshold, blank.label.char = "-",label.major.cex = label.majority.bases.cex,
-                             show.base.legend = show.base.legend, nvc.colors = plotter$nvc.colors, nvc.colors.light = plotter$nvc.colors.light,
+                             rasterize.plotting.area = rasterize.plotting.area, raster.height = raster.height, raster.width = raster.width,
+                             show.base.legend = show.base.legend, nvc.colors = plotter$nvc.colors, nvc.colors.light = plotter$nvc.colors.light, debugMode = debugMode,
                              ...);
   internal.plot.main.title(paste0("Clipped Nucleotide Rate, Leading Clipped bases\n(1-",clip.amt,"), by distance to clip start"), plotter, plot.type = "NVC", ...);
   internal.plot.read.labels(plotter,"bottom",r2.buffer,xlim[2]);
@@ -748,7 +826,13 @@ makePlot.NVC.lead.clip.matchByClipPosition <- function(plotter, clip.amt = 10,  
 ####################################################################################
 ####################################################################################
 
-makePlot.NVC.tail.clip.matchByClipPosition <- function(plotter, clip.amt = 10,  r2.buffer = clip.amt / 10, label.majority.bases = TRUE, label.majority.bases.threshold = 0.5, label.majority.bases.cex = 1, show.base.legend = TRUE, debugMode = DEFAULTDEBUGMODE, ...){
+makePlot.NVC.tail.clip.matchByClipPosition <- function(plotter, clip.amt = 10,  r2.buffer = clip.amt / 10, 
+                                                       label.majority.bases = TRUE, label.majority.bases.threshold = 0.5, label.majority.bases.cex = 1, 
+                                                       rasterize.plotting.area = FALSE, raster.height = 1000, raster.width = 1000,
+                                                       show.base.legend = TRUE, debugMode = DEFAULTDEBUGMODE, ...){
+  if(rasterize.plotting.area){
+    check.rasterize.or.die("rasterize.plotting.area");
+  }
   res <- plotter$res;
   #print(clip.amt)
   #print(r2.buffer)
@@ -793,6 +877,7 @@ makePlot.NVC.tail.clip.matchByClipPosition <- function(plotter, clip.amt = 10,  
                              r2.buffer = r2.buffer,
                              label.major = label.majority.bases, label.cutoff = label.majority.bases.threshold, blank.label.char = "-",label.major.cex = label.majority.bases.cex,
                              show.base.legend = show.base.legend, nvc.colors = plotter$nvc.colors, nvc.colors.light = plotter$nvc.colors.light,
+                             rasterize.plotting.area = rasterize.plotting.area, raster.height = raster.height, raster.width = raster.width, debugMode = debugMode,
                              ...);
   internal.plot.main.title(paste0("Clipped Nucleotide Rate, Trailing Clipped bases\n(1-",clip.amt,"), by distance to clip start"), plotter, plot.type = "NVC", ...);
   internal.plot.read.labels(plotter,"bottom",r2.buffer,xlim[2]);
@@ -884,8 +969,10 @@ makePlot.splice.junction.loci.counts <- function(plotter, calc.rate = FALSE, hig
     if(debugMode){ message("Finished: ",plot.name," plot.",getTimeAndDiff(ts)); }
 }}
 
-
-makePlot.splice.junction.event.rates <- function(plotter, calc.ratePerRead = TRUE, calc.proportion = FALSE, high.low.cutoff = 4, debugMode = DEFAULTDEBUGMODE, ...){
+makePlot.splice.junction.event.ratesPerRead <- function(plotter, high.low.cutoff = 4, debugMode = DEFAULTDEBUGMODE, ...){
+  calc.ratePerRead = TRUE;
+  calc.proportion = FALSE;
+  
   res <- plotter$res;
   plot.name <- "Splice Junction Event Rates";
   if(debugMode){ ts <- timestamp() }
@@ -924,20 +1011,113 @@ makePlot.splice.junction.event.rates <- function(plotter, calc.ratePerRead = TRU
 
   makePlot.generic.points(tf.list,plotter,pre.plot.func=pre.plot.func,...)
 
-  if(calc.ratePerRead){
-    title(ylab="Junction Events per Read-Pair");
-    internal.plot.main.title("Splice Junction Events per Read, by type", plotter, ...);
-  } else if(calc.proportion){
-    title(ylab="Proportion of all splice events");
-    internal.plot.main.title("Splice Junction Events, by type", plotter, ...);
-  } else {
-    title(ylab="# Splice Events");
-    internal.plot.main.title("# Observed Splice Events, by type", plotter, ...);
-  }
+  title(ylab="Events per Read-Pair");
+  internal.plot.main.title("Splice Junction Event Rates per Read-Pair", plotter, ...);
+
     if(debugMode){ message("Finished: ",plot.name," plot.",getTimeAndDiff(ts)); }
 }}
 
-makePlot.splice.junction.event.rates.split.by.type <- function(plotter, calc.rate = TRUE, high.low.cutoff = 4, debugMode = DEFAULTDEBUGMODE, ...){
+
+makePlot.splice.junction.event.proportions <- function(plotter, high.low.cutoff = 4, debugMode = DEFAULTDEBUGMODE, ...){
+  calc.ratePerRead = FALSE;
+  calc.proportion = TRUE;
+  
+  res <- plotter$res;
+  plot.name <- "Splice Junction Event Rates";
+  if(debugMode){ ts <- timestamp() }
+  if(is.null(plotter$res@qc.data[["summary"]]) | ! all(c("SpliceEvents_KnownLociWithFewReads","SpliceEvents_KnownLociWithManyReads","SpliceEvents_NovelLociWithFewReads","SpliceEvents_NovelLociWithManyReads") %in% plotter$res@qc.data[["summary"]][[1]]$FIELD) ){
+    
+    message(paste0("Warning: Skipping ",plot.name," plotting. Data not found!"));
+    blank.plot(c(plot.name,"Data Not Found\nSkipping..."));
+  } else {
+
+  low.label <- paste0("1-",high.low.cutoff-1,"\nReads");
+  high.label <- paste0(high.low.cutoff,"+\nReads");
+  hl.label <- c(low.label,high.label);
+
+  norm.by <- NULL;
+  if(calc.ratePerRead){
+    norm.by <- "READ_PAIR_OK";
+  } else if(calc.proportion){
+    norm.by <- "SpliceEvents";
+  }
+
+    pre.plot.func <- function(){
+         abline(v=2.5,col="gray",lty=3);
+         abline(v=4.5,col="gray",lty=3);
+         categoryText <- c("All SJ Loci","Known SJ Loci","Novel SJ Loci");
+         categoryText.cex <- fit.character.vector(categoryText, min.width = 1.2, max.width = 1.9, max.width.per.char = 0.3);
+         
+         text(c(1.5,3.5,5.5),par("usr")[4],categoryText, cex = categoryText.cex, adj=c(0.5,0.95));
+    }
+
+    tf.list <- generic.points.tf(plotter$res@qc.data[["summary"]], 
+                                 x.names = c("SpliceEvents_KnownLoci","SpliceEvents_NovelLoci","SpliceEvents_KnownLociWithFewReads","SpliceEvents_KnownLociWithManyReads","SpliceEvents_NovelLociWithFewReads","SpliceEvents_NovelLociWithManyReads"),
+                                 x.titles = c("Known","Novel", paste0("",hl.label),paste0("",hl.label) ),
+                                 norm.by = norm.by,
+                                 offset.horiz = 0.5,
+                                 horiz.offsets = plotter$lanebam.params$horiz.offsets);
+
+  makePlot.generic.points(tf.list,plotter,pre.plot.func=pre.plot.func,...)
+
+
+  title(ylab="Proportion of all splice events");
+  internal.plot.main.title("Breakdown of Splice Junction Events", plotter, ...);
+
+    if(debugMode){ message("Finished: ",plot.name," plot.",getTimeAndDiff(ts)); }
+}}
+
+
+makePlot.splice.junction.event.counts <- function(plotter, high.low.cutoff = 4, debugMode = DEFAULTDEBUGMODE, ...){
+  calc.ratePerRead = FALSE;
+  calc.proportion = FALSE;
+  
+  res <- plotter$res;
+  plot.name <- "Splice Junction Event Rates";
+  if(debugMode){ ts <- timestamp() }
+  if(is.null(plotter$res@qc.data[["summary"]]) | ! all(c("SpliceEvents_KnownLociWithFewReads","SpliceEvents_KnownLociWithManyReads","SpliceEvents_NovelLociWithFewReads","SpliceEvents_NovelLociWithManyReads") %in% plotter$res@qc.data[["summary"]][[1]]$FIELD) ){
+    
+    message(paste0("Warning: Skipping ",plot.name," plotting. Data not found!"));
+    blank.plot(c(plot.name,"Data Not Found\nSkipping..."));
+  } else {
+
+  low.label <- paste0("1-",high.low.cutoff-1,"\nReads");
+  high.label <- paste0(high.low.cutoff,"+\nReads");
+  hl.label <- c(low.label,high.label);
+
+  norm.by <- NULL;
+  if(calc.ratePerRead){
+    norm.by <- "READ_PAIR_OK";
+  } else if(calc.proportion){
+    norm.by <- "SpliceEvents";
+  }
+
+    pre.plot.func <- function(){
+         abline(v=2.5,col="gray",lty=3);
+         abline(v=4.5,col="gray",lty=3);
+         categoryText <- c("All SJ Loci","Known SJ Loci","Novel SJ Loci");
+         categoryText.cex <- fit.character.vector(categoryText, min.width = 1.2, max.width = 1.9, max.width.per.char = 0.3);
+         
+         text(c(1.5,3.5,5.5),par("usr")[4],categoryText, cex = categoryText.cex, adj=c(0.5,0.95));
+    }
+
+    tf.list <- generic.points.tf(plotter$res@qc.data[["summary"]], 
+                                 x.names = c("SpliceEvents_KnownLoci","SpliceEvents_NovelLoci","SpliceEvents_KnownLociWithFewReads","SpliceEvents_KnownLociWithManyReads","SpliceEvents_NovelLociWithFewReads","SpliceEvents_NovelLociWithManyReads"),
+                                 x.titles = c("Known","Novel", paste0("",hl.label),paste0("",hl.label) ),
+                                 norm.by = norm.by,
+                                 offset.horiz = 0.5,
+                                 horiz.offsets = plotter$lanebam.params$horiz.offsets);
+
+  makePlot.generic.points(tf.list,plotter,pre.plot.func=pre.plot.func,...)
+
+  title(ylab="# Splice Events");
+  internal.plot.main.title("# Observed Splice Events, by type", plotter, ...);
+
+    if(debugMode){ message("Finished: ",plot.name," plot.",getTimeAndDiff(ts)); }
+}}
+
+makePlot.splice.junction.event.proportionsByType <- function(plotter, high.low.cutoff = 4, debugMode = DEFAULTDEBUGMODE, ...){
+  calc.rate = TRUE
   res <- plotter$res;
   plot.name <- "Splice Junction Event Rates";
   if(debugMode){ ts <- timestamp() }
@@ -995,13 +1175,10 @@ makePlot.splice.junction.event.rates.split.by.type <- function(plotter, calc.rat
        #text(3.5,usr[4],"Known SJ Loci",adj=c(0.5,1.1));
        #text(5.5,usr[4],"Novel SJ Loci",adj=c(0.5,1.1));
 
-  if(calc.rate){
-    title(ylab="Proportion of Splice Events");
-    internal.plot.main.title("Splice Junction Events, by type", plotter, ...);
-  } else {
-    title(ylab="# Splice Events");
-    internal.plot.main.title("# Observed Splice Events, by type", plotter, ...);
-  }
+
+  title(ylab="Proportion of Events, by type");
+  internal.plot.main.title("Breakdown of Splice Junction Events, by type", plotter, ...);
+
     if(debugMode){ message("Finished: ",plot.name," plot.",getTimeAndDiff(ts)); }
 }}
 
@@ -1056,8 +1233,22 @@ makePlot.strandedness.test <- function(plotter, plot.target.boxes = FALSE, debug
 makePlot.dropped.rates <- function(plotter, debugMode = DEFAULTDEBUGMODE,...){
   res <- plotter$res;
   plot.name <- "Dropped Rates";
-  x.names <- c("DROPPED_MATE_UNMAPPED","DROPPED_NOT_PROPER_PAIR","DROPPED_READ_FAILS_VENDOR_QC","DROPPED_MARKED_NOT_VALID", "DROPPED_CHROMS_MISMATCH", "DROPPED_PAIR_STRANDS_MISMATCH", "DROPPED_IGNORED_CHROMOSOME", "DROPPED_NOT_UNIQUE_ALIGNMENT") ;
-  x.titles <- c("Mate\nUnmapped",      "Not\nProper\nPair",      "Fails\nVendor\nQC",           "Marked\nNot\nValid",        "Chroms\nMismatch",        "Pair\nStrands\nDisagree",      "On\nIgnored\nChrom",          "Multi\nMapped");
+  x.names <- c("DROPPED_UNALIGNED",
+               "DROPPED_NOT_PROPER_PAIR",
+               "DROPPED_READ_FAILS_VENDOR_QC",
+               "DROPPED_MARKED_NOT_VALID", 
+               "DROPPED_CHROMS_MISMATCH", 
+               "DROPPED_PAIR_STRANDS_MISMATCH", 
+               "DROPPED_IGNORED_CHROMOSOME", 
+               "DROPPED_NOT_UNIQUE_ALIGNMENT") ;
+  x.titles <- c("Unaligned",
+                "Not\nProper\nPair",      
+                "Fails\nVendor\nQC", 
+                "Marked\nNot\nValid",
+                "Chroms\nMismatch", 
+                "Pair\nStrands\nDisagree",
+                "On\nIgnored\nChrom",
+                "Multi\nMapped");
   if(debugMode){ ts <- timestamp() }
   if(is.null(plotter$res@qc.data[["summary"]]) | ! all(c(x.names) %in% plotter$res@qc.data[["summary"]][[1]]$FIELD) ){
     message(paste0("Warning: Skipping ",plot.name," plotting. Data not found!"));
@@ -1078,7 +1269,7 @@ makePlot.dropped.rates <- function(plotter, debugMode = DEFAULTDEBUGMODE,...){
 
 
 
-#lanebam.ID	total.reads mapped.reads	mapping.rate	multi.mapped.reads	multi.mapping.rate
+#unique.ID	total.reads mapped.reads	mapping.rate	multi.mapped.reads	multi.mapping.rate
 #c("total.reads","mapped.reads","mapping.rate","mm.reads","mm.rate")
 #names(plotter$res@calc.data)
 makePlot.mapping.rates <- function(plotter, plot.mm = TRUE, y.counts.in.millions = TRUE, debugMode = DEFAULTDEBUGMODE,...){
@@ -1090,6 +1281,7 @@ makePlot.mapping.rates <- function(plotter, plot.mm = TRUE, y.counts.in.millions
     message(paste0("Warning: Skipping ",plot.name," plotting. Data not found!"));
     blank.plot(c(plot.name,"Data Not Found","Skipping..."));
   } else {
+    oldmar <- par("mar");
     if(is.null(plotter$res@calc.data[["map.rates"]]$multi.mapped.reads) & plot.mm){
        par(mar = c(5,4,4,4) + 0.1);
        tf.list <- generic.points.tf(plotter$res@calc.data[["map.rates"]], 
@@ -1118,6 +1310,7 @@ makePlot.mapping.rates <- function(plotter, plot.mm = TRUE, y.counts.in.millions
        
 
     } else {
+
        par(mar = c(5,4,4,4) + 0.1);
        tf.list <- generic.points.tf(plotter$res@calc.data[["map.rates"]], 
                                     x.names = c("total.reads","mapped.reads"),
@@ -1159,6 +1352,8 @@ makePlot.mapping.rates <- function(plotter, plot.mm = TRUE, y.counts.in.millions
     axis(4, at = (yrange / 2) + usr[3], labels=c("Rate"),col="transparent", line=1);     
     internal.plot.main.title("Mapping Stats", plotter, ...);
     if(debugMode){ message("Finished: ",plot.name," plot.",getTimeAndDiff(ts)); }
+    
+    par(mar = oldmar);
   }
 }
 
@@ -1563,7 +1758,7 @@ makePlot.legend.over <- function(position, plotter, debugMode = DEFAULTDEBUGMODE
 }
 
 
-get.summary.table <- function(res, debugMode = DEFAULTDEBUGMODE){
+get.summary.table <- function(res, outfile = NULL, debugMode = DEFAULTDEBUGMODE){
    out.table <- sapply( res@qc.data[["summary"]], function(dl){
      out.dl <- dl$COUNT;
      out.dl;
@@ -1571,6 +1766,10 @@ get.summary.table <- function(res, debugMode = DEFAULTDEBUGMODE){
    row.names(out.table) <- res@qc.data[["summary"]][[1]]$FIELD
    #out.table <- t(out.table);
    out.table <- data.frame(out.table,stringsAsFactors=F);
+   if(! is.null(outfile)){
+     write.table.with.first.col(out.table,file = outfile, rownamesTitle = "FIELD");
+   }
+   
    return(out.table);
 }
 

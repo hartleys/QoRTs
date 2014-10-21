@@ -18,11 +18,19 @@ object stdUtils {
    * timestamp / memory-usage utilities
    **************************************************************************************************************************/
   
-  def standardStatusReport(initialTimeStamp : TimeStampUtil) {
+  def standardStatusReport(initialTimeStamp : TimeStampUtil, lineStart : String = "") {
     val currTime = TimeStampUtil();
-    reportln("[Time:			" + currTime.toString + "]","note");
-    reportln("[Mem usage:		" + MemoryUtil.memInfo +"]","note");
-    reportln("[Elapsed Time:	" + TimeStampUtil.timeDifferenceFormatter(currTime.compareTo(initialTimeStamp)) +"]","note");
+    
+    val rawLineSeq : Seq[(String,String)] = Seq[(String,String)]( 
+        (lineStart + "[Time:",          currTime.toString + "]"),
+        (lineStart + "[Mem usage:",     MemoryUtil.memInfo +"]"),
+        (lineStart + "[Elapsed Time:",  TimeStampUtil.timeDifferenceFormatter(currTime.compareTo(initialTimeStamp)) +"]")
+    );
+    val fmtLineSeq : Seq[String] = leftRightJustifySeq(rawLineSeq);
+    
+    fmtLineSeq.foreach((str) =>{
+      reportln(str,"note");
+    });
   }
   
   val STANDARD_DATE_AND_TIME_FORMATTER = (new java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss"));
@@ -191,9 +199,18 @@ object stdUtils {
     augmentString(s).toDouble
   }
   
+  def hexstring2int(s : String) : Int = {
+    Integer.parseInt(s,16);
+  }
+  
+  //note on string formatting:
+  // "%.3f".format(1.092512) returns "1.093"
+  
   /**************************************************************************************************************************
    * String formatting
    **************************************************************************************************************************/
+  
+
   def cleanQuotes(s : String) : String = {
     if(s.length < 2) s;
     else if(s.charAt(0) == '"' && s.charAt(s.length - 1) == '"'){
@@ -201,7 +218,7 @@ object stdUtils {
     } else {
       s
     }
-  } 
+  }  
   
   def formatByteCount(b : Long) : String = {
     if(b < 5000L) b.toString + "B";
@@ -234,6 +251,20 @@ object stdUtils {
   /**************************************************************************************************************************
    * Line formatting:
    **************************************************************************************************************************/
+  
+  def leftRightJustify(str1 : String, str2 : String, width : Int = -1, padChar : String = " ", bufferSpacing : Int = 5) : String = {
+    val useWidth = if(width == -1){ str1.length() + str2.length() + bufferSpacing } else { width };
+    val rightWidth = useWidth - str1.length();
+    return str1 + padString(str2, rightWidth, truncate = false, padChar = padChar, alignment = "right");
+  }
+  
+  def leftRightJustifySeq(strings : Seq[(String,String)], width : Int = -1, padChar : String = " ", bufferSpacing : Int = 5) : Seq[String] = {
+    val minReqWidth = strings.map{case (s1,s2) => s1.length + s2.length + bufferSpacing}.max;
+    val useWidth = if(width == -1){ minReqWidth } else {width};
+    strings.map{case (s1,s2) => leftRightJustify(s1,s2,width = useWidth, padChar = padChar)}
+  }
+  
+  
   def lineseq2string(ss : Seq[String]) : String = {
     //ss.foldLeft("")(_ +"\n"+ _) + "\n";
     ss.mkString("\n");

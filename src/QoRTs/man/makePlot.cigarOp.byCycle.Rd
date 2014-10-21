@@ -17,7 +17,7 @@
 }
 \arguments{
   \item{plotter}{
-    A QoRTs_Plotter object.
+    A \code{QoRT_Plotter} reference object. See \code{\link{build.plotter}}.
   }
   \item{op}{
     A character string naming which cigar op to plot.
@@ -61,5 +61,5 @@
 }
 
 \seealso{
-
+  \code{\link{build.plotter}}
 }

@@ -14,7 +14,7 @@ makePlot.strandedness.test(plotter, plot.target.boxes = FALSE,
 }
 \arguments{
   \item{plotter}{
-    A QoRT_Plotter object.
+    A \code{QoRT_Plotter} reference object. See \code{\link{build.plotter}}.
   }
   \item{plot.target.boxes}{
     A logical value. If true, then green target boxes will be printed over the area in which all points should be expected to fall.
@@ -32,5 +32,5 @@ makePlot.strandedness.test(plotter, plot.target.boxes = FALSE,
 }
 
 \seealso{
-
+  \code{\link{build.plotter}}
 }

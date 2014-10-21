@@ -96,7 +96,7 @@ List(
     //}
     
     //case (t, s) => if (t <:< typeOf[T]) Some(s.asInstanceOf[T]) else {error("FATAL INTERNAL ERROR: PARAMETER " + key + " OF WRONG TYPE!"); None};
-    def parseArguments(args : List[String], debugMode : Boolean = false) : Boolean = {
+    def parseArguments(args : List[String], debugMode : Boolean = internalUtils.optionHolder.OPTION_debugMode) : Boolean = {
       if(args.length < 1){
         reportShortHelp();
         false;
@@ -184,12 +184,12 @@ List(
       return sb.toString();
     }
     
-    private def parseArgs_master(inputArguments : List[String], debugMode : Boolean){
+    private def parseArgs_master(inputArguments : List[String], debugMode : Boolean = internalUtils.optionHolder.OPTION_debugMode){
       parseArgs(inputArguments, debugMode);
       argList.find(! _.isReady()) match {
         case Some(unreadyArg) =>{
           throwSyntaxErrorMessage("Argument is flagged unready: " + unreadyArg.getShortSyntax());
-        }
+        } 
         case None =>{
           //do nothing
         }
@@ -206,7 +206,7 @@ List(
             argList.find(_.isNamed(inputArguments.head)) match {
               case Some(arg) => {
                 val remainder = arg.parse(inputArguments);
-                if(debugMode) reportln("ARG("+arg.getName()+")="+arg(),"debug");
+                if(debugMode) reportln("INPUT_ARG("+arg.getName()+")="+arg(),"debug");
                 parseArgs(remainder, debugMode);
               }
               case None => throwSyntaxErrorMessage("Unrecognized Argument: " + inputArguments.head);
@@ -219,8 +219,6 @@ List(
         //}
       }
     }
-    
-    
   }
   
   private def throwSyntaxErrorMessage(s : String){

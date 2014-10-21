@@ -13,7 +13,7 @@ makePlot.dropped.rates(plotter, debugMode, \dots)
 }
 \arguments{
   \item{plotter}{
-    A QoRT_Plotter object.
+    A \code{QoRT_Plotter} reference object. See \code{\link{build.plotter}}.
   }
   \item{debugMode}{
     Logical. If TRUE, debugging data will be printed to the console.
@@ -24,9 +24,11 @@ makePlot.dropped.rates(plotter, debugMode, \dots)
   }
 }
 \details{
-   TODO!
+   For each bam file, this function plots the rates and reasons for reads being dropped from QC analysis. 
+   
+   Note that in the example dataset reads were never dropped. This is a consequence of the pre-processing steps in the example pipeline.
 }
 
 \seealso{
-
+  \code{\link{build.plotter}}
 }

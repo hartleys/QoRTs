@@ -20,7 +20,7 @@ makePlot.chrom.type.rates(plotter,
 }
 \arguments{
   \item{plotter}{
-    A QoRT_Plotter object.
+    A \code{QoRT_Plotter} reference object. See \code{\link{build.plotter}}.
   }
   \item{plot.rates}{
     A logical value indicating whether to plot percent of the total 
@@ -58,12 +58,12 @@ makePlot.chrom.type.rates(plotter,
   }
 }
 \details{
-   TODO!
+   For each sample-run, this function plots the number of read-pairs mapping to each category of chromosome. 
 }
 \value{
    By default, this function returns nothing. If the return.table parameter is TRUE, then it returns a data.frame with the data that was plotted.
 }
 
 \seealso{
-
+  \code{\link{build.plotter}}
 }

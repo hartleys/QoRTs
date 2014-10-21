@@ -20,7 +20,7 @@
 }
 \arguments{
   \item{plotter}{
-    A QoRTs_Plotter object.
+    A \code{QoRT_Plotter} reference object. See \code{\link{build.plotter}}.
   }
   \item{by.sample}{
     Logical. Whether to combine all lanebams for each sample before 
@@ -52,5 +52,6 @@
   Usually returns nothing, unless return.table is TRUE, in which case it returns a data.frame containing the plotted data for each sample. 
 }
 \seealso{
+  \code{\link{build.plotter}}
 
 }

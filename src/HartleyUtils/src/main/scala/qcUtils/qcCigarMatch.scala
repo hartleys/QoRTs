@@ -420,6 +420,7 @@ class qcCigarMatch(readLen : Int) extends QCUtility[Unit] {
   var mismatchCt = 0;
 
   
+  def getUtilityName : String = "cigarMatch";
 
   
 }

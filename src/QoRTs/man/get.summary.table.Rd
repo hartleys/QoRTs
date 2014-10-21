@@ -8,11 +8,14 @@
    Retrieves and compiles a summary data table.
 }
 \usage{
-  get.summary.table(res, debugMode)
+  get.summary.table(res, outfile, debugMode)
 }
 \arguments{
   \item{res}{
-    A QoRT_QC_Results object.
+    A \code{QoRT_QC_Results} object, created by \code{\link{read.qc.results.data}}.
+  }
+  \item{outfile}{
+    Optional. A file name where the table should be written.
   }
   \item{debugMode}{
     Logical. If TRUE, debugging data will be printed to the console.
@@ -23,5 +26,5 @@
 }
 
 \seealso{
-
+  \code{\link{read.qc.results.data}} 
 }

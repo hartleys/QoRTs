@@ -16,7 +16,7 @@
 }
 \arguments{
   \item{plotter}{
-    A QoRTs_Plotter object.
+    A \code{QoRT_Plotter} reference object. See \code{\link{build.plotter}}.
   }
   \item{rate.per.million}{
     A logical value indicating whether or not to scale the y 
@@ -44,5 +44,5 @@
 }
 
 \seealso{
-
+  \code{\link{build.plotter}}
 }

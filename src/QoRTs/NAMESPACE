@@ -35,9 +35,13 @@ export(
  makePlot.NVC.tail.clip.matchByClipPosition,
  
  makePlot.gene.assignment.rates,
+ 
  makePlot.splice.junction.loci.counts,
- makePlot.splice.junction.event.rates,
- makePlot.splice.junction.event.rates.split.by.type,
+ makePlot.splice.junction.event.ratesPerRead,
+ makePlot.splice.junction.event.proportions,
+ makePlot.splice.junction.event.counts,
+ makePlot.splice.junction.event.proportionsByType,
+ 
  makePlot.strandedness.test,
  makePlot.dropped.rates,
  makePlot.mapping.rates,

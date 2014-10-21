@@ -15,7 +15,7 @@ makePlot.mapping.rates(plotter, plot.mm = TRUE,
 }
 \arguments{
   \item{plotter}{
-    A QoRT_Plotter object.
+    A \code{QoRT_Plotter} reference object. See \code{\link{build.plotter}}.
   }
   \item{plot.mm}{
     Plot multi-mapping rates.
@@ -32,9 +32,10 @@ makePlot.mapping.rates(plotter, plot.mm = TRUE,
   }
 }
 \details{
-   TODO!
+For each sample-run, this function plots the number of mapped reads and the rate at which reads map (if the total reads is provided).
 }
 
 \seealso{
-
+  \code{\link{build.plotter}}
+  \code{\link{read.qc.results.data}}
 }

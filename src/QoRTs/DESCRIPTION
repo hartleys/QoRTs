@@ -1,15 +1,15 @@
 Package: QoRTs
-Version: 0.0.17
+Version: 0.0.23
 Date: 2014-07-24
 Title: Quality of RNA-seq Tool
 Authors@R: c(person("Stephen Hartley, PhD", "Developer", role = c("aut", "cre"),
                      email = "stephen.hartley@nih.gov"))
 Author: Stephen Hartley, PhD
 Maintainer: Stephen Hartley <stephen.hartley@nih.gov>
-Depends: R (>= 3.0.2), methods
+Depends: R (>= 3.0.2), methods, png
 Suggests: MASS, Cairo, DESeq2, edgeR, knitr, BiocStyle
 Description: An R toolset for organizing, visualizing, and analyzing RNA-Seq Quality-Control data.
 License: file LICENSE
 VignetteBuilder: knitr
-URL: www.EDITME.EDITME
-BugReports: www.EDITME.EDITME
+URL: https://github.com/hartleys/QoRTs
+BugReports: https://github.com/hartleys/QoRTs

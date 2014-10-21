@@ -102,7 +102,7 @@ object bamToWiggle {
                     new FinalArgument[String](
                                          name = "outfilePrefix",
                                          valueName = "outfilePrefix",
-                                         argDesc = "The output file prefix. If unstranded, this will produce one file named \"outfilePrefix.unstranded.wig.gz\". If stranded, this will produce two files: \"outfilePrefix.fwd.wig.gz\" and \"outfilePrefix.rev.wig.gz\". If the \"--noGzipOutput\" flag is raised then the output files will not have the \".gz\" extension at the end." // description
+                                         argDesc = "The output file prefix. If unstranded, this will produce one file named \"outfilePrefix.unstranded.wig.gz\". If stranded, this will produce two files: \"outfilePrefix.fwd.wig.gz\" and \"outfilePrefix.rev.wig.gz\". If the \"--noGzipOutput\" flag is raised then the output files will not have the \".gz\" extension at the end. IMPORTANT NOTE: if the window size is set to any size other than the default of 100, the window size will be added to the filename. The filename will be  \"outfilePrefix.win50.unstranded.wig.gz\" for unstranded wiggles with a 50bp window, and so on." // description
                                         ) :: List() );
       
      def run(args : Array[String]) {
@@ -210,9 +210,11 @@ object bamToWiggle {
       }
     }
     def writeOutput(outfile : String, summaryWriter : WriterUtil){
+      val windowString = if(windowSize == 100) "" else (".Win"+windowSize.toString());
+      
       if(stranded){
-        val writerF = openWriterSmart_viaGlobalParam(outfile + ".fwd.wig");
-        val writerR = openWriterSmart_viaGlobalParam(outfile + ".rev.wig");
+        val writerF = openWriterSmart_viaGlobalParam(outfile + windowString + ".fwd.wig");
+        val writerR = openWriterSmart_viaGlobalParam(outfile + windowString + ".rev.wig");
         
         val sortedKeyList : Vector[(String,Char)] = chromMap.keySet.toVector.sorted
         for(chromPairs <- sortedKeyList){
@@ -226,7 +228,7 @@ object bamToWiggle {
         close(writerF);
         close(writerR);
       } else {
-        val writer = openWriterSmart_viaGlobalParam(outfile + ".unstranded.wig");
+        val writer = openWriterSmart_viaGlobalParam(outfile + windowString + ".unstranded.wig");
         //writer.write("track type=wiggle_0 name="+trackName+" visibility=full\n");
         
         val sortedKeyList : Vector[(String,Char)] = chromMap.keySet.toVector.sorted
@@ -237,6 +239,9 @@ object bamToWiggle {
         close(writer);
       }
     }
+    
+    def getUtilityName : String = "bamToWig";
+
   }
   
   case class Chrom(chromName :  String, chromStrand : Char, windowCounts : Array[Int], span : Int, truncate : Boolean){

@@ -14,6 +14,9 @@ makePlot.NVC.lead.clip(plotter, clip.amt,  r2.buffer,
                    label.majority.bases = TRUE, 
                    label.majority.bases.threshold = 0.5, 
                    label.majority.bases.cex = 1, 
+                   rasterize.plotting.area = FALSE, 
+                   raster.height = 1000, 
+                   raster.width = 1000,
                    show.base.legend = TRUE, 
                    debugMode,
                    \dots)
@@ -24,12 +27,15 @@ makePlot.NVC.tail.clip(plotter, clip.amt,  r2.buffer,
                        label.majority.bases = TRUE, 
                        label.majority.bases.threshold = 0.5, 
                        label.majority.bases.cex = 1, 
+                       rasterize.plotting.area = FALSE, 
+                       raster.height = 1000, 
+                       raster.width = 1000,
                        show.base.legend = TRUE, 
                        debugMode, \dots)
 }
 \arguments{
   \item{plotter}{
-    A QoRT_Plotter object.
+    A \code{QoRT_Plotter} reference object. See \code{\link{build.plotter}}.
   }
   \item{clip.amt}{
     Numeric value. The number of bases clipped. These methods
@@ -60,6 +66,21 @@ makePlot.NVC.tail.clip(plotter, clip.amt,  r2.buffer,
     big the labels are to be, if label.majority.bases is TRUE.
     (see \code{\link{par}} for information on cex).
   }
+  \item{rasterize.plotting.area}{
+    Logical. If TRUE, the plotting area will be written to a temp
+    png file then drawn to the current device as a raster image.
+    This option is generally preferred for vector devices, because
+    NVC plots can be very large when drawn in vector format. 
+    \emph{Note: this requires the \code{png} package!}
+  }
+  \item{raster.height}{
+    Numeric. If rasterize.plotting.area is TRUE, then this is the
+    height of the plotting area raster image, in pixels.
+  }
+  \item{raster.width}{
+    Numeric. If rasterize.plotting.area is TRUE, then this is the
+    width of the plotting area raster image, in pixels.
+  }
   \item{show.base.legend}{
     A logical value indicating whether to print the base-color
     legend along the right edge of the plot.
@@ -73,9 +94,11 @@ makePlot.NVC.tail.clip(plotter, clip.amt,  r2.buffer,
   }
 }
 \details{
-   TODO!
+   For general information on reading NVC plots, see \code{\link{makePlot.NVC}}.
+   
+   This function plots the nucleotide rates for the sections of reads that were soft-clipped by the aligner. Note that these will not function on reads that have been aligned using an aligner that does not practice soft clipping (such as TopHat2).
 }
 
 \seealso{
-
+  \code{\link{build.plotter}}, \code{\link{makePlot.NVC}}
 }

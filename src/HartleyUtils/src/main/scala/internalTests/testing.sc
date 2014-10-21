@@ -31,7 +31,7 @@ object testing {
   }
   
   val tc = new TestClass();                       //> tc  : internalTests.testing.TestClass = internalTests.testing$$anonfun$main$
-                                                  //| 1$TestClass$1@399ed64
+                                                  //| 1$TestClass$1@106faf1e
   
   val tct1 = tc(1);                               //> tct1  : Int = 1
 val tct3 = tc(2);                                 //> tct3  : Int = 2
@@ -44,5 +44,9 @@ val tct2 = tc(2);                                 //> tct2  : Int = 3
  val tttsts = Seq('A'.toInt ,'B'.toInt, 'C'.toInt,'G'.toInt,'N'.toInt,'S'.toInt,'H'.toInt).max
                                                   //> tttsts  : Int = 83
  
- 
+  val x1 = 200;                                   //> x1  : Int = 200
+  val x1s = 200.toHexString;                      //> x1s  : String = c8
+  val s1x = Integer.parseInt("c8",16)             //> s1x  : Int = 200
+  val srsg = "sample.ID	size.factorx".substring(0,21);
+                                                  //> srsg  : String = sample.ID	size.factor
 }

@@ -10,7 +10,7 @@ makePlot.generic <- function(data.list, plotter, x.name, y.name, norm.x, avg.y, 
   priorities <- sort(unique(plotter$lanebam.params$plot.priority));
 
   tf.xy <- function(dl, i){
-    curr.lanebam <- plotter$lanebam.params$lanebam.ID[i];
+    curr.lanebam <- plotter$lanebam.params$unique.ID[i];
     curr.x <- dl[[curr.lanebam]][[x.name]];
     curr.y <- dl[[curr.lanebam]][[y.name]];
     if(norm.x) curr.x <- curr.x / max(curr.x) * 100;
@@ -21,8 +21,8 @@ makePlot.generic <- function(data.list, plotter, x.name, y.name, norm.x, avg.y, 
     df;
   }
   tf.list <- list();
-  for(i in 1:length(plotter$lanebam.params$lanebam.ID)){
-    curr.lanebam <- plotter$lanebam.params$lanebam.ID[i];
+  for(i in 1:length(plotter$lanebam.params$unique.ID)){
+    curr.lanebam <- plotter$lanebam.params$unique.ID[i];
     tf.list[[curr.lanebam]] <- tf.xy(data.list,i);
   }
 
@@ -79,16 +79,16 @@ makePlot.generic <- function(data.list, plotter, x.name, y.name, norm.x, avg.y, 
 
   for(p in priorities){
     p.params <- plotter$lanebam.params[plotter$lanebam.params$plot.priority == p,];
-    for(j in 1:length(p.params$lanebam.ID)){
-      #print(p.params$lanebam.ID[j]);
-      curr.data <- tf.list[[ p.params$lanebam.ID[j] ]];
+    for(j in 1:length(p.params$unique.ID)){
+      #print(p.params$unique.ID[j]);
+      curr.data <- tf.list[[ p.params$unique.ID[j] ]];
       curr.y <- curr.data[[y.name]]
       curr.x <- curr.data[[x.name]]
       if(plot.type == "lines"){
         lines(curr.x, curr.y, lty = p.params$lines.lty[j], col = color2transparent(p.params$lines.col[j],p.params$lines.alpha[j]));
       }
       if(plot.medians | plot.means){
-        points(avg[[p.params$lanebam.ID[j]]], avg.plot.center + p.params$vert.offsets[j] * margin.sz * 2,pch = p.params$points.pch[j], col = color2transparent(p.params$points.col[j], p.params$points.alpha[j]));
+        points(avg[[p.params$unique.ID[j]]], avg.plot.center + p.params$vert.offsets[j] * margin.sz * 2,pch = p.params$points.pch[j], col = color2transparent(p.params$points.col[j], p.params$points.alpha[j]));
       }
     }
   }
@@ -106,10 +106,11 @@ makePlot.generic <- function(data.list, plotter, x.name, y.name, norm.x, avg.y, 
 ##########################################################################################################
 
 makePlot.generic.pair <- function(data.list.r1, data.list.r2, plotter, x.name, y.name, norm.x, avg.y, xlim , ylim = NULL, vert.offset = 0, horiz.offset = 0, draw.horiz.lines = FALSE, plot.type = "lines", r2.buffer = 10, override.lty = -1, x.is.log = FALSE, y.is.log = FALSE, pre.plot.func = NULL, y.axis.las = 1, ...){
+
   priorities <- sort(unique(plotter$lanebam.params$plot.priority));
   
   tf.xy <- function(dl, i){
-    curr.lanebam <- plotter$lanebam.params$lanebam.ID[i];
+    curr.lanebam <- plotter$lanebam.params$unique.ID[i];
     curr.x <- dl[[curr.lanebam]][[x.name]];
     curr.y <- dl[[curr.lanebam]][[y.name]];
     if(norm.x) curr.x <- curr.x / max(curr.x) * 100;
@@ -122,8 +123,8 @@ makePlot.generic.pair <- function(data.list.r1, data.list.r2, plotter, x.name, y
 
   tf.list.r1 <- list();
   tf.list.r2 <- list();
-  for(i in 1:length(plotter$lanebam.params$lanebam.ID)){
-    curr.lanebam <- plotter$lanebam.params$lanebam.ID[i];
+  for(i in 1:length(plotter$lanebam.params$unique.ID)){
+    curr.lanebam <- plotter$lanebam.params$unique.ID[i];
     tf.list.r1[[curr.lanebam]] <- tf.xy(data.list.r1,i);
     tf.list.r2[[curr.lanebam]] <- tf.xy(data.list.r2,i);
   }
@@ -150,15 +151,15 @@ makePlot.generic.pair <- function(data.list.r1, data.list.r2, plotter, x.name, y
   }
   for(p in priorities){
     p.params <- plotter$lanebam.params[plotter$lanebam.params$plot.priority == p,];
-    for(j in 1:length(p.params$lanebam.ID)){
-      #print(p.params$lanebam.ID[j]);
-      curr.data <- tf.list.r1[[ p.params$lanebam.ID[j] ]];
+    for(j in 1:length(p.params$unique.ID)){
+      #print(p.params$unique.ID[j]);
+      curr.data <- tf.list.r1[[ p.params$unique.ID[j] ]];
       curr.x <- curr.data[[x.name]];
       curr.y <- curr.data[[y.name]];
       if(plot.type == "lines"){
         lines(curr.x, curr.y, lty = ifelse(override.lty == -1, p.params$lines.lty[j], override.lty), col = color2transparent(p.params$lines.col[j],p.params$lines.alpha[j]));
       }
-      curr.data <- tf.list.r2[[ p.params$lanebam.ID[j] ]];
+      curr.data <- tf.list.r2[[ p.params$unique.ID[j] ]];
       curr.x <- curr.data[[x.name]];
       curr.y <- curr.data[[y.name]];
       curr.x <- curr.x + r2.offset;
@@ -191,20 +192,25 @@ makePlot.generic.pair <- function(data.list.r1, data.list.r2, plotter, x.name, y
 ###################################################################################
 
 #TO FINISH
-makePlot.gene.cdf.helper <- function(data.list, plotter,plot.intercepts = TRUE, label.intercepts = FALSE, override.lty = -1, pre.plot.func = NULL, ...){
+makePlot.gene.cdf.helper <- function(data.list, plotter,plot.intercepts = TRUE, label.intercepts = FALSE, override.lty = -1, pre.plot.func = NULL,
+                                     rasterize.plotting.area = FALSE, raster.height = 1000, raster.width = 1000,
+                                     debugMode = FALSE,
+                                     ...){
+   if(rasterize.plotting.area) rasterFunc <- make.mixed.raster.vector.function(raster.height = raster.height, raster.width = raster.width, debugMode = debugMode);
+   
    priorities <- sort(unique(plotter$lanebam.params$plot.priority));
    
    gene.ct <- length(data.list[[1]])
    
    tf.y <- function(dl, i){
-     curr.lanebam <- plotter$lanebam.params$lanebam.ID[i];
+     curr.lanebam <- plotter$lanebam.params$unique.ID[i];
      read.ct <- dl[[curr.lanebam]][ gene.ct ];
      tfy <- dl[[curr.lanebam]] / read.ct;
      tfy;
    }
    tf.list <- list();
-   for(i in 1:length(plotter$lanebam.params$lanebam.ID)){
-     curr.lanebam <- plotter$lanebam.params$lanebam.ID[i];
+   for(i in 1:length(plotter$lanebam.params$unique.ID)){
+     curr.lanebam <- plotter$lanebam.params$unique.ID[i];
      tf.list[[curr.lanebam]] <- tf.y(data.list,i);
    }
 
@@ -212,15 +218,25 @@ makePlot.gene.cdf.helper <- function(data.list, plotter,plot.intercepts = TRUE, 
    xlim <- c(1,gene.ct);
    if(label.intercepts) xlim[1] <- 0.65;
 
-   plot(1,1, log="x",type='l',ylim=c(0,1),xlim=xlim,axes=F,xlab="",ylab="",col="white");
+   plot(1,1, log="x",type='l',ylim=c(0,1),xlim=xlim,axes=F,xlab="",ylab="",col="white", ...);
    if(! is.null(pre.plot.func)) pre.plot.func();
+   
+   if(rasterize.plotting.area){
+     rasterFunc$initRaster();
+     plot(1,1, log="x",type='l',ylim=c(0,1),xlim=xlim,axes=F,xlab="",ylab="",col="white", bg = "transparent", ...);
+   }
 
    for(p in priorities){
       p.params <- plotter$lanebam.params[plotter$lanebam.params$plot.priority == p,];
-      for(j in 1:length(p.params$lanebam.ID)){
-        curr.y <- tf.list[[ p.params$lanebam.ID[j] ]];
+      for(j in 1:length(p.params$unique.ID)){
+        curr.y <- tf.list[[ p.params$unique.ID[j] ]];
         lines(curr.x,curr.y, lty = ifelse(override.lty == -1, p.params$lines.lty[j], override.lty), col = p.params$lines.col[j]);
       }
+   }
+
+   if(rasterize.plotting.area){
+     rasterFunc$closeRaster();
+     rasterFunc$printRaster();
    }
 
    box();
@@ -251,8 +267,8 @@ makePlot.gene.cdf.helper <- function(data.list, plotter,plot.intercepts = TRUE, 
          lines(c(xs.2,xe.2),c(ys.2,ye.2),lty = 3, col = p.params$lines.col[i]);
    }
 
-   for(i in 1:length(p.params$lanebam.ID)){
-      curr.lanebam <- p.params$lanebam.ID[i];
+   for(i in 1:length(p.params$unique.ID)){
+      curr.lanebam <- p.params$unique.ID[i];
       for(j in c(1,10,100,1000,10000)){
          curr.pct <- tf.list[[ curr.lanebam ]][j];
          if(curr.pct == 1){
@@ -267,7 +283,12 @@ makePlot.gene.cdf.helper <- function(data.list, plotter,plot.intercepts = TRUE, 
    }
 }
 
-makePlot.gene.cdf.bySample.helper <- function(data.list, curr.sample, plot.intercepts = TRUE, label.intercepts = TRUE, pre.plot.func = NULL, ...){
+makePlot.gene.cdf.bySample.helper <- function(data.list, curr.sample, plot.intercepts = TRUE, label.intercepts = TRUE, pre.plot.func = NULL, 
+                                              rasterize.plotting.area = FALSE, raster.height = 1000, raster.width = 1000,
+                                              debugMode = FALSE,
+                                              ...){
+   if(rasterize.plotting.area) rasterFunc <- make.mixed.raster.vector.function(raster.height = raster.height, raster.width = raster.width, debugMode = debugMode);
+
    gene.ct <- length(data.list[[1]])
    
    tf.list <- list();
@@ -280,8 +301,13 @@ makePlot.gene.cdf.bySample.helper <- function(data.list, curr.sample, plot.inter
    xlim <- c(1,gene.ct);
    if(label.intercepts) xlim[1] <- 0.65;
 
-   plot(1,1, log="x",type='l',ylim=c(0,1),xlim=xlim,axes=F,xlab="",ylab="",col="white");
+   plot(1,1, log="x",type='l',ylim=c(0,1),xlim=xlim,axes=F,xlab="",ylab="",col="white", ...);
    if(! is.null(pre.plot.func)) pre.plot.func();
+
+   if(rasterize.plotting.area){
+     rasterFunc$initRaster();
+     plot(1,1, log="x",type='l',ylim=c(0,1),xlim=xlim,axes=F,xlab="",ylab="",col="white", ...);
+   }
 
       for(j in 1:length(tf.list)){
         if(names(tf.list)[j] != curr.sample){
@@ -292,6 +318,11 @@ makePlot.gene.cdf.bySample.helper <- function(data.list, curr.sample, plot.inter
       j <- which(names(tf.list) == curr.sample);
       curr.y <- tf.list[[j]];
       lines(curr.x,curr.y, lty = 1, col = "red");
+
+   if(rasterize.plotting.area){
+     rasterFunc$closeRaster();
+     rasterFunc$printRaster();
+   }
 
    box();
    title(ylab="Cumulative % of total reads",xlab="# Genes");
@@ -346,7 +377,31 @@ makePlot.generic.NVC.pair <- function(data.list.r1, data.list.r2, plotter, x.nam
                                   label.major = FALSE, label.cutoff = 0.5, blank.label.char = "", 
                                   points.highlighted = FALSE, color.unhighlighted.light = TRUE, 
                                   x.axis.labels  = NULL, count.x.from.end = FALSE, pre.plot.func = NULL, label.major.cex = 1, 
-                                  show.base.legend = TRUE, nvc.colors = NULL, nvc.colors.light = NULL, ... ){
+                                  show.base.legend = TRUE, nvc.colors = NULL, nvc.colors.light = NULL, 
+                                  rasterize.plotting.area = FALSE, raster.height = 1000, raster.width = 2000, debugMode = FALSE, ... ){
+
+  if(rasterize.plotting.area){
+    makePlot.generic.NVC.pair.RASTERIZED(data.list.r1 = data.list.r1, data.list.r2 = data.list.r2, plotter = plotter, x.name = x.name, y.name = y.name, xlim = xlim, ylim = ylim, r2.buffer = r2.buffer, 
+                                      label.major = label.major, label.cutoff = label.cutoff, blank.label.char = blank.label.char, 
+                                      points.highlighted = points.highlighted, color.unhighlighted.light = color.unhighlighted.light, 
+                                      x.axis.labels  = x.axis.labels, count.x.from.end = count.x.from.end, pre.plot.func = pre.plot.func, label.major.cex = label.major.cex, 
+                                      show.base.legend = show.base.legend, nvc.colors = nvc.colors, nvc.colors.light = nvc.colors.light, 
+                                      raster.height = raster.height, raster.width = raster.width, debugMode = debugMode, ... )
+  } else {
+    makePlot.generic.NVC.pair.DEFAULT(data.list.r1 = data.list.r1, data.list.r2 = data.list.r2, plotter = plotter, x.name = x.name, y.name = y.name, xlim = xlim, ylim = ylim, r2.buffer = r2.buffer, 
+                                      label.major = label.major, label.cutoff = label.cutoff, blank.label.char = blank.label.char, 
+                                      points.highlighted = points.highlighted, color.unhighlighted.light = color.unhighlighted.light, 
+                                      x.axis.labels  = x.axis.labels, count.x.from.end = count.x.from.end, pre.plot.func = pre.plot.func, label.major.cex = label.major.cex, 
+                                      show.base.legend = show.base.legend, nvc.colors = nvc.colors, nvc.colors.light = nvc.colors.light, debugMode = debugMode,
+                                      ... )
+  }
+}
+
+makePlot.generic.NVC.pair.DEFAULT <- function(data.list.r1, data.list.r2, plotter, x.name, y.name, xlim, ylim, r2.buffer = 10, 
+                                  label.major = FALSE, label.cutoff = 0.5, blank.label.char = "", 
+                                  points.highlighted = FALSE, color.unhighlighted.light = TRUE, 
+                                  x.axis.labels  = NULL, count.x.from.end = FALSE, pre.plot.func = NULL, label.major.cex = 1, 
+                                  show.base.legend = TRUE, nvc.colors = NULL, nvc.colors.light = NULL, debugMode = FALSE, ... ){
    bases <- names(plotter$nvc.colors);
    priorities <- sort(unique(plotter$lanebam.params$plot.priority));
 
@@ -386,16 +441,16 @@ makePlot.generic.NVC.pair <- function(data.list.r1, data.list.r2, plotter, x.nam
     p.params <- plotter$lanebam.params[plotter$lanebam.params$plot.priority == p,];
     curr.nvc.colors <- plotter$nvc.colors;
     if(p < 2) curr.nvc.colors <- plotter$nvc.colors.light;
-    for(j in 1:length(p.params$lanebam.ID)){
+    for(j in 1:length(p.params$unique.ID)){
       for(k in 1:length(bases)){
-        curr.data <- tf.list.r1[[ p.params$lanebam.ID[j] ]][[bases[k]]];
+        curr.data <- tf.list.r1[[ p.params$unique.ID[j] ]][[bases[k]]];
         curr.x <- 1:length(curr.data)
         curr.y <- curr.data
         lines(curr.x, curr.y, lty = p.params$lines.lty[j], col = color2transparent(curr.nvc.colors[[bases[k]]], p.params$lines.alpha[j]), lwd = p.params$lines.lwd[j]);
         if(p == 2 & points.highlighted){
           points(curr.x,curr.y, pch = p.params$points.pch[j], col =  color2transparent(curr.nvc.colors[[bases[k]]], p.params$points.alpha[j]));
         }
-        curr.data <- tf.list.r2[[ p.params$lanebam.ID[j] ]][[bases[k]]];
+        curr.data <- tf.list.r2[[ p.params$unique.ID[j] ]][[bases[k]]];
         curr.x <- 1:length(curr.data)
         curr.y <- curr.data
         curr.x <- curr.x  + r2.offset;
@@ -413,7 +468,7 @@ makePlot.generic.NVC.pair <- function(data.list.r1, data.list.r2, plotter, x.nam
 
      #j <- 1;
      get.major.labels.by.lanebam <- function(dl,j){
-       curr.lanebam <- p.params$lanebam.ID[j];
+       curr.lanebam <- p.params$unique.ID[j];
        ML <- rep(blank.label.char, xlim.max);
        maxRate <- rep(label.cutoff,xlim.max);
        for(k in 1:length(bases)){
@@ -439,8 +494,196 @@ makePlot.generic.NVC.pair <- function(data.list.r1, data.list.r2, plotter, x.nam
        return(ML.final);
      }
      
-     ML.list.r1 <- lapply(1:length(p.params$lanebam.ID), function(j){ get.major.labels.by.lanebam(tf.list.r1, j) });
-     ML.list.r2 <- lapply(1:length(p.params$lanebam.ID), function(j){ get.major.labels.by.lanebam(tf.list.r2, j) }); 
+     ML.list.r1 <- lapply(1:length(p.params$unique.ID), function(j){ get.major.labels.by.lanebam(tf.list.r1, j) });
+     ML.list.r2 <- lapply(1:length(p.params$unique.ID), function(j){ get.major.labels.by.lanebam(tf.list.r2, j) }); 
+
+     ML.r1 <- collapse.major.labels(ML.list.r1);
+     ML.r2 <- collapse.major.labels(ML.list.r2);
+
+     get.ML.col <- function(ML){
+       sapply(ML, function(ml){
+         if(ml == blank.label.char){ "gray";
+         } else { plotter$nvc.colors[[ml]]; }
+       });
+     }
+
+     #print("ML.list.r1:");
+     #print(ML.list.r1);
+     #print("ML.r1:");
+     #print(ML.r1);
+     #print("ML.r1.col:");
+     #print(get.ML.col(ML.r1));
+
+     text(1:xlim.max, rep(par("usr")[4],xlim.max), ML.r1, adj = c(0.5,1), col = get.ML.col(ML.r1) , cex = label.major.cex);
+     text(1:xlim.max + r2.offset, rep(par("usr")[4],xlim.max), ML.r2, adj = c(0.5,1), col = get.ML.col(ML.r2), cex = label.major.cex  );
+  }
+
+  pretty.axis <- limited.pretty(xlim);
+  pretty.axis <- pretty.axis[pretty.axis == round(pretty.axis)];
+  
+  if(count.x.from.end){ 
+    max.cycle.ct <- max(plotter$res@decoder$cycle.CT);
+    axis(1,at=pretty.axis + r2.offset, labels = max.cycle.ct - (xlim.max - pretty.axis));
+    axis(1,at=pretty.axis,labels= max.cycle.ct - (xlim.max - pretty.axis));
+  } else if(! is.null(x.axis.labels)){
+    x.labels <- x.axis.labels[pretty.axis];
+    axis(1,at=pretty.axis + r2.offset, labels = x.labels);
+    axis(1,at=pretty.axis,labels= x.labels);
+  } else {
+    axis(1,at=pretty.axis + r2.offset, labels = pretty.axis);
+    axis(1,at=pretty.axis,labels=pretty.axis);
+  }
+
+  if(show.base.legend){
+    y.center <- (par("usr")[4] - par("usr")[3]) / 2 + par("usr")[3];
+    bases.list <- names(nvc.colors);
+    base.legend.adj = c(-0.2,-0.2);
+
+    #test(par("usr")[2],par("usr")[3], );
+    #mtext(c("A\nT\nG\nC"),side = 4);
+    
+    axis(4,at=y.center, labels = "A\n \n \n ",col="transparent",col.axis = nvc.colors[["A"]], font = 2, las=1, hadj=0, tcl=0, line = -0.5);
+    axis(4,at=y.center, labels = " \nT\n \n ",col="transparent",col.axis = nvc.colors[["T"]], font = 2, las=1, hadj=0, tcl=0, line = -0.5);
+    axis(4,at=y.center, labels = " \n \nG\n ",col="transparent",col.axis = nvc.colors[["G"]], font = 2, las=1, hadj=0, tcl=0, line = -0.5);
+    axis(4,at=y.center, labels = " \n \n \nC",col="transparent",col.axis = nvc.colors[["C"]], font = 2, las=1, hadj=0, tcl=0, line = -0.5);
+
+    #text(par("usr")[2],par("usr")[3],"A\n\n\n", adj=base.legend.adj, col = nvc.colors[["A"]], font=2, xpd=TRUE)
+    #text(par("usr")[2],par("usr")[3],"\nT\n\n", adj=base.legend.adj, col = nvc.colors[["T"]], font=2, xpd=TRUE)
+    #text(par("usr")[2],par("usr")[3],"\n\nG\n", adj=base.legend.adj, col = nvc.colors[["G"]], font=2, xpd=TRUE)
+    #text(par("usr")[2],par("usr")[3],"\n\n\nC", adj=base.legend.adj, col = nvc.colors[["C"]], font=2, xpd=TRUE)
+
+    #text(par("usr")[2],par("usr")[3],expression("A\n"*phantom("T\nG\nC")),             adj=base.legend.adj, col = nvc.colors[["A"]])
+    #text(par("usr")[2],par("usr")[3],expression(phantom("A\n")*"T\n"*phantom("G\nC")), adj=base.legend.adj, col = nvc.colors[["T"]])
+    #text(par("usr")[2],par("usr")[3],expression(phantom("A\nT\n")*"G\n"*phantom("C")), adj=base.legend.adj, col = nvc.colors[["G"]])
+    #text(par("usr")[2],par("usr")[3],expression(phantom("A\nT\nG\n")*"C"),             adj=base.legend.adj, col = nvc.colors[["C"]])
+
+  }
+
+
+  box();
+  axis(2);
+  rect(xlim[2] + mini.buffer, ylim[1] - ylim[2], xlim[2] + 1 + r2.buffer - mini.buffer, ylim[2] * 2, border="black",col="white");   
+}
+
+########################################################################################################################
+########################################################################################################################
+########################################################################################################################
+########################################################################################################################
+########################################################################################################################
+########################################################################################################################
+
+
+makePlot.generic.NVC.pair.RASTERIZED <- function(data.list.r1, data.list.r2, plotter, x.name, y.name, xlim, ylim, r2.buffer = 10, 
+                                  label.major = FALSE, label.cutoff = 0.5, blank.label.char = "", 
+                                  points.highlighted = FALSE, color.unhighlighted.light = TRUE, 
+                                  x.axis.labels  = NULL, count.x.from.end = FALSE, pre.plot.func = NULL, label.major.cex = 1, 
+                                  show.base.legend = TRUE, nvc.colors = NULL, nvc.colors.light = NULL, 
+                                  raster.height = 1000, raster.width = 2000, debugMode = FALSE, ... ){
+   rasterFunc <- make.mixed.raster.vector.function(raster.height = raster.height, raster.width = raster.width, debugMode = debugMode);
+   
+   bases <- names(plotter$nvc.colors);
+   priorities <- sort(unique(plotter$lanebam.params$plot.priority));
+
+   tf <- function(df){
+      split <- lapply(1:length(bases), function(i){
+        b <- bases[i];
+        df$CT[ df$base == b ];
+      });
+      names(split) <- bases;
+      sums <- split[[1]];
+      for(i in 2:length(bases)){
+        sums <- sums + split[[i]];
+      }
+      out <- lapply(split, function(x){
+        x / sums;
+      });
+      return(out);
+   }
+   tf.list.r1 <- lapply(data.list.r1,tf);
+   tf.list.r2 <- lapply(data.list.r2,tf);
+
+  xlim.max <- xlim[2];
+  xlim.min <- xlim[1];
+  ylim.max <- ylim[2];
+  ylim.min <- ylim[1];
+
+  mini.buffer <- (r2.buffer + 1) / 5;
+  r2.offset <- xlim[2] + r2.buffer;
+  
+  plot(0,0,col="transparent",main="",xlab="",ylab="",xlim=c(xlim[1],xlim[2] * 2 + r2.buffer),ylim=ylim,axes=F, ...);
+  rasterPlot <- function(){
+     plot(0,0,col="transparent",main="",xlab="",ylab="",xlim=c(xlim[1],xlim[2] * 2 + r2.buffer),ylim=ylim,axes=F, bg = "transparent", ...);
+  }
+  
+  if(! is.null(pre.plot.func)) pre.plot.func();
+
+  abline(h=0.5,lty=3,col="gray");
+  abline(h=0.25,lty=3,col="gray");
+  if(label.major & label.cutoff != 0.5) abline(h = label.cutoff, lty=3,col="gray");
+
+  rasterFunc$initRaster();
+  rasterPlot();
+  for(p in priorities){
+    p.params <- plotter$lanebam.params[plotter$lanebam.params$plot.priority == p,];
+    curr.nvc.colors <- plotter$nvc.colors;
+    if(p < 2) curr.nvc.colors <- plotter$nvc.colors.light;
+    for(j in 1:length(p.params$unique.ID)){
+      for(k in 1:length(bases)){
+        curr.data <- tf.list.r1[[ p.params$unique.ID[j] ]][[bases[k]]];
+        curr.x <- 1:length(curr.data)
+        curr.y <- curr.data
+        lines(curr.x, curr.y, lty = p.params$lines.lty[j], col = color2transparent(curr.nvc.colors[[bases[k]]], p.params$lines.alpha[j]), lwd = p.params$lines.lwd[j]);
+        if(p == 2 & points.highlighted){
+          points(curr.x,curr.y, pch = p.params$points.pch[j], col =  color2transparent(curr.nvc.colors[[bases[k]]], p.params$points.alpha[j]));
+        }
+        curr.data <- tf.list.r2[[ p.params$unique.ID[j] ]][[bases[k]]];
+        curr.x <- 1:length(curr.data)
+        curr.y <- curr.data
+        curr.x <- curr.x  + r2.offset;
+        lines(curr.x, curr.y, lty = p.params$lines.lty[j], col = color2transparent(curr.nvc.colors[[bases[k]]], p.params$lines.alpha[j]), lwd = p.params$lines.lwd[j]);
+        if(p == 2 & points.highlighted){
+          points(curr.x,curr.y, pch = p.params$points.pch[j], col = color2transparent(curr.nvc.colors[[bases[k]]], p.params$points.alpha[j]));
+        }
+      }
+    }
+  }
+  rasterFunc$closeRaster();
+  rasterFunc$printRaster();
+  
+  if(label.major){
+    p <- 2;
+    p.params <- plotter$lanebam.params[plotter$lanebam.params$plot.priority == p,];
+
+     #j <- 1;
+     get.major.labels.by.lanebam <- function(dl,j){
+       curr.lanebam <- p.params$unique.ID[j];
+       ML <- rep(blank.label.char, xlim.max);
+       maxRate <- rep(label.cutoff,xlim.max);
+       for(k in 1:length(bases)){
+         curr.y <- dl[[curr.lanebam]][[bases[k]]];
+         for(m in 1:length(curr.y)){
+           if(curr.y[m] > maxRate[m]){
+             ML[m] <- bases[k];
+             maxRate[m] <- curr.y[m];
+           }
+         }
+       }
+       return(ML);
+     }
+     
+     collapse.major.labels <- function(ML.list){
+       ML.final <- rep(blank.label.char, xlim.max);
+       for(m in 1:xlim.max){
+         ML.curr <- sapply(ML.list,function(ml){ ml[m] });
+         if(all(ML.curr == ML.curr[1])){
+           ML.final[m] <- ML.curr[1];
+         }
+       }
+       return(ML.final);
+     }
+     
+     ML.list.r1 <- lapply(1:length(p.params$unique.ID), function(j){ get.major.labels.by.lanebam(tf.list.r1, j) });
+     ML.list.r2 <- lapply(1:length(p.params$unique.ID), function(j){ get.major.labels.by.lanebam(tf.list.r2, j) }); 
 
      ML.r1 <- collapse.major.labels(ML.list.r1);
      ML.r2 <- collapse.major.labels(ML.list.r2);
@@ -511,7 +754,6 @@ makePlot.generic.NVC.pair <- function(data.list.r1, data.list.r2, plotter, x.nam
 }
 
 
-
 ########################################################################################################################
 ########################################################################################################################
 ########################################################################################################################
@@ -556,7 +798,7 @@ generic.points.tf.from.df <- function(df, x.names, x.titles, offset.horiz = 0, h
   x.titles <- x.titles[keep];
   
   tf.xy <- function(i){
-    curr.lanebam <- df$lanebam.ID[i];
+    curr.lanebam <- df$unique.ID[i];
     
     curr.x <- 1:length(x.names);
     curr.y <- as.numeric(df[i, x.names]);
@@ -567,7 +809,7 @@ generic.points.tf.from.df <- function(df, x.names, x.titles, offset.horiz = 0, h
     out.df;
   }
   tfed <- lapply(1:length(df[,1]), tf.xy);
-  names(tfed) <- df$lanebam.ID;
+  names(tfed) <- df$unique.ID;
   return( tfed );
 }
 
@@ -613,8 +855,8 @@ makePlot.generic.points <- function(tf.list, plotter, plot.type = "points", ylim
 
   for(p in priorities){
     p.params <- plotter$lanebam.params[plotter$lanebam.params$plot.priority == p,];
-    for(j in 1:length(p.params$lanebam.ID)){
-      curr.data <- tf.list[[ p.params$lanebam.ID[j] ]];
+    for(j in 1:length(p.params$unique.ID)){
+      curr.data <- tf.list[[ p.params$unique.ID[j] ]];
       curr.y <- curr.data$y
       curr.x <- curr.data$x
       if(plot.type == "points"){
@@ -676,8 +918,8 @@ makePlot.generic.points.right <- function(tf.list, plotter, plot.type = "points"
 
   for(p in priorities){
     p.params <- plotter$lanebam.params[plotter$lanebam.params$plot.priority == p,];
-    for(j in 1:length(p.params$lanebam.ID)){
-      curr.data <- tf.list[[ p.params$lanebam.ID[j] ]];
+    for(j in 1:length(p.params$unique.ID)){
+      curr.data <- tf.list[[ p.params$unique.ID[j] ]];
       curr.y <- tf.y(curr.data$y);
       curr.x <- curr.data$x + xlim.min;
       if(plot.type == "points"){

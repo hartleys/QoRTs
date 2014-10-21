@@ -252,7 +252,7 @@ class qcJunctionCounts(anno_holder : qcGtfAnnotationBuilder, stranded : Boolean,
     summaryWriter.write("SpliceEvents_NovelLociWithManyReads	" + num_events_novel_sj_with_many_reads + "\n");
     
   }
-  
+  def getUtilityName : String = "JunctionCalcs";
 }
 
 

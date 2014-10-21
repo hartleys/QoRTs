@@ -37,7 +37,10 @@ val tct2 = tc(2);System.out.println("""tct2  : Int = """ + $show(tct2 ));$skip(3
 
  val str = "%1.3f".format(115.0);System.out.println("""str  : String = """ + $show(str ));$skip(97); 
  
- val tttsts = Seq('A'.toInt ,'B'.toInt, 'C'.toInt,'G'.toInt,'N'.toInt,'S'.toInt,'H'.toInt).max;System.out.println("""tttsts  : Int = """ + $show(tttsts ))}
+ val tttsts = Seq('A'.toInt ,'B'.toInt, 'C'.toInt,'G'.toInt,'N'.toInt,'S'.toInt,'H'.toInt).max;System.out.println("""tttsts  : Int = """ + $show(tttsts ));$skip(18); 
  
- 
+  val x1 = 200;System.out.println("""x1  : Int = """ + $show(x1 ));$skip(29); ;
+  val x1s = 200.toHexString;System.out.println("""x1s  : String = """ + $show(x1s ));$skip(38); ;
+  val s1x = Integer.parseInt("c8",16);System.out.println("""s1x  : Int = """ + $show(s1x ));$skip(55); 
+  val srsg = "sample.ID	size.factorx".substring(0,21);;System.out.println("""srsg  : String = """ + $show(srsg ))}
 }

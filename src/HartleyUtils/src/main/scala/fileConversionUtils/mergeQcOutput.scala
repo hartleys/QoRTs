@@ -9,6 +9,8 @@ import internalUtils.commonSeqUtils._;
 import java.io.File;
 
 object mergeQcOutput {
+  val mergeFileList : List[String] = List("DESeq","DEXSeq","JunctionSeq","NovelSplice","KnownSplice","WiggleTrack","WiggleTrackAltWin");
+  
   class merger extends CommandLineRunUtil {
      val parser : CommandLineArgParser = 
        new CommandLineArgParser(
@@ -17,10 +19,20 @@ object mergeQcOutput {
           synopsis = "", 
           description = "",   
           argList = 
-                    new UnaryArgument(name = "mergeAllBrowserTracks",
-                              arg = List("--mergeAllBrowserTracks"), // name of value
-                              argDesc = "OPTION IS CURRENTLY DISABLED!" // description
-                              ) ::
+                    new BinaryArgument[Int](
+                                         name = "wiggleWindow", 
+                                         arg = List("--wiggleWindow"), 
+                                         valueName = "val",  
+                                         argDesc = "The window size of the alternate-size wiggle track, if applicable." ,
+                                         defaultValue = Some(100)
+                                        ) ::
+                    new BinaryArgument[List[String]](
+                                         name = "mergeFiles", 
+                                         arg = List("--mergeFiles"), 
+                                         valueName = "file1[,file2,...]",  
+                                         argDesc = "A comma-delimited list of strings, indicating which file types to attempt to merge. By default, this utility autodetects the presence of all mergable qc files and merges all standard files. Valid codes are:" + mergeFileList.mkString(",") ,
+                                         defaultValue = Some(mergeFileList)
+                                        ) ::
                     new FinalArgument[String](
                                          name = "infileDirs",
                                          valueName = "infileDirs",
@@ -39,7 +51,8 @@ object mergeQcOutput {
          mergeQcOutput.run(
              parser.get[String]("infileDirs"),
              parser.get[String]("outfile"),
-             parser.get[Boolean]("mergeAllBrowserTracks")
+             parser.get[List[String]]("mergeFiles"),
+             parser.get[Int]("wiggleWindow")
            );
          }
      }
@@ -53,10 +66,26 @@ object mergeQcOutput {
           synopsis = "", 
           description = "",   
           argList = 
-                    new UnaryArgument(name = "mergeAllBrowserTracks",
-                              arg = List("--mergeAllBrowserTracks"), // name of value
-                              argDesc = "" // description
-                              ) ::
+                    new BinaryOptionArgument[String](
+                                         name = "sampleID", 
+                                         arg = List("--sampleID"), 
+                                         valueName = "sampid",  
+                                         argDesc = "Optional: the id of the specific sample that is to be merged. By default, this utility will merge all samples found in the decoder. With this option selected, it will ONLY merge the one sample named here."
+                                        ) ::
+                    new BinaryArgument[Int](
+                                         name = "wiggleWindow", 
+                                         arg = List("--wiggleWindow"), 
+                                         valueName = "val",  
+                                         argDesc = "The window size of the alternate-size wiggle track, if applicable." ,
+                                         defaultValue = Some(100)
+                                        ) ::
+                    new BinaryArgument[List[String]](
+                                         name = "mergeFiles", 
+                                         arg = List("--mergeFiles"), 
+                                         valueName = "file1[,file2,...]",  
+                                         argDesc = "A comma-delimited list of strings, indicating which file types to attempt to merge. By default, this utility autodetects the presence of all mergable qc files and merges all standard files. Valid codes are:" + mergeFileList.mkString(",") ,
+                                         defaultValue = Some(mergeFileList)
+                                        ) ::
                     new FinalArgument[String](
                                          name = "infileDir",
                                          valueName = "infileDir",
@@ -85,18 +114,29 @@ object mergeQcOutput {
              parser.get[String]("infileDir"),
              parser.get[String]("decoderFile"),
              parser.get[String]("outfile"),
-             parser.get[Boolean]("mergeAllBrowserTracks")
+             parser.get[List[String]]("mergeFiles"),
+             parser.get[Int]("wiggleWindow"),
+             parser.get[Option[String]]("sampleID")
            );
          }
      }
   }
   
-  def multirun(infileDir : String, decoderFile : String, outfile : String, makeAllBrowserTracks : Boolean){
-    val decoder = decode(decoderFile,infileDir);
+  def multirun(infileDir : String, decoderFile : String, outfile : String, mergeFiles : List[String], wiggleWindow : Int, sampID : Option[String]){
+    val decoder : Map[String,Set[String]] = decode(decoderFile,infileDir);
     
-    for((sampleID, infiles) <- decoder){
-      merge(infiles.toSeq, outfile + "/"+sampleID+"/", makeAllBrowserTracks);
+    val initialTimeStamp = TimeStampUtil();
+    
+    if(sampID.isEmpty){
+      for((sampleID, infiles) <- decoder){
+        merge(infiles.toSeq, outfile + "/"+sampleID+"/",  mergeFiles, wiggleWindow);
+      }
+    } else {
+      val infiles = decoder(sampID.get);
+      merge(infiles.toSeq, outfile + "/"+sampID.get+"/",  mergeFiles, wiggleWindow);
     }
+    
+    standardStatusReport(initialTimeStamp);
   }
   def decode(decoder : String, infileDir : String) : Map[String,Set[String]] = {
     val lines = getLinesSmartUnzip(decoder);
@@ -115,12 +155,14 @@ object mergeQcOutput {
     });
   }
    
-   def run(infile : String, outfile : String, makeAllBrowserTracks : Boolean){
+   def run(infile : String, outfile : String, mergeFiles : List[String], wiggleWindow : Int){
      val infiles = infile.split(",");
-     merge(infiles.toSeq, outfile, makeAllBrowserTracks);
+     merge(infiles.toSeq, outfile, mergeFiles, wiggleWindow);
    }
    
-   def merge(infiles : Seq[String], outfile : String, makeAllBrowserTracks : Boolean){
+   def merge(infiles : Seq[String], outfile : String, mergeFiles : List[String], wiggleWindow : Int){
+     
+     var currTimeStamp = TimeStampUtil();
      
      val DESeq_suffix = "QC.geneCounts.formatted.for.DESeq.txt.gz";
      val DEXSeq_suffix = "QC.exonCounts.formatted.for.DEXSeq.txt.gz";
@@ -132,6 +174,11 @@ object mergeQcOutput {
      val stranded_wiggle_fwd_suffix = "QC.wiggle.fwd.wig.gz";
      val stranded_wiggle_rev_suffix = "QC.wiggle.rev.wig.gz";
      
+     val unstranded_alt_wiggle_suffix = "QC.wiggle.Win"+wiggleWindow.toString()+".wig.gz";
+     val stranded_alt_wiggle_fwd_suffix = "QC.wiggle.Win"+wiggleWindow.toString()+".fwd.wig.gz";
+     val stranded_alt_wiggle_rev_suffix = "QC.wiggle.Win"+wiggleWindow.toString()+".rev.wig.gz";
+     
+     
      //if(outfile.last == '/' || outfile.last == '\\'){
        val outDir = new File(outfile);
        if(! outDir.exists()){
@@ -141,7 +188,9 @@ object mergeQcOutput {
        }
      //}
      
-     if((new File(infiles.head +DESeq_suffix)).exists()){
+     if(! mergeFiles.contains("DESeq")){
+       reportln("Skipping DESeq merge" ,"note");
+     } else if((new File(infiles.head +DESeq_suffix)).exists()){
        report("Merging DESeq data...","note");
        mergeSimpleData(infiles, DESeq_suffix, outfile + DESeq_suffix);
        report("done\n","note");
@@ -149,7 +198,12 @@ object mergeQcOutput {
        reportln("DESeq data not found at: " + infiles.head +DESeq_suffix + "\n	Skipping DESeq merge" ,"note");
      }
      
-     if((new File(infiles.head +DEXSeq_suffix)).exists()){
+     standardStatusReport(currTimeStamp, ">    ");
+     currTimeStamp = TimeStampUtil();
+     
+     if(! mergeFiles.contains("DEXSeq")){
+       reportln("Skipping DEXSeq merge" ,"note");
+     } else if((new File(infiles.head +DEXSeq_suffix)).exists()){
        report("Merging DEXSeq data...","note");
        mergeSimpleData(infiles, DEXSeq_suffix, outfile + DEXSeq_suffix);
        report("done\n","note");
@@ -157,15 +211,25 @@ object mergeQcOutput {
        reportln("DEXSeq data not found at: " + infiles.head +DEXSeq_suffix + "\n	Skipping DEXSeq merge" ,"note");
      }
      
-     if((new File(infiles.head +Splice_suffix)).exists()){
-       report("Merging SpliceSeq data...","note");
+     standardStatusReport(currTimeStamp, ">    ");
+     currTimeStamp = TimeStampUtil();
+     
+     if(! mergeFiles.contains("JunctionSeq")){
+       reportln("Skipping JunctionSeq merge" ,"note");
+     } else if((new File(infiles.head +Splice_suffix)).exists()){
+       report("Merging JunctionSeq data...","note");
        mergeSimpleData(infiles, Splice_suffix, outfile + Splice_suffix);
        report("done\n","note");
      } else {
        reportln("Splice data not found at: " + infiles.head +Splice_suffix + "\n	Skipping SpliceSeq merge" ,"note");
      }
      
-     if((new File(infiles.head +NovelSplice_suffix)).exists()){
+     standardStatusReport(currTimeStamp, ">    ");
+     currTimeStamp = TimeStampUtil();
+     
+     if(! mergeFiles.contains("NovelSplice")){
+       reportln("Skipping NovelSplice merge" ,"note");
+     } else if((new File(infiles.head +NovelSplice_suffix)).exists()){
        report("Merging novel splice data...","note");
        mergeNovelSpliceData(infiles, NovelSplice_suffix, outfile + NovelSplice_suffix);
        report("done\n","note");
@@ -173,7 +237,12 @@ object mergeQcOutput {
        reportln("Splice data not found at: " + infiles.head +NovelSplice_suffix + "\n	Skipping Novel Splice merge" ,"note");
      }
      
-     if((new File(infiles.head +KnownSplice_suffix)).exists()){
+     standardStatusReport(currTimeStamp, ">    ");
+     currTimeStamp = TimeStampUtil();
+     
+     if(! mergeFiles.contains("KnownSplice")){
+       reportln("Skipping KnownSplice merge" ,"note");
+     } else if((new File(infiles.head +KnownSplice_suffix)).exists()){
        report("Merging known splice data...","note");
        mergeComplexData(infiles, KnownSplice_suffix, outfile + KnownSplice_suffix);
        report("done\n","note");
@@ -181,7 +250,12 @@ object mergeQcOutput {
        reportln("Splice data not found at: " + infiles.head +KnownSplice_suffix + "\n	Skipping Known Splice merge" ,"note");
      }
      
-     if(makeAllBrowserTracks){
+     standardStatusReport(currTimeStamp, ">    ");
+     currTimeStamp = TimeStampUtil();
+     
+     if(! mergeFiles.contains("WiggleTrack")){
+       reportln("Skipping WiggleTrack merge" ,"note");
+     } else {
        //TODO!!!
        //reportln("NOTE: makeAllBrowserTracks is UNIMPLEMENTED at this time!","debug");
        
@@ -207,6 +281,38 @@ object mergeQcOutput {
         
        //SumWigglesFast.run(filelist , outfile , false , false , false , true , None)
      }
+     
+     standardStatusReport(currTimeStamp, ">    ");
+     currTimeStamp = TimeStampUtil();
+     
+     if(! mergeFiles.contains("WiggleTrackAltWin")){
+       reportln("Skipping WiggleTrack (with non-default window size) merge" ,"note");
+     } else {
+       
+       if(! (((new File(infiles.head + unstranded_wiggle_suffix)).exists()) || ((new File(infiles.head + stranded_wiggle_fwd_suffix)).exists()))){
+         report("No wiggle track with alternate window size found. This is probably normal.","note");
+       }
+       
+       if((new File(infiles.head + unstranded_alt_wiggle_suffix)).exists()){
+         report("Merging unstranded wiggle data...","note");
+         val pairlist = infiles.map(infile => (infile + unstranded_alt_wiggle_suffix, 1.0));
+         SumWigglesFast.runHelper2(pairlist, outfile + unstranded_alt_wiggle_suffix, false);
+         report("done\n","note");
+       }
+       if((new File(infiles.head + stranded_alt_wiggle_fwd_suffix)).exists()){
+         report("Merging stranded wiggle data...","note");
+         val fwdpairlist = infiles.map(infile => (infile + stranded_alt_wiggle_fwd_suffix, 1.0));
+         SumWigglesFast.runHelper2(fwdpairlist, outfile + stranded_alt_wiggle_fwd_suffix, false);
+         
+         val revpairlist = infiles.map(infile => (infile + stranded_alt_wiggle_rev_suffix, 1.0));
+         SumWigglesFast.runHelper2(revpairlist, outfile + stranded_alt_wiggle_rev_suffix, false);
+         report("done\n","note");
+       }
+       //SumWigglesFast.run(filelist , outfile , false , false , false , true , None)
+     }
+     
+     standardStatusReport(currTimeStamp, ">    ");
+     currTimeStamp = TimeStampUtil();
      
    }
    

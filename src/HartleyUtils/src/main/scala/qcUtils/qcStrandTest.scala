@@ -90,6 +90,8 @@ class qcStrandTest(anno_holder : qcGtfAnnotationBuilder, stranded : Boolean, fr_
     summaryWriter.write("StrandTest_ambig_other	"+ambig_other+"\n");
     summaryWriter.write("StrandTest_STRANDEDNESS_MATCHES_INFERRED	" + strandedness_ok +"\n")
   }
+  
+  def getUtilityName : String = "StrandCheck";
 }
 
 

@@ -1,6 +1,7 @@
 \name{build.plotter}
 \docType{methods}
 \alias{build.plotter}
+\alias{build.plotter}
 \alias{build.plotter.highlightBySample.colorByLane}
 \alias{build.plotter.highlightBySample}
 \alias{build.plotter.colorByLane}
@@ -98,5 +99,5 @@
 }
 
 \seealso{
-
+  \code{\link{read.qc.results.data}} 
 }

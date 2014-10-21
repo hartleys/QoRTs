@@ -106,6 +106,7 @@ class qcQualityScoreCounter(readLength : Int, maxQualScore : Int) extends QCUtil
     
     close(writer);
   }
+  def getUtilityName : String = "QualityScoreDistribution";
 }
 
 

@@ -70,4 +70,7 @@ class qcGCContentCount(readLength : Int) extends QCUtility[Unit] {
       (b == G_BYTE || b == C_BYTE);
     })
   }
+  
+  def getUtilityName : String = "GCDistribution";
+
 }

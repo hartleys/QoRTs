@@ -14,7 +14,7 @@ makePlot.legend.over(position, plotter, debugMode, \dots)
 }
 \arguments{
   \item{plotter}{
-    A QoRT_Plotter object.
+    A \code{QoRT_Plotter} reference object. See \code{\link{build.plotter}}.
   }
   \item{position}{
     For makePlot.legend.over, a character string indicating the location 
@@ -40,5 +40,5 @@ makePlot.legend.over(position, plotter, debugMode, \dots)
 }
 
 \seealso{
-
+  \code{\link{build.plotter}}
 }

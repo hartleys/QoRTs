@@ -22,7 +22,9 @@ object optionHolder {
   
   var OPTION_noGzipOutput = false;
   
+  //val DEFAULT_debugMode = true;
   
+  var OPTION_debugMode = true;
   
   
   

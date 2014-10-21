@@ -23,7 +23,7 @@ object Reporter {
       if(isWorthy(verb)){
         freshenLine;
         report_basefunction(str);
-        isMidline = true;
+        isMidline = str.last != '\n';
       }
     }
     
@@ -36,7 +36,7 @@ object Reporter {
     def report(str : String, verb : String){
       if(isWorthy(verb)){
         report_basefunction(str);
-        isMidline = true;
+        isMidline = str.last != '\n';
       }
     }
     

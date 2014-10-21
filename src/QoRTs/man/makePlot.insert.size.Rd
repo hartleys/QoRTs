@@ -16,7 +16,7 @@
 }
 \arguments{
   \item{plotter}{
-    A QoRTs_Plotter object.
+    A \code{QoRT_Plotter} reference object. See \code{\link{build.plotter}}.
   }
   \item{calc.rate}{
     A logical value indicating whether or not to calculate and
@@ -77,5 +77,5 @@
 }
 
 \seealso{
-
+  \code{\link{build.plotter}}
 }

@@ -17,6 +17,9 @@ makePlot.NVC.lead.clip.matchByClipPosition(plotter,
             label.majority.bases = TRUE, 
             label.majority.bases.threshold = 0.5, 
             label.majority.bases.cex = 1, 
+            rasterize.plotting.area = FALSE, 
+            raster.height = 1000, 
+            raster.width = 1000,
             show.base.legend = TRUE, 
             load.results = TRUE, 
             debugMode, ...)
@@ -26,12 +29,15 @@ makePlot.NVC.tail.clip.matchByClipPosition(plotter,
             label.majority.bases = TRUE, 
             label.majority.bases.threshold = 0.5, 
             label.majority.bases.cex = 1, 
+            rasterize.plotting.area = FALSE, 
+            raster.height = 1000, 
+            raster.width = 1000,
             show.base.legend = TRUE, 
             debugMode, ...)
 }
 \arguments{
   \item{plotter}{
-    A QoRT_Plotter object.
+    A \code{QoRT_Plotter} reference object. See \code{\link{build.plotter}}.
   }
   \item{clip.amt}{
     UNDOCUMENTED
@@ -51,6 +57,21 @@ makePlot.NVC.tail.clip.matchByClipPosition(plotter,
   \item{show.base.legend}{
     UNDOCUMENTED
   }
+  \item{rasterize.plotting.area}{
+    Logical. If TRUE, the plotting area will be written to a temp
+    png file then drawn to the current device as a raster image.
+    This option is generally preferred for vector devices, because
+    NVC plots can be very large when drawn in vector format. 
+    \emph{Note: this requires the \code{png} package!}
+  }
+  \item{raster.height}{
+    Numeric. If rasterize.plotting.area is TRUE, then this is the
+    height of the plotting area raster image, in pixels.
+  }
+  \item{raster.width}{
+    Numeric. If rasterize.plotting.area is TRUE, then this is the
+    width of the plotting area raster image, in pixels.
+  }
   \item{load.results}{
     UNDOCUMENTED
   }
@@ -63,9 +84,9 @@ makePlot.NVC.tail.clip.matchByClipPosition(plotter,
   }
 }
 \details{
-   TODO!
+   This function is currently BETA, and is not intended for general use. Documentation and testing is still pending.
 }
 
 \seealso{
-
+  \code{\link{build.plotter}}, \code{\link{makePlot.NVC}}
 }

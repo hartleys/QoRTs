@@ -53,4 +53,7 @@ class qcChromCount(fr_secondStrand : Boolean) extends QCUtility[Unit] {
     close(writer);
     summaryWriter.write("NumberOfChromosomesCovered	"+chroms.size+"\n");
   }
+  
+  def getUtilityName : String = "chromCounts";
+
 }

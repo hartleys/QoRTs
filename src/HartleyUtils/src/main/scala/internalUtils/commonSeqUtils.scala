@@ -182,6 +182,42 @@ object commonSeqUtils {
     return ((readLength, peekRecords.iterator ++ iter));
   }*/
   
+  def peekSamRecordIterator(infile : String, peekCount : Int = 1000) : SamFileAttributes = {
+    val reader : SAMFileReader = if(infile == "-"){
+      new SAMFileReader(System.in);
+    } else {
+      new SAMFileReader(new File(infile));
+    }
+    val iter : Iterator[SAMRecord] = reader.iterator();
+    var peekRecords = Seq[SAMRecord]();
+     
+    for(i <- 0 until peekCount){
+      if(iter.hasNext){
+        val next = iter.next;
+        try {
+          peekRecords = peekRecords :+ next;
+        } catch {
+          case e : Exception => throw e;
+        }
+      } else { 
+        //do nothing!
+      }
+    }
+     
+    val isSortedByName : Boolean = (Iterator.from(1,2).takeWhile(_ < peekRecords.size).map(peekRecords(_))).zip( (Iterator.from(0,2).takeWhile(_ < peekRecords.size).map(peekRecords(_))) ).forall( (r12) => r12._1.getReadName == r12._2.getReadName );
+    val isDefinitelyPairedEnd : Boolean = peekRecords.exists( r => ( peekRecords.count(_.getReadName() == r.getReadName()) > 1 ) );
+    val readLength = peekRecords.maxBy( _.getReadLength ).getReadLength;
+    val isSortedByPosition : Boolean = (peekRecords).zip(peekRecords.tail).forall( r12 => {
+        val iv1 = internalUtils.genomicUtils.getGenomicIntervalsFromRead(r12._1, true, false).next;
+        val iv2 = internalUtils.genomicUtils.getGenomicIntervalsFromRead(r12._2, true, false).next;
+        GenomicInterval.compare(iv1,iv2) > 0;
+    });
+    val minReadLength : Int = peekRecords.minBy( _.getReadLength ).getReadLength;
+
+    reader.close();
+    return SamFileAttributes(readLength, isSortedByName, isSortedByPosition, isDefinitelyPairedEnd, minReadLength);
+  }
+  
   def initSamRecordIterator(infile : String, peekCount : Int = 1000) : (SamFileAttributes, Iterator[SAMRecord]) = {
     val reader : SAMFileReader = if(infile == "-"){
       new SAMFileReader(System.in);
@@ -330,9 +366,12 @@ object commonSeqUtils {
   final val CODA_READ_PAIR_OK = 7;
   final val CODA_READ_ON_IGNORED_CHROMOSOME = 8;
   final val CODA_NOT_UNIQUE_ALIGNMENT = 9;
-  final val CODA_NOT_MARKED_RG = 10;
   
-  final val CODA_CODA_LENGTH = 11;
+  final val CODA_TOTAL_READ_PAIRS = 10;
+  final val CODA_NOT_MARKED_RG = 11;
+  
+  
+  final val CODA_CODA_LENGTH = 12;
   final val CODA_DEFAULT_OPTIONS : Seq[Boolean] = repToSeq(true,CODA_CODA_LENGTH - 1).toVector ++ Vector(false);
   
   def getNewCauseOfDropArray() : Array[Int] = {
@@ -343,8 +382,8 @@ object commonSeqUtils {
     //var out = "";
     val sb = new StringBuilder("");
     sb.append("READ_PAIR_OK                   "  + (if(dropOptions(CODA_READ_PAIR_OK)) causeOfDropArray(CODA_READ_PAIR_OK) else "-1"  ) + "\n");
-    sb.append("TOTAL_READ_PAIRS               "  + causeOfDropArray.toSeq.sum + "\n");
-    sb.append("DROPPED_MATE_UNMAPPED          "  + (if(dropOptions(CODA_MATE_UNMAPPED)) causeOfDropArray(CODA_MATE_UNMAPPED) else "-1"  ) + "\n");
+    sb.append("TOTAL_READ_PAIRS               "  + causeOfDropArray(CODA_TOTAL_READ_PAIRS) + "\n");
+    sb.append("DROPPED_UNALIGNED              "  + (if(dropOptions(CODA_MATE_UNMAPPED)) causeOfDropArray(CODA_MATE_UNMAPPED) else "-1"  ) + "\n");
     sb.append("DROPPED_NOT_PROPER_PAIR        "  + (if(dropOptions(CODA_NOT_PROPER_PAIR)) causeOfDropArray(CODA_NOT_PROPER_PAIR) else "-1"  ) + "\n");
     sb.append("DROPPED_READ_FAILS_VENDOR_QC   "  + (if(dropOptions(CODA_READ_FAILS_VENDOR_QC)) causeOfDropArray(CODA_READ_FAILS_VENDOR_QC) else "-1"  ) + "\n");
     //sb.append("DROPPED_NOT_PRIMARY_ALIGNMENT  "  + (if(dropOptions(CODA_NOT_PRIMARY_ALIGNMENT)) causeOfDropArray(CODA_NOT_PRIMARY_ALIGNMENT) else "-1"  ) + "\n");
@@ -359,8 +398,8 @@ object commonSeqUtils {
     //var out = "";
     val sb = new StringBuilder("");
     sb.append("READ_PAIR_OK	"  + (if(dropOptions(CODA_READ_PAIR_OK)) causeOfDropArray(CODA_READ_PAIR_OK) else "-1"  ) + "\n");
-    sb.append("TOTAL_READ_PAIRS	"  + causeOfDropArray.toSeq.sum + "\n");
-    sb.append("DROPPED_MATE_UNMAPPED	"  + (if(dropOptions(CODA_MATE_UNMAPPED)) causeOfDropArray(CODA_MATE_UNMAPPED) else "-1"  ) + "\n");
+    sb.append("TOTAL_READ_PAIRS	"  + causeOfDropArray(CODA_TOTAL_READ_PAIRS) + "\n");
+    sb.append("DROPPED_UNALIGNED	"  + (if(dropOptions(CODA_MATE_UNMAPPED)) causeOfDropArray(CODA_MATE_UNMAPPED) else "-1"  ) + "\n");
     sb.append("DROPPED_NOT_PROPER_PAIR	"  + (if(dropOptions(CODA_NOT_PROPER_PAIR)) causeOfDropArray(CODA_NOT_PROPER_PAIR) else "-1"  ) + "\n");
     sb.append("DROPPED_READ_FAILS_VENDOR_QC	"  + (if(dropOptions(CODA_READ_FAILS_VENDOR_QC)) causeOfDropArray(CODA_READ_FAILS_VENDOR_QC) else "-1"  ) + "\n");
     //sb.append("DROPPED_NOT_PRIMARY_ALIGNMENT	"  + (if(dropOptions(CODA_NOT_PRIMARY_ALIGNMENT)) causeOfDropArray(CODA_NOT_PRIMARY_ALIGNMENT) else "-1"  ) + "\n");
@@ -374,6 +413,7 @@ object commonSeqUtils {
    
   def useReadPair(r1 : SAMRecord, r2 : SAMRecord, causeOfDropArray : Array[Int], dropOptions : Seq[Boolean] = CODA_DEFAULT_OPTIONS, dropChrom : Set[String], readGroup : Option[String]) : Boolean = {
     
+    causeOfDropArray(CODA_TOTAL_READ_PAIRS) += 1;
     
     if(dropOptions(CODA_NOT_MARKED_RG)){
       if(r1.getReadGroup().getReadGroupId != readGroup.get){
@@ -409,11 +449,11 @@ object commonSeqUtils {
     }
   }
   def useRead_code(samRecord : SAMRecord, dropOptions : Seq[Boolean]) : Int = {
+    if(dropOptions(CODA_IS_NOT_VALID) && samRecord.isValid != null) { return CODA_IS_NOT_VALID; }
     if(dropOptions(CODA_MATE_UNMAPPED) && samRecord.getMateUnmappedFlag()) { return CODA_MATE_UNMAPPED; }
     if(dropOptions(CODA_NOT_PROPER_PAIR) && (! samRecord.getProperPairFlag())) { return CODA_NOT_PROPER_PAIR; }
     if(dropOptions(CODA_READ_FAILS_VENDOR_QC) && samRecord.getReadFailsVendorQualityCheckFlag()){ return CODA_READ_FAILS_VENDOR_QC; }
     if(dropOptions(CODA_NOT_PRIMARY_ALIGNMENT) && samRecord.getNotPrimaryAlignmentFlag()) { return CODA_NOT_PRIMARY_ALIGNMENT; }
-    if(dropOptions(CODA_IS_NOT_VALID) && samRecord.isValid != null) { return CODA_IS_NOT_VALID; }
     if(dropOptions(CODA_NOT_UNIQUE_ALIGNMENT) && samRecord.getMappingQuality() < 255) { return CODA_NOT_UNIQUE_ALIGNMENT; }
     return CODA_READ_OK;
   }

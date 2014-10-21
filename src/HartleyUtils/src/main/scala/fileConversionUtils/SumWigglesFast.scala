@@ -31,9 +31,21 @@ object SumWigglesFast {
                                          valueName = "val,val,val,...",  
                                          argDesc = "normalization factors for each wig file."
                                         ) ::
+             new BinaryArgument[String](   name = "infilePrefix",
+                                                        arg = List("--infilePrefix"),  
+                                                        valueName = "infilePrefix", 
+                                                        argDesc = "A file prefix for all input junction count files. By default the full file path should be specified by the infile parameter.", 
+                                                        defaultValue = Some("")
+                                                        ) ::
+            new BinaryArgument[String](   name = "infileSuffix",
+                                                        arg = List("--infileSuffix"),  
+                                                        valueName = "infileSuffix", 
+                                                        argDesc = "A file suffix for all input junction count files. By default the full file path should be specified by the infile parameter.", 
+                                                        defaultValue = Some("")
+                                                        ) ::
             new UnaryArgument(name = "ignoreSizeFactors",
                               arg = List("--ignoreSizeFactors"), // name of value
-                              argDesc = "Flag to indicate that this utility should ignore size factors even if they are found in the input listFile." // description
+                              argDesc = "Flag to indicate that this utility should ignore size factors even if they are found in the input listFile. MAKE SURE NOT TO APPLY SIZE FACTORS TWICE!" // description
                               ) ::
             new UnaryArgument(name = "quiet",
                               arg = List("--quiet","-q"), // name of value
@@ -67,11 +79,18 @@ object SumWigglesFast {
                           parser.get[Boolean]("calcMean"), 
                           parser.get[Boolean]("quiet"),
                           parser.get[Boolean]("ignoreSizeFactors"),
-                          parser.get[Option[List[Double]]]("sizeFactors"));
+                          parser.get[Option[List[Double]]]("sizeFactors"),
+                          parser.get[String]("infilePrefix"), 
+                          parser.get[String]("infileSuffix")
+                          
+      );
     }
   }
   
-  def run(filelist : String, outfile : String, makeNegative : Boolean, calcAverage : Boolean, quiet : Boolean, ignoreSizeFactors : Boolean, sizeFactors : Option[List[Double]]){
+  def run(filelist : String, outfile : String, makeNegative : Boolean, calcAverage : Boolean, quiet : Boolean, ignoreSizeFactors : Boolean, sizeFactors : Option[List[Double]], infilePrefix : String = "", infileSuffix : String = ""){
+    
+     reportln("runing sumWigglesFast. ignoreSizeFactors = " + ignoreSizeFactors, "debug");
+    
      val initialpairlist : (Seq[(String, Double)]) = if(filelist.contains(",")){
        val files = filelist.split(",").toVector;
        val sf = if(ignoreSizeFactors || sizeFactors.isEmpty){
@@ -99,11 +118,13 @@ object SumWigglesFast {
          lines.zip( repToSeq(1.0, lines.length) );
        }
      }
+     val secondPairList : Seq[(String,Double)] = initialpairlist.map{ case (fileInfix ,sf ) => (infilePrefix + fileInfix + infileSuffix, sf)};
+     
      
      val makeNegativeVal = if(makeNegative) (-1).toDouble else 1.toDouble;
-     val calcAverageVal = if(calcAverage) initialpairlist.size.toDouble else 1.toDouble;
+     val calcAverageVal = if(calcAverage) secondPairList.size.toDouble else 1.toDouble;
      
-     val pairlist = initialpairlist.map( p => (p._1, (p._2 * makeNegativeVal * calcAverageVal)  ) );
+     val pairlist = secondPairList.map( p => (p._1, (p._2 * makeNegativeVal * calcAverageVal)  ) );
      
      //val denominator : Double = if(! calcAverage){ if(makeNegative) -1.0 else 1.0 } else
      //        if(makeNegative){ - sampleList.length.toDouble} else { sampleList.length.toDouble};
@@ -134,6 +155,7 @@ object SumWigglesFast {
     reportln("Made iterators 2.","debug");
     
     val lineIterator = sumIterator.map((wigLine) => wigLine.toString() + "\n");
+    report("\n","progress");
     
     val writer = openWriterSmart(outfile, true);
     lineIterator.foreach(writer.write(_));

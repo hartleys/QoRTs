@@ -9,7 +9,7 @@ import internalUtils.commandLineUI._;
 
 object runner {
   
-  final val QORTS_VERSION = "0.0.2";
+  final val QORTS_VERSION = "0.0.18";
   //final val FOR_HELP_STRING = "For help, use command: "
   
   final val Runner_ThisProgramsExecutableJarFileName : String = "QoRT.jar";
@@ -26,7 +26,9 @@ object runner {
            ("mergeCounts" ->  (() => new fileConversionUtils.mergeQcOutput.merger)),
            ("bamToWiggle" ->  (() => new fileConversionUtils.bamToWiggle.wiggleMaker)),
            ("makeSpliceBed" ->  (() => new fileConversionUtils.convertSpliceCountsToBed.converter)),
-           ("mergeNovelSplices" -> (() => new fileConversionUtils.addNovelSplices.mergeNovelSplices))
+           ("mergeNovelSplices" -> (() => new fileConversionUtils.addNovelSplices.mergeNovelSplices)),
+           ("makeSpliceJunctionBed" -> (() => new fileConversionUtils.makeSpliceJunctionBed.converter))
+
           //(("prepFlatGtfFile",((fileConversionUtils.prepFlatGtfFile.run(_), "", "")))),
            //(("QC", ((qcUtils.runAllQC.run(_)),"",""))),
            //(("convertSoftToHardClipping", ((fileConversionUtils.convertSoftToHardClipping.run(_)),"",""))),
@@ -54,7 +56,7 @@ object runner {
     //println("Initializing...");
     
     internalUtils.Reporter.init_stderrOnly;
-    internalUtils.Reporter.reportln("Starting... (" + (new java.util.Date()).toString + ")","debug");
+    internalUtils.Reporter.reportln("Starting QoRTs v"+QORTS_VERSION+" (" + (new java.util.Date()).toString + ")","debug");
     
     if(args.length == 0){
       internalUtils.Reporter.reportln("No command given!","output");

@@ -450,7 +450,7 @@ class qcNVC(readLen : Int, writeClippedNVC : Boolean)  extends QCUtility[Unit] {
   def writeOutput(outfile : String, summaryWriter : WriterUtil){
      qcNVC.writeTabulatedSequence(outfile, maxLeadClip, maxTailClip, nvcCounter, readLengthSet, writeClippedNVC);
   }
-  
+  def getUtilityName : String = "NVC";
   
   
 }
