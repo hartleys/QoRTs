@@ -13,6 +13,9 @@ The java jar file does not need to be installed.
 Just execute it using the java command:
 java -jar /path/to/jarfile/QoRTs.jar QC input.bam anno.gtf.gz /output/dir/
 
+Example data for use with the R package can be found in the seperate R
+package QoRTsExampleData.
+
 MORE INFORMATION:
 For more information, see the QoRTs vignette, QoRTs-vignette.pdf
 Additional options and syntax information for the java utility can be
