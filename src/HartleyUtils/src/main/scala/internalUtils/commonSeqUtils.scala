@@ -370,7 +370,6 @@ object commonSeqUtils {
   final val CODA_TOTAL_READ_PAIRS = 10;
   final val CODA_NOT_MARKED_RG = 11;
   
-  
   final val CODA_CODA_LENGTH = 12;
   final val CODA_DEFAULT_OPTIONS : Seq[Boolean] = repToSeq(true,CODA_CODA_LENGTH - 1).toVector ++ Vector(false);
   
@@ -411,7 +410,7 @@ object commonSeqUtils {
     return sb.toString;
   }
    
-  def useReadPair(r1 : SAMRecord, r2 : SAMRecord, causeOfDropArray : Array[Int], dropOptions : Seq[Boolean] = CODA_DEFAULT_OPTIONS, dropChrom : Set[String], readGroup : Option[String]) : Boolean = {
+  def useReadPair(r1 : SAMRecord, r2 : SAMRecord, causeOfDropArray : Array[Int], dropOptions : Seq[Boolean] = CODA_DEFAULT_OPTIONS, dropChrom : Set[String], readGroup : Option[String], minMAPQ : Int = 255) : Boolean = {
     
     causeOfDropArray(CODA_TOTAL_READ_PAIRS) += 1;
     
@@ -423,8 +422,8 @@ object commonSeqUtils {
     }
     
     
-    val r1c = useRead_code(r1, dropOptions);
-    val r2c = useRead_code(r2, dropOptions);
+    val r1c = useRead_code(r1, dropOptions, minMAPQ);
+    val r2c = useRead_code(r2, dropOptions, minMAPQ);
     
     if(r1c != CODA_READ_OK){
       causeOfDropArray(r1c) += 1;
@@ -448,13 +447,13 @@ object commonSeqUtils {
       }
     }
   }
-  def useRead_code(samRecord : SAMRecord, dropOptions : Seq[Boolean]) : Int = {
+  def useRead_code(samRecord : SAMRecord, dropOptions : Seq[Boolean], minMAPQ : Int = 255) : Int = {
     if(dropOptions(CODA_IS_NOT_VALID) && samRecord.isValid != null) { return CODA_IS_NOT_VALID; }
     if(dropOptions(CODA_MATE_UNMAPPED) && samRecord.getMateUnmappedFlag()) { return CODA_MATE_UNMAPPED; }
     if(dropOptions(CODA_NOT_PROPER_PAIR) && (! samRecord.getProperPairFlag())) { return CODA_NOT_PROPER_PAIR; }
     if(dropOptions(CODA_READ_FAILS_VENDOR_QC) && samRecord.getReadFailsVendorQualityCheckFlag()){ return CODA_READ_FAILS_VENDOR_QC; }
     if(dropOptions(CODA_NOT_PRIMARY_ALIGNMENT) && samRecord.getNotPrimaryAlignmentFlag()) { return CODA_NOT_PRIMARY_ALIGNMENT; }
-    if(dropOptions(CODA_NOT_UNIQUE_ALIGNMENT) && samRecord.getMappingQuality() < 255) { return CODA_NOT_UNIQUE_ALIGNMENT; }
+    if(dropOptions(CODA_NOT_UNIQUE_ALIGNMENT) && samRecord.getMappingQuality() < minMAPQ) { return CODA_NOT_UNIQUE_ALIGNMENT; }
     return CODA_READ_OK;
   }
   

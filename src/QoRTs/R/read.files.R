@@ -521,7 +521,7 @@ calc.samplewise.norm.factors <- function(res, calc.DESeq2 , calc.edgeR ){
         message("WARNING: DESeq2::estimateSizeFactorsForMatrix threw warnings: ");
         message(w);
       }, error = function(e){
-        message("WARNING: DESeq2::estimateSizeFactorsForMatrix failed. Skipping DESeq2 normalization.");
+        message("WARNING: DESeq2::estimateSizeFactorsForMatrix failed. Skipping DESeq2 normalization.\n",e);
         #norm.factors[,Norm_Geo:=NULL];
       });
     }
@@ -533,19 +533,19 @@ calc.samplewise.norm.factors <- function(res, calc.DESeq2 , calc.edgeR ){
       tryCatch({
         norm.factors$Norm_TMM <- calcNormFactors(count.matrix, method="TMM");
       }, error = function(e){
-        message("WARNING: edgeR::calcNormFactors(method=TMM) failed. Skipping edgeR TMM normalizations.");
+        message("WARNING: edgeR::calcNormFactors(method=TMM) failed. Skipping edgeR TMM normalizations.\n",e);
         #norm.factors[,Norm_TMM:=NULL];
       });
        tryCatch({
          norm.factors$Norm_UQ <- calcNormFactors(count.matrix, method="upperquartile");
        }, error = function(e){
-         message("WARNING: edgeR::calcNormFactors(method=upperquartile) failed. Skipping edgeR upperquartile normalizations.");
+         message("WARNING: edgeR::calcNormFactors(method=upperquartile) failed. Skipping edgeR upperquartile normalizations.\n",e);
          #norm.factors[,Norm_UQ:=NULL];
       });
       tryCatch({
         norm.factors$Norm_RLE <- calcNormFactors(count.matrix, method="RLE");
       }, error = function(e){
-        message("WARNING: edgeR::calcNormFactors(method=RLE) failed. Skipping edgeR RLE normalizations.");
+        message("WARNING: edgeR::calcNormFactors(method=RLE) failed. Skipping edgeR RLE normalizations.\n",e);
         #norm.factors[,Norm_RLE:=NULL];
       });
     }
@@ -705,7 +705,11 @@ calc.gene.CDF.bySample <- function(res){
   gene.ct.bySample <- lapply(res@sample.list, function(sample){
     lanebam.set <- res@decoder$unique.ID[res@decoder$sample.ID == sample];
     if(length(lanebam.set) == 1){
-       return(res@qc.data[["geneCounts"]][[lanebam.set[1]]]);
+       df <-  res@qc.data[["geneCounts"]][[lanebam.set[1]]];
+       is.gene <- substr(df$GENEID,1,1) != "_";
+       ct.so.far <- df$COUNT[ is.gene ];
+       return(ct.so.far);
+       #return(res@qc.data[["geneCounts"]][[lanebam.set[1]]]);
     } else {
        df <- res@qc.data[["geneCounts"]][[lanebam.set[1]]];
        is.gene <- substr(df$GENEID,1,1) != "_";

@@ -1,5 +1,5 @@
 Package: QoRTs
-Version: 0.0.23
+Version: 0.0.25
 Date: 2014-07-24
 Title: Quality of RNA-seq Tool
 Authors@R: c(person("Stephen Hartley, PhD", "Developer", role = c("aut", "cre"),

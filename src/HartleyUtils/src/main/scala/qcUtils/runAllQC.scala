@@ -79,6 +79,12 @@ object runAllQC {
                         ""+
                         "",   
           argList = 
+                    new BinaryArgument[Int](name = "minMAPQ",
+                                           arg = List("--minMAPQ"),  
+                                           valueName = "num", 
+                                           argDesc = "Filter reads for the given minimum MAPQ. Set to 0 to turn off mapq filtering.", 
+                                           defaultValue = Some(255)
+                                           ) :: 
                     new BinaryOptionArgument[String](
                                          name = "flatgfffile", 
                                          arg = List("--flatgff"), 
@@ -202,7 +208,8 @@ object runAllQC {
           parser.get[Boolean]("keepMultiMapped"),
           parser.get[Int]("numThreads"),
           parser.get[Option[String]]("readGroup"),
-          parser.get[Boolean]("parallelFileRead")
+          parser.get[Boolean]("parallelFileRead"),
+          parser.get[Int]("minMAPQ")
       );
       }
     }
@@ -225,7 +232,8 @@ object runAllQC {
           keepMultiMapped : Boolean,
           numThreads : Int,
           readGroup : Option[String],
-          parallelFileRead : Boolean){
+          parallelFileRead : Boolean,
+          minMAPQ: Int){
 
     reportln("Starting ALLQC:","note");
     val initialTimeStamp = TimeStampUtil();
@@ -288,9 +296,10 @@ object runAllQC {
     val anno_holder = new qcGtfAnnotationBuilder(gtffile , flatgtffile , stranded , stdGtfCodes, flatGtfCodes);
     
     if(parallelFileRead){
+      reportln("WARNING WARNING WARNING: parallell file read is BETA! NOT FOR GENERAL USE!!!","warn");
       runOnSeqFile_PAR(initialTimeStamp = initialTimeStamp, infile = infile, outfile = outfile, anno_holder = anno_holder, testRun = testRun, runFunc = runFunc, stranded = stranded, fr_secondStrand = fr_secondStrand, dropChrom = dropChrom, keepMultiMapped = keepMultiMapped, noMultiMapped = noMultiMapped, numThreads = numThreads, readGroup )
     } else {
-      runOnSeqFile(initialTimeStamp = initialTimeStamp, infile = infile, outfile = outfile, anno_holder = anno_holder, testRun = testRun, runFunc = runFunc, stranded = stranded, fr_secondStrand = fr_secondStrand, dropChrom = dropChrom, keepMultiMapped = keepMultiMapped, noMultiMapped = noMultiMapped, numThreads = numThreads, readGroup )
+      runOnSeqFile(initialTimeStamp = initialTimeStamp, infile = infile, outfile = outfile, anno_holder = anno_holder, testRun = testRun, runFunc = runFunc, stranded = stranded, fr_secondStrand = fr_secondStrand, dropChrom = dropChrom, keepMultiMapped = keepMultiMapped, noMultiMapped = noMultiMapped, numThreads = numThreads, readGroup , minMAPQ = minMAPQ)
     }
     
   }
@@ -307,7 +316,8 @@ object runAllQC {
                    keepMultiMapped : Boolean, 
                    noMultiMapped : Boolean, 
                    numThreads : Int,
-                   readGroup : Option[String]){
+                   readGroup : Option[String],
+                   minMAPQ : Int){
     
     val COMPLETED_OK_FILEPATH = outfile + COMPLETED_OK_FILENAME;
     val (samFileAttributes, recordIter) = initSamRecordIterator(infile);
@@ -324,10 +334,10 @@ object runAllQC {
     val isDefinitelyPairedEnd = samFileAttributes.isDefinitelyPairedEnd;
     val minReadLength = samFileAttributes.minReadLength;
     
-    if(readLength != minReadLength){reportln("Warning: Read length is not consistent! In the first 1000 reads, read length varies from "+minReadLength+" to " +readLength+"!\nThis may cause odd things to happen. In general, it is STRONGLY recommended that you always avoid hard clipping of reads.","warning")}
-    if(! isDefinitelyPairedEnd){ reportln("Warning: Have not found any matched read pairs in the first 1000 reads. Is data paired end? WARNING: This utility is only designed for use on paired end data!","warning"); }
-    if(isSortedByPosition){ reportln("SAM/BAM file looks like it might be sorted by position. If so: this mode is not currently supported!","warning"); }
-    if(! isSortedByName) error("FATAL ERROR: SAM/BAM file is not sorted by name! Sort the file by name!");
+    if(readLength != minReadLength){reportln("Warning: Read length is not consistent! In the first 1000 reads, read length varies from "+minReadLength+" to " +readLength+"!\nThis may cause odd things to happen. In general, it is STRONGLY recommended that you always avoid hard clipping of reads. (error detected in initial 1000 reads)","warning")}
+    if(! isDefinitelyPairedEnd){ reportln("Warning: Have not found any matched read pairs in the first 1000 reads. Is data paired end? WARNING: This utility is only designed for use on paired end data! (error detected in initial 1000 reads)","warning"); }
+    if(isSortedByPosition){ reportln("SAM/BAM file looks like it might be sorted by position. If so: this mode is not currently supported! (error detected in initial 1000 reads)","warning"); }
+    if(! isSortedByName) error("FATAL ERROR: SAM/BAM file is not sorted by name! Sort the file by name! (error detected in initial 1000 reads)");
     reportln("SAMRecord Reader Generated. Based on the first 1000 reads, the reads appear to be of length: "+readLength+".","note");
     standardStatusReport(initialTimeStamp);
 
@@ -361,7 +371,7 @@ object runAllQC {
       val (r1,r2) = pair;
       readNum += 1;
       
-      if(internalUtils.commonSeqUtils.useReadPair(r1,r2,coda, coda_options, dropChrom, readGroup)){
+      if(internalUtils.commonSeqUtils.useReadPair(r1,r2,coda, coda_options, dropChrom, readGroup, minMAPQ)){
         
         qcALL.foreach( _.runOnReadPair(r1,r2,readNum) );
         //qcGGC.runOnReadPair(r1,r2,readNum);

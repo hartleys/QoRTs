@@ -128,7 +128,7 @@ Several QoRTs functions will require a "decoder" file, which describes each samp
 
 \noindent \emph{Required Fields}:
   \begin{itemize}
-    \item \emph{unique.ID}: A unique identifier for the row.
+    \item \emph{unique.ID}: A unique identifier for the row. QoRTs will also accept the synonym "lanebam.ID".
     \item \emph{lane.ID}: The ID of the lane or batch.
     \item \emph{group.ID}: The ID of the "group". For example: "Case" or "Control".
     \item \emph{sample.ID}: The ID of the biological sample from which the data originated. Each sample can have multiple rows, representing technical replicates (in which the same sample is sequenced on multiple lanes or runs).

@@ -9,12 +9,12 @@ import internalUtils.commandLineUI._;
 
 object runner {
   
-  final val QORTS_VERSION = "0.0.18";
+  final val QORTS_VERSION = "0.0.25";
   //final val FOR_HELP_STRING = "For help, use command: "
   
-  final val Runner_ThisProgramsExecutableJarFileName : String = "QoRT.jar";
+  final val Runner_ThisProgramsExecutableJarFileName : String = "QoRTs.jar";
   final val allowDepreciated : Boolean = true;
-  final val COMMAND_MAX_LENGTH = 20;
+  final val COMMAND_MAX_LENGTH = 30;
   
   //Command name -> (execution call, summary, syntax)
   final val utilCommandList : Map[String, () => CommandLineRunUtil] = 

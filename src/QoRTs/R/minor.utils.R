@@ -50,14 +50,14 @@ can.select.raster.device <- function(){
 autoselect.raster.device <- function(){
    if(is.available.raster.device("png")){
      message("selecting png raster device.");
-     rasterDev <- get("png");
+     rasterDev <- grDevices::png;
      outDev <- function(...){
-       outDev(units = "px", ...);
+       rasterDev(units = "px", ...);
      }
      return(outDev);
    } else if(is.available.raster.device("CairoPNG")){
      message("selecting CairoPNG raster device.");
-     rasterDev <- get("CairoPNG");
+     rasterDev <- CairoPNG;
      return(rasterDev);
    } else {
      stop("Error: no viable raster (png) device found! Install package CairoPNG or reinstall R with png capabilities activated!");
@@ -86,9 +86,11 @@ make.mixed.raster.vector.function <- function(use.raster.device = NULL, raster.h
     use.raster.device <- autoselect.raster.device();
   }
   usetempfile <- tempfile();
-  if(debugMode) message("writing temp raster image to: ",usetempfile);
+  if(debugMode) message("Selecting temp file location: ",usetempfile);
   initRaster <- function(){
+    if(debugMode) message("Writing temp file to",usetempfile);
     use.raster.device(filename = usetempfile, height=raster.height, width=raster.width, bg = "transparent", ...);
+    if(debugMode) message("Temp file built.");
     par(mar = c(0,0,0,0));
   }
   
@@ -97,9 +99,12 @@ make.mixed.raster.vector.function <- function(use.raster.device = NULL, raster.h
   }
   
   printRaster <- function(){
+    if(debugMode) message("Reading Rasterized image...");
     require(png);
     imgData <- png::readPNG(usetempfile);
+    if(debugMode) message("Rasterized image read.");
     rasterData <- as.raster(imgData);
+    if(debugMode) message("Cast Rasterized image to raster class.");
     usr <- par("usr");
     xlog <- par("xlog");
     ylog <- par("ylog");
@@ -109,11 +114,14 @@ make.mixed.raster.vector.function <- function(use.raster.device = NULL, raster.h
     if(ylog){
        usr[3:4] <- 10 ^ usr[3:4];
     }
+    if(debugMode) message("Printing raster image...");
     rasterImage(rasterData, usr[1], usr[3], usr[2], usr[4]);
     
     if(debugMode) message("deleting temp raster image: ",usetempfile);
     unlink(usetempfile);
   }
+  
+  if(debugMode) message("Built rasterization fcn.");
   
   return(list(initRaster = initRaster, closeRaster = closeRaster, printRaster = printRaster, usetempfile = usetempfile));
 }

@@ -5,9 +5,9 @@ Quality of RNA-Seq Toolset
 
 INSTALLATION:
 The R package can be installed in R using the command:
-install.packages("QoRTs_0.0.23.tar.gz", repos = NULL, type="source")
+install.packages("QoRTs_0.0.25.tar.gz", repos = NULL, type="source")
 or using the command-line command, in linux:
-R CMD INSTALL QoRTs_0.0.23.tar.gz
+R CMD INSTALL QoRTs_0.0.25.tar.gz
 
 The java jar file does not need to be installed.
 Just execute it using the java command:

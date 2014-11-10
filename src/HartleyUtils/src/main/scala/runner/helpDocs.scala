@@ -94,7 +94,7 @@ object helpDocs {
    
   def getGeneralHelp : String = {
       val sb = new StringBuilder("");
-      sb.append("QoRT: Quality Of Rna-seq Tools\n")
+      sb.append("QoRTs: Quality Of Rna-seq Tool Set\n")
       sb.append("version: " + runner.QORTS_VERSION + "\n");
       sb.append("\n");
       //sb.append("SYNOPSIS\n");
