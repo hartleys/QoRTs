@@ -329,7 +329,8 @@ class qcGetGeneCounts( stranded : Boolean,
                        coda : Array[Int], 
                        coda_options : Array[Boolean] , 
                        geneBodyIntervalCount : Int, 
-                       calcRPKM : Boolean, writeGenewiseGeneBody : Boolean, writeDESeq : Boolean, writeGeneCounts : Boolean) extends QCUtility[String] {
+                       calcRPKM : Boolean, writeGenewiseGeneBody : Boolean, writeDESeq : Boolean, writeGeneCounts : Boolean,
+                       geneKeepFunc : (String => Boolean)) extends QCUtility[String] {
   
   reportln("Init GeneCalcs","progress");
   
@@ -394,20 +395,21 @@ class qcGetGeneCounts( stranded : Boolean,
       return "_ambiguous";
     } else {
       val geneAssignment = readGenes.head
-      geneCounts(geneAssignment) += 1;
-      readExonCount += 1;
-      val cdsGenes = qcGetGeneCounts.getPairFeatures(r1,r2,stranded,fr_secondStrand,geneArea_cdsArray);
-      if(cdsGenes.size == 1){
-        geneArea_cdsCounts(geneAssignment) += 1;
-        readCdsCount += 1;
-      } else {
-        geneCounts_utr(geneAssignment) += 1;
-        readUtrCount += 1;
+      if( geneKeepFunc(geneAssignment) ){
+        geneCounts(geneAssignment) += 1;
+        readExonCount += 1;
+        val cdsGenes = qcGetGeneCounts.getPairFeatures(r1,r2,stranded,fr_secondStrand,geneArea_cdsArray);
+        if(cdsGenes.size == 1){
+          geneArea_cdsCounts(geneAssignment) += 1;
+          readCdsCount += 1;
+        } else {
+          geneCounts_utr(geneAssignment) += 1;
+          readUtrCount += 1;
+        }
+      
+        //calculateGeneBodyCoverage(geneAssignment : String, r1 : SAMRecord, r2 : SAMRecord, geneBodyCoverageMap : Map[String, Array[Int]], intervalMap : Map[String, Vector[TreeSet[GenomicInterval]]])
+        qcGetGeneCounts.calculateGeneBodyCoverage(geneAssignment, r1,r2, geneBody_CoverageCountArrays, geneBody_CoverageIntervalMap);
       }
-      
-      //calculateGeneBodyCoverage(geneAssignment : String, r1 : SAMRecord, r2 : SAMRecord, geneBodyCoverageMap : Map[String, Array[Int]], intervalMap : Map[String, Vector[TreeSet[GenomicInterval]]])
-      qcGetGeneCounts.calculateGeneBodyCoverage(geneAssignment, r1,r2, geneBody_CoverageCountArrays, geneBody_CoverageIntervalMap);
-      
       return geneAssignment;
     }
   }

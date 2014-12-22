@@ -272,7 +272,7 @@ object bamToWiggle {
   
 
   def writeChrom(chrom : Chrom, writer : WriterUtil, sizeFactor : Double, negativeStrand : Boolean){
-    writer.write("fixedStep  chrom="+chrom.chromName+"  start=1  step="+chrom.span+"\n");
+    writer.write("fixedStep  chrom="+chrom.chromName+"  start=1  step="+chrom.span+" span="+chrom.span+"\n");
     val adjustmentFactor = if(negativeStrand) ((-1).toDouble * sizeFactor * chrom.span.toDouble) else (sizeFactor * chrom.span.toDouble);        
     chrom.windowCounts.foreach(
       (ct : Int) => {

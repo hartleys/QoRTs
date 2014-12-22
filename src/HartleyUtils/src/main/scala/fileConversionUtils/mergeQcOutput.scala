@@ -170,11 +170,11 @@ object mergeQcOutput {
      val NovelSplice_suffix = "QC.spliceJunctionCounts.novelSplices.txt.gz";
      val KnownSplice_suffix = "QC.spliceJunctionCounts.knownSplices.txt.gz";
      
-     val unstranded_wiggle_suffix = "QC.wiggle.wig.gz";
+     val unstranded_wiggle_suffix = "QC.wiggle.unstranded.wig.gz";
      val stranded_wiggle_fwd_suffix = "QC.wiggle.fwd.wig.gz";
      val stranded_wiggle_rev_suffix = "QC.wiggle.rev.wig.gz";
      
-     val unstranded_alt_wiggle_suffix = "QC.wiggle.Win"+wiggleWindow.toString()+".wig.gz";
+     val unstranded_alt_wiggle_suffix = "QC.wiggle.Win"+wiggleWindow.toString()+".unstranded.wig.gz";
      val stranded_alt_wiggle_fwd_suffix = "QC.wiggle.Win"+wiggleWindow.toString()+".fwd.wig.gz";
      val stranded_alt_wiggle_rev_suffix = "QC.wiggle.Win"+wiggleWindow.toString()+".rev.wig.gz";
      
@@ -259,8 +259,13 @@ object mergeQcOutput {
        //TODO!!!
        //reportln("NOTE: makeAllBrowserTracks is UNIMPLEMENTED at this time!","debug");
        
-       if(! (((new File(infiles.head + unstranded_wiggle_suffix)).exists()) || ((new File(infiles.head + stranded_wiggle_fwd_suffix)).exists()))){
-         report("WARNING: Cannot find wiggle files!","note");
+       if( ((new File(infiles.head + unstranded_wiggle_suffix)).exists()) | ((new File(infiles.head + stranded_wiggle_fwd_suffix)).exists())){
+         //Do nothing?
+       } else {
+         reportln("WARNING: Cannot find wiggle files! Attempted to find:","note");
+         reportln("          \""+infiles.head + unstranded_wiggle_suffix+"\"","note");
+         reportln("          OR","note");
+         reportln("          \""+infiles.head + stranded_wiggle_fwd_suffix+"\"","note");
        }
        
        if((new File(infiles.head + unstranded_wiggle_suffix)).exists()){
@@ -288,19 +293,21 @@ object mergeQcOutput {
      if(! mergeFiles.contains("WiggleTrackAltWin")){
        reportln("Skipping WiggleTrack (with non-default window size) merge" ,"note");
      } else {
+       val unstrandedWigExists = (new File(infiles.head + unstranded_alt_wiggle_suffix)).exists();
+       val strandedWigExists = (new File(infiles.head + stranded_alt_wiggle_fwd_suffix)).exists();
        
-       if(! (((new File(infiles.head + unstranded_wiggle_suffix)).exists()) || ((new File(infiles.head + stranded_wiggle_fwd_suffix)).exists()))){
+       if(! (unstrandedWigExists || strandedWigExists) ){
          report("No wiggle track with alternate window size found. This is probably normal.","note");
        }
        
-       if((new File(infiles.head + unstranded_alt_wiggle_suffix)).exists()){
-         report("Merging unstranded wiggle data...","note");
+       if(unstrandedWigExists){
+         report("Merging unstranded alt-window wiggle data...","note");
          val pairlist = infiles.map(infile => (infile + unstranded_alt_wiggle_suffix, 1.0));
          SumWigglesFast.runHelper2(pairlist, outfile + unstranded_alt_wiggle_suffix, false);
          report("done\n","note");
        }
-       if((new File(infiles.head + stranded_alt_wiggle_fwd_suffix)).exists()){
-         report("Merging stranded wiggle data...","note");
+       if(strandedWigExists){
+         report("Merging stranded alt-window wiggle data...","note");
          val fwdpairlist = infiles.map(infile => (infile + stranded_alt_wiggle_fwd_suffix, 1.0));
          SumWigglesFast.runHelper2(fwdpairlist, outfile + stranded_alt_wiggle_fwd_suffix, false);
          

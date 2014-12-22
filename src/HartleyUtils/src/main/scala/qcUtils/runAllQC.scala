@@ -48,6 +48,10 @@ object runAllQC {
   final val MASTERLEVEL_FUNCTION_LIST = List[String]("GeneCalcs", "InsertSize","NVC","CigarOpDistribution","QualityScoreDistribution","GCDistribution","JunctionCalcs","StrandCheck","chromCounts","cigarMatch");
 
   
+  final val QC_INCOMPATIBLE_WITH_SINGLE_END_FUNCTION_LIST : Set[String] = Set(
+      "InsertSize"
+  );
+  
   //"InsertSize","NVC","CigarOpDistribution","QualityScoreDistribution","GCDistribution","GeneCalcs",
   //"JunctionCounts", "StrandCheck", "writeKnownSplices","writeNovelSplices","writeSpliceExon", 
   //"writeDESeq","writeDEXSeq","writeGenewiseGeneBody", "writeGeneCounts"
@@ -77,7 +81,7 @@ object runAllQC {
                         ""+
                         ""+
                         ""+
-                        "",   
+                        "",
           argList = 
                     new BinaryArgument[Int](name = "minMAPQ",
                                            arg = List("--minMAPQ"),  
@@ -138,6 +142,34 @@ object runAllQC {
                                          argDesc =  "If this option is set, all analyses will be restricted to reads that are tagged with the given "+
                                                     "readGroupName using an RG tag. This can be used if multiple read groups have already been combined "+
                                                     "into a single bam file."
+                                        ) ::
+                    new BinaryOptionArgument[String](
+                                         name = "restrictToGeneList", 
+                                         arg = List("--restrictToGeneList"), 
+                                         valueName = "geneList.txt",  
+                                         argDesc =  "If this option is set, almost all analyses will be restricted to reads that are found on genes named in the "+
+                                                    "supplied gene list file. The file should contain a gene ID on each line and nothing else. "+
+                                                    "The only functions that will be run on the full set of all reads will be the functions that calculate "+
+                                                    "the gene mapping itself. NOTE: if you want to include ambiguous reads, include a line with the text: '_ambiguous'. "+
+                                                    "If you want to include reads that do not map to any known feature, include a line with the text: '_no_feature'. "+
+                                                    "WARNING: this is not intended for default use. It is intended to be used when re-running QoRTs, with the intention of "+
+                                                    "examining artifacts that can be caused in various plots by a small number of genes with extremely high coverage. For example, "+
+                                                    "GC content plots sometimes contain visible spikes caused by small mitochondrial genes with extremely high expression."+
+                                                    "ADDITIONAL WARNING: This feature is in BETA, and is not yet fully tested."
+                                        ) ::
+                    new BinaryOptionArgument[String](
+                                         name = "dropGeneList", 
+                                         arg = List("--dropGeneList"), 
+                                         valueName = "geneList.txt",  
+                                         argDesc =  "If this option is set, almost all analyses will be restricted to reads that are NOT found on genes named in the "+
+                                                    "supplied gene list file. The file should contain a gene ID on each line and nothing else. "+
+                                                    "The only functions that will be run on the full set of all reads will be the functions that calculate "+
+                                                    "the gene mapping itself. NOTE: if you want to EXCLUDE ambiguous reads, include a line with the text: '_ambiguous'. "+
+                                                    "If you want to EXCLUDE reads that do not map to any known feature, include a line with the text: '_no_feature'. "+
+                                                    "WARNING: this is not intended for default use. It is intended to be used when re-running QoRTs, with the intention of "+
+                                                    "examining artifacts that can be caused by certain individual 'problem genes'. For example, "+
+                                                    "GC content plots sometimes contain visible spikes caused by small transcripts / RNA's with extremely high expression levels."+
+                                                    "ADDITIONAL WARNING: This feature is in BETA, and is not yet fully tested."
                                         ) ::
                     new BinaryArgument[Int](name = "numThreads",
                                                         arg = List("--numThreads"),  
@@ -209,7 +241,9 @@ object runAllQC {
           parser.get[Int]("numThreads"),
           parser.get[Option[String]]("readGroup"),
           parser.get[Boolean]("parallelFileRead"),
-          parser.get[Int]("minMAPQ")
+          parser.get[Int]("minMAPQ"),
+          parser.get[Option[String]]("restrictToGeneList"),
+          parser.get[Option[String]]("dropGeneList")
       );
       }
     }
@@ -233,7 +267,9 @@ object runAllQC {
           numThreads : Int,
           readGroup : Option[String],
           parallelFileRead : Boolean,
-          minMAPQ: Int){
+          minMAPQ: Int,
+          restrictToGeneList : Option[String],
+          dropGeneList : Option[String]){
 
     reportln("Starting ALLQC:","note");
     val initialTimeStamp = TimeStampUtil();
@@ -259,7 +295,8 @@ object runAllQC {
       runFunctions.toSet -- dropFunctions.toSet;
     }
     
-    val runFunc = runFunc_initial.foldLeft(runFunc_initial)((soFar,currFunc) => {
+    val runFuncTEMP : scala.collection.immutable.Set[String] = if(restrictToGeneList.isEmpty & dropGeneList.isEmpty) scala.collection.immutable.Set[String]() else scala.collection.immutable.Set[String]("GeneCalcs");
+    val runFunc = (runFunc_initial ++ runFuncTEMP).foldLeft(runFunc_initial ++ runFuncTEMP)((soFar,currFunc) => {
       QC_FUNCTION_DEPENDANCIES.get(currFunc) match {
         case Some(reqFunc) => {
           if(soFar.contains(reqFunc)){
@@ -292,14 +329,35 @@ object runAllQC {
     //reportln("dropChrom: "+dropChromList.mkString(";"),"note");
     //reportln("run_functions: " + runFunc.mkString(";"),"note");
     
+    val geneListKeep : Option[Set[String]] = restrictToGeneList match {
+      case Some(glkf) => {
+        Some(internalUtils.fileUtils.getLinesSmartUnzip(glkf).toSet[String]);
+      }
+      case None => None;
+    }
+    val geneListDrop : Option[Set[String]] = dropGeneList match {
+      case Some(glkf) => {
+        Some(internalUtils.fileUtils.getLinesSmartUnzip(glkf).toSet[String]);
+      }
+      case None => None;
+    }
+    val geneKeepFunc : (String => Boolean) = if(geneListKeep.isEmpty && geneListDrop.isEmpty){
+      (g : String) => true;
+    } else {
+      (g : String) => {
+        (geneListKeep.isEmpty || (  geneListKeep.get.contains(g))) && 
+        (geneListDrop.isEmpty || (! geneListDrop.get.contains(g)))
+      }
+    }
+    
     setQcOptions(noGzipOutput);
     val anno_holder = new qcGtfAnnotationBuilder(gtffile , flatgtffile , stranded , stdGtfCodes, flatGtfCodes);
     
     if(parallelFileRead){
-      reportln("WARNING WARNING WARNING: parallell file read is BETA! NOT FOR GENERAL USE!!!","warn");
-      runOnSeqFile_PAR(initialTimeStamp = initialTimeStamp, infile = infile, outfile = outfile, anno_holder = anno_holder, testRun = testRun, runFunc = runFunc, stranded = stranded, fr_secondStrand = fr_secondStrand, dropChrom = dropChrom, keepMultiMapped = keepMultiMapped, noMultiMapped = noMultiMapped, numThreads = numThreads, readGroup )
+      reportln("ERROR ERROR ERROR: parallell file read is NOT IMPLEMENTED AT THIS TIME!","warn");
+      //runOnSeqFile_PAR(initialTimeStamp = initialTimeStamp, infile = infile, outfile = outfile, anno_holder = anno_holder, testRun = testRun, runFunc = runFunc, stranded = stranded, fr_secondStrand = fr_secondStrand, dropChrom = dropChrom, keepMultiMapped = keepMultiMapped, noMultiMapped = noMultiMapped, numThreads = numThreads, readGroup )
     } else {
-      runOnSeqFile(initialTimeStamp = initialTimeStamp, infile = infile, outfile = outfile, anno_holder = anno_holder, testRun = testRun, runFunc = runFunc, stranded = stranded, fr_secondStrand = fr_secondStrand, dropChrom = dropChrom, keepMultiMapped = keepMultiMapped, noMultiMapped = noMultiMapped, numThreads = numThreads, readGroup , minMAPQ = minMAPQ)
+      runOnSeqFile(initialTimeStamp = initialTimeStamp, infile = infile, outfile = outfile, anno_holder = anno_holder, testRun = testRun, runFunc = runFunc, stranded = stranded, fr_secondStrand = fr_secondStrand, dropChrom = dropChrom, keepMultiMapped = keepMultiMapped, noMultiMapped = noMultiMapped, numThreads = numThreads, readGroup , minMAPQ = minMAPQ, geneKeepFunc = geneKeepFunc, isSingleEnd = isSingleEnd)
     }
     
   }
@@ -317,15 +375,21 @@ object runAllQC {
                    noMultiMapped : Boolean, 
                    numThreads : Int,
                    readGroup : Option[String],
-                   minMAPQ : Int){
+                   minMAPQ : Int,
+                   geneKeepFunc : (String => Boolean),
+                   isSingleEnd : Boolean){
     
     val COMPLETED_OK_FILEPATH = outfile + COMPLETED_OK_FILENAME;
     val (samFileAttributes, recordIter) = initSamRecordIterator(infile);
     val pairedIter : Iterator[(SAMRecord,SAMRecord)] = 
-      if(noMultiMapped){
-        if(testRun) samRecordPairIterator(recordIter, true, 200000) else samRecordPairIterator(recordIter)
+      if(isSingleEnd){
+        if(testRun) samRecordPairIterator_withMulti_singleEnd(recordIter, true, 200000) else samRecordPairIterator_withMulti_singleEnd(recordIter);
       } else {
-        if(testRun) samRecordPairIterator_withMulti(recordIter, true, 200000) else samRecordPairIterator_withMulti(recordIter)
+        if(noMultiMapped){
+          if(testRun) samRecordPairIterator(recordIter, true, 200000) else samRecordPairIterator(recordIter)
+        } else {
+          if(testRun) samRecordPairIterator_withMulti(recordIter, true, 200000) else samRecordPairIterator_withMulti(recordIter)
+        }
       }
     
     val readLength = samFileAttributes.readLength;
@@ -343,12 +407,13 @@ object runAllQC {
 
     val coda : Array[Int] = internalUtils.commonSeqUtils.getNewCauseOfDropArray;
     val coda_options : Array[Boolean] = internalUtils.commonSeqUtils.CODA_DEFAULT_OPTIONS.toArray;
+    if(isSingleEnd) CODA_SINGLE_END_OFF_OPTIONS.foreach( coda_options(_) = false );
     if(keepMultiMapped) coda_options(internalUtils.commonSeqUtils.CODA_NOT_UNIQUE_ALIGNMENT) = false;
     if(! readGroup.isEmpty) coda_options(internalUtils.commonSeqUtils.CODA_NOT_MARKED_RG) = true;
     
     //"writeKnownSplices","writeNovelSplices","writeSpliceExon", "writeDESeq","writeDEXSeq","writeGenewiseGeneBody"
     //  final val QC_FUNCTION_LIST : Seq[String] = Seq("InsertSize","NVC","CigarOpDistribution","QualityScoreDistribution","GCDistribution","GeneCounts","JunctionCounts");
-    val qcGGC:  QCUtility[String] =   if(runFunc.contains("GeneCalcs"))                 new qcGetGeneCounts(stranded,fr_secondStrand,anno_holder,coda,coda_options,40, runFunc.contains("FPKM"), runFunc.contains("writeGenewiseGeneBody"), runFunc.contains("writeDESeq"), runFunc.contains("writeGeneCounts")) else QCUtility.getBlankStringUtil;
+    val qcGGC:  QCUtility[String] =   if(runFunc.contains("GeneCalcs"))                 new qcGetGeneCounts(stranded,fr_secondStrand,anno_holder,coda,coda_options,40, runFunc.contains("FPKM"), runFunc.contains("writeGenewiseGeneBody"), runFunc.contains("writeDESeq"), runFunc.contains("writeGeneCounts"), geneKeepFunc) else QCUtility.getBlankStringUtil;
     val qcIS :  QCUtility[Unit]   =   if(runFunc.contains("InsertSize"))                new qcInnerDistance(anno_holder, stranded, fr_secondStrand, readLength)        else QCUtility.getBlankUnitUtil;
     val qcCS :  QCUtility[Unit]   =   if(runFunc.contains("NVC"))                       new qcNVC(readLength, runFunc.contains("writeClippedNVC"))                     else QCUtility.getBlankUnitUtil;
     val qcJD :  QCUtility[Unit]   =   if(runFunc.contains("CigarOpDistribution"))       new qcCigarDistribution(readLength)                                            else QCUtility.getBlankUnitUtil;
@@ -372,17 +437,19 @@ object runAllQC {
       readNum += 1;
       
       if(internalUtils.commonSeqUtils.useReadPair(r1,r2,coda, coda_options, dropChrom, readGroup, minMAPQ)){
-        
-        qcALL.foreach( _.runOnReadPair(r1,r2,readNum) );
-        //qcGGC.runOnReadPair(r1,r2,readNum);
-        //qcCS.runOnReadPair(r1,r2,readNum);
-        //qcJD.runOnReadPair(r1,r2,readNum);
-        //qcQSC.runOnReadPair(r1,r2,readNum);
-        //qcIS.runOnReadPair(r1,r2,readNum);
-        //qcGC.runOnReadPair(r1,r2,readNum);
-        //qcJC.runOnReadPair(r1,r2,readNum);
-        //qcST.runOnReadPair(r1,r2,readNum);
-        //qcCC.runOnReadPair(r1,r2,readNum);
+          val gene = qcGGC.runOnReadPair(r1,r2,readNum);
+          if( geneKeepFunc(gene) ){
+          //if( geneListKeep.get.contains(gene) ){
+            qcIS.runOnReadPair(r1,r2,readNum);
+            qcCS.runOnReadPair(r1,r2,readNum);
+            qcJD.runOnReadPair(r1,r2,readNum);
+            qcQSC.runOnReadPair(r1,r2,readNum);
+            qcGC.runOnReadPair(r1,r2,readNum);
+            qcJC.runOnReadPair(r1,r2,readNum);
+            qcST.runOnReadPair(r1,r2,readNum);
+            qcCC.runOnReadPair(r1,r2,readNum);
+            qcCM.runOnReadPair(r1,r2,readNum);
+          }
       }
     }
     reportln("Finished reading SAM. Read: " + readNum + " read-pairs","note");
@@ -418,6 +485,12 @@ object runAllQC {
     //qcCC.writeOutput(outfile, summaryWriter);
     reportln("Done.","note");
     
+    if(isSingleEnd){
+      summaryWriter.write("IS_SINGLE_END	1\n");
+    } else {
+      summaryWriter.write("IS_SINGLE_END	0\n");
+    }
+    
     summaryWriter.write("COMPLETED_WITHOUT_ERROR	1\n");
     
     close(summaryWriter);
@@ -441,7 +514,7 @@ object runAllQC {
     completedOkWriter.write("# Note: if this file EXISTS, then QoRTs completed without errors.");
     completedOkWriter.close();
   }
-  
+  /*
   def runOnSeqFile_PAR(initialTimeStamp : TimeStampUtil, 
                    infile : String, 
                    outfile : String, 
@@ -486,7 +559,7 @@ object runAllQC {
     
 
     val qcAllVector : Vector[QCUtility[Any]] = runMasterLevelFunctions.map((funcName : String) => {
-      if(funcName == "GeneCalcs") new qcGetGeneCounts(stranded,fr_secondStrand,anno_holder,coda,coda_options,40, runFunc.contains("FPKM"), runFunc.contains("writeGenewiseGeneBody"), runFunc.contains("writeDESeq"), runFunc.contains("writeGeneCounts"));
+      if(funcName == "GeneCalcs") new qcGetGeneCounts(stranded,fr_secondStrand,anno_holder,coda,coda_options,40, runFunc.contains("FPKM"), runFunc.contains("writeGenewiseGeneBody"), runFunc.contains("writeDESeq"), runFunc.contains("writeGeneCounts"), );
       else if(funcName == "InsertSize") new qcInnerDistance(anno_holder, stranded, fr_secondStrand, readLength);
       else if(funcName == "NVC") new qcNVC(readLength, runFunc.contains("writeClippedNVC"));
       else if(funcName == "CigarOpDistribution") new qcCigarDistribution(readLength) ;
@@ -572,7 +645,7 @@ object runAllQC {
     val completedOkWriter = openWriter(COMPLETED_OK_FILEPATH);
     completedOkWriter.write("# Note: if this file EXISTS, then QoRTs completed without errors.");
     completedOkWriter.close();
-  }
+  }*/
   
   
   /*

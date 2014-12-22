@@ -256,7 +256,7 @@ object commonSeqUtils {
   //def samRecordPairIterator_allPossibleSituations(iter : Iterator[SAMRecord], attr : SamFileAttributes, verbose : Boolean = true, testCutoff : Int = Int.MaxValue) : Iterator[(SAMRecord,SAMRecord)] = {
     
   //}
-  def samRecordPairIterator_withMulti(iter : Iterator[SAMRecord], verbose : Boolean = true, testCutoff : Int = Int.MaxValue, ignoreSecondary : Boolean = true) : Iterator[(SAMRecord,SAMRecord)] = {
+  def samRecordPairIterator_withMulti(iter : Iterator[SAMRecord], verbose : Boolean = true, testCutoff : Int = -1, ignoreSecondary : Boolean = true) : Iterator[(SAMRecord,SAMRecord)] = {
     if(ignoreSecondary){
       presetProgressReporters.wrapIterator_readPairs(getSRPairIter(iter.filter(! _.getNotPrimaryAlignmentFlag())), 
           verbose, testCutoff);
@@ -265,6 +265,16 @@ object commonSeqUtils {
       return null;
     }
   }
+  def samRecordPairIterator_withMulti_singleEnd(iter : Iterator[SAMRecord], verbose : Boolean = true, testCutoff : Int = -1, ignoreSecondary : Boolean = true) : Iterator[(SAMRecord,SAMRecord)] = {
+    if(ignoreSecondary){
+      presetProgressReporters.wrapIterator_readPairs(getSRPairIter_singleEnd(iter.filter(! _.getNotPrimaryAlignmentFlag())), 
+          verbose, testCutoff);
+    } else {
+      error("FATAL ERROR: Using non-primary read mappings is not currently implemented!");
+      return null;
+    }
+  }
+  
   
   // Feature Removed!
   // Reason: Cannot guarantee reasonable memory footprint.
@@ -310,6 +320,10 @@ object commonSeqUtils {
     }
   }*/
   
+  private def getSRPairIter_singleEnd(iter : Iterator[SAMRecord]) : Iterator[(SAMRecord,SAMRecord)] = {
+    return iter.map( (next : SAMRecord) => (next,next) );
+  }
+  
   private def getSRPairIter(iter : Iterator[SAMRecord]) : Iterator[(SAMRecord,SAMRecord)] = {
     return new  Iterator[(SAMRecord,SAMRecord)] {
       def hasNext : Boolean = iter.hasNext;
@@ -325,7 +339,7 @@ object commonSeqUtils {
     }
   }
   
-  def samRecordPairIterator(iter : Iterator[SAMRecord], verbose : Boolean = true, testCutoff : Int = Int.MaxValue) : Iterator[(SAMRecord,SAMRecord)] = {
+  def samRecordPairIterator(iter : Iterator[SAMRecord], verbose : Boolean = true, testCutoff : Int = -1) : Iterator[(SAMRecord,SAMRecord)] = {
     presetProgressReporters.wrapIterator_readPairs(getSRPairIter(iter), verbose, testCutoff);
   }
   
@@ -372,6 +386,8 @@ object commonSeqUtils {
   
   final val CODA_CODA_LENGTH = 12;
   final val CODA_DEFAULT_OPTIONS : Seq[Boolean] = repToSeq(true,CODA_CODA_LENGTH - 1).toVector ++ Vector(false);
+  
+  final val CODA_SINGLE_END_OFF_OPTIONS : Seq[Int] = Seq(CODA_MATE_UNMAPPED, CODA_NOT_PROPER_PAIR, CODA_CHROMS_MISMATCH, CODA_PAIR_STRANDS_MISMATCH, CODA_READ_PAIR_OK);
   
   def getNewCauseOfDropArray() : Array[Int] = {
     return Array.ofDim[Int](CODA_CODA_LENGTH);

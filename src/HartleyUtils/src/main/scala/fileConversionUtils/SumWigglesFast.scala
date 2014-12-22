@@ -34,13 +34,13 @@ object SumWigglesFast {
              new BinaryArgument[String](   name = "infilePrefix",
                                                         arg = List("--infilePrefix"),  
                                                         valueName = "infilePrefix", 
-                                                        argDesc = "A file prefix for all input junction count files. By default the full file path should be specified by the infile parameter.", 
+                                                        argDesc = "A file prefix for all input wiggle files. By default the full file path should be specified by the infile parameter.", 
                                                         defaultValue = Some("")
                                                         ) ::
             new BinaryArgument[String](   name = "infileSuffix",
                                                         arg = List("--infileSuffix"),  
                                                         valueName = "infileSuffix", 
-                                                        argDesc = "A file suffix for all input junction count files. By default the full file path should be specified by the infile parameter.", 
+                                                        argDesc = "A file suffix for all input wiggle files. By default the full file path should be specified by the infile parameter.", 
                                                         defaultValue = Some("")
                                                         ) ::
             new UnaryArgument(name = "ignoreSizeFactors",

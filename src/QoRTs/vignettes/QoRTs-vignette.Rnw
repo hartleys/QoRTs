@@ -55,8 +55,8 @@ BiocStyle::latex()
 National Human Genome Research Institute\\
 National Institutes of Health}
 \date{8 August 2014\\
-Revised 9 October 2014\\
-v0.0.20}
+Revised 22 December 2014\\
+v0.0.26}
 
 \begin{document}
 
