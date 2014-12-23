@@ -1,0 +1,433 @@
+%\VignetteIndexEntry{QoRTs Advanced User Manual}
+%\VignettePackage{QoRTs}
+%\VignetteEngine{knitr::knitr_notangle}
+
+\documentclass[12pt]{article}
+
+<<knitr, echo=FALSE, results="hide">>=
+library("knitr")
+library("Cairo")
+opts_chunk$set(tidy=FALSE,dev="CairoPNG",fig.show="hide",
+               fig.width=6.5,fig.height=5.5,fig.keep="high",
+               message=FALSE)
+@
+
+<<style, eval=TRUE, echo=FALSE, results="asis">>=
+BiocStyle::latex()
+@
+
+\usepackage[sort]{cite}
+\usepackage{hyperref}
+
+%------------------------------------------------------------
+% newcommands
+%------------------------------------------------------------
+\newcommand{\myincfig}[3]{%
+  \begin{figure}[h]
+  \centering
+  \includegraphics[width=#2]{figure/#1-1}
+  \caption{\label{figure/#1}#3}
+  \label{#1-fig}
+  \end{figure}
+}
+\newcommand{\myincfigTwo}[3]{%
+  \begin{figure}[h]
+  \centering
+  \includegraphics[width=#2]{figure/#1-1}
+  \includegraphics[width=#2]{figure/#1-2}  
+  \caption{\label{figure/#1}#3}
+  \label{#1-fig}
+  \end{figure}
+}
+\newcommand{\myincfigThree}[3]{%
+  \begin{figure}[h]
+  \centering
+  \includegraphics[width=#2]{figure/#1-1}
+  \includegraphics[width=#2]{figure/#1-2}  
+  \includegraphics[width=#2]{figure/#1-3}  
+  \caption{\label{figure/#1}#3}
+  \label{#1-fig}
+  \end{figure}
+}
+
+\title{QoRTs Package Advanced User Manual}
+\author{Stephen Hartley\\
+National Human Genome Research Institute\\
+National Institutes of Health}
+\date{August 8 2014\\
+Revised 12 December 2014 %REPLACE_THIS_LINE_WITH_REVISION_DATE
+\\
+v0.0.27 %REPLACE_THIS_LINE_WITH_VERSION_NUMBER
+}
+
+\begin{document}
+
+\maketitle
+
+\tableofcontents
+
+<<setup,echo=FALSE,results="hide">>=
+options(width=80, signif=3, digits=3, prompt=" ", continue=" ")
+set.seed(0xdada)
+require("QoRTs")
+require("QoRTsExampleData");
+
+## To create bitmap versions of plots with many dots, circumventing
+##   Sweave's fig=TRUE mechanism...
+##   (pdfs are too large)
+openBitmap = function(nm, rows=1, cols=1, height = 600, width = 800, cex = 1.2) {
+  CairoPNG(paste("QoRT-", nm, ".png", sep=""), 
+       width=width*cols, height=height*rows, pointsize=14)
+  par(mfrow=c(rows, cols), cex=cex)
+}
+@ 
+
+%-----------------------------------------------------------
+\section{Overview} \label{sec:praeludium}
+%-----------------------------------------------------------
+
+The QoRTs software package is a fast, efficient, and portable toolkit designed primarily to aid in the detection and identification of errors, biases, and artifacts produced by paired-end high-throughput RNA-Seq technology. It can produce a wide variety of graphs, plots, and tables that allow the data to be visualized in various ways. Data can be compiled and contrasted in multiple ways to allow systematic errors or artifacts to reveal themselves more easily. While it will not directly assign pass/fail status, it is a powerful tool for bioinformaticians to detect and identify features in the data.
+
+This is the advanced user manual, intended to provide an overview of some of the secondary capabilities of the QoRTs package. For general-purpose use, see the QoRTs vignette, QoRTs-vignette.pdf, which can be found at \url{https://github.com/hartleys/QoRTs}.
+
+In addition to its primary functionality, QoRTs includes a variety of data processing and visualization tools. QoRTs can:
+
+\noindent Additional Functions:
+  \begin{itemize}
+    \item Generate the gene-level counts necessary for analysis with the \Biocpkg{DESeq}/\Biocpkg{DESeq2}\cite{DESeq} or \Biocpkg{edgeR}\cite{edgeR} packages.
+    \item Generate the exon-level counts necessary for analysis with the \Biocpkg{DEXSeq}\cite{DEXSeq} differential-exon-usage analysis package.
+    \item Generate "flat" annotation files, needed for use with the \Biocpkg{DEXSeq}\cite{DEXSeq} differential-exon-usage analysis package.
+    \item Generate the splice-junction counts necessary for analysis with the \verb|JunctionSeq| differential splice junction usage package.
+    \item Create "wiggle" files for use with the UCSC genome browser.
+    \item Merge and average wiggle files, optionally with user-specified size factors to adjust for library size.
+    \item Create bed files displaying splice junctions (novel and annotated) with coverage counts, for use with the UCSC genome browser.
+    \item Merge multiple splice junction count bed files, optionally with user-specified size factors to adjust for library size.
+  \end{itemize}
+
+%----------
+\subsection{Generating a flattened annotation file} \label{sec:flatAnnoGen}
+%----------
+
+Before counting exons and splice junctions, QoRTs generates a set of non-overlapping exonic fragments out of all the exons in the genome annotation gtf file. It then assigns each exonic fragment a unique identifier. Similarly, it assigns every splice junction its own unique identifier. A gtf file listing all these genomic features and their unique identifiers can be created using the following command:
+
+\begin{verbatim}
+java -jar /path/to/jarfile/QoRTs.jar makeFlatGtf 
+                                     input.gtf 
+                                     flattened.gff
+\end{verbatim}
+
+\emph{strandedness:} You must use the \verb|--stranded| option to create the flattened gff for use with stranded datasets. DO NOT mix stranded flattened gff with unstranded data, or vice versa.
+
+\emph{DEXSeq:} DEXSeq also requires a flattened annotation file, which is formatted similarly. In order to produce a flattened gff file that DEXSeq can read, include the \verb|--DEXSeqFmt| option.
+
+This gtf file conforms to the UCSC gff file definition, (found here: \url{http://genome.ucsc.edu/FAQ/FAQformat.html}). It will contain 4 different feature types (column 3): "aggregate\_gene", "exonic\_part", "splice\_site", and "novel\_splice\_site".
+
+%-----------------------------------------------------------
+\section{Genome browser tracks} \label{sec:wigglePlots}
+%-----------------------------------------------------------
+
+In addition to the standard QC plots, which examine the data as a whole, it is sometimes desirable to be able to query and examine coverage information at specific genetic loci. In particular, when identifying candidate genes via genome-wide analyses, it is often vital to examine the locus for artifacts before carrying out costly and time-consuming validation experiments.
+
+%----------
+\subsection{Generating wiggle tracks}
+%----------
+
+QoRTs includes a utility to generate ".wig", or "wiggle plot" files. These wiggle plot files include counts for the mean coverage for each equal-sized window across the whole genome. These files are designed to be used with the UCSC browser or similar interfaces, and allow easy and intuitive visualization of your data.
+
+\begin{verbatim}
+java -jar /path/to/jarfile/QoRTs.jar bamToWiggle 
+                                     infile.bam 
+                                     trackName
+                                     chromLengthFile
+                                     outfilePrefix
+\end{verbatim}
+
+The chromLengthFile is a simple tab-delimited text file that includes each chromosome in the first column and the chromosome's length (in base-pairs) in the second column. If the wiggle file is intended for use with a standard genome on the UCSC genome browser, then the UCSC utility \verb|fetchChromSizes| should be used to generate this file. (see \url{http://genome.ucsc.edu/goldenPath/help/bigWig.html} for more information on \verb|fetchChromSizes|, as well as information on how to compress your wig files into smaller and more efficient bigWig files)
+
+\noindent Common options and flags for this function include:
+  \begin{itemize}
+    \item \verb|--sizefactor 1.0|: A float value. All the coverage values will be divided by this factor. Useful for comparing two samples that may have different normalization factors.
+    \item \verb|--stranded|: Flag to indicate that data should be treated as stranded.
+    \item \verb|--stranded_fr_secondstrand|: Flag to indicate that the data is of the fr\_secondstrand stranded library type. 
+    \item \verb|--negativeReverseStrand|: If this flag is set, then the negative strand will be counted in negative numbers. This can be useful for plotting both strands in a single multiwig track, via a trackhub. (see \url{http://genome.ucsc.edu/goldenPath/help/trackDb/trackDbDoc.html})
+  \end{itemize}
+
+%----------
+\subsection{Merging wiggle tracks}
+%----------
+
+QoRTs includes a utility for summing or averaging multiple wiggle files.
+
+\begin{verbatim}
+java -jar /path/to/jarfile/QoRTs.jar mergeWig
+                                     namelist
+                                     outfile.wig.gz
+\end{verbatim}
+
+The \verb|namelist| parameter can be either a comma-delimited list of input files, the path to a text file (which must end with '.txt') containing a list of input filenames (one per line), or "-" to read file names from standard input (one per line). Each input file should be a ".wig" file, preferably created via the bamToWiggle tool. All the wiggle files MUST have the same window size, chromosome lengths, and chromosome ordering. By default, each window in the output wiggle file will be the sum of that same window across all the input wiggle files.
+
+\noindent Common options and flags for this function include:
+  \begin{itemize}
+    \item \verb|--calcMean|: If this flag is raised, the utility will calculate the average rather than the sum-total coverage for each window.
+    \item \verb|--makeNegative|: If this flag is raised, the output will be multiplied by -1.
+    \item \verb|--infilePrefix|: A prefix to preppend to each input name in the \verb|namelist| parameter. 
+    \item \verb|--infileSuffix|: A suffix to append to each input name in the \verb|namelist| parameter.
+  \end{itemize}
+
+\emph{Optionally}, each input wiggle file can be adjusted/normalized via a user-specified "size-factor". This size factor is usually used when attempting to normalize and average biological replicates, where the total read count and library size may not be constant. A simple normalization factor can be calculated by simply using the number of reads. A better normalization factor would be to use the estimateSizeFactorsForMatrix() function contained in the \Biocpkg{DESeq2}\cite{DESeq} package. For most purposes, the normalization factors across all samples in the comparison should add up to 1. Each input wiggle file's wiggle counts will be divided by the size factor before the samples are added (or averaged, if the \verb|--calcMean| option is used).
+
+Size factors can be added in a number of ways. the \verb|--sizeFactors| option can be used with a list of size factors, delimited with commas (with no whitespace in between). Alternately, if the \verb|namelist| parameter is a filename or "-", then the size factor can be provided as a second column (delimited with tabs). Finally, even if size factors are included, the utility will ignore them if the \item \verb|--ignoreSizeFactors| option is used.
+
+For more information and a full accounting of all parameters and options, use the command:
+\begin{verbatim}
+java -jar /path/to/jarfile/QoRTs.jar mergeWig --man
+\end{verbatim}
+
+%----------
+\subsection{Generating splice-junction tracks}
+%----------
+
+Splice junction counts can be made into a separate bed track using the command:
+
+\begin{verbatim}
+java -jar /path/to/jarfile/QoRTs.jar makeSpliceBed 
+                                         filelist.txt
+                                         outfile.bed
+\end{verbatim}
+
+\noindent Common options and flags for this function include:
+  \begin{itemize}
+    \item \emph{--rgb}: The color to use for each bed entry.
+  \end{itemize}
+
+%----------
+\subsection{Merging splice-junction tracks}
+%----------
+
+For more information and a full accounting of all parameters and options, use the command:
+\begin{verbatim}
+java -jar /path/to/jarfile/QoRTs.jar makeSpliceBed --man
+\end{verbatim}
+
+%----------
+\subsection{Merging Count Data} \label{sec:mergeCounts}
+%----------
+
+For the purposes of quality control it is generally preferable to run QoRTs on each sample-run individually, so that potential technical artifacts related to sequencing run or lane can be identified. However, for most downstream purposes these "technical replicates" will be combined and treated as a single sample. Differential expression tools like \Biocpkg{DESeq}, \Biocpkg{DESeq2}\cite{DESeq}, \Biocpkg{DEXSeq}\cite{DEXSeq}, and \Biocpkg{EdgeR}\cite{edgeRsoftware} assume that each set of gene counts (or exon counts, for \Biocpkg{DEXSeq}) is derived from a different biological  sample.
+
+Thus, the java utility includes a function for quickly and easily calculating merged sample-wise counts.
+
+\begin{verbatim}
+java -jar /path/to/jarfile/QoRTs.jar mergeAllCounts 
+                                    decoder.txt 
+                                    /path/to/qc/results/dir/ 
+                                    ./merged/
+\end{verbatim}
+
+Alternatively, the merger can be performed for a single sample directly, via the command:
+
+\begin{verbatim}
+java -jar /path/to/jarfile/QoRTs.jar mergeCounts 
+          ./CtrlDay1_RG1/,./CtrlDay1_RG2/,./CtrlDay1_RG3/
+          ./merged/CD1/ 
+\end{verbatim}
+
+The list of QC data directories must be separated by commas and contain no whitespace.
+
+For more information and a full accounting of all parameters and options, use the command:
+\begin{verbatim}
+java -jar /path/to/jarfile/QoRTs.jar mergeAllCounts --man
+and
+java -jar /path/to/jarfile/QoRTs.jar mergeCounts --man
+\end{verbatim}
+
+
+%-----------------------------------------------------------
+\section{Importing data into other tools} \label{sec:useWithOtherTools}
+%-----------------------------------------------------------
+
+In addition to providing quality control information, QoRTs also provides the requisite input files needed for the DESeq/DESeq2 \cite{DESeq}, \Biocpkg{DEXSeq}\cite{DEXSeq}, and \Biocpkg{EdgeR}\cite{edgeR,edgeRsoftware,edgeRGLM} analysis tools. These files will be identical to those that would be generated by HTSeq (using the default "union rule" option).
+
+All the data files can be found in the \verb|qc.data.dir| directory. The files for use with \Biocpkg{DESeq}, \Biocpkg{DESeq2}, and \Biocpkg{EdgeR} will be named \verb|QC.geneCounts.formatted.for.DESeq.txt.gz| and the files for use with \Biocpkg{DEXSeq} will be named \verb|QC.exonCounts.formatted.for.DEXSeq.txt.gz|
+
+\pagebreak
+%-----------------------------------------------------------
+\section{Documentation} \label{sec:dataDoc}
+%-----------------------------------------------------------
+
+%-----------------------------------------------------------
+\subsection{Documentation of the Raw Data Files} \label{sec:rawDataDoc}
+%-----------------------------------------------------------
+
+The \verb|QCQORTS_COMPLETED_OK| simply indicates that the QoRTs scala utility completed without error. If the file exists, then the scala utility completed.
+
+All QoRTs output QC files are tab-delimited gzip-compressed text files (except the summary file, which is left as uncompressed text).
+
+%----------
+\subsubsection{Chrom Counts} \label{sec:chromCountFile}
+%----------
+
+The file \verb|QC.chromCount.txt.gz| contains read-pair counts tabulating the number of read-pairs that appear on each chromosome.
+
+\noindent Columns:
+  \begin{itemize}
+    \item \verb|CHROM|: chromosome name
+    \item \verb|FWD_CT|: forward-strand read-pair count (stranded data only).
+    \item \verb|REV_CT|: reverse-strand read-pair count (stranded data only).
+    \item \verb|CT|: total read-pair count.
+  \end{itemize}
+  
+%----------
+\subsubsection{Cigar Op distribution by read cycle}
+%----------
+
+The files \verb|QC.cigarOpDistribution.byReadCycle.R1.txt.gz| and \verb|QC.cigarOpDistribution.byReadCycle.R2.txt.gz| contains information about the rates at which each possible "cigar operation" occurs at each read cycle. "Cigar Operations" are defined by the specification of the SAM file format, and are used to describe how a read-pair aligns to the reference sequence. This includes splice junctions, deletions, insertions, and hard/soft clipping.
+
+\noindent Columns:
+  \begin{itemize}
+    \item TODO!
+  \end{itemize}
+
+%----------
+\subsubsection{Cigar Op length distribution}
+%----------
+
+The files \verb|QC.cigarOpLengths.byOp.R1.txt.gz| and \verb|QC.cigarOpLengths.byOp.R2.txt.gz| contains the occurance counts of cigar operation lengths, for each cigar operation.
+
+\noindent Columns:
+  \begin{itemize}
+    \item \verb|OP|: The cigar operation character code.
+    \item \verb|LEN|: The length of the cigar operation.
+    \item \verb|CT|: The number of times the given operation and length is observed in the input reads.
+  \end{itemize}
+
+%----------
+\subsubsection{GC Count}
+%----------
+
+The files \verb|QC.gc.R1.txt.gz|, \verb|QC.gc.R2.txt.gz|, \verb|QC.gc.RB.txt.gz|, and \verb|QC.gc.txt.gz| contains information about the G/C distribution.
+
+\noindent Columns:
+  \begin{itemize}
+    \item \verb|NUM_BASES_GC|: The number of bases that are either G or C.
+    \item \verb|CT|: The number of times the given NUM_BASES_GC is found in the input reads.
+  \end{itemize}
+  
+\verb|QC.gc.R1.txt.gz| contains the G/C distribution for read 1. \verb|QC.gc.R1.txt.gz| contains the G/C distribution for read 2. \verb|QC.gc.RB.txt.gz| contains the G/C distribution for both reads counted together as a pair. Finally, \verb|QC.gc.txt.gz| contains the G/C distribution for all reads.
+
+%----------
+\subsubsection{Gene Body Coverage}
+%----------
+
+The files \verb|QC.geneBodyCoverage.by.expression.level.txt.gz| and \verb|QC.geneBodyCoverage.genewise.txt.gz| describe the 5' to 3' gene body coverage.
+
+TODO!
+
+%----------
+\subsubsection{Gene Counts}
+%----------
+
+TODO!
+
+%----------
+\subsubsection{Insert Size}
+%----------
+
+The file \verb|QC.insert.size.debug.txt.gz| describes the insert size distribution.
+
+TODO!
+
+%----------
+\subsubsection{NVC}
+%----------
+
+A number of files describe the nucleotide-count by cycle (aka read-position).
+
+\noindent NVC files:
+  \begin{itemize}
+    \item \verb|QC.NVC.raw.R1.txt.gz|: This 
+    \item \verb|QC.NVC.raw.R2.txt.gz|: see above, but for read 2.
+    \item \verb|QC.NVC.minus.clipping.R1.txt.gz|: 
+    \item \verb|QC.NVC.minus.clipping.R2.txt.gz|: see above, but for read 2.
+    \item \verb|QC.NVC.tail.clip.R1.txt.gz|: 
+    \item \verb|QC.NVC.tail.clip.R2.txt.gz|: see above, but for read 2.
+    \item \verb|QC.NVC.lead.clip.R1.txt.gz|: 
+    \item \verb|QC.NVC.lead.clip.R2.txt.gz|: see above, but for read 2.
+  \end{itemize}
+
+Each file is formatted with the columns:
+
+\noindent Columns:
+  \begin{itemize}
+    \item \verb|readPos|: The position in the read.
+    \item \verb|base|: The nucleotide base
+    \item \verb|CT_Aligned_to_Fwd|: The number of reads with the given base at the given position, on the forward strand.
+    \item \verb|CT_Aligned_to_Rev|: The number of reads with the given base at the given position, on the reverse strand.
+    \item \verb|CT|: The number of reads with the given base at the given position.
+  \end{itemize}
+
+%----------
+\subsubsection{Phred Quality Scores}
+%----------
+
+The files \verb|QC.quals.r1.txt.gz| and \verb|QC.quals.r2.txt.gz| describe the Phred quality control distribution for read 1 and read 2, respectively.
+
+\noindent Columns:
+  \begin{itemize}
+    \item \verb|readLen|: The read position (aka cycle)
+    \item \verb|min|: The minimum Phred score at the given position, across all reads.
+    \item \verb|lowerQuartile|: The lower quartile bound of the Phred score at the given position, across all reads.
+    \item \verb|median|: The median Phred score at the given position across all reads.
+    \item \verb|upperQuartile|: The upper quartile bound of the Phred score at the given position, across all reads.
+    \item \verb|max|: The maximum Phred score at the given position, across all reads.
+  \end{itemize}
+
+%----------
+\subsubsection{Summary Data}
+%----------
+
+
+TODO!
+
+
+%%-----------------------------------------------------------
+%\section{Closing Remarks} \label{sec:remarks}
+%%-----------------------------------------------------------
+%ADD MORE INFO HERE.
+
+%--------------------------------------------------
+\section{References}
+%--------------------------------------------------
+\begingroup
+\renewcommand{\section}[2]{}%
+\bibliography{QoRTs-advanced}
+\endgroup
+
+
+%-----------------------------------------------------------
+\section{Session Information}
+%-----------------------------------------------------------
+
+The session information records the versions of all the packages used in the generation of the present document.
+
+<<sessionInfo>>=
+sessionInfo()
+@
+
+%-----------------------------------------------------------
+\section{Legal} \label{sec:legal}
+%-----------------------------------------------------------
+
+This software is "United States Government Work" under the terms of the United States Copyright Act.  It was written as part of the authors' official duties for the United States Government and thus cannot be copyrighted.  This software is freely available to the public for use without a copyright notice.  Restrictions cannot be placed on its present or future use.
+
+Although all reasonable efforts have been taken to ensure the accuracy and reliability of the software and data, the National Human Genome Research Institute (NHGRI) and the U.S. Government does not and cannot warrant the performance or results that may be obtained by using this software or data.  NHGRI and the U.S. Government disclaims all warranties as to performance, merchantability or fitness for any particular purpose.
+
+In any work or product derived from this material, proper attribution of the authors as the source of the software or data should be made, using "NHGRI Genome Technology Branch" as the citation.
+
+NOTE: The Scala package includes (internally) the sam-JDK library (sam-1.113.jar), from picard tools. 
+The MIT license and copyright information can be accessed using the command:
+\begin{verbatim}
+java -jar /path/to/jarfile/QoRTs.jar ? samjdkinfo
+\end{verbatim}
+
+\end{document}

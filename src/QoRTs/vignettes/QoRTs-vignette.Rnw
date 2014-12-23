@@ -54,9 +54,11 @@ BiocStyle::latex()
 \author{Stephen Hartley\\
 National Human Genome Research Institute\\
 National Institutes of Health}
-\date{8 August 2014\\
-Revised 22 December 2014\\
-v0.0.26}
+\date{August 8 2014\\
+Revised 12 December 2014 %REPLACE_THIS_LINE_WITH_REVISION_DATE
+\\
+v0.0.27 %REPLACE_THIS_LINE_WITH_VERSION_NUMBER
+}
 
 \begin{document}
 

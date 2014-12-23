@@ -34,7 +34,7 @@ object bamToWiggle {
           command = "bamTowiggle", 
           quickSynopsis = "", 
           synopsis = "", 
-          description = "Calculates depth-of-coverage for each equally-sized window across the entire genome. Notes: This counts paired reads seperately. Unlike mpileup, it does not count areas as covered when they span a read's splice junction.",   
+          description = "Calculates depth-of-coverage for each equally-sized window across the entire genome. Note: By default this counts read pairs as seperate reads.",   
           argList = 
                     new BinaryArgument[Double](   name = "sizefactor",
                                                         arg = List("--sizefactor"),  
@@ -50,6 +50,13 @@ object bamToWiggle {
                                          arg = List("--negativeReverseStrand"), // name of value
                                          argDesc = "Flag to indicate that the reverse strand should be counted in negative values. Can be useful for plotting stranded data on a single multiwig track, via trackhubs." // description
                                        ) ::
+                    new UnaryArgument(    name = "countByReadPair",
+                                         arg = List("--countByReadPair"), // name of value
+                                         argDesc = "Flag to indicate that this utility should count 'read-pair coverage' rather than 'read coverage'. "+
+                                                   "If this flag is raised, then regions where a read-pair overlaps will be counted "+
+                                                   "ONCE. By default each read is counted separately, so a read-pair where the reads overlap "+
+                                                   " will be double-counted." // description
+                                       ) ::
                     new UnaryArgument(    name = "testRun",
                                          arg = List("--testRun","-t"), // name of value
                                          argDesc = "Flag to indicate that only the first 100k reads should be read in, used for test runs." // description
@@ -64,8 +71,20 @@ object bamToWiggle {
                                        ) ::
                     new UnaryArgument(   name = "isSingleEnd", 
                                          arg = List("--isSingleEnd"), // name of value
-                                         argDesc = "Flag for single-end data. CURRENTLY NONFUNCTIONAL: THIS UTILITY IS INTENDED ONLY FOR USE WITH PAIRED-END DATA!" 
+                                         argDesc = "Flag for single-end data. Note that many other options do not apply in this case (for example: option --countPairsTogether does nothing in single-end mode)" 
                                        ) ::
+                    new UnaryArgument( name = "keepMultiMapped",
+                                         arg = List("--keepMultiMapped"), // name of value
+                                         argDesc = "Flag to indicate that the tool should NOT filter out multi-mapped reads. Note that even with this flag raised this utility will still only use the 'primary' alignment location for each read. By default any reads that are marked as multi-mapped will be ignored entirely." // description
+                                       ) ::
+                    new BinaryOptionArgument[String](
+                                         name = "readGroup", 
+                                         arg = List("--readGroup"), 
+                                         valueName = "readGroupName",  
+                                         argDesc =  "If this option is set, all analyses will be restricted to ONLY reads that are tagged with the given "+
+                                                    "readGroupName (using an RG tag). This can be used if multiple read-groups have already been combined "+
+                                                    "into a single bam file, but you want to summarize each read-group separately."
+                                        ) ::
                     new UnaryArgument(   name = "noTruncate", 
                                          arg = List("--noTruncate"), // name of value
                                          argDesc = "The UCSC tool wigToBigWig only allows wiggle files in which every window is of equal size. "+
@@ -122,7 +141,10 @@ object bamToWiggle {
              parser.get[Double]("sizefactor"),
              parser.get[Boolean]("testRun"),
              parser.get[Boolean]("noGzipOutput"),
-             parser.get[Boolean]("negativeReverseStrand")
+             parser.get[Boolean]("negativeReverseStrand"),
+             parser.get[Boolean]("countByReadPair"),
+             parser.get[Boolean]("keepMultiMapped"),
+             parser.get[Option[String]]("readGroup")
            );
          }
      }
@@ -141,7 +163,10 @@ object bamToWiggle {
   //negativeStrand : Boolean, 
   //getStrandFromFirstRead : Boolean)
   
-  def run(infiles : List[String], outfilePrefix : String, trackName : String, chromLengthFile : String, noTruncate : Boolean, windowSize : Int, isSingleEnd : Boolean, stranded : Boolean, fr_secondStrand : Boolean, sizeFactor : Double, testRun : Boolean, noGzipOutput : Boolean, negativeReverseStrand : Boolean){
+  def run(infiles : List[String], outfilePrefix : String, trackName : String, chromLengthFile : String, noTruncate : Boolean, 
+      windowSize : Int, isSingleEnd : Boolean, stranded : Boolean, fr_secondStrand : Boolean, sizeFactor : Double, testRun : Boolean, noGzipOutput : Boolean, 
+      negativeReverseStrand : Boolean, countPairsTogether : Boolean,
+      keepMultiMapped : Boolean, readGroup : Option[String]){
     
     //registerGlobalParam[Boolean]("noGzipOutput", noGzipOutput);
     internalUtils.optionHolder.OPTION_noGzipOutput = noGzipOutput;
@@ -149,10 +174,10 @@ object bamToWiggle {
     val initialTimeStamp = TimeStampUtil();
     standardStatusReport(initialTimeStamp);
     
-    val qcBTW : QcBamToWig = new QcBamToWig(trackName , chromLengthFile , noTruncate , windowSize , isSingleEnd, stranded , fr_secondStrand, sizeFactor, negativeReverseStrand );
+    val qcBTW : QcBamToWig = new QcBamToWig(trackName , chromLengthFile , noTruncate , windowSize , isSingleEnd, stranded , fr_secondStrand, sizeFactor, negativeReverseStrand, countPairsTogether );
     
     for(infile <- infiles){
-      runOnFile(infile , qcBTW , testRun );
+      runOnFile(infile , qcBTW , testRun, isSingleEnd, keepMultiMapped, readGroup);
     }
     
     val postRunStamp = TimeStampUtil();
@@ -164,12 +189,20 @@ object bamToWiggle {
     standardStatusReport(finalStamp);
   }
     
-  def runOnFile(infile : String, qcBTW : QcBamToWig, testRun : Boolean){
+  def runOnFile(infile : String, qcBTW : QcBamToWig, testRun : Boolean, isSingleEnd : Boolean, keepMultiMapped : Boolean, readGroup : Option[String]){
     val (samFileAttributes, recordIter) = initSamRecordIterator(infile);
-    val pairedIter : Iterator[(SAMRecord,SAMRecord)] = if(testRun) samRecordPairIterator_withMulti(recordIter, true, 200000) else samRecordPairIterator_withMulti(recordIter);
+    val pairedIter : Iterator[(SAMRecord,SAMRecord)] = 
+      if(isSingleEnd){
+        if(testRun) samRecordPairIterator_withMulti_singleEnd(recordIter, true, 200000) else samRecordPairIterator_withMulti_singleEnd(recordIter);
+      } else {
+        if(testRun) samRecordPairIterator_withMulti(recordIter, true, 200000) else samRecordPairIterator_withMulti(recordIter)
+      }
     
     val coda : Array[Int] = internalUtils.commonSeqUtils.getNewCauseOfDropArray;
     val coda_options : Array[Boolean] = internalUtils.commonSeqUtils.CODA_DEFAULT_OPTIONS.toArray;
+    if(isSingleEnd) CODA_SINGLE_END_OFF_OPTIONS.foreach( coda_options(_) = false );
+    if(keepMultiMapped) coda_options(internalUtils.commonSeqUtils.CODA_NOT_UNIQUE_ALIGNMENT) = false;
+    if(! readGroup.isEmpty) coda_options(internalUtils.commonSeqUtils.CODA_NOT_MARKED_RG) = true;
     
     var readNum = 0;
     val samIterationTimeStamp = TimeStampUtil();
@@ -177,21 +210,69 @@ object bamToWiggle {
     //for((pair,readNum) <- numberedIter){
       val (r1,r2) = pair;
       readNum += 1;
-      if(internalUtils.commonSeqUtils.useReadPair(r1,r2,coda, coda_options, Set[String](), None)){
+      if(internalUtils.commonSeqUtils.useReadPair(r1,r2,coda, coda_options, Set[String](), readGroup)){
         qcBTW.runOnReadPair(r1,r2,readNum);
       }
     }
   }
   
+  def getReadBlocks(r : SAMRecord) : Vector[(Int,Int)] = {
+    r.getAlignmentBlocks().toVector.map((block) => {
+      (block.getReferenceStart(), block.getReferenceStart() + block.getLength());
+    });
+  }
   
-  class QcBamToWig(trackName : String, chromLengthFile : String, noTruncate : Boolean, windowSize : Int, isSingleEnd: Boolean, stranded : Boolean, fr_secondStrand : Boolean, sizeFactor : Double, negativeReverseStrand : Boolean) extends QCUtility[Unit] {
+  def getOverlappedPairBlocks(r1 : SAMRecord, r2 : SAMRecord) : Vector[(Int,Int)] = {
+    val r1b = getReadBlocks(r1);
+    val r2b = getReadBlocks(r2);
+    
+    //def blocksOverlap(b1 : (Int,Int), b2 : (Int,Int)) : Boolean = {
+    //  b1._1 <= b2._2 && b2._1 <= b1._2;
+    //}
+    //def mergeBlocks(b1 : (Int,Int), b2 : (Int,Int)) : (Int,Int) = {
+    //  (math.min(b1._1,b2._1), math.max(b1._2, b2._2))
+    //}
+    //val r2bOverlap : Seq[(Int,Int)] = r2b.filter((b2) => r1b.exists(blocksOverlap(_,b2)));
+    //val r2bNonOverlap : Seq[(Int,Int)] = r2b.filterNot((b2) => r1b.exists(blocksOverlap(_,b2)));
+    val merged = (r1b ++ r2b).sorted
+    merged.tail.foldLeft(Vector(merged.head))( (soFar,curr) =>{
+      if(curr._1 <= soFar.last._2){
+        soFar.updated(soFar.length - 1, (soFar.last._1, math.max(curr._2, soFar.last._2)));
+      } else {
+        soFar :+ curr;
+      }
+    })
+  }
+  
+  
+  class QcBamToWig(trackName : String, chromLengthFile : String, noTruncate : Boolean, windowSize : Int, isSingleEnd: Boolean, stranded : Boolean, fr_secondStrand : Boolean, sizeFactor : Double, negativeReverseStrand : Boolean, countPairsTogether : Boolean) extends QCUtility[Unit] {
     val chromMap : Map[(String,Char),Chrom] = genChrom(chromLengthFile, windowSize, stranded, ! noTruncate);
     var unknownChromSet : Set[String] = Set[String]();
     
     def runOnReadPair(r1 : SAMRecord, r2 : SAMRecord, readNum : Int){
-      runOnRead(r1);
-      runOnRead(r2);
+      if(isSingleEnd){
+        runOnRead(r1);
+      } else if(! countPairsTogether){
+        runOnRead(r1);
+        runOnRead(r2);
+      } else {
+        val chromName = r1.getReferenceName();
+        val strand = internalUtils.commonSeqUtils.getStrand(r1 , stranded , fr_secondStrand );
+        val blocks = getOverlappedPairBlocks(r1,r2);
+        chromMap.get((chromName,strand)) match {
+          case Some(chrom) => {
+            chrom.countBlocks(blocks);
+          }
+          case None => {
+            if(! unknownChromSet.contains(chromName)){
+              reportln("WARNING: Chromosome not found in the chromLengthFile: ["+chromName+","+strand+"]","deepDebug");
+              unknownChromSet += chromName;
+            }
+          }
+        }
+      }
     }
+    
     def runOnRead(r : SAMRecord){
       val chromName = r.getReferenceName();
       val strand = internalUtils.commonSeqUtils.getStrand(r , stranded , fr_secondStrand );
@@ -209,6 +290,10 @@ object bamToWiggle {
         }
       }
     }
+    
+    
+    
+    
     def writeOutput(outfile : String, summaryWriter : WriterUtil){
       val windowString = if(windowSize == 100) "" else (".Win"+windowSize.toString());
       
@@ -244,11 +329,11 @@ object bamToWiggle {
 
   }
   
-  case class Chrom(chromName :  String, chromStrand : Char, windowCounts : Array[Int], span : Int, truncate : Boolean){
+  case class Chrom(chromName :  String, chromStrand : Char, windowCounts : Array[Long], span : Int, truncate : Boolean){ 
     def countSamRecord(samRecord : SAMRecord) {
         val blocks = samRecord.getAlignmentBlocks();
       
-        var i = 0;
+        var i = 0; 
         while(i < blocks.size()){
           val block : AlignmentBlock = blocks.get(i);
           val start = block.getReferenceStart();
@@ -268,6 +353,19 @@ object bamToWiggle {
           i = i + 1;
         }
     }
+    
+    def countBlocks(blocks : Seq[(Int,Int)]){
+      for((start,end) <- blocks){
+        if(! truncate && (end - 1 / span) >=  windowCounts.length){
+          error("ERROR: read extends outside chromosome length!");
+        }
+        var j = start;
+        while(j < end && (j / span) < windowCounts.length){
+          windowCounts(j / span) = windowCounts(j / span) + 1;
+          j = j + 1;
+        }
+      }
+    }
   }
   
 
@@ -275,7 +373,7 @@ object bamToWiggle {
     writer.write("fixedStep  chrom="+chrom.chromName+"  start=1  step="+chrom.span+" span="+chrom.span+"\n");
     val adjustmentFactor = if(negativeStrand) ((-1).toDouble * sizeFactor * chrom.span.toDouble) else (sizeFactor * chrom.span.toDouble);        
     chrom.windowCounts.foreach(
-      (ct : Int) => {
+      (ct : Long) => {
         writer.write((ct.toDouble / adjustmentFactor)  +"\n");
       }
     );
@@ -297,12 +395,12 @@ object bamToWiggle {
                     }
       
       if(stranded){
-        val chromP = new Chrom(chromName,'+',Array.ofDim[Int](spanCt),span, truncate);
-        val chromM = new Chrom(chromName,'-',Array.ofDim[Int](spanCt),span, truncate);
+        val chromP = new Chrom(chromName,'+',Array.ofDim[Long](spanCt),span, truncate);
+        val chromM = new Chrom(chromName,'-',Array.ofDim[Long](spanCt),span, truncate);
         chromMap = chromMap + (((chromName,'+'), chromP));
         chromMap = chromMap + (((chromName,'-'), chromM));        
       } else {
-        val chrom = new Chrom(chromName,'.',Array.ofDim[Int](spanCt),span, truncate);
+        val chrom = new Chrom(chromName,'.',Array.ofDim[Long](spanCt),span, truncate);
         chromMap = chromMap + (((chromName,'.'), chrom));
       }
     }

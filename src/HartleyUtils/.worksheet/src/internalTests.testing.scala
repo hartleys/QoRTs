@@ -42,5 +42,30 @@ val tct2 = tc(2);System.out.println("""tct2  : Int = """ + $show(tct2 ));$skip(3
   val x1 = 200;System.out.println("""x1  : Int = """ + $show(x1 ));$skip(29); ;
   val x1s = 200.toHexString;System.out.println("""x1s  : String = """ + $show(x1s ));$skip(38); ;
   val s1x = Integer.parseInt("c8",16);System.out.println("""s1x  : Int = """ + $show(s1x ));$skip(55); 
-  val srsg = "sample.ID	size.factorx".substring(0,21);;System.out.println("""srsg  : String = """ + $show(srsg ))}
+  val srsg = "sample.ID	size.factorx".substring(0,21);System.out.println("""srsg  : String = """ + $show(srsg ));$skip(139); ;
+                                                  
+                                                  
+  val r1b = Vector((386666,386766));System.out.println("""r1b  : scala.collection.immutable.Vector[(Int, Int)] = """ + $show(r1b ));$skip(37); ;
+  val r2b = Vector((386793,386893));System.out.println("""r2b  : scala.collection.immutable.Vector[(Int, Int)] = """ + $show(r2b ));$skip(38); ;
+  
+  val merged = (r1b ++ r2b).sorted;System.out.println("""merged  : scala.collection.immutable.Vector[(Int, Int)] = """ + $show(merged ));$skip(17); val res$0 = 
+  
+  merged.tail;System.out.println("""res0: scala.collection.immutable.Vector[(Int, Int)] = """ + $show(res$0));$skip(14); val res$1 = 
+  merged.head;System.out.println("""res1: (Int, Int) = """ + $show(res$1));$skip(430); val res$2 = 
+  
+  
+  
+  merged.tail.foldLeft(Vector(merged.head))( (soFar,curr) =>{
+      if(curr._1 <= soFar.last._2){
+        print("soFar = " + soFar+"\n");
+        print("curr = " + curr+"\n");
+        print("soFar.last._2 = " + soFar.last._2+"\n");
+        print("curr._1 = " + curr._1+"\n");
+        soFar.updated(soFar.length - 1, (soFar.last._1, math.max(curr._2, soFar.last._2)));
+      } else {
+        soFar :+ curr;
+      }
+    });System.out.println("""res2: scala.collection.immutable.Vector[(Int, Int)] = """ + $show(res$2))}
+    
+    
 }

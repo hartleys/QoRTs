@@ -9,7 +9,7 @@ import internalUtils.commandLineUI._;
 
 object runner {
   
-  final val QORTS_VERSION = "0.0.26";
+  final val QORTS_VERSION = "0.0.29"; // REPLACE_THIS_QORTS_VERSION_VARIABLE_WITH_VERSION_NUMBER          (note this exact text is used in a search-and-replace. Do not change it.)
   //final val FOR_HELP_STRING = "For help, use command: "
   
   final val Runner_ThisProgramsExecutableJarFileName : String = "QoRTs.jar";
@@ -59,7 +59,7 @@ object runner {
     internalUtils.Reporter.reportln("Starting QoRTs v"+QORTS_VERSION+" (" + (new java.util.Date()).toString + ")","debug");
     
     
-    try{
+    //try{
     if(args.length == 0){
       internalUtils.Reporter.reportln("No command given!","output");
       helpDocs.generalHelp;
@@ -87,13 +87,13 @@ object runner {
       }
     }}
    // helloWorld.run(args);
-    } catch {
-      case e : Exception => {
-        internalUtils.Reporter.reportln("Error Caught. General Help:","note");
-        helpDocs.generalHelp;
-        throw e;
-      }
-    }
+    //} catch {
+    //  case e : Exception => {
+    //    internalUtils.Reporter.reportln("Error Caught. General Help:","note");
+    //    helpDocs.generalHelp;
+    //    throw e;
+    //  }
+    //}
     
     internalUtils.Reporter.reportln("Done. (" + (new java.util.Date()).toString + ")","note");
     internalUtils.Reporter.closeLogs;

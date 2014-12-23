@@ -97,6 +97,7 @@ List(
     
     //case (t, s) => if (t <:< typeOf[T]) Some(s.asInstanceOf[T]) else {error("FATAL INTERNAL ERROR: PARAMETER " + key + " OF WRONG TYPE!"); None};
     def parseArguments(args : List[String], debugMode : Boolean = internalUtils.optionHolder.OPTION_debugMode) : Boolean = {
+      try {
       if(args.length < 1){
         reportShortHelp();
         false;
@@ -109,6 +110,15 @@ List(
       } else {
         parseArgs_master(args.toList, debugMode);
         true;
+      }
+      } catch {
+        case e : Exception => {
+          reportln("Syntax Error? Syntax must be:","warn");
+          reportShortHelp();
+          reportln("For more information, use option --man","warn");
+          reportln("Error is:","warn");
+          throw e;
+        }
       }
     }
     

@@ -31,7 +31,7 @@ object testing {
   }
   
   val tc = new TestClass();                       //> tc  : internalTests.testing.TestClass = internalTests.testing$$anonfun$main$
-                                                  //| 1$TestClass$1@106faf1e
+                                                  //| 1$TestClass$1@422f3d17
   
   val tct1 = tc(1);                               //> tct1  : Int = 1
 val tct3 = tc(2);                                 //> tct3  : Int = 2
@@ -49,4 +49,34 @@ val tct2 = tc(2);                                 //> tct2  : Int = 3
   val s1x = Integer.parseInt("c8",16)             //> s1x  : Int = 200
   val srsg = "sample.ID	size.factorx".substring(0,21);
                                                   //> srsg  : String = sample.ID	size.factor
+                                                  
+                                                  
+  val r1b = Vector((386666,386766));              //> r1b  : scala.collection.immutable.Vector[(Int, Int)] = Vector((386666,38676
+                                                  //| 6))
+  val r2b = Vector((386793,386893));              //> r2b  : scala.collection.immutable.Vector[(Int, Int)] = Vector((386793,38689
+                                                  //| 3))
+  
+  val merged = (r1b ++ r2b).sorted                //> merged  : scala.collection.immutable.Vector[(Int, Int)] = Vector((386666,38
+                                                  //| 6766), (386793,386893))
+  
+  merged.tail                                     //> res0: scala.collection.immutable.Vector[(Int, Int)] = Vector((386793,386893
+                                                  //| ))
+  merged.head                                     //> res1: (Int, Int) = (386666,386766)
+  
+  
+  
+  merged.tail.foldLeft(Vector(merged.head))( (soFar,curr) =>{
+      if(curr._1 <= soFar.last._2){
+        print("soFar = " + soFar+"\n");
+        print("curr = " + curr+"\n");
+        print("soFar.last._2 = " + soFar.last._2+"\n");
+        print("curr._1 = " + curr._1+"\n");
+        soFar.updated(soFar.length - 1, (soFar.last._1, math.max(curr._2, soFar.last._2)));
+      } else {
+        soFar :+ curr;
+      }
+    })                                            //> res2: scala.collection.immutable.Vector[(Int, Int)] = Vector((386666,386766
+                                                  //| ), (386793,386893))
+    
+    
 }

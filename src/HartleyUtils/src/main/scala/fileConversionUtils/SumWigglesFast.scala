@@ -24,7 +24,7 @@ object SumWigglesFast {
             new UnaryArgument(name = "calcMean",
                               arg = List("--calcMean","-m"), // name of value
                               argDesc = "Flag to indicate that the mean average should be calculated, rather than the sum." // description
-                              ) ::
+                              ) ::                          
             new BinaryOptionArgument[List[Double]](
                                          name = "sizeFactors", 
                                          arg = List("--sizeFactors"), 
@@ -56,8 +56,8 @@ object SumWigglesFast {
                                          valueName = "<filelist.txt | - | file1.wig,file2.wig,...>",
                                          argDesc = "One of three things:"+
                                                    "(1) A comma-delimited list of wig files. Note: NO WHITESPACE!"+
-                                                   "(2) A file (or '-' to read from stdin) containing a list of the wig files to merge (one on each line).\n"+
-                                                   "Optionally, the file can have a second (tab-delimited) column, containing the normalization factors to use. If this column is present, "+
+                                                   "(2) A file ending in '.txt' (or '-' to read from stdin) containing a list of the wig files to merge (one on each line). If the parameter is a file name, then it MUST end in '.txt'. "+
+                                                   "Optionally, the list file can have a second (tab-delimited) column, containing the normalization factors to use. If this column is present, "+
                                                    "this utility will automatically calculate the normalized totals (or the normalized mean, if --calcMean is set).\n"+
                                                    "Note: wig filenames cannot contain whitespace or commas.\n"+
                                                    "Also Note: if the wig file names end in \".gz\" or \".zip\", they will be read using the appropriate decompression method."
@@ -91,7 +91,7 @@ object SumWigglesFast {
     
      reportln("runing sumWigglesFast. ignoreSizeFactors = " + ignoreSizeFactors, "debug");
     
-     val initialpairlist : (Seq[(String, Double)]) = if(filelist.contains(",")){
+     val initialpairlist : (Seq[(String, Double)]) = if(! filelist.endsWith(".txt")){
        val files = filelist.split(",").toVector;
        val sf = if(ignoreSizeFactors || sizeFactors.isEmpty){
          repToSeq(1.0, files.length);

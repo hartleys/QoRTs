@@ -121,11 +121,11 @@ object runAllQC {
                                        ) ::
                     new UnaryArgument( name = "noMultiMapped",
                                          arg = List("--fileContainsNoMultiMappedReads"), // name of value
-                                         argDesc = "Flag to indicate that the input sam/bam file contains only primary alignments (ie, no multi-mapped reads). This flag is ALWAYS OPTIONAL, but when applicable this utility will run (slightly) faster using this argument." // description
+                                         argDesc = "Flag to indicate that the input sam/bam file contains only primary alignments (ie, no multi-mapped reads). This flag is ALWAYS OPTIONAL, but when applicable this utility will run (slightly) faster when using this argument. DEPRECIATED!" // description
                                        ) ::
                     new UnaryArgument( name = "keepMultiMapped",
                                          arg = List("--keepMultiMapped"), // name of value
-                                         argDesc = "Flag to indicate that the tool should NOT filter out multi-mapped reads." // description
+                                         argDesc = "Flag to indicate that the tool should NOT filter out multi-mapped reads. Note that even with this flag raised this utility will still only use the 'primary' alignment location for each read. By default any reads that are marked as multi-mapped will be ignored entirely." // description
                                        ) ::
                     new UnaryArgument( name = "noGzipOutput",
                                          arg = List("--noGzipOutput"), // name of value
@@ -139,9 +139,9 @@ object runAllQC {
                                          name = "readGroup", 
                                          arg = List("--readGroup"), 
                                          valueName = "readGroupName",  
-                                         argDesc =  "If this option is set, all analyses will be restricted to reads that are tagged with the given "+
-                                                    "readGroupName using an RG tag. This can be used if multiple read groups have already been combined "+
-                                                    "into a single bam file."
+                                         argDesc =  "If this option is set, all analyses will be restricted to ONLY reads that are tagged with the given "+
+                                                    "readGroupName (using an RG tag). This can be used if multiple read-groups have already been combined "+
+                                                    "into a single bam file, but you want to summarize each read-group separately."
                                         ) ::
                     new BinaryOptionArgument[String](
                                          name = "restrictToGeneList", 
