@@ -2,13 +2,15 @@ QoRTs
 =====
 
 Quality of RNA-Seq Toolset
+v0.0.32
+(Compiled Fri Jan  9 15:57:25 EST 2015)
 
 INSTALLATION:
 The R package can be installed in R using the command:
-install.packages("QoRTs_0.0.29.tar.gz", repos = NULL, type="source")
+install.packages("QoRTs_0.0.32.tar.gz", repos = NULL, type="source")
 
 or using the command-line tool, in linux:
-R CMD INSTALL QoRTs_0.0.29.tar.gz
+R CMD INSTALL QoRTs_0.0.32.tar.gz
 
 The java jar file does not need to be installed. 
 Just execute it using the java command:
@@ -17,16 +19,16 @@ java -jar /path/to/jarfile/QoRTs.jar QC input.bam anno.gtf.gz /output/dir/
 MORE INFORMATION:
 For more information, see the QoRTs vignette, QoRTs-vignette.pdf
 
-Additional options and syntax information for the java utility can be
-found using the command:
-java -jar /path/to/jarfile/QoRTs.jar QC ?
-
-Options and information about other sub-utilities within the java utility
+Additional options and syntax information for the main QC java utility 
 can be found using the command:
-java -jar /path/to/jarfile/QoRTs.jar ?
+java -jar /path/to/jarfile/QoRTs.jar QC --man
+
+Options and information about other sub-utilities within the java package
+can be found using the command:
+java -jar /path/to/jarfile/QoRTs.jar --man
 
 And for each sub-utility:
-java -jar /path/to/jarfile/QoRTs.jar utilname ?
+java -jar /path/to/jarfile/QoRTs.jar utilname --man
 
 Options and information for individual R functions can be found using
 the R command:
@@ -51,6 +53,6 @@ authors as the source of the software or data should be made, using "NHGRI
 Genome Technology Branch" as the citation.
 
 NOTE: The scala package includes (internally) the sam-JDK library 
-(sam-1.113.jar), from picard tools. The MIT license and copyright 
-information can be accessed using the command:
-java -jar /path/to/jarfile/QoRT.jar ? samjdkinfo
+(sam-1.113.jar), from picard tools, which is covered under the MIT license. 
+The MIT license and copyright information can be accessed using the command:
+java -jar /path/to/jarfile/QoRTs.jar --man samjdkinfo
