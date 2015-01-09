@@ -23,7 +23,16 @@ object addNovelSplices {
           command = "mergeNovelSplices", 
           quickSynopsis = "", 
           synopsis = "", 
-          description = "",   
+          description = "This utility takes the QC output from the standard QC utility run on a series of samples "+
+                        "and performs two functions: first, it compiles all splice junctions across all samples and "+
+                        "filters low-coverage novel splice junctions by mean coverage across all samples (optionally normalized with user-supplied size factors). "+
+                        "It then assigns unique identifiers to each novel splice junction that passed this filter, and outputs a special flat gff file "+
+                        "listing all exons, annotated splice junctions "+
+                        "and passed-filter novel splice junctions with assigned unique identifiers for all features. "+
+                        "Next, it uses these unique identifiers to create a new set of JunctionSeq-formatted count files, one for each "+
+                        "input sample. This new count file will include counts for the passed-filter novel splice junctions "+
+                        "in addition to the usual counts for annotated splice junctions, exons, and aggregated-genes, all listed by the assigned unique identifiers."+
+                        "",   
           argList = 
                     new BinaryArgument[Double](name = "minCount",
                                                         arg = List("--minCount"),  

@@ -10,13 +10,24 @@ import internalUtils.GtfTool._;
 
 object makeSpliceJunctionBed {
 
-  class converter extends CommandLineRunUtil {
+  class converter extends CommandLineRunUtil { 
      val parser : CommandLineArgParser = 
        new CommandLineArgParser(
           command = "makeSpliceBed", 
           quickSynopsis = "", 
           synopsis = "", 
-          description = "",   
+          description = "This utility takes the splice junction count files created by the QoRTs QC utility "+
+                        "across multiple samples "+
+                        "and creates a single merged splice junction 'bed' file that lists each splice junction along with the "+
+                        "mean read-pair coverage counts (optionally, the mean normalized counts)."+
+                        "This splice junction bed file "+
+                        "can be used to visualize splice junction counts using the UCSC genome browser "+
+                        "and other similar utilities."+
+                        ""+
+                        ""+
+                        ""+
+                        ""+
+                        "",   
           argList = 
                     new BinaryOptionArgument[String](
                                          name = "rgb", 

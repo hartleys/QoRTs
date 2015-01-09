@@ -16,6 +16,8 @@
                      rasterize.large.plots,
                      raster.height = 1000, 
                      raster.width = 1000,
+                     exclude.autosomes.chrom.rate.plot = TRUE,
+                     chromosome.name.style = "UCSC",
                      \dots)
 }
 \arguments{
@@ -68,6 +70,15 @@
     Numeric. If rasterize.plotting.area is TRUE, then this is the
     width of the plotting area raster image, in pixels. Double-pane plots
     will be twice this width.
+  }
+  \item{exclude.autosomes.chrom.rate.plot}{
+    A logical value indicating whether to exclude autosomes from the plot.
+    See \code{\link{makePlot.chrom.type.rates}}
+  }
+  \item{chromosome.name.style}{
+    A string value indicating the style of the chromosome names, 
+    and also how to split up the categories. See 
+    \code{\link{makePlot.chrom.type.rates}}
   }
   \item{\dots}{ 
     Arguments to be passed to methods, such as

@@ -9,7 +9,9 @@ import internalUtils.commandLineUI._;
 
 object runner {
   
-  final val QORTS_VERSION = "0.0.29"; // REPLACE_THIS_QORTS_VERSION_VARIABLE_WITH_VERSION_NUMBER          (note this exact text is used in a search-and-replace. Do not change it.)
+  final val QORTS_VERSION = "0.0.32"; // REPLACE_THIS_QORTS_VERSION_VARIABLE_WITH_VERSION_NUMBER          (note this exact text is used in a search-and-replace. Do not change it.)
+  final val QORTS_COMPILE_DATE = "Fri Jan  9 15:57:25 EST 2015"; // REPLACE_THIS_QORTS_DATE_VARIABLE_WITH_DATE          (note this exact text is used in a search-and-replace. Do not change it.)
+  
   //final val FOR_HELP_STRING = "For help, use command: "
   
   final val Runner_ThisProgramsExecutableJarFileName : String = "QoRTs.jar";
@@ -27,7 +29,7 @@ object runner {
            ("bamToWiggle" ->  (() => new fileConversionUtils.bamToWiggle.wiggleMaker)),
            ("makeSpliceBed" ->  (() => new fileConversionUtils.convertSpliceCountsToBed.converter)),
            ("mergeNovelSplices" -> (() => new fileConversionUtils.addNovelSplices.mergeNovelSplices)),
-           ("makeSpliceJunctionBed" -> (() => new fileConversionUtils.makeSpliceJunctionBed.converter))
+           ("makeSummarySpliceBed" -> (() => new fileConversionUtils.makeSpliceJunctionBed.converter))
 
           //(("prepFlatGtfFile",((fileConversionUtils.prepFlatGtfFile.run(_), "", "")))),
            //(("QC", ((qcUtils.runAllQC.run(_)),"",""))),
@@ -56,9 +58,9 @@ object runner {
     //println("Initializing...");
     
     internalUtils.Reporter.init_stderrOnly;
-    internalUtils.Reporter.reportln("Starting QoRTs v"+QORTS_VERSION+" (" + (new java.util.Date()).toString + ")","debug");
-    
-    
+    internalUtils.Reporter.reportln("Starting QoRTs v"+QORTS_VERSION+" (Compiled " + QORTS_COMPILE_DATE + ")","debug");
+    internalUtils.Reporter.reportln("Starting time: ("+(new java.util.Date()).toString+")","debug");
+
     //try{
     if(args.length == 0){
       internalUtils.Reporter.reportln("No command given!","output");

@@ -214,8 +214,6 @@ QC_INTERNAL_SCALAQC_FILE_LIST <- list( summary = "QCsummary.txt",
                                        NVC.minus.clipping.R1 = "QC.NVC.minus.clipping.R1.txt.gz",
                                        NVC.minus.clipping.R2 = "QC.NVC.minus.clipping.R2.txt.gz",
                                        chrom.counts = "QC.chromCount.txt.gz"
-                                       #
-                                       #
                                        #,
                                        #spliceJunctionCounts.knownSplices = "scalaQC.spliceJunctionCounts.knownSplices.txt.gz"
                                        #spliceJunctionCounts.novelSplices = "scalaQC.spliceJunctionCounts.novelSplices.txt.gz"
@@ -512,7 +510,7 @@ calc.samplewise.norm.factors <- function(res, calc.DESeq2 , calc.edgeR ){
     }
     
     if(calc.DESeq2 & "DESeq2" %in% rownames(installed.packages())){
-      message("Calculating DESeq2 Normalization Factors (Geometric normalization)...\n");
+      message("Calculating DESeq2 Normalization Factors (Geometric normalization)...");
       suppressPackageStartupMessages(require("DESeq2"));
       
       tryCatch({
@@ -521,31 +519,31 @@ calc.samplewise.norm.factors <- function(res, calc.DESeq2 , calc.edgeR ){
         message("WARNING: DESeq2::estimateSizeFactorsForMatrix threw warnings: ");
         message(w);
       }, error = function(e){
-        message("WARNING: DESeq2::estimateSizeFactorsForMatrix failed. Skipping DESeq2 normalization.\n",e);
+        message("WARNING: DESeq2::estimateSizeFactorsForMatrix failed. Skipping DESeq2 normalization.",e);
         #norm.factors[,Norm_Geo:=NULL];
       });
     }
     
     if(calc.edgeR & "edgeR" %in% rownames(installed.packages())){
-      message("Calculating edgeR Normalization Factors (all edgeR normalizations)...\n");
+      message("Calculating edgeR Normalization Factors (all edgeR normalizations)...");
       suppressPackageStartupMessages(require("edgeR"));
       
       tryCatch({
         norm.factors$Norm_TMM <- calcNormFactors(count.matrix, method="TMM");
       }, error = function(e){
-        message("WARNING: edgeR::calcNormFactors(method=TMM) failed. Skipping edgeR TMM normalizations.\n",e);
+        message("WARNING: edgeR::calcNormFactors(method=TMM) failed. Skipping edgeR TMM normalizations.",e);
         #norm.factors[,Norm_TMM:=NULL];
       });
        tryCatch({
          norm.factors$Norm_UQ <- calcNormFactors(count.matrix, method="upperquartile");
        }, error = function(e){
-         message("WARNING: edgeR::calcNormFactors(method=upperquartile) failed. Skipping edgeR upperquartile normalizations.\n",e);
+         message("WARNING: edgeR::calcNormFactors(method=upperquartile) failed. Skipping edgeR upperquartile normalizations.",e);
          #norm.factors[,Norm_UQ:=NULL];
       });
       tryCatch({
         norm.factors$Norm_RLE <- calcNormFactors(count.matrix, method="RLE");
       }, error = function(e){
-        message("WARNING: edgeR::calcNormFactors(method=RLE) failed. Skipping edgeR RLE normalizations.\n",e);
+        message("WARNING: edgeR::calcNormFactors(method=RLE) failed. Skipping edgeR RLE normalizations.",e);
         #norm.factors[,Norm_RLE:=NULL];
       });
     }
@@ -580,18 +578,18 @@ calc.lanebamwise.norm.factors <- function(res, calc.DESeq2 , calc.edgeR){
        is.gene <- substr(df$GENEID,1,1) != "_";
 
        count.matrix <- do.call(cbind.data.frame, lapply(res@qc.data[["geneCounts"]], function(X){ X$COUNT } ));
-       count.matrix <- count.matrix[is.gene,];
+       count.matrix <- count.matrix[is.gene,, drop = F];
     }
     
     if(calc.DESeq2 & "DESeq2" %in% rownames(installed.packages())){
-      message("Calculating DESeq2 Normalization Factors (Geometric normalization)...\n");
+      message("Calculating DESeq2 Normalization Factors (Geometric normalization)...");
       suppressPackageStartupMessages(require("DESeq2"));
       
       norm.factors$Norm_Geo <- estimateSizeFactorsForMatrix(count.matrix);
     }
     
     if(calc.edgeR & "edgeR" %in% rownames(installed.packages())){
-      message("Calculating edgeR Normalization Factors (all edgeR normalizations)...\n");
+      message("Calculating edgeR Normalization Factors (all edgeR normalizations)...");
       suppressPackageStartupMessages(require("edgeR"));
       norm.factors$Norm_TMM <- calcNormFactors(count.matrix, method="TMM");
       norm.factors$Norm_UQ <- calcNormFactors(count.matrix, method="upperquartile");
@@ -603,7 +601,6 @@ calc.lanebamwise.norm.factors <- function(res, calc.DESeq2 , calc.edgeR){
 
 
 calc.lanebamwise.bysample.norm.factors <- function(res){
-    #INCOMPLETE!
     samples <- res@sample.list;
     mapped.reads <- lapply( res@qc.data[["summary"]], function(df){
        df$COUNT[df$FIELD == "READ_PAIR_OK"];
@@ -611,7 +608,6 @@ calc.lanebamwise.bysample.norm.factors <- function(res){
 
     norm.factors.bySample <- res@calc.data[["norm.factors.bySample"]];
     #norm.factors <- data.frame(unique.ID = res@decoder$unique.ID, sample.ID = res@decoder$sample.ID, lanebam.norm = rep(1,length(res@decoder$sample.ID)));
-    
     
     bySample.list <- lapply(1:length(samples), function(i){
       s <- samples[i];
@@ -628,6 +624,12 @@ calc.lanebamwise.bysample.norm.factors <- function(res){
     });
 
     norm.factors.byLaneBam <- do.call(rbind.data.frame, bySample.list);
+    
+    norm.factors.byLaneBam.reordering <- sapply(res@decoder$unique.ID, function(uid){
+       which(norm.factors.byLaneBam$unique.ID == uid);
+    });
+    norm.factors.byLaneBam <- norm.factors.byLaneBam[norm.factors.byLaneBam.reordering,];
+    
     res@calc.data[["norm.factors.bySample.splitToLaneBam"]] <- norm.factors.byLaneBam;
     return(res);
 }

@@ -217,6 +217,10 @@ reportTimeAndDiff <- function(ts = NULL){
 ####################################################################################
 ###   Minor Utility functions:
 
+removeLineBreaks <- function(s){
+   gsub("\n"," ",s,fixed=TRUE)
+}
+
 overmerge.list <- function(list.old,list.new){
   list.out <- list.old;
   if(length(list.new) > 0){
@@ -258,9 +262,13 @@ color2transparent <- function(someColor,alpha){
     blue=curcoldata[3],alpha=alpha, maxColorValue=255)})
 }
 
-blank.plot <- function(label){
+blank.plot <- function(label, cex = NULL, ...){
   plot(0,0,col="transparent", xlim=c(0,1),ylim=c(0,1),axes=F,xlab="",ylab="");
-  text(0.5,0.5,labels=paste0(label,collapse="\n"),cex=3);
+  label.text <- paste0(label,collapse="\n");
+  if(is.null(cex)){
+    cex <- fit.character.vector(label.text)
+  }
+  text(0.5,0.5, labels = label.text, cex = cex, ...);
   box();
 }
 

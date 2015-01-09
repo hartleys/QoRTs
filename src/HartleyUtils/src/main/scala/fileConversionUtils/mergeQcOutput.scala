@@ -17,7 +17,13 @@ object mergeQcOutput {
           command = "mergeCounts", 
           quickSynopsis = "", 
           synopsis = "", 
-          description = "",   
+          description = "This utility merges count data from multiple QoRTs QC runs."+
+                        ""+
+                        ""+
+                        ""+
+                        ""+
+                        ""+
+                        "",   
           argList = 
                     new BinaryArgument[Int](
                                          name = "wiggleWindow", 

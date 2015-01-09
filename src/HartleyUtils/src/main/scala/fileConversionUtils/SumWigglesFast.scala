@@ -15,7 +15,15 @@ object SumWigglesFast {
           command = "mergeWig",  
           quickSynopsis = "", 
           synopsis = "",  
-          description = "",   
+          description = "This utility merges multiple '.wig' wiggle files into a single summary '.wig' wiggle file. "+
+                        "Optionally it can be used to display the mean read-pair coverage of each window across all input wiggle files rather than the sum. "+
+                        "Also optionally, the mean/sum can be weighted by a set of user-supplied normalization factors."+
+                        ""+
+                        ""+
+                        ""+
+                        ""+
+                        ""+
+                        "",   
           argList = 
             new UnaryArgument(name = "makeNegative",
                               arg = List("--makeNegative","-n"), // name of value

@@ -34,7 +34,13 @@ object bamToWiggle {
           command = "bamTowiggle", 
           quickSynopsis = "", 
           synopsis = "", 
-          description = "Calculates depth-of-coverage for each equally-sized window across the entire genome. Note: By default this counts read pairs as seperate reads.",   
+          description = "Generates '.wig' wiggle files, suitable for use with the UCSC genome browser or "+
+                        "similar tools. Wiggle files contain depth-of-coverage counts for all equally-sized "+
+                        "windows across the entire genome. These depth-of-coverage counts can be either be by read (the default) or "+
+                        "by read-pair."+
+                        ""+
+                        ""+
+                        "",
           argList = 
                     new BinaryArgument[Double](   name = "sizefactor",
                                                         arg = List("--sizefactor"),  
@@ -63,7 +69,7 @@ object bamToWiggle {
                                        ) ::
                     new UnaryArgument(   name = "stranded", 
                                          arg = List("--stranded"), // name of value
-                                         argDesc = "The stranded flag. If this is set, then two wiggle files are created, one for each strand." // description
+                                         argDesc = "The stranded flag, used for strand-specific data. If this is set, then two wiggle files are created, one for each strand." // description
                                        ) ::
                     new UnaryArgument(   name = "fr_secondstrand", 
                                          arg = List("--stranded_fr_secondstrand"), // name of value
@@ -77,6 +83,22 @@ object bamToWiggle {
                                          arg = List("--keepMultiMapped"), // name of value
                                          argDesc = "Flag to indicate that the tool should NOT filter out multi-mapped reads. Note that even with this flag raised this utility will still only use the 'primary' alignment location for each read. By default any reads that are marked as multi-mapped will be ignored entirely." // description
                                        ) ::
+                    new UnaryArgument( name = "includeTrackDefLine",
+                                         arg = List("--includeTrackDefLine"), // name of value
+                                         argDesc = "Flag to indicate that a track definition line should be included. Necessary if you intend to directly use the wig file rather than first converting to bigwig." // description
+                                       ) ::
+                    new BinaryOptionArgument[String](
+                                         name = "rgbColor", 
+                                         arg = List("--rgbColor"), 
+                                         valueName = "r,g,b",  
+                                         argDesc =  "The color for the track. Nonfunctional unless the --includeTrackDefLine flag is raised. three numbers from 0-255, with no whitespace, defining the color and altColor for the track. For more information refer to the wiggle track definition on the UCSC genome browser website."
+                                        ) ::
+                    new BinaryOptionArgument[String](
+                                         name = "additionalTrackOptions", 
+                                         arg = List("--additionalTrackOptions"), 
+                                         valueName = "\"track options\"",  
+                                         argDesc =  "More options for the track. For more information refer to the wiggle track definition on the UCSC genome browser website."
+                                        ) ::                                        
                     new BinaryOptionArgument[String](
                                          name = "readGroup", 
                                          arg = List("--readGroup"), 
@@ -90,7 +112,7 @@ object bamToWiggle {
                                          argDesc = "The UCSC tool wigToBigWig only allows wiggle files in which every window is of equal size. "+
                                                    "This means that if the chromosome size is not divisible by the window size, a few bases are not "+
                                                    "counted on the end of the chromosome. Using this flag will cause this utility to not truncate off"+
-                                                   " the last odd-sized window. However, be aware that this will mean that you cannot use wigToBigWig to"+
+                                                   " the last odd-sized window. However, be aware that this will mean that you cannot use the UCSC 'wigToBigWig' utility to"+
                                                    " convert the wiggle file to a (smaller and more efficient) bigWig file." 
                                        ) ::
                     new BinaryArgument[Int](   name = "windowSize",
@@ -144,7 +166,10 @@ object bamToWiggle {
              parser.get[Boolean]("negativeReverseStrand"),
              parser.get[Boolean]("countByReadPair"),
              parser.get[Boolean]("keepMultiMapped"),
-             parser.get[Option[String]]("readGroup")
+             parser.get[Option[String]]("readGroup"),
+             parser.get[Boolean]("includeTrackDefLine"),
+             parser.get[Option[String]]("rgbColor"),
+             parser.get[Option[String]]("additionalTrackOptions")
            );
          }
      }
@@ -166,7 +191,10 @@ object bamToWiggle {
   def run(infiles : List[String], outfilePrefix : String, trackName : String, chromLengthFile : String, noTruncate : Boolean, 
       windowSize : Int, isSingleEnd : Boolean, stranded : Boolean, fr_secondStrand : Boolean, sizeFactor : Double, testRun : Boolean, noGzipOutput : Boolean, 
       negativeReverseStrand : Boolean, countPairsTogether : Boolean,
-      keepMultiMapped : Boolean, readGroup : Option[String]){
+      keepMultiMapped : Boolean, readGroup : Option[String],
+      includeTrackDef : Boolean,
+      rgbColor : Option[String],
+      additionalTrackOptions : Option[String]){
     
     //registerGlobalParam[Boolean]("noGzipOutput", noGzipOutput);
     internalUtils.optionHolder.OPTION_noGzipOutput = noGzipOutput;
@@ -174,7 +202,7 @@ object bamToWiggle {
     val initialTimeStamp = TimeStampUtil();
     standardStatusReport(initialTimeStamp);
     
-    val qcBTW : QcBamToWig = new QcBamToWig(trackName , chromLengthFile , noTruncate , windowSize , isSingleEnd, stranded , fr_secondStrand, sizeFactor, negativeReverseStrand, countPairsTogether );
+    val qcBTW : QcBamToWig = new QcBamToWig(trackName , chromLengthFile , noTruncate , windowSize , isSingleEnd, stranded , fr_secondStrand, sizeFactor, negativeReverseStrand, countPairsTogether , includeTrackDef, rgbColor, additionalTrackOptions);
     
     for(infile <- infiles){
       runOnFile(infile , qcBTW , testRun, isSingleEnd, keepMultiMapped, readGroup);
@@ -245,7 +273,14 @@ object bamToWiggle {
   }
   
   
-  class QcBamToWig(trackName : String, chromLengthFile : String, noTruncate : Boolean, windowSize : Int, isSingleEnd: Boolean, stranded : Boolean, fr_secondStrand : Boolean, sizeFactor : Double, negativeReverseStrand : Boolean, countPairsTogether : Boolean) extends QCUtility[Unit] {
+  class QcBamToWig(trackName : String, chromLengthFile : String, 
+                   noTruncate : Boolean, windowSize : Int, 
+                   isSingleEnd: Boolean, stranded : Boolean,
+                   fr_secondStrand : Boolean, sizeFactor : Double, 
+                   negativeReverseStrand : Boolean, countPairsTogether : Boolean, 
+                   includeTrackDef : Boolean, rgbColor : Option[String],
+                   additionalTrackOptions : Option[String]) extends QCUtility[Unit] {
+    
     val chromMap : Map[(String,Char),Chrom] = genChrom(chromLengthFile, windowSize, stranded, ! noTruncate);
     var unknownChromSet : Set[String] = Set[String]();
     
@@ -300,6 +335,12 @@ object bamToWiggle {
       if(stranded){
         val writerF = openWriterSmart_viaGlobalParam(outfile + windowString + ".fwd.wig");
         val writerR = openWriterSmart_viaGlobalParam(outfile + windowString + ".rev.wig");
+        val rgbColorString = if(rgbColor.isEmpty) " " else " color="+rgbColor.get+" altColor="+rgbColor.get +" ";
+        val additionalOptionsString = if(additionalTrackOptions.isEmpty) " " else " "+additionalTrackOptions.get+" ";
+        if(includeTrackDef){
+          writerF.write("track name="+trackName+"_FWD type=wiggle_0 visibility=full"+rgbColorString+additionalOptionsString+"\n");
+          writerR.write("track name="+trackName+"_REV type=wiggle_0 visibility=full"+rgbColorString+additionalOptionsString+"\n");
+        }
         
         val sortedKeyList : Vector[(String,Char)] = chromMap.keySet.toVector.sorted
         for(chromPairs <- sortedKeyList){

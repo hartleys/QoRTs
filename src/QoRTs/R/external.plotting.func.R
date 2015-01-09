@@ -15,6 +15,7 @@ makePlot.qual.pair <- function(plotter, y.name, r2.buffer = NULL, debugMode = DE
 
   res <- plotter$res;
   plot.name <- paste0(plot.name," Phred Quality Score");
+  plotter.error.wrapper(plot.name, plotterFcn = function(){
   if(debugMode){ ts <- timestamp() }
   if(is.null(plotter$res@qc.data[["quals.r1"]]) ){
     message(paste0("Warning: Skipping ",plot.name," plotting. Data not found!"));
@@ -47,15 +48,16 @@ makePlot.qual.pair <- function(plotter, y.name, r2.buffer = NULL, debugMode = DE
    internal.plot.main.title(paste0(plot.name), plotter, ...);
    
     if(debugMode){ message("Finished: ",plot.name," plot.",getTimeAndDiff(ts)); }
-}}
+}})}
 
 makePlot.gc <- function(plotter, plot.medians = NULL, plot.means = TRUE, debugMode = DEFAULTDEBUGMODE, paired = FALSE, ...){
+  plot.name <- "GC Content";
+plotter.error.wrapper(plot.name, plotterFcn = function(){
   if(! paired){
     makePlot.gc.unpaired(plotter = plotter, plot.medians = plot.medians, plot.means = plot.means, debugMode = debugMode, ...);
   } else {
   
   res <- plotter$res;
-  plot.name <- "GC Content";
   if(debugMode){ ts <- timestamp() }
   if(is.null(plotter$res@qc.data[["gc.paired"]]) ){
     
@@ -77,11 +79,12 @@ makePlot.gc <- function(plotter, plot.medians = NULL, plot.means = TRUE, debugMo
   internal.plot.main.title("GC Content", plotter, ...);
   
     if(debugMode){ message("Finished: ",plot.name," plot.",getTimeAndDiff(ts)); }
-}}}
+}}})}
 
 makePlot.gc.unpaired <- function(plotter, plot.medians = NULL, plot.means = TRUE, debugMode = DEFAULTDEBUGMODE, ...){
-  res <- plotter$res;
   plot.name <- "GC Content, Unpaired";
+plotter.error.wrapper(plot.name, plotterFcn = function(){
+  res <- plotter$res;
   if(debugMode){ ts <- timestamp() }
   if(is.null(plotter$res@qc.data[["gc.unpaired"]]) ){
     
@@ -105,7 +108,7 @@ makePlot.gc.unpaired <- function(plotter, plot.medians = NULL, plot.means = TRUE
   internal.plot.main.title("GC Content, Unpaired", plotter, ...);
   
     if(debugMode){ message("Finished: ",plot.name," plot.",getTimeAndDiff(ts)); }
-}}
+}})}
 
 makePlot.clipping <- function(plotter, rate.per.million = FALSE, r2.buffer = NULL , debugMode = DEFAULTDEBUGMODE,...){
   makePlot.cigarOp.byCycle(plotter,"SoftClip", r2.buffer = r2.buffer, rate.per.million = rate.per.million, ... );
@@ -147,6 +150,8 @@ makePlot.cigarOp.byCycle <- function(plotter,op, r2.buffer = NULL, rate.per.mill
 
   res <- plotter$res;
   plot.name <- paste0(op.title, ", by read cycle");
+  plotter.error.wrapper(plot.name, plotterFcn = function(){
+
   if(debugMode){ ts <- timestamp() }
   if(is.null(plotter$res@qc.data[["cigarOpDistribution.byReadCycle.R1"]]) ){
     
@@ -195,14 +200,14 @@ makePlot.cigarOp.byCycle <- function(plotter,op, r2.buffer = NULL, rate.per.mill
    internal.plot.main.title(paste0(op.title, ", by read cycle"), plotter, ...);
    
     if(debugMode){ message("Finished: ",plot.name," plot.",getTimeAndDiff(ts)); }
-}}
+}})}
 
 
 
 makePlot.insert.size <- function(plotter, calc.rate = TRUE, pct.cutoff = 0.98, plot.medians = TRUE, plot.means = NULL, debugMode = DEFAULTDEBUGMODE,...){
-
-  res <- plotter$res;
   plot.name <- "Gene-Body Coverage";
+plotter.error.wrapper(plot.name, plotterFcn = function(){
+  res <- plotter$res;
   if(debugMode){ ts <- timestamp() }
   if(is.null(plotter$res@qc.data[["insert.size"]]) ){
     
@@ -250,12 +255,13 @@ makePlot.insert.size <- function(plotter, calc.rate = TRUE, pct.cutoff = 0.98, p
   title(ylab = "Rate");
   
     if(debugMode){ message("Finished: ",plot.name," plot.",getTimeAndDiff(ts)); }
-}}
+}})}
 
 
 makePlot.genebody.coverage <- function(plotter, plot.medians = NULL, plot.means = TRUE, debugMode = DEFAULTDEBUGMODE, ... ){
-  res <- plotter$res;
   plot.name <- "Gene-Body Coverage";
+plotter.error.wrapper(plot.name, plotterFcn = function(){
+  res <- plotter$res;
   if(debugMode){ ts <- timestamp() }
   if(is.null(plotter$res@qc.data[["geneBodyCoverage.by.expression.level"]]) ){
     
@@ -285,11 +291,12 @@ makePlot.genebody.coverage <- function(plotter, plot.medians = NULL, plot.means 
   title(ylab = "Rate");
   
     if(debugMode){ message("Finished: ",plot.name," plot.",getTimeAndDiff(ts)); }
-}}
+}})}
 
 makePlot.genebody.coverage.UMQuartile <- function(plotter, plot.medians = NULL, plot.means = TRUE, debugMode = DEFAULTDEBUGMODE, ... ){
-  res <- plotter$res;
   plot.name <- "Gene-Body Coverage, Upper Middle Quartile Genes";
+plotter.error.wrapper(plot.name, plotterFcn = function(){
+  res <- plotter$res;
   if(debugMode){ ts <- timestamp() }
   if(is.null(plotter$res@qc.data[["geneBodyCoverage.by.expression.level"]]) ){
     
@@ -319,11 +326,12 @@ makePlot.genebody.coverage.UMQuartile <- function(plotter, plot.medians = NULL, 
   title(ylab = "Rate");
   
     if(debugMode){ message("Finished: ",plot.name," plot.",getTimeAndDiff(ts)); }
-}}
+}})}
 
 makePlot.genebody.coverage.lowExpress <- function(plotter, plot.medians = NULL, plot.means = TRUE, debugMode = DEFAULTDEBUGMODE, ... ){
-  res <- plotter$res;
   plot.name <- "Gene-Body Coverage, Low Expression Genes";
+plotter.error.wrapper(plot.name, plotterFcn = function(){
+  res <- plotter$res;
   if(debugMode){ ts <- timestamp() }
   if(is.null(plotter$res@qc.data[["geneBodyCoverage.by.expression.level"]]) ){
     
@@ -353,13 +361,14 @@ makePlot.genebody.coverage.lowExpress <- function(plotter, plot.medians = NULL, 
   title(ylab = "Rate");
   
     if(debugMode){ message("Finished: ",plot.name," plot.",getTimeAndDiff(ts)); }
-}}
+}})}
 
 
 
 makePlot.missingness.rate <- function(plotter,  r2.buffer = NULL, debugMode = DEFAULTDEBUGMODE, ...){
-  res <- plotter$res;
   plot.name <- "Missingness Rate, by read cycle";
+plotter.error.wrapper(plot.name, plotterFcn = function(){
+  res <- plotter$res;
   if(debugMode){ ts <- timestamp() }
   if(is.null(plotter$res@qc.data[["NVC.raw.R1"]]) ){
     
@@ -402,7 +411,7 @@ makePlot.missingness.rate <- function(plotter,  r2.buffer = NULL, debugMode = DE
   title(ylab = "Missing Nucleotide Rate");
   
     if(debugMode){ message("Finished: ",plot.name," plot.",getTimeAndDiff(ts)); }
-}}
+}})}
 
 ####################################################################################
 ####################################################################################
@@ -410,6 +419,7 @@ makePlot.missingness.rate <- function(plotter,  r2.buffer = NULL, debugMode = DE
 
 
 makePlot.cigarLength.distribution <- function(plotter,op, r2.buffer = NULL, perMillion = TRUE, log.x = FALSE, log.y = FALSE, debugMode = DEFAULTDEBUGMODE,...){
+
   if(op == "SoftClip"){
     op.title <- "Alignment Clipping Length";
     op.field <- "S"
@@ -434,8 +444,11 @@ makePlot.cigarLength.distribution <- function(plotter,op, r2.buffer = NULL, perM
   } else {
     stop("Fatal error: cigarOp Code not recognized! Must be one of: SoftClip,HardClip,Del,Ins,Pad,Splice");
   }
-  res <- plotter$res;
   plot.name <- paste0(op.title," Distribution", ", by read cycle");
+  plotter.error.wrapper(plot.name, plotterFcn = function(){
+  
+  res <- plotter$res;
+
   if(debugMode){ ts <- timestamp() }
   if(is.null(plotter$res@qc.data[["cigarOpLengths.byOp.R1"]]) ){
     
@@ -499,7 +512,7 @@ makePlot.cigarLength.distribution <- function(plotter,op, r2.buffer = NULL, perM
    internal.plot.main.title(paste0(op.title," Distribution"), plotter, ...);
    
     if(debugMode){ message("Finished: ",plot.name," plot.",getTimeAndDiff(ts)); }
-}}
+}})}
 
 
 
@@ -511,6 +524,8 @@ makePlot.cigarLength.distribution <- function(plotter,op, r2.buffer = NULL, perM
 makePlot.gene.cdf <- function(plotter, sampleWise = FALSE, plot.intercepts = TRUE, label.intercepts = FALSE, debugMode = DEFAULTDEBUGMODE,
                               rasterize.plotting.area = FALSE, raster.height = 1000, raster.width = 1000,
                               ...){
+plot.name <- "gene cdf"
+plotter.error.wrapper(plot.name, plotterFcn = function(){
   if(rasterize.plotting.area){
     check.rasterize.or.die("rasterize.plotting.area");
   }
@@ -523,13 +538,14 @@ makePlot.gene.cdf <- function(plotter, sampleWise = FALSE, plot.intercepts = TRU
     rasterize.plotting.area = rasterize.plotting.area, raster.height = raster.height, raster.width = raster.width, debugMode = debugMode,
     ...);
   } 
-}
+})}
 
 makePlot.gene.cdf.bamWise <- function(plotter, plot.intercepts = TRUE, label.intercepts = FALSE, debugMode = DEFAULTDEBUGMODE,
                                       rasterize.plotting.area = FALSE, raster.height = 1000, raster.width = 1000,
                                       ...){
-  res <- plotter$res;
   plot.name <- "Cumulative Gene Assignment Diversity";
+plotter.error.wrapper(plot.name, plotterFcn = function(){
+  res <- plotter$res;
   if(debugMode){ ts <- timestamp() }
   if(is.null(plotter$res@calc.data[["LANEBAM_GENE_CDF"]]) ){
     
@@ -541,13 +557,14 @@ makePlot.gene.cdf.bamWise <- function(plotter, plot.intercepts = TRUE, label.int
     if(debugMode){ message("Finished: ",plot.name," plot.",getTimeAndDiff(ts)); }
   }
   
-}
+})}
 
 makePlot.gene.cdf.sampleWise <- function(plotter, plot.intercepts = TRUE, label.intercepts = TRUE, debugMode = DEFAULTDEBUGMODE,
                                          rasterize.plotting.area = FALSE, raster.height = 1000, raster.width = 1000,
                                          ...){
-  res <- plotter$res;
   plot.name <- "Cumulative Gene Assignment Diversity, sampleWise";
+plotter.error.wrapper(plot.name, plotterFcn = function(){
+  res <- plotter$res;
   if(debugMode){ ts <- timestamp() }
   if(is.null(plotter$res@calc.data[["SAMPLE_GENE_CDF"]]) ){
     
@@ -561,7 +578,7 @@ makePlot.gene.cdf.sampleWise <- function(plotter, plot.intercepts = TRUE, label.
   
     if(debugMode){ message("Finished: ",plot.name," plot.",getTimeAndDiff(ts)); }
   }
-}
+})}
 
 ####################################################################################
 ####################################################################################
@@ -571,12 +588,13 @@ makePlot.raw.NVC <- function(plotter,  r2.buffer = NULL,  points.highlighted = T
                          label.majority.bases = FALSE, label.majority.bases.threshold = 0.5, label.majority.bases.cex = 0.5, 
                          rasterize.plotting.area = FALSE, raster.height = 1000, raster.width = 2000,
                          show.base.legend = TRUE, debugMode = DEFAULTDEBUGMODE, ...){
+  plot.name <- "NVC, Raw";
+plotter.error.wrapper(plot.name, plotterFcn = function(){
   if(rasterize.plotting.area){
     check.rasterize.or.die("rasterize.plotting.area");
   }
 
   res <- plotter$res;
-  plot.name <- "NVC, Raw";
   if(debugMode){ ts <- timestamp() }
   if(is.null(plotter$res@qc.data[["NVC.raw.R1"]]) ){
     
@@ -607,17 +625,18 @@ makePlot.raw.NVC <- function(plotter,  r2.buffer = NULL,  points.highlighted = T
   title(ylab = "Nucleotide Rate");
     if(debugMode){ message("Finished: ",plot.name," plot.",getTimeAndDiff(ts)); }
   
-}}
+}})}
 
 makePlot.minus.clipping.NVC <- function(plotter,  r2.buffer = NULL, points.highlighted = TRUE,
                                     label.majority.bases = FALSE, label.majority.bases.threshold = 0.5, label.majority.bases.cex = 0.5, 
                                     rasterize.plotting.area = FALSE, raster.height = 1000, raster.width = 2000,
                                     show.base.legend = TRUE, debugMode = DEFAULTDEBUGMODE, ...){
+  plot.name <- "NVC, Aligned bases only";
+plotter.error.wrapper(plot.name, plotterFcn = function(){
   if(rasterize.plotting.area){
     check.rasterize.or.die("rasterize.plotting.area");
   }
   res <- plotter$res;
-  plot.name <- "NVC, Aligned bases only";
   if(debugMode){ ts <- timestamp() }
   if(is.null(plotter$res@qc.data[["NVC.minus.clipping.R1"]]) ){
     
@@ -657,17 +676,18 @@ makePlot.minus.clipping.NVC <- function(plotter,  r2.buffer = NULL, points.highl
   title(xlab = "Read Cycle");
   title(ylab = "Nucleotide Rate");
     if(debugMode){ message("Finished: ",plot.name," plot.",getTimeAndDiff(ts)); }
-}}
+}})}
 
 makePlot.NVC.lead.clip <- function(plotter, clip.amt = 10,  r2.buffer = clip.amt / 10, points.highlighted = TRUE,
                               label.majority.bases = TRUE, label.majority.bases.threshold = 0.5, label.majority.bases.cex = 1, 
                               rasterize.plotting.area = FALSE, raster.height = 1000, raster.width = 1000,
                               show.base.legend = TRUE, debugMode = DEFAULTDEBUGMODE, ...){
+  plot.name <- "Lead Clipping NVC";
+plotter.error.wrapper(plot.name, plotterFcn = function(){
   if(rasterize.plotting.area){
     check.rasterize.or.die("rasterize.plotting.area");
   }
   res <- plotter$res;
-  plot.name <- "Lead Clipping NVC";
   if(debugMode){ ts <- timestamp() }
   if(is.null(plotter$res@qc.data[["NVC.lead.clip.R1"]]) ){
     
@@ -699,16 +719,19 @@ makePlot.NVC.lead.clip <- function(plotter, clip.amt = 10,  r2.buffer = clip.amt
   title(xlab = "Read Cycle");
   title(ylab = "Nucleotide Rate");
     if(debugMode){ message("Finished: ",plot.name," plot.",getTimeAndDiff(ts)); }
-}}
+}})}
+
+
 makePlot.NVC.tail.clip <- function(plotter, clip.amt = 10,  r2.buffer = clip.amt / 10, points.highlighted = TRUE, 
                                label.majority.bases = TRUE, label.majority.bases.threshold = 0.5, label.majority.bases.cex = 1, 
                                rasterize.plotting.area = FALSE, raster.height = 1000, raster.width = 1000,
                                show.base.legend = TRUE, debugMode = DEFAULTDEBUGMODE, ...){
+  plot.name <- "Tail Clipping NVC";
+plotter.error.wrapper(plot.name, plotterFcn = function(){
   if(rasterize.plotting.area){
     check.rasterize.or.die("rasterize.plotting.area");
   }
   res <- plotter$res;
-  plot.name <- "Tail Clipping NVC";
   if(debugMode){ ts <- timestamp() }
   if(is.null(plotter$res@qc.data[["NVC.tail.clip.R1"]]) ){
     
@@ -742,7 +765,7 @@ makePlot.NVC.tail.clip <- function(plotter, clip.amt = 10,  r2.buffer = clip.amt
   title(xlab = "Read Cycle");
   title(ylab = "Nucleotide Rate");
     if(debugMode){ message("Finished: ",plot.name," plot.",getTimeAndDiff(ts)); }
-}}
+}})}
 
 ####################################################################################
 ####################################################################################
@@ -753,13 +776,14 @@ makePlot.NVC.lead.clip.matchByClipPosition <- function(plotter, clip.amt = 10,  
                                                        rasterize.plotting.area = FALSE, raster.height = 1000, raster.width = 1000,
                                                        show.base.legend = TRUE, load.results = TRUE, debugMode = DEFAULTDEBUGMODE, 
                                                        ...){
+  plot.name <- "Lead Clipping NVC";
+plotter.error.wrapper(plot.name, plotterFcn = function(){
   if(rasterize.plotting.area){
     check.rasterize.or.die("rasterize.plotting.area");
   }
   res <- plotter$res;
   #print(clip.amt)
   #print(r2.buffer)
-  plot.name <- "Lead Clipping NVC";
   if(debugMode){ ts <- timestamp() }
   if(is.null(plotter$res@qc.data[["NVC.lead.clip.R1"]]) ){
     
@@ -820,7 +844,7 @@ makePlot.NVC.lead.clip.matchByClipPosition <- function(plotter, clip.amt = 10,  
   title(xlab = "Distance from Clip Start");
   title(ylab = "Nucleotide Rate");
     if(debugMode){ message("Finished: ",plot.name," plot.",getTimeAndDiff(ts)); }
-}}
+}})}
 
 ####################################################################################
 ####################################################################################
@@ -830,13 +854,14 @@ makePlot.NVC.tail.clip.matchByClipPosition <- function(plotter, clip.amt = 10,  
                                                        label.majority.bases = TRUE, label.majority.bases.threshold = 0.5, label.majority.bases.cex = 1, 
                                                        rasterize.plotting.area = FALSE, raster.height = 1000, raster.width = 1000,
                                                        show.base.legend = TRUE, debugMode = DEFAULTDEBUGMODE, ...){
+  plot.name <- "Lead Clipping NVC";
+plotter.error.wrapper(plot.name, plotterFcn = function(){
   if(rasterize.plotting.area){
     check.rasterize.or.die("rasterize.plotting.area");
   }
   res <- plotter$res;
   #print(clip.amt)
   #print(r2.buffer)
-  plot.name <- "Lead Clipping NVC";
   if(debugMode){ ts <- timestamp() }
   if(is.null(plotter$res@qc.data[["NVC.lead.clip.R1"]]) ){
     
@@ -884,7 +909,7 @@ makePlot.NVC.tail.clip.matchByClipPosition <- function(plotter, clip.amt = 10,  
   title(xlab = "Distance from Clip Start");
   title(ylab = "Nucleotide Rate");
     if(debugMode){ message("Finished: ",plot.name," plot.",getTimeAndDiff(ts)); }
-}}
+}})}
 
 
 ####################################################################################
@@ -892,8 +917,9 @@ makePlot.NVC.tail.clip.matchByClipPosition <- function(plotter, clip.amt = 10,  
 ####################################################################################
 
 makePlot.gene.assignment.rates <- function(plotter, debugMode = DEFAULTDEBUGMODE, ...) {
-  res <- plotter$res;
   plot.name <- "Gene Assignment Rates";
+plotter.error.wrapper(plot.name, plotterFcn = function(){
+  res <- plotter$res;
   if(debugMode){ ts <- timestamp() }
   if(is.null(plotter$res@qc.data[["summary"]]) | ! all(c("ReadPairs_UniqueGene","ReadPairs_AmbigGene","ReadPairs_NoGene","ReadPairs_NoGene_Intron","ReadPairs_NoGene_OneKbFromGene","ReadPairs_NoGene_TenKbFromGene", "ReadPairs_NoGene_MiddleOfNowhere","READ_PAIR_OK" ) %in% plotter$res@qc.data[["summary"]][[1]]$FIELD) ){
     
@@ -920,12 +946,13 @@ makePlot.gene.assignment.rates <- function(plotter, debugMode = DEFAULTDEBUGMODE
   title(ylab="Rate");
   internal.plot.main.title("Read Mapping Location Rates", plotter, ...);
     if(debugMode){ message("Finished: ",plot.name," plot.",getTimeAndDiff(ts)); }
-}}
+}})}
 ####  if(is.null(plotter$res@qc.data[["summary"]]) | ! all(c() %in% plotter$res@qc.data[["summary"]][[1]]$FIELD) ){
 
 makePlot.splice.junction.loci.counts <- function(plotter, calc.rate = FALSE, high.low.cutoff = 4, debugMode = DEFAULTDEBUGMODE, ...){
-  res <- plotter$res;
   plot.name <- "Splice Junction Loci Rates";
+plotter.error.wrapper(plot.name, plotterFcn = function(){
+  res <- plotter$res;
   if(debugMode){ ts <- timestamp() }
   if(is.null(plotter$res@qc.data[["summary"]]) | ! all(c("SpliceLoci_Known_FewReads","SpliceLoci_Known_ManyReads","SpliceLoci_Novel_FewReads","SpliceLoci_Novel_ManyReads") %in% plotter$res@qc.data[["summary"]][[1]]$FIELD) ){
     
@@ -967,14 +994,15 @@ makePlot.splice.junction.loci.counts <- function(plotter, calc.rate = FALSE, hig
     internal.plot.main.title("# Observed Splice Junction Loci, by type", plotter, ...);
   }
     if(debugMode){ message("Finished: ",plot.name," plot.",getTimeAndDiff(ts)); }
-}}
+}})}
 
 makePlot.splice.junction.event.ratesPerRead <- function(plotter, high.low.cutoff = 4, debugMode = DEFAULTDEBUGMODE, ...){
+  plot.name <- "Splice Junction Event Rates";
+plotter.error.wrapper(plot.name, plotterFcn = function(){
   calc.ratePerRead = TRUE;
   calc.proportion = FALSE;
   
   res <- plotter$res;
-  plot.name <- "Splice Junction Event Rates";
   if(debugMode){ ts <- timestamp() }
   if(is.null(plotter$res@qc.data[["summary"]]) | ! all(c("SpliceEvents_KnownLociWithFewReads","SpliceEvents_KnownLociWithManyReads","SpliceEvents_NovelLociWithFewReads","SpliceEvents_NovelLociWithManyReads") %in% plotter$res@qc.data[["summary"]][[1]]$FIELD) ){
     
@@ -1015,15 +1043,16 @@ makePlot.splice.junction.event.ratesPerRead <- function(plotter, high.low.cutoff
   internal.plot.main.title("Splice Junction Event Rates per Read-Pair", plotter, ...);
 
     if(debugMode){ message("Finished: ",plot.name," plot.",getTimeAndDiff(ts)); }
-}}
+}})}
 
 
 makePlot.splice.junction.event.proportions <- function(plotter, high.low.cutoff = 4, debugMode = DEFAULTDEBUGMODE, ...){
+  plot.name <- "Splice Junction Event Rates";
+plotter.error.wrapper(plot.name, plotterFcn = function(){
   calc.ratePerRead = FALSE;
   calc.proportion = TRUE;
   
   res <- plotter$res;
-  plot.name <- "Splice Junction Event Rates";
   if(debugMode){ ts <- timestamp() }
   if(is.null(plotter$res@qc.data[["summary"]]) | ! all(c("SpliceEvents_KnownLociWithFewReads","SpliceEvents_KnownLociWithManyReads","SpliceEvents_NovelLociWithFewReads","SpliceEvents_NovelLociWithManyReads") %in% plotter$res@qc.data[["summary"]][[1]]$FIELD) ){
     
@@ -1065,15 +1094,16 @@ makePlot.splice.junction.event.proportions <- function(plotter, high.low.cutoff 
   internal.plot.main.title("Breakdown of Splice Junction Events", plotter, ...);
 
     if(debugMode){ message("Finished: ",plot.name," plot.",getTimeAndDiff(ts)); }
-}}
+}})}
 
 
 makePlot.splice.junction.event.counts <- function(plotter, high.low.cutoff = 4, debugMode = DEFAULTDEBUGMODE, ...){
+  plot.name <- "Splice Junction Event Rates";
+plotter.error.wrapper(plot.name, plotterFcn = function(){
   calc.ratePerRead = FALSE;
   calc.proportion = FALSE;
   
   res <- plotter$res;
-  plot.name <- "Splice Junction Event Rates";
   if(debugMode){ ts <- timestamp() }
   if(is.null(plotter$res@qc.data[["summary"]]) | ! all(c("SpliceEvents_KnownLociWithFewReads","SpliceEvents_KnownLociWithManyReads","SpliceEvents_NovelLociWithFewReads","SpliceEvents_NovelLociWithManyReads") %in% plotter$res@qc.data[["summary"]][[1]]$FIELD) ){
     
@@ -1114,12 +1144,13 @@ makePlot.splice.junction.event.counts <- function(plotter, high.low.cutoff = 4, 
   internal.plot.main.title("# Observed Splice Events, by type", plotter, ...);
 
     if(debugMode){ message("Finished: ",plot.name," plot.",getTimeAndDiff(ts)); }
-}}
+}})}
 
 makePlot.splice.junction.event.proportionsByType <- function(plotter, high.low.cutoff = 4, debugMode = DEFAULTDEBUGMODE, ...){
+  plot.name <- "Splice Junction Event Rates";
+plotter.error.wrapper(plot.name, plotterFcn = function(){
   calc.rate = TRUE
   res <- plotter$res;
-  plot.name <- "Splice Junction Event Rates";
   if(debugMode){ ts <- timestamp() }
   if(is.null(plotter$res@qc.data[["summary"]]) | ! all(c("SpliceEvents_KnownLociWithFewReads","SpliceEvents_KnownLociWithManyReads","SpliceEvents_NovelLociWithFewReads","SpliceEvents_NovelLociWithManyReads") %in% plotter$res@qc.data[["summary"]][[1]]$FIELD) ){
     
@@ -1180,12 +1211,13 @@ makePlot.splice.junction.event.proportionsByType <- function(plotter, high.low.c
   internal.plot.main.title("Breakdown of Splice Junction Events, by type", plotter, ...);
 
     if(debugMode){ message("Finished: ",plot.name," plot.",getTimeAndDiff(ts)); }
-}}
+}})}
 
 
 makePlot.strandedness.test <- function(plotter, plot.target.boxes = FALSE, debugMode = DEFAULTDEBUGMODE, ...){
-  res <- plotter$res;
   plot.name <- "Strandedness Test";
+plotter.error.wrapper(plot.name, plotterFcn = function(){
+  res <- plotter$res;
   if(debugMode){ ts <- timestamp() }
   if(is.null(plotter$res@qc.data[["summary"]]) | ! all(c("StrandTest_frFirstStrand","StrandTest_frSecondStrand") %in% plotter$res@qc.data[["summary"]][[1]]$FIELD) ){
     
@@ -1228,11 +1260,12 @@ makePlot.strandedness.test <- function(plotter, plot.target.boxes = FALSE, debug
     }
   }
     if(debugMode){ message("Finished: ",plot.name," plot.",getTimeAndDiff(ts)); }
-}}
+}})}
 
 makePlot.dropped.rates <- function(plotter, debugMode = DEFAULTDEBUGMODE,...){
-  res <- plotter$res;
   plot.name <- "Dropped Rates";
+plotter.error.wrapper(plot.name, plotterFcn = function(){
+  res <- plotter$res;
   x.names <- c("DROPPED_UNALIGNED",
                "DROPPED_NOT_PROPER_PAIR",
                "DROPPED_READ_FAILS_VENDOR_QC",
@@ -1265,7 +1298,7 @@ makePlot.dropped.rates <- function(plotter, debugMode = DEFAULTDEBUGMODE,...){
   internal.plot.main.title("Read Drop Rate, by Reason", plotter, ...);
     if(debugMode){ message("Finished: ",plot.name," plot.",getTimeAndDiff(ts)); }
   }
-}
+})}
 
 
 
@@ -1273,8 +1306,9 @@ makePlot.dropped.rates <- function(plotter, debugMode = DEFAULTDEBUGMODE,...){
 #c("total.reads","mapped.reads","mapping.rate","mm.reads","mm.rate")
 #names(plotter$res@calc.data)
 makePlot.mapping.rates <- function(plotter, plot.mm = TRUE, y.counts.in.millions = TRUE, debugMode = DEFAULTDEBUGMODE,...){
-  res <- plotter$res;
   plot.name <- "Mapping Rates";
+plotter.error.wrapper(plot.name, plotterFcn = function(){
+  res <- plotter$res;
   if(debugMode){ ts <- timestamp() }
   if(is.null(plotter$res@calc.data[["map.rates"]])){
     
@@ -1355,7 +1389,7 @@ makePlot.mapping.rates <- function(plotter, plot.mm = TRUE, y.counts.in.millions
     
     par(mar = oldmar);
   }
-}
+})}
 
 UCSC.chrom.category.def <- function(chromName){
    if(is.null(chromName)){
@@ -1455,14 +1489,16 @@ makePlot.chrom.type.rates <- function(plotter,
                                   chrom.norm.factors = NULL,
                                   custom.chromosome.style.def.function = NULL,
                                   return.table = FALSE, debugMode = DEFAULTDEBUGMODE, ...){
-  res <- plotter$res;
   plot.name <- "Chromosome Rates";
+plotter.error.wrapper(plot.name, plotterFcn = function(){
+  res <- plotter$res;
   if(debugMode){ ts <- timestamp() }
   if( is.null(plotter$res@qc.data[["chrom.counts"]]) ){
     
     message(paste0("Warning: Skipping ",plot.name," plotting. Data not found!"));
     blank.plot(c(plot.name,"Data Not Found\nSkipping..."));
   } else {
+  
     if(is.null(custom.chromosome.style.def.function)){
       if(chromosome.name.style %in% names(DEFAULT_CHROM_CATEGORY_DEF_FUNCTIONS)){
         chrom.style.def.fcn <- DEFAULT_CHROM_CATEGORY_DEF_FUNCTIONS[[chromosome.name.style]];
@@ -1472,18 +1508,23 @@ makePlot.chrom.type.rates <- function(plotter,
     } else {
       chrom.style.def.fcn <- custom.chromosome.style.def.function;
     }
-    chrom.cats <- chrom.style.def.fcn(NULL)
+    chrom.cats <- chrom.style.def.fcn(NULL);
+    
+    #Remove categories not found in the dataset:
+    #chrom.list <- plotter$res@qc.data[["chrom.counts"]][[1]]$CHROM;
+    #chrom.cats <- chrom.cats[chrom.cats %in% sapply(chrom.list, chrom.style.def.fcn)]
+    
+    
     tf.list <- lapply(1:length(plotter$res@qc.data[["chrom.counts"]]), function(i){
        in.df <- plotter$res@qc.data[["chrom.counts"]][[i]];
        
-
        df <- data.frame( x = 1,y = sum(in.df$CT[ sapply(in.df$CHROM,function(x){ chrom.style.def.fcn(x) == chrom.cats[1] } ) ]),x.titles = chrom.cats[1], stringsAsFactors=F); 
        
        for(j in 2:length(chrom.cats)){
           chrom.cat <- chrom.cats[j];
           df <- rbind(df, c(j,sum(in.df$CT[ sapply(in.df$CHROM,function(x){ chrom.style.def.fcn(x) == chrom.cat } ) ]),chrom.cat)); 
        }
-
+       
        df$y <- as.numeric(df$y);
        df$x <- as.numeric(df$x) ;
        df$x <- df$x + plotter$lanebam.params$horiz.offsets[i] * 0.5
@@ -1497,12 +1538,15 @@ makePlot.chrom.type.rates <- function(plotter,
     for(i in 1:length(chrom.cats)){
       chrom.cat <- chrom.cats[i];
       if(chrom.cat == "Autosomes" & exclude.autosomes){
-        tf.list <- lapply(tf.list, function(tf.xy){ tf.xy[tf.xy$x.titles != chrom.cat,] });
+        tf.list <- lapply(tf.list, function(tf.xy){ tf.xy[tf.xy$x.titles != chrom.cat,,drop=F] });
       } else if(all(sapply(tf.list,function(tf.xy){ tf.xy$y[tf.xy$x.titles == chrom.cat] == 0 }))){
-        tf.list <- lapply(tf.list, function(tf.xy){ tf.xy[tf.xy$x.titles != chrom.cat,] });
+        tf.list <- lapply(tf.list, function(tf.xy){ tf.xy[tf.xy$x.titles != chrom.cat,,drop=F] });
       }
     }
-
+    if(dim(tf.list[[1]])[1] == 0){
+       stop("> makePlot.chrom.type.rates: All chromosomes excluded! Did zero reads align? Are you using inconsistent chromosome names? Have you set exclude.autosomes on a dataset with no non-autosomal reads?");
+    }
+    
     tf.list <- lapply(1:length(tf.list), function(i){
       tf.list[[i]]$x <- 1:length(tf.list[[i]]$x) + plotter$lanebam.params$horiz.offsets[i] * 0.5;
       tf.list[[i]];
@@ -1553,11 +1597,12 @@ makePlot.chrom.type.rates <- function(plotter,
       return(table.df);
     }
   }
-}
+})}
 
 makePlot.norm.factors <- function(plotter, by.sample = TRUE, return.table = FALSE, debugMode = DEFAULTDEBUGMODE, ...){
-  res <- plotter$res;
   plot.name <- "Normalization Factors";
+plotter.error.wrapper(plot.name, plotterFcn = function(){
+  res <- plotter$res;
   if(debugMode){ ts <- timestamp() }
   if( is.null(plotter$res@calc.data[["norm.factors.bySample"]]) ){
     
@@ -1595,11 +1640,12 @@ makePlot.norm.factors <- function(plotter, by.sample = TRUE, return.table = FALS
       return(table.df);
     }
   }
-}
+})}
 
 makePlot.norm.factors.vs.TC <- function(plotter, by.sample = TRUE, return.table = FALSE, debugMode = DEFAULTDEBUGMODE, ...){
+plot.name <- "Normalization Factors";
+plotter.error.wrapper(plot.name, plotterFcn = function(){
   res <- plotter$res;
-  plot.name <- "Normalization Factors";
   if(debugMode){ ts <- timestamp() }
   if( is.null(plotter$res@calc.data[["norm.factors.bySample"]]) ){
     
@@ -1643,13 +1689,14 @@ makePlot.norm.factors.vs.TC <- function(plotter, by.sample = TRUE, return.table 
       return(table.df);
     }
   }
-}
+})}
 
 #INCOMPLETE!!!!!!
 #Placeholder for future functionality!
 makePlot.cigarMismatch <- function(plotter,debugMode = DEFAULTDEBUGMODE, ...){
+plot.name <- "Cigar Mismatch";
+plotter.error.wrapper(plot.name, plotterFcn = function(){
   res <- plotter$res;
-  plot.name <- "Cigar Mismatch";
   if(debugMode){ ts <- timestamp() }
   if(is.null(plotter$res@qc.data[["summary"]]) | ! all(c("CigChk_staggered","CigChk_noAlignedOverlap") %in% plotter$res@qc.data[["summary"]][[1]]$FIELD) ){
     message(paste0("Warning: Skipping ",plot.name," plotting. Data not found!"));
@@ -1672,9 +1719,11 @@ makePlot.cigarMismatch <- function(plotter,debugMode = DEFAULTDEBUGMODE, ...){
     internal.plot.main.title("Strandedness Test", plotter, ...);
     
     if(debugMode){ message("Finished: ",plot.name," plot.",getTimeAndDiff(ts)); }
-}}
+}})}
 #INCOMPLETE! Temporary placeholder for future functionality
 makePlot.splicing.mismatch <- function(plotter, debugMode = DEFAULTDEBUGMODE, ... ){
+plot.name <- "Splice Mismatch";
+plotter.error.wrapper(plot.name, plotterFcn = function(){
   res <- plotter$res;
   plot.name <- "Splicing Mismatch";
   if(debugMode){ ts <- timestamp() }
@@ -1693,7 +1742,7 @@ makePlot.splicing.mismatch <- function(plotter, debugMode = DEFAULTDEBUGMODE, ..
   
   
   
-}}
+}})}
 
 ####################################################################################
 ####################################################################################
@@ -1712,6 +1761,8 @@ makePlot.splicing.mismatch <- function(plotter, debugMode = DEFAULTDEBUGMODE, ..
 
 
 makePlot.legend.box <- function(plotter,debugMode = DEFAULTDEBUGMODE, ...){
+plot.name <- "legend box";
+plotter.error.wrapper(plot.name, plotterFcn = function(){
   plotter.NVC <- plotter;
   plot(0,0,col="transparent",xlim=c(0,1),ylim=c(0,1), axes=F,xlab="",ylab="");
 
@@ -1750,7 +1801,7 @@ makePlot.legend.box <- function(plotter,debugMode = DEFAULTDEBUGMODE, ...){
     #Do nothing.
     return("");
   }
-}
+})}
 
 makePlot.legend.over <- function(position, plotter, debugMode = DEFAULTDEBUGMODE, ...) {
   plotter.NVC <- plotter;

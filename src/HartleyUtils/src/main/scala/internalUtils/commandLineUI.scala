@@ -176,7 +176,7 @@ List(
     }
     
     def getForMoreHelp() : String = {
-      "For more info, use:\njava -jar " + runner.runner.Runner_ThisProgramsExecutableJarFileName + " ? " + command + ""
+      "For more info, use:\njava -jar " + runner.runner.Runner_ThisProgramsExecutableJarFileName + " --man " + command + ""
     }
     
     def getMandatoryArgumentsHelp() : String = {

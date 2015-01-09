@@ -3,6 +3,18 @@
 ########################################################################################################################
 ########################################################################################################################
 ########################################################################################################################
+
+plotter.error.wrapper <- function(plot.name, plotterFcn, ...){
+   tryCatch({
+     plotterFcn();
+   }, error = function(e){
+     message(paste0("Warning: Skipping ",plot.name," plotting. Encountered error: ", removeLineBreaks(e)));
+     blank.plot(c(plot.name," Skipped"), ...);
+   });
+}
+
+
+
 ########################################################################################################################
 
 
@@ -270,11 +282,13 @@ makePlot.gene.cdf.helper <- function(data.list, plotter,plot.intercepts = TRUE, 
    for(i in 1:length(p.params$unique.ID)){
       curr.lanebam <- p.params$unique.ID[i];
       for(j in c(1,10,100,1000,10000)){
-         curr.pct <- tf.list[[ curr.lanebam ]][j];
-         if(curr.pct == 1){
-            break;
+         if(j < length( tf.list[[ curr.lanebam ]] )){
+            curr.pct <- tf.list[[ curr.lanebam ]][j];
+            if(curr.pct == 1){
+               break;
+            }
+            internal.internal.plot.crosshairs(i,j,curr.lanebam,curr.pct);
          }
-         internal.internal.plot.crosshairs(i,j,curr.lanebam,curr.pct);
       }
       j <- min(which(tf.list[[ curr.lanebam ]] == 1));
       curr.pct <- 1;
@@ -352,12 +366,14 @@ makePlot.gene.cdf.bySample.helper <- function(data.list, curr.sample, plot.inter
 
    i <- which(names(tf.list) == curr.sample);
       for(j in c(1,10,100,1000,10000)){
-         curr.pct <- tf.list[[ i ]][j];
-         if(curr.pct == 1){
-            break;
+         if(j < length( tf.list[[ i ]] )){
+            curr.pct <- tf.list[[ i ]][j];
+            if(curr.pct == 1){
+               break;
+            }
+            internal.internal.plot.crosshairs(j,curr.pct);
+            if(label.intercepts) text(0.9,curr.pct,paste0(round(curr.pct * 100,1),""), adj=c(1,0.5),col="red", cex=0.75);
          }
-         internal.internal.plot.crosshairs(j,curr.pct);
-         if(label.intercepts) text(0.9,curr.pct,paste0(round(curr.pct * 100,1),""), adj=c(1,0.5),col="red", cex=0.75);
       }
       j <- min(which(tf.list[[ i ]] == 1));
       curr.pct <- 1;

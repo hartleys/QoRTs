@@ -14,17 +14,19 @@ makePlot.all.std <- function(res, outfile.dir = "./",
                          rasterize.large.plots = NULL, 
                          raster.height = 1000, 
                          raster.width = 1000,
+                         exclude.autosomes.chrom.rate.plot = TRUE,
+                         chromosome.name.style = "UCSC",
                          ...){
 
   get.summary.table(res, outfile = paste0(outfile.dir,"summary.table.txt"), debugMode = debugMode);
 
-  makePlot.summary.basic(res = res, outfile.dir = outfile.dir, plotter.params = plotter.params, plot.device.name = plot.device.name, plotting.device.params = plotting.device.params, rasterize.large.plots = rasterize.large.plots, raster.height = raster.height, raster.width = raster.width, ...);
-  makePlot.summary.colorByGroup(res = res, outfile.dir = outfile.dir, plotter.params = plotter.params, plot.device.name = plot.device.name, plotting.device.params = plotting.device.params, rasterize.large.plots = rasterize.large.plots, raster.height = raster.height, raster.width = raster.width, ...);
-  makePlot.summary.colorByLane(res = res, outfile.dir = outfile.dir, plotter.params = plotter.params, plot.device.name = plot.device.name, plotting.device.params = plotting.device.params, rasterize.large.plots = rasterize.large.plots, raster.height = raster.height, raster.width = raster.width, ...);
+  makePlot.summary.basic(res = res, outfile.dir = outfile.dir, plotter.params = plotter.params, plot.device.name = plot.device.name, plotting.device.params = plotting.device.params, rasterize.large.plots = rasterize.large.plots, raster.height = raster.height, raster.width = raster.width, chromosome.name.style = chromosome.name.style, exclude.autosomes.chrom.rate.plot = exclude.autosomes.chrom.rate.plot, ...);
+  makePlot.summary.colorByGroup(res = res, outfile.dir = outfile.dir, plotter.params = plotter.params, plot.device.name = plot.device.name, plotting.device.params = plotting.device.params, rasterize.large.plots = rasterize.large.plots, raster.height = raster.height, raster.width = raster.width, chromosome.name.style = chromosome.name.style, exclude.autosomes.chrom.rate.plot = exclude.autosomes.chrom.rate.plot, ...);
+  makePlot.summary.colorByLane(res = res, outfile.dir = outfile.dir, plotter.params = plotter.params, plot.device.name = plot.device.name, plotting.device.params = plotting.device.params, rasterize.large.plots = rasterize.large.plots, raster.height = raster.height, raster.width = raster.width, chromosome.name.style = chromosome.name.style, exclude.autosomes.chrom.rate.plot = exclude.autosomes.chrom.rate.plot, ...);
 
-  makePlot.summary.sample.highlight.all(res = res,outfile.dir = outfile.dir, plotter.params = plotter.params, plot.device.name = plot.device.name, plotting.device.params = plotting.device.params, rasterize.large.plots = rasterize.large.plots, raster.height = raster.height, raster.width = raster.width,  ...);
+  makePlot.summary.sample.highlight.all(res = res,outfile.dir = outfile.dir, plotter.params = plotter.params, plot.device.name = plot.device.name, plotting.device.params = plotting.device.params, rasterize.large.plots = rasterize.large.plots, raster.height = raster.height, raster.width = raster.width, chromosome.name.style = chromosome.name.style, exclude.autosomes.chrom.rate.plot = exclude.autosomes.chrom.rate.plot,  ...);
   
-  makePlot.summary.sample.highlight.andColorByLane.all(res = res,outfile.dir = outfile.dir, plotter.params = plotter.params, plot.device.name = plot.device.name, plotting.device.params = plotting.device.params, rasterize.large.plots = rasterize.large.plots, raster.height = raster.height, raster.width = raster.width, ...);
+  makePlot.summary.sample.highlight.andColorByLane.all(res = res,outfile.dir = outfile.dir, plotter.params = plotter.params, plot.device.name = plot.device.name, plotting.device.params = plotting.device.params, rasterize.large.plots = rasterize.large.plots, raster.height = raster.height, raster.width = raster.width, chromosome.name.style = chromosome.name.style, exclude.autosomes.chrom.rate.plot = exclude.autosomes.chrom.rate.plot, ...);
 }
 
 #######################################################################
@@ -40,6 +42,8 @@ makePlot.summary.sample.highlight.all <- function(res, outfile.dir = "./",
                                                   rasterize.large.plots = NULL, 
                                                   raster.height = 1000, 
                                                   raster.width = 1000,
+                                                  exclude.autosomes.chrom.rate.plot = TRUE,
+                                                  chromosome.name.style = "UCSC",
                                                   ...){
   for(curr.sample in unique(res@decoder$sample.ID)){
     makePlot.summary.sample.highlight(res = res, 
@@ -49,7 +53,7 @@ makePlot.summary.sample.highlight.all <- function(res, outfile.dir = "./",
                                      plotter.params = plotter.params,
                                      plot.device.name = plot.device.name,
                                      rasterize.large.plots = rasterize.large.plots, 
-                                     raster.height = raster.height, raster.width = raster.width,
+                                     raster.height = raster.height, raster.width = raster.width, chromosome.name.style = chromosome.name.style, exclude.autosomes.chrom.rate.plot = exclude.autosomes.chrom.rate.plot,
                                      ...);
     if(verbose) message(paste0(curr.sample," complete!"));
   }
@@ -64,6 +68,8 @@ makePlot.summary.sample.highlight.andColorByLane.all <- function(res, outfile.di
                                                                  rasterize.large.plots = NULL, 
                                                                  raster.height = 1000, 
                                                                  raster.width = 1000,
+                                                                 exclude.autosomes.chrom.rate.plot = TRUE,
+                                                                 chromosome.name.style = "UCSC",
                                                                  ...){
   for(curr.sample in unique(res@decoder$sample.ID)){
     makePlot.summary.sample.highlight.andColorByLane(res = res,
@@ -73,7 +79,7 @@ makePlot.summary.sample.highlight.andColorByLane.all <- function(res, outfile.di
                     plotter.params = plotter.params, 
                     plot.device.name = plot.device.name, 
                     rasterize.large.plots = rasterize.large.plots, 
-                    raster.height = raster.height, raster.width = raster.width,
+                    raster.height = raster.height, raster.width = raster.width, chromosome.name.style = chromosome.name.style, exclude.autosomes.chrom.rate.plot = exclude.autosomes.chrom.rate.plot,
                     ...);
     if(verbose) message(paste0(curr.sample," complete!"));
   }
@@ -98,6 +104,8 @@ makePlot.summary.basic <- function(res,  outfile = NULL,
                                    raster.height = 1000, 
                                    raster.width = 1000,
                                    separatePlots = FALSE,
+                                   exclude.autosomes.chrom.rate.plot = TRUE,
+                                   chromosome.name.style = "UCSC",
                                    ...){  
 
     build.plotter.function <- function(){
@@ -117,7 +125,7 @@ makePlot.summary.basic <- function(res,  outfile = NULL,
                          cdf.bySample = FALSE, 
                          cdf.plotIntercepts = FALSE, 
                          rasterize.large.plots = rasterize.large.plots,
-                         raster.height = raster.height, raster.width = raster.width,
+                         raster.height = raster.height, raster.width = raster.width, chromosome.name.style = chromosome.name.style, exclude.autosomes.chrom.rate.plot = exclude.autosomes.chrom.rate.plot,
                          separatePlots = separatePlots,
                          nvc.highlight.points = FALSE,
                          ...);
@@ -141,6 +149,8 @@ makePlot.summary.colorByGroup <- function(res, outfile = NULL,
                                           raster.height = 1000, 
                                           raster.width = 1000,
                                           separatePlots = FALSE,
+                                          exclude.autosomes.chrom.rate.plot = TRUE,
+                                          chromosome.name.style = "UCSC",
                                           ...){
     build.plotter.function <- function(){
       build.plotter.colorByGroup(res, plotter.params = plotter.params);
@@ -159,7 +169,7 @@ makePlot.summary.colorByGroup <- function(res, outfile = NULL,
                          cdf.bySample = FALSE, 
                          cdf.plotIntercepts = FALSE, 
                          rasterize.large.plots = rasterize.large.plots, 
-                         raster.height = raster.height, raster.width = raster.width,
+                         raster.height = raster.height, raster.width = raster.width, chromosome.name.style = chromosome.name.style, exclude.autosomes.chrom.rate.plot = exclude.autosomes.chrom.rate.plot,
                          separatePlots = separatePlots,
                          ...);
 }
@@ -181,6 +191,8 @@ makePlot.summary.colorByLane <- function(res, outfile = NULL,
                                          raster.height = 1000, 
                                          raster.width = 1000,
                                          separatePlots = FALSE,
+                                         exclude.autosomes.chrom.rate.plot = TRUE,
+                                         chromosome.name.style = "UCSC",
                                          ...){
     build.plotter.function <- function(){
       build.plotter.colorByLane(res, plotter.params = plotter.params);
@@ -199,7 +211,7 @@ makePlot.summary.colorByLane <- function(res, outfile = NULL,
                          cdf.bySample = FALSE, 
                          cdf.plotIntercepts = FALSE, 
                          rasterize.large.plots = rasterize.large.plots,
-                         raster.height = raster.height, raster.width = raster.width,
+                         raster.height = raster.height, raster.width = raster.width, chromosome.name.style = chromosome.name.style, exclude.autosomes.chrom.rate.plot = exclude.autosomes.chrom.rate.plot,
                          separatePlots = separatePlots,
                          ...);
 }
@@ -221,6 +233,8 @@ makePlot.summary.sample.highlight <- function(res,curr.sample,outfile = NULL,
                                               raster.height = 1000,
                                               raster.width = 1000,
                                               separatePlots = FALSE,
+                                              exclude.autosomes.chrom.rate.plot = TRUE,
+                                              chromosome.name.style = "UCSC",
                                               ...){
 
     build.plotter.function <- function(){
@@ -240,7 +254,7 @@ makePlot.summary.sample.highlight <- function(res,curr.sample,outfile = NULL,
                          cdf.bySample = TRUE, 
                          cdf.plotIntercepts = TRUE, 
                          rasterize.large.plots = rasterize.large.plots,
-                         raster.height = raster.height, raster.width = raster.width,
+                         raster.height = raster.height, raster.width = raster.width, chromosome.name.style = chromosome.name.style, exclude.autosomes.chrom.rate.plot = exclude.autosomes.chrom.rate.plot,
                          separatePlots = separatePlots,
                          ...);
 }
@@ -262,6 +276,8 @@ makePlot.summary.sample.highlight.andColorByLane <- function(res,curr.sample, ou
                                                              raster.height = 1000,
                                                              raster.width = 1000,
                                                              separatePlots = FALSE,
+                                                             exclude.autosomes.chrom.rate.plot = TRUE,
+                                                             chromosome.name.style = "UCSC",
                                                              ...){
     build.plotter.function <- function(){
       build.plotter.highlightBySample.colorByLane(curr.sample,res, merge.offset.outgroup = FALSE, plotter.params = plotter.params);
@@ -280,7 +296,7 @@ makePlot.summary.sample.highlight.andColorByLane <- function(res,curr.sample, ou
                          cdf.bySample = FALSE, 
                          cdf.plotIntercepts = TRUE, 
                          rasterize.large.plots = rasterize.large.plots,
-                         raster.height = raster.height, raster.width = raster.width,
+                         raster.height = raster.height, raster.width = raster.width, chromosome.name.style = chromosome.name.style, exclude.autosomes.chrom.rate.plot = exclude.autosomes.chrom.rate.plot,
                          separatePlots = separatePlots,
                          ...);
 }
@@ -303,6 +319,8 @@ plot.summary.GENERIC <- function(res,
                                  raster.width = 1000,
                                  separatePlots = FALSE,
                                  nvc.highlight.points = TRUE,
+                                 exclude.autosomes.chrom.rate.plot = TRUE,
+                                 chromosome.name.style = "UCSC",
                                  ... ){
 
 
@@ -458,13 +476,19 @@ plot.summary.GENERIC <- function(res,
     plotter <- build.plotter.function();
     if(plot.device.name == "CairoPDF" | plot.device.name == "pdf"){
       if(debugMode) if(debugMode) message("Plotting pdf...");
-      INTERNAL.plot.summaries.pdf( res = res, plotter = plotter, nvc.highlight.points = nvc.highlight.points, verbose = verbose, debugMode = debugMode, rasterize.large.plots = rasterize.large.plots, raster.height = raster.height, raster.width = raster.width, ...);
+      INTERNAL.plot.summaries.pdf( res = res, plotter = plotter, nvc.highlight.points = nvc.highlight.points, verbose = verbose, debugMode = debugMode, rasterize.large.plots = rasterize.large.plots, raster.height = raster.height, raster.width = raster.width, 
+                                   exclude.autosomes.chrom.rate.plot = exclude.autosomes.chrom.rate.plot,
+                                   chromosome.name.style = chromosome.name.style,
+                                   ...);
     } else if(! complete.extended) {
       if(debugMode) message("Plotting std...");
       INTERNAL.plot.summaries(res = res, plotter = plotter, nvc.highlight.points = nvc.highlight.points, verbose = verbose, debugMode = debugMode, rasterize.large.plots = rasterize.large.plots, raster.height = raster.height, raster.width = raster.width, separatePlotFuncts = separatePlotFuncts, ...);
     } else {
       if(debugMode) message("Plotting extended...");
-      INTERNAL.plot.summaries.advanced(res = res, plotter = plotter, nvc.highlight.points = nvc.highlight.points, verbose = verbose, debugMode = debugMode, rasterize.large.plots = rasterize.large.plots, raster.height = raster.height, raster.width = raster.width, separatePlotFuncts = separatePlotFuncts, ...);
+      INTERNAL.plot.summaries.advanced(res = res, plotter = plotter, nvc.highlight.points = nvc.highlight.points, verbose = verbose, debugMode = debugMode, rasterize.large.plots = rasterize.large.plots, raster.height = raster.height, raster.width = raster.width, separatePlotFuncts = separatePlotFuncts,
+                                       exclude.autosomes.chrom.rate.plot = exclude.autosomes.chrom.rate.plot,
+                                       chromosome.name.style = chromosome.name.style,
+                                       ...);
     }
   }, error = function(e){
     message(paste0("ERROR: ", e));
@@ -564,7 +588,7 @@ INTERNAL.plot.summaries <- function(res, plotter,verbose = TRUE, cdf.bySample = 
   makePlot.splice.junction.event.ratesPerRead(plotter, debugMode = debugMode, ...);
   makePlot.strandedness.test(plotter, debugMode = debugMode, ...);
   makePlot.mapping.rates(plotter, debugMode = debugMode, ...);
-  makePlot.chrom.type.rates(plotter, chromosome.name.style = "UCSC_WITH_ERCC", exclude.autosomes=TRUE, debugMode = debugMode, ...);
+  makePlot.chrom.type.rates(plotter, chromosome.name.style = "UCSC", exclude.autosomes=TRUE, debugMode = debugMode, ...);
   
   makePlot.norm.factors(plotter, debugMode = debugMode, ...);
   makePlot.raw.NVC(plotter, points.highlighted = nvc.highlight.points, debugMode = debugMode, rasterize.plotting.area = rasterize.large.plots, raster.height = raster.height, raster.width = 2 * raster.width, ...);
@@ -583,6 +607,8 @@ INTERNAL.plot.summaries.advanced <- function(res, plotter,verbose = TRUE, cdf.by
                                              raster.height,
                                              raster.width,
                                              separatePlotFuncts,
+                                             exclude.autosomes.chrom.rate.plot = TRUE,
+                                             chromosome.name.style = "UCSC",
                                              ...){
   outfilePrefix <- separatePlotFuncts$outfilePrefix;
   outfileExt <- separatePlotFuncts$outfileExt;
@@ -640,7 +666,7 @@ INTERNAL.plot.summaries.advanced <- function(res, plotter,verbose = TRUE, cdf.by
   openFunc("sj.event.proportionByType",1); makePlot.splice.junction.event.proportionsByType(plotter, debugMode = debugMode, ...); plot.corner.label(22);  devCloseFunct();
   openFunc("sj.event.rate",1); makePlot.splice.junction.event.ratesPerRead(plotter, debugMode = debugMode, ...); plot.corner.label(23); devCloseFunct();
   openFunc("mapping.rates",1); makePlot.mapping.rates(plotter, debugMode = debugMode, ...); plot.corner.label(24); devCloseFunct();
-  openFunc("chrom.rates",1); makePlot.chrom.type.rates(plotter, chromosome.name.style = "UCSC_WITH_ERCC", exclude.autosomes=TRUE, debugMode = debugMode, ...); plot.corner.label(25); devCloseFunct();
+  openFunc("chrom.rates",1); makePlot.chrom.type.rates(plotter, chromosome.name.style = chromosome.name.style, exclude.autosomes = exclude.autosomes.chrom.rate.plot, debugMode = debugMode, ...); plot.corner.label(25); devCloseFunct();
   openFunc("norm.factors",1); makePlot.norm.factors(plotter, debugMode = debugMode, ...); plot.corner.label(26); devCloseFunct();
   openFunc("norm.vs.TC",1); makePlot.norm.factors.vs.TC(plotter, debugMode = debugMode, ...); plot.corner.label(27); devCloseFunct();
   
@@ -666,6 +692,8 @@ INTERNAL.plot.summaries.pdf <- function(res, plotter,
                                         rasterize.large.plots, 
                                         raster.height,
                                         raster.width,
+                                        exclude.autosomes.chrom.rate.plot = TRUE,
+                                        chromosome.name.style = "UCSC",
                                         ...){
 
   #if(pdf.device.name == "pdf"){
@@ -724,7 +752,7 @@ INTERNAL.plot.summaries.pdf <- function(res, plotter,
   layout(matrix(1:6,3,2,byrow=TRUE));
   makePlot.strandedness.test(plotter, debugMode = debugMode, ...); plot.corner.label(25);
   makePlot.mapping.rates(plotter, debugMode = debugMode, ...); plot.corner.label(26);
-  makePlot.chrom.type.rates(plotter, chromosome.name.style = "UCSC_WITH_ERCC", exclude.autosomes=TRUE, debugMode = debugMode, ...); plot.corner.label(27);
+  makePlot.chrom.type.rates(plotter, chromosome.name.style = chromosome.name.style, exclude.autosomes=exclude.autosomes.chrom.rate.plot, debugMode = debugMode, ...); plot.corner.label(27);
   makePlot.norm.factors(plotter, debugMode = debugMode, ...); plot.corner.label(28);
   makePlot.NVC.lead.clip(plotter, clip.amt = 12, points.highlighted = TRUE, debugMode = debugMode, rasterize.plotting.area = rasterize.large.plots, raster.height = raster.height, raster.width = raster.width, ...); plot.corner.label(29);
   makePlot.NVC.tail.clip(plotter, clip.amt = 12, points.highlighted = TRUE, debugMode = debugMode, rasterize.plotting.area = rasterize.large.plots, raster.height = raster.height, raster.width = raster.width, ...); plot.corner.label(30);

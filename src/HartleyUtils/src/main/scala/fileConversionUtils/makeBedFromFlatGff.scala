@@ -16,7 +16,15 @@ object makeBedFromFlatGff {
           command = "makeSpliceBed", 
           quickSynopsis = "", 
           synopsis = "", 
-          description = "",   
+          description = ""+
+                        ""+
+                        ""+
+                        ""+
+                        ""+
+                        ""+
+                        ""+
+                        ""+
+                        "",   
           argList = 
                     new BinaryOptionArgument[String](
                                          name = "rgb", 

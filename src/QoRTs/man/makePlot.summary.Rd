@@ -26,6 +26,8 @@
                       raster.height = 1000, 
                       raster.width = 1000,
                       separatePlots = FALSE,
+                      exclude.autosomes.chrom.rate.plot = TRUE,
+                      chromosome.name.style = "UCSC",
                       \dots)
                       
   makePlot.summary.colorByGroup(res, outfile,
@@ -41,6 +43,8 @@
                       raster.height = 1000, 
                       raster.width = 1000,
                       separatePlots = FALSE,
+                      exclude.autosomes.chrom.rate.plot = TRUE,
+                      chromosome.name.style = "UCSC",
                       \dots)
                       
   makePlot.summary.colorByLane(res, outfile,
@@ -56,6 +60,8 @@
                       raster.height = 1000, 
                       raster.width = 1000,
                       separatePlots = FALSE,
+                      exclude.autosomes.chrom.rate.plot = TRUE,
+                      chromosome.name.style = "UCSC",
                       \dots)                
 
   makePlot.summary.sample.highlight(res,
@@ -73,6 +79,8 @@
                       raster.height = 1000, 
                       raster.width = 1000,
                       separatePlots = FALSE,
+                      exclude.autosomes.chrom.rate.plot = TRUE,
+                      chromosome.name.style = "UCSC",
                       \dots)   
 
   makePlot.summary.sample.highlight.andColorByLane(res,
@@ -90,10 +98,14 @@
                       raster.height = 1000, 
                       raster.width = 1000,
                       separatePlots = FALSE,
+                      exclude.autosomes.chrom.rate.plot = TRUE,
+                      chromosome.name.style = "UCSC",
                       \dots)   
 
 }
 \arguments{
+
+
   \item{res}{
     A \code{QoRT_QC_Results} object, created by 
     \code{\link{read.qc.results.data}}.
@@ -192,6 +204,15 @@
     set. The files will be saved to the contatenation of 
     outfile.dir, outfile.prefix, the name of the plot type, 
     and then outfile.ext.
+  }
+  \item{exclude.autosomes.chrom.rate.plot}{
+    A logical value indicating whether to exclude autosomes from the plot.
+    See \code{\link{makePlot.chrom.type.rates}}
+  }
+  \item{chromosome.name.style}{
+    A string value indicating the style of the chromosome names, 
+    and also how to split up the categories. See 
+    \code{\link{makePlot.chrom.type.rates}}
   }
   \item{\dots}{ 
     Arguments to be passed to methods, such as

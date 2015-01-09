@@ -15,7 +15,13 @@ object convertSpliceCountsToBed {
           command = "makeSpliceBed", 
           quickSynopsis = "", 
           synopsis = "", 
-          description = "",   
+          description = "This utility generates a splice-junction 'bed' file from the QoRTs-generated "+
+                        "splice junction counts produced by the QC utility. This splice junction bed file "+
+                        "can be used to visualize splice junction counts using the UCSC genome browser "+
+                        "and other similar utilities."+
+                        ""+
+                        ""+
+                        "",   
           argList = 
                     new BinaryOptionArgument[String](
                                          name = "rgb", 

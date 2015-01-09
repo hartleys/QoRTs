@@ -14,7 +14,15 @@ object mergeSpliceBed {
           command = "mergeSpliceBed", 
           quickSynopsis = "", 
           synopsis = "", 
-          description = "",   
+          description = ""+
+                        ""+
+                        ""+
+                        ""+
+                        ""+
+                        ""+
+                        ""+
+                        ""+
+                        "",   
           argList = 
                     new UnaryArgument(name = "quiet",
                               arg = List("--quiet","-q"), // name of value
