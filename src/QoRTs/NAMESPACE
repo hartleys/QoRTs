@@ -1,17 +1,21 @@
+import(methods)
+
 export(
  #Reading input data from file:
  read.qc.results.data,
+ completeAndCheckDecoder,
  #read.in.results.data.with.single.decoder.file,
  #read.in.results.data.with.two.decoder.files,
  #read.in.results.data.with.decoder,
  
  #Plotter Building:
  QoRTs.default.plotting.params,
- build.plotter.highlightBySample.colorByLane,
- build.plotter.highlightBySample,
+ build.plotter.highlightSample.colorByLane,
+ build.plotter.highlightSample,
+ build.plotter.colorBySample,
  build.plotter.colorByLane,
  build.plotter.colorByGroup,
- build.plotter.summary,
+ build.plotter.basic,
  
  #Specific Plots:
  makePlot.qual.pair,
@@ -51,12 +55,13 @@ export(
  get.summary.table,
  
  #Multi-plots:
- makePlot.summary.sample.highlight.andColorByLane.all,
- makePlot.summary.sample.highlight.andColorByLane,
- makePlot.summary.basic,
- makePlot.summary.sample.highlight,
- makePlot.summary.sample.highlight.all,
- makePlot.summary.colorByGroup,
- makePlot.summary.colorByLane,
- makePlot.all.std
+ makeMultiPlot.highlightSample.colorByLane.all,
+ makeMultiPlot.highlightSample.colorByLane,
+ makeMultiPlot.basic,
+ makeMultiPlot.highlightSample,
+ makeMultiPlot.highlightSample.all,
+ makeMultiPlot.colorByGroup,
+ makeMultiPlot.colorByLane,
+ makeMultiPlot.colorBySample,
+ makeMultiPlot.all
 )

@@ -6,7 +6,7 @@
 
 DEFAULTDEBUGMODE = TRUE;
 
-makePlot.all.std <- function(res, outfile.dir = "./",
+makeMultiPlot.all <- function(res, outfile.dir = "./",
                          plotter.params = list(), 
                          plot.device.name = "png", 
                          plotting.device.params = list(), 
@@ -20,20 +20,20 @@ makePlot.all.std <- function(res, outfile.dir = "./",
 
   get.summary.table(res, outfile = paste0(outfile.dir,"summary.table.txt"), debugMode = debugMode);
 
-  makePlot.summary.basic(res = res, outfile.dir = outfile.dir, plotter.params = plotter.params, plot.device.name = plot.device.name, plotting.device.params = plotting.device.params, rasterize.large.plots = rasterize.large.plots, raster.height = raster.height, raster.width = raster.width, chromosome.name.style = chromosome.name.style, exclude.autosomes.chrom.rate.plot = exclude.autosomes.chrom.rate.plot, ...);
-  makePlot.summary.colorByGroup(res = res, outfile.dir = outfile.dir, plotter.params = plotter.params, plot.device.name = plot.device.name, plotting.device.params = plotting.device.params, rasterize.large.plots = rasterize.large.plots, raster.height = raster.height, raster.width = raster.width, chromosome.name.style = chromosome.name.style, exclude.autosomes.chrom.rate.plot = exclude.autosomes.chrom.rate.plot, ...);
-  makePlot.summary.colorByLane(res = res, outfile.dir = outfile.dir, plotter.params = plotter.params, plot.device.name = plot.device.name, plotting.device.params = plotting.device.params, rasterize.large.plots = rasterize.large.plots, raster.height = raster.height, raster.width = raster.width, chromosome.name.style = chromosome.name.style, exclude.autosomes.chrom.rate.plot = exclude.autosomes.chrom.rate.plot, ...);
+                                makeMultiPlot.basic(res = res, outfile.dir = outfile.dir, plotter.params = plotter.params, plot.device.name = plot.device.name, plotting.device.params = plotting.device.params, rasterize.large.plots = rasterize.large.plots, raster.height = raster.height, raster.width = raster.width, chromosome.name.style = chromosome.name.style, exclude.autosomes.chrom.rate.plot = exclude.autosomes.chrom.rate.plot, ...);
+                        makeMultiPlot.colorBySample(res = res, outfile.dir = outfile.dir, plotter.params = plotter.params, plot.device.name = plot.device.name, plotting.device.params = plotting.device.params, rasterize.large.plots = rasterize.large.plots, raster.height = raster.height, raster.width = raster.width, chromosome.name.style = chromosome.name.style, exclude.autosomes.chrom.rate.plot = exclude.autosomes.chrom.rate.plot, ...);
+                         makeMultiPlot.colorByGroup(res = res, outfile.dir = outfile.dir, plotter.params = plotter.params, plot.device.name = plot.device.name, plotting.device.params = plotting.device.params, rasterize.large.plots = rasterize.large.plots, raster.height = raster.height, raster.width = raster.width, chromosome.name.style = chromosome.name.style, exclude.autosomes.chrom.rate.plot = exclude.autosomes.chrom.rate.plot, ...);
+                          makeMultiPlot.colorByLane(res = res, outfile.dir = outfile.dir, plotter.params = plotter.params, plot.device.name = plot.device.name, plotting.device.params = plotting.device.params, rasterize.large.plots = rasterize.large.plots, raster.height = raster.height, raster.width = raster.width, chromosome.name.style = chromosome.name.style, exclude.autosomes.chrom.rate.plot = exclude.autosomes.chrom.rate.plot, ...);
+                  makeMultiPlot.highlightSample.all(res = res, outfile.dir = outfile.dir, plotter.params = plotter.params, plot.device.name = plot.device.name, plotting.device.params = plotting.device.params, rasterize.large.plots = rasterize.large.plots, raster.height = raster.height, raster.width = raster.width, chromosome.name.style = chromosome.name.style, exclude.autosomes.chrom.rate.plot = exclude.autosomes.chrom.rate.plot, ...);
+      makeMultiPlot.highlightSample.colorByLane.all(res = res, outfile.dir = outfile.dir, plotter.params = plotter.params, plot.device.name = plot.device.name, plotting.device.params = plotting.device.params, rasterize.large.plots = rasterize.large.plots, raster.height = raster.height, raster.width = raster.width, chromosome.name.style = chromosome.name.style, exclude.autosomes.chrom.rate.plot = exclude.autosomes.chrom.rate.plot, ...);
 
-  makePlot.summary.sample.highlight.all(res = res,outfile.dir = outfile.dir, plotter.params = plotter.params, plot.device.name = plot.device.name, plotting.device.params = plotting.device.params, rasterize.large.plots = rasterize.large.plots, raster.height = raster.height, raster.width = raster.width, chromosome.name.style = chromosome.name.style, exclude.autosomes.chrom.rate.plot = exclude.autosomes.chrom.rate.plot,  ...);
-  
-  makePlot.summary.sample.highlight.andColorByLane.all(res = res,outfile.dir = outfile.dir, plotter.params = plotter.params, plot.device.name = plot.device.name, plotting.device.params = plotting.device.params, rasterize.large.plots = rasterize.large.plots, raster.height = raster.height, raster.width = raster.width, chromosome.name.style = chromosome.name.style, exclude.autosomes.chrom.rate.plot = exclude.autosomes.chrom.rate.plot, ...);
 }
 
 #######################################################################
 #######################################################################
 #######################################################################
 
-makePlot.summary.sample.highlight.all <- function(res, outfile.dir = "./",
+makeMultiPlot.highlightSample.all <- function(res, outfile.dir = "./",
                                                   plotter.params = list(), 
                                                   plot.device.name = "png", 
                                                   plotting.device.params = list(), 
@@ -46,7 +46,7 @@ makePlot.summary.sample.highlight.all <- function(res, outfile.dir = "./",
                                                   chromosome.name.style = "UCSC",
                                                   ...){
   for(curr.sample in unique(res@decoder$sample.ID)){
-    makePlot.summary.sample.highlight(res = res, 
+    makeMultiPlot.highlightSample(res = res, 
                                      curr.sample = curr.sample, 
                                      outfile.dir = outfile.dir,
                                      verbose = FALSE, 
@@ -59,7 +59,7 @@ makePlot.summary.sample.highlight.all <- function(res, outfile.dir = "./",
   }
 }
 
-makePlot.summary.sample.highlight.andColorByLane.all <- function(res, outfile.dir = "./",
+makeMultiPlot.highlightSample.colorByLane.all <- function(res, outfile.dir = "./",
                                                                  plotter.params = list(), 
                                                                  plot.device.name = "png", 
                                                                  plotting.device.params = list(), 
@@ -72,7 +72,7 @@ makePlot.summary.sample.highlight.andColorByLane.all <- function(res, outfile.di
                                                                  chromosome.name.style = "UCSC",
                                                                  ...){
   for(curr.sample in unique(res@decoder$sample.ID)){
-    makePlot.summary.sample.highlight.andColorByLane(res = res,
+    makeMultiPlot.highlightSample.colorByLane(res = res,
                     outfile.dir = outfile.dir,
                     curr.sample = curr.sample,
                     verbose = FALSE, 
@@ -91,9 +91,9 @@ makePlot.summary.sample.highlight.andColorByLane.all <- function(res, outfile.di
 #######################################################################
 # Summary Plot:
 
-makePlot.summary.basic <- function(res,  outfile = NULL, 
+makeMultiPlot.basic <- function(res,  outfile = NULL, 
                                    outfile.dir = "./",
-                                   outfile.prefix = "plot.summary.basic", 
+                                   outfile.prefix = "plot.basic", 
                                    outfile.ext = NULL, 
                                    plotter.params = list(), 
                                    plot.device.name = "curr", 
@@ -109,10 +109,10 @@ makePlot.summary.basic <- function(res,  outfile = NULL,
                                    ...){  
 
     build.plotter.function <- function(){
-      build.plotter.summary(res, plotter.params = plotter.params);
+      build.plotter.basic(res, plotter.params = plotter.params);
     }
     
-    plot.summary.GENERIC(res = res, 
+    makeMultiPlot.GENERIC(res = res, 
                          build.plotter.function = build.plotter.function, 
                          outfile = outfile,
                          outfile.dir = outfile.dir,
@@ -136,9 +136,9 @@ makePlot.summary.basic <- function(res,  outfile = NULL,
 #######################################################################
 #######################################################################
 
-makePlot.summary.colorByGroup <- function(res, outfile = NULL, 
+makeMultiPlot.colorByGroup <- function(res, outfile = NULL, 
                                           outfile.dir = "./",
-                                          outfile.prefix = "plot.summary.colorByGroup", 
+                                          outfile.prefix = "plot.colorByGroup", 
                                           outfile.ext = NULL, 
                                           plotter.params = list(), 
                                           plot.device.name = "curr", 
@@ -156,7 +156,7 @@ makePlot.summary.colorByGroup <- function(res, outfile = NULL,
       build.plotter.colorByGroup(res, plotter.params = plotter.params);
     }
     
-    plot.summary.GENERIC(res = res, 
+    makeMultiPlot.GENERIC(res = res, 
                          build.plotter.function = build.plotter.function, 
                          outfile = outfile,
                          outfile.dir = outfile.dir,
@@ -178,9 +178,9 @@ makePlot.summary.colorByGroup <- function(res, outfile = NULL,
 #######################################################################
 #######################################################################
 
-makePlot.summary.colorByLane <- function(res, outfile = NULL, 
+makeMultiPlot.colorByLane <- function(res, outfile = NULL, 
                                          outfile.dir = "./",
-                                         outfile.prefix = "plot.summary.colorByLane", 
+                                         outfile.prefix = "plot.colorByLane", 
                                          outfile.ext = NULL, 
                                          plotter.params = list(), 
                                          plot.device.name = "curr",
@@ -198,7 +198,49 @@ makePlot.summary.colorByLane <- function(res, outfile = NULL,
       build.plotter.colorByLane(res, plotter.params = plotter.params);
     }
     
-    plot.summary.GENERIC(res = res, 
+    makeMultiPlot.GENERIC(res = res, 
+                         build.plotter.function = build.plotter.function, 
+                         outfile = outfile,
+                         outfile.dir = outfile.dir,
+                         outfile.prefix = outfile.prefix, 
+                         outfile.ext = outfile.ext, 
+                         plot.device.name = plot.device.name, 
+                         plotting.device.params = plotting.device.params, 
+                         debugMode = debugMode, 
+                         verbose = verbose, 
+                         cdf.bySample = FALSE, 
+                         cdf.plotIntercepts = FALSE, 
+                         rasterize.large.plots = rasterize.large.plots,
+                         raster.height = raster.height, raster.width = raster.width, chromosome.name.style = chromosome.name.style, exclude.autosomes.chrom.rate.plot = exclude.autosomes.chrom.rate.plot,
+                         separatePlots = separatePlots,
+                         ...);
+}
+
+#######################################################################
+#######################################################################
+#######################################################################
+
+makeMultiPlot.colorBySample <- function(res, outfile = NULL, 
+                                         outfile.dir = "./",
+                                         outfile.prefix = "plot.colorBySample", 
+                                         outfile.ext = NULL, 
+                                         plotter.params = list(), 
+                                         plot.device.name = "curr",
+                                         plotting.device.params = list(), 
+                                         verbose = TRUE, 
+                                         debugMode = DEFAULTDEBUGMODE , 
+                                         rasterize.large.plots = NULL, 
+                                         raster.height = 1000, 
+                                         raster.width = 1000,
+                                         separatePlots = FALSE,
+                                         exclude.autosomes.chrom.rate.plot = TRUE,
+                                         chromosome.name.style = "UCSC",
+                                         ...){
+    build.plotter.function <- function(){
+      build.plotter.colorBySample(res, plotter.params = plotter.params);
+    }
+    
+    makeMultiPlot.GENERIC(res = res, 
                          build.plotter.function = build.plotter.function, 
                          outfile = outfile,
                          outfile.dir = outfile.dir,
@@ -217,13 +259,14 @@ makePlot.summary.colorByLane <- function(res, outfile = NULL,
 }
 
 
+
 #######################################################################
 #######################################################################
 #######################################################################
 
-makePlot.summary.sample.highlight <- function(res,curr.sample,outfile = NULL, 
+makeMultiPlot.highlightSample <- function(res,curr.sample,outfile = NULL, 
                                               outfile.dir = "./",
-                                              outfile.prefix = paste0("plot.summary.sampleHL.",curr.sample), 
+                                              outfile.prefix = paste0("plot.sampleHL.",curr.sample), 
                                               outfile.ext = NULL,
                                               plotter.params = list(), 
                                               plot.device.name = "curr", 
@@ -238,10 +281,10 @@ makePlot.summary.sample.highlight <- function(res,curr.sample,outfile = NULL,
                                               ...){
 
     build.plotter.function <- function(){
-      build.plotter.highlightBySample(curr.sample,res, merge.offset.outgroup = FALSE, plotter.params = plotter.params);
+      build.plotter.highlightSample(curr.sample,res, merge.offset.outgroup = FALSE, plotter.params = plotter.params);
     }
     
-    plot.summary.GENERIC(res = res, 
+    makeMultiPlot.GENERIC(res = res, 
                          build.plotter.function = build.plotter.function, 
                          outfile = outfile,
                          outfile.dir = outfile.dir,
@@ -263,9 +306,9 @@ makePlot.summary.sample.highlight <- function(res,curr.sample,outfile = NULL,
 #######################################################################
 #######################################################################
 
-makePlot.summary.sample.highlight.andColorByLane <- function(res,curr.sample, outfile = NULL, 
+makeMultiPlot.highlightSample.colorByLane <- function(res,curr.sample, outfile = NULL, 
                                                              outfile.dir = "./",
-                                                             outfile.prefix = paste0("plot.summary.sampleHL.coloredByLane.",curr.sample), 
+                                                             outfile.prefix = paste0("plot.sampleHL.coloredByLane.",curr.sample), 
                                                              outfile.ext = NULL, 
                                                              plotter.params = list(),  
                                                              plot.device.name = "curr", 
@@ -280,10 +323,10 @@ makePlot.summary.sample.highlight.andColorByLane <- function(res,curr.sample, ou
                                                              chromosome.name.style = "UCSC",
                                                              ...){
     build.plotter.function <- function(){
-      build.plotter.highlightBySample.colorByLane(curr.sample,res, merge.offset.outgroup = FALSE, plotter.params = plotter.params);
+      build.plotter.highlightSample.colorByLane(curr.sample,res, merge.offset.outgroup = FALSE, plotter.params = plotter.params);
     }
     
-    plot.summary.GENERIC(res = res, 
+    makeMultiPlot.GENERIC(res = res, 
                          build.plotter.function = build.plotter.function, 
                          outfile = outfile,
                          outfile.dir = outfile.dir,
@@ -304,7 +347,7 @@ makePlot.summary.sample.highlight.andColorByLane <- function(res,curr.sample, ou
 supportedDevices <- c("png","CairoPNG","tiff","jpeg","CairoPDF","pdf","svg","curr");
 supportedVectorDevices <- c("pdf","CairoPDF","svg");
 
-plot.summary.GENERIC <- function(res, 
+makeMultiPlot.GENERIC <- function(res, 
                                  build.plotter.function, 
                                  outfile = NULL,
                                  outfile.dir, 
@@ -573,7 +616,7 @@ INTERNAL.plot.summaries <- function(res, plotter,verbose = TRUE, cdf.bySample = 
   makePlot.cigarOp.byCycle(plotter,"Splice", debugMode = debugMode, ...);
   #makePlot.cigarLength.distribution(plotter,"Ins", log.y = TRUE, debugMode = debugMode, ...);
   #makePlot.cigarLength.distribution(plotter,"Del", log.y = TRUE, debugMode = debugMode, ...);
-  makePlot.gc(plotter, debugMode = debugMode, paired = FALSE, ...);
+  makePlot.gc(plotter, debugMode = debugMode, ...);
   makePlot.missingness.rate(plotter, debugMode = debugMode, ...);
   
   makePlot.insert.size(plotter, debugMode = debugMode, ...);
@@ -651,7 +694,7 @@ INTERNAL.plot.summaries.advanced <- function(res, plotter,verbose = TRUE, cdf.by
   openFunc("SpliceProfile",1); makePlot.cigarOp.byCycle(plotter,"Splice", debugMode = debugMode, ...); plot.corner.label(9); devCloseFunct();
   openFunc("InsertionLengthHisto",1); makePlot.cigarLength.distribution(plotter,"Ins", log.y = TRUE, debugMode = debugMode, ...); plot.corner.label(10); devCloseFunct();
   openFunc("DeletionLengthHisto",1); makePlot.cigarLength.distribution(plotter,"Del", log.y = TRUE, debugMode = debugMode, ...); plot.corner.label(11); devCloseFunct();
-  openFunc("gc",1); makePlot.gc(plotter, debugMode = debugMode, paired = FALSE, ...); plot.corner.label(12); devCloseFunct();
+  openFunc("gc",1); makePlot.gc(plotter, debugMode = debugMode, ...); plot.corner.label(12); devCloseFunct();
   openFunc("missingness.rate",1); makePlot.missingness.rate(plotter, debugMode = debugMode, ...); plot.corner.label(13); devCloseFunct();
   
   openFunc("dropped.rate",1); makePlot.dropped.rates(plotter, debugMode = debugMode, ...); plot.corner.label(14); devCloseFunct();
@@ -734,7 +777,7 @@ INTERNAL.plot.summaries.pdf <- function(res, plotter,
   makePlot.cigarLength.distribution(plotter,"Del", log.y = TRUE, debugMode = debugMode, ...); plot.corner.label(12);
 
   layout(matrix(1:6,3,2,byrow=TRUE));
-  makePlot.gc(plotter, debugMode = debugMode, paired = FALSE, ...); plot.corner.label(13);
+  makePlot.gc(plotter, debugMode = debugMode, ...); plot.corner.label(13);
   makePlot.missingness.rate(plotter, debugMode = debugMode, ...); plot.corner.label(14);
   makePlot.dropped.rates(plotter, debugMode = debugMode, ...); plot.corner.label(15);
   makePlot.insert.size(plotter, debugMode = debugMode, ...); plot.corner.label(16);

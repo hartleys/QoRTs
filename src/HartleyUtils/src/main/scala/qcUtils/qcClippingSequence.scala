@@ -353,7 +353,7 @@ object qcClippingSequence {
       }
     }
   }
-  
+  /*
   def getStrand(samRecord : SAMRecord) : Char = {
     if(samRecord.getFirstOfPairFlag()){
       if(samRecord.getReadNegativeStrandFlag) '-' else '+';
@@ -376,7 +376,7 @@ object qcClippingSequence {
     
     //add more checks here?
     return true;
-  }
+  }*/
   
 }
 

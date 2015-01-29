@@ -7,7 +7,7 @@
 
 #highlight.by, color.highlighted.by, plot.type, offset.by = color.highlighted.by, merge.offset.outgroup = TRUE, pch.matched.with.color = TRUE
 
-build.plotter.highlightBySample.colorByLane <- function(curr.sample, res, plotter.params = list(), merge.offset.outgroup = TRUE){
+build.plotter.highlightSample.colorByLane <- function(curr.sample, res, plotter.params = list(), merge.offset.outgroup = TRUE){
    pch.matched.with.color <- TRUE
    if(! (curr.sample %in% res@decoder$sample.ID)){
       stop("FATAL ERROR! ","Cannot find sample ", curr.sample," in the sample list!");
@@ -22,14 +22,14 @@ build.plotter.highlightBySample.colorByLane <- function(curr.sample, res, plotte
                                             compiled.params = compiled.params,
                                             highlight.by = res@decoder$sample.ID, 
                                             color.highlighted.by = res@decoder$lane.ID, 
-                                            plot.type = "highlightBySample.colorByLane", 
+                                            plot.type = "highlightSample.colorByLane", 
                                             merge.offset.outgroup = merge.offset.outgroup,
                                             pch.matched.with.color = pch.matched.with.color));
 }
 
 #########################################################
 
-build.plotter.highlightBySample <- function(curr.sample, res, plotter.params = list(), merge.offset.outgroup = TRUE){
+build.plotter.highlightSample <- function(curr.sample, res, plotter.params = list(), merge.offset.outgroup = TRUE){
    if(! (curr.sample %in% res@decoder$sample.ID)){
       stop("FATAL ERROR! ","Cannot find sample ", curr.sample," in the sample list!");
    }
@@ -42,7 +42,7 @@ build.plotter.highlightBySample <- function(curr.sample, res, plotter.params = l
                                   res = res, 
                                   compiled.params = compiled.params,
                                   highlight.by = res@decoder$sample.ID, 
-                                  plot.type = "highlightBySample", 
+                                  plot.type = "highlightSample", 
                                   offset.by = res@decoder$lane.ID, 
                                   merge.offset.outgroup = merge.offset.outgroup));
 }
@@ -59,7 +59,8 @@ build.plotter.colorByLane <- function(res, plotter.params = list()){
                                             res = res, 
                                             compiled.params = compiled.params,
                                             color.by = res@decoder$lane.ID, 
-                                            plot.type = "colorByLane"));
+                                            plot.type = "colorByLane",
+                                            color.by.title.name = "Lane"));
 }
 
 #########################################################
@@ -74,18 +75,35 @@ build.plotter.colorByGroup <- function(res, plotter.params = list()){
                                             res = res, 
                                             compiled.params = compiled.params,
                                             color.by = res@decoder$group.ID, 
-                                            plot.type = "colorByGroup"));
+                                            plot.type = "colorByGroup",
+                                            color.by.title.name = "Group"));
 }
 
 #########################################################
 
-build.plotter.summary <- function(res, plotter.params = list()){
+build.plotter.colorBySample <- function(res, plotter.params = list()){
    base.defaultParams <- QoRTs.default.plotting.params;
-   defaultParams <- merge.plotting.params(base.defaultParams,list(alt.lines.alpha = 100, alt.points.alpha = 100, alt.lines.color = "grey48", alt.lines.lty = 1));
+   defaultParams <- merge.plotting.params(base.defaultParams,list(std.lines.alpha = 125));
    final.params <- merge.plotting.params(defaultParams,plotter.params);
    compiled.params <- compile.plotting.params(final.params);
    
-   build.plotter.simple(res,res@decoder$lane.ID, compiled.params = compiled.params ,plot.type = "summary");
+   return(build.plotter.color( 
+                                            res = res, 
+                                            compiled.params = compiled.params,
+                                            color.by = res@decoder$sample.ID, 
+                                            plot.type = "colorBySample",
+                                            color.by.title.name = "Sample"));
+}
+
+#########################################################
+
+build.plotter.basic <- function(res, plotter.params = list()){
+   base.defaultParams <- QoRTs.default.plotting.params;
+   defaultParams <- merge.plotting.params(base.defaultParams,list(alt.lines.alpha = 150, alt.points.alpha = 150, alt.lines.color = "black", alt.lines.lty = 1));
+   final.params <- merge.plotting.params(defaultParams,plotter.params);
+   compiled.params <- compile.plotting.params(final.params);
+   
+   build.plotter.basic.helper(res,res@decoder$lane.ID, compiled.params = compiled.params ,plot.type = "summary");
 }
 
 #########################################################
@@ -124,7 +142,7 @@ build.plotter.colorByX <- function(res, color.by.name, color.by.title.name = col
 ###########################################################################################################################################################################
 ###########################################################################################################################################################################
 
-build.plotter.simple <- function(res, offset.by, compiled.params, plot.type){
+build.plotter.basic.helper <- function(res, offset.by, compiled.params, plot.type){
   if(! is.null(check.isValid(res))){
     #THROW AN ERROR!
     stop("Error parsing results: ", check.isValid(res));
@@ -209,10 +227,15 @@ build.plotter.highlight.and.color <- function(curr.highlight, res, compiled.para
   hl.by.factor <- color.highlighted.by[is.highlighted ];
   hl.by.factor.levels <- sort(unique(hl.by.factor));
   
-  if(length(hl.by.factor.levels) > length(compiled.params@by.colors)) stop("to many categories in by.colors! Add more colors to compiled.params@by.colors!");
-  
+  if(length(hl.by.factor.levels) > length(compiled.params@by.colors)) {
+    message("WARNING WARNING WARNING: Too many categories to color! (Max = ",length(compiled.params@by.colors),", curr = ",length(hl.by.factor.levels),") Add more colors? Falling back to a rainbow palette");
+    compiled.params@by.colors <- rainbow(length(hl.by.factor.levels));
+  } 
   if(pch.matched.with.color){
-    if(length(hl.by.factor.levels) > length(compiled.params@by.pch)) stop("to many categories in by.colors! Add more pch values to compiled.params@by.pch!");
+    if(length(hl.by.factor.levels) > length(compiled.params@by.pch)){
+      message("WARNING WARNING WARNING: Too many categories to mark distinct with pch! (Max = ",length(compiled.params@by.pch),", curr = ",length(hl.by.factor.levels),") Add more colors? Falling back to a repeating pattern.");
+      compiled.params@by.pch <- rep(compiled.params@by.pch, ceiling( length(hl.by.factor.levels) / length(compiled.params@by.pch)));
+    }
     legend.points.pch <- compiled.params@by.pch[1:length(hl.by.factor.levels)];
   } else {
     legend.points.pch <- rep(compiled.params@highlight.points.pch[1], length(hl.by.factor.levels));
@@ -327,10 +350,16 @@ build.plotter.color <- function(res, compiled.params, color.by, plot.type, offse
   hl.by.factor <- color.by[is.highlighted ];
   hl.by.factor.levels <- sort(unique(hl.by.factor));
   
-  if(length(hl.by.factor.levels) > length(compiled.params@by.colors)) stop("to many categories in by.colors! Add more colors to compiled.params@by.colors!");
+  if(length(hl.by.factor.levels) > length(compiled.params@by.colors)) {
+    message("WARNING WARNING WARNING: Too many categories to color! (Max = ",length(compiled.params@by.colors),", curr = ",length(hl.by.factor.levels),") Add more colors? Falling back to a rainbow palette");
+    compiled.params@by.colors <- rainbow(length(hl.by.factor.levels));
+  } 
   
   if(pch.matched.with.color){
-    if(length(hl.by.factor.levels) > length(compiled.params@by.pch)) stop("to many categories in by.colors! Add more pch values to compiled.params@by.pch!");
+    if(length(hl.by.factor.levels) > length(compiled.params@by.pch)){
+      message("WARNING WARNING WARNING: Too many categories to mark distinct with pch! Ran out of R symbols and ASCII characters! (Max = ",length(compiled.params@by.pch),", curr = ",length(hl.by.factor.levels),") Add more characters? Falling back to a repeating pattern.");
+      compiled.params@by.pch <- rep(compiled.params@by.pch, ceiling( length(hl.by.factor.levels) / length(compiled.params@by.pch)));
+    }
     legend.points.pch <- compiled.params@by.pch[1:length(hl.by.factor.levels)];
   } else {
     legend.points.pch <- rep(compiled.params@highlight.points.pch[1], length(hl.by.factor.levels));

@@ -2,11 +2,12 @@
 \docType{methods}
 \alias{build.plotter}
 \alias{build.plotter}
-\alias{build.plotter.highlightBySample.colorByLane}
-\alias{build.plotter.highlightBySample}
+\alias{build.plotter.highlightSample.colorByLane}
+\alias{build.plotter.highlightSample}
 \alias{build.plotter.colorByLane}
 \alias{build.plotter.colorByGroup}
-\alias{build.plotter.summary}
+\alias{build.plotter.colorBySample}
+\alias{build.plotter.basic}
 \alias{build.plotter.colorByX}
 \alias{QoRTs.default.plotting.params}
 \alias{plotter}
@@ -17,18 +18,20 @@
    Generating QC_Plotter objects, which can be used in many of the QoRT utilities to organize samples in various ways to allow for easy comparison and detection of consistent biases and artifacts. 
 }
 \usage{
-  build.plotter.summary(res, plotter.params = list())
+  build.plotter.basic(res, plotter.params = list())
 
   build.plotter.colorByGroup(res, plotter.params = list())
   
   build.plotter.colorByLane(res, plotter.params = list())
   
-  build.plotter.highlightBySample(curr.sample,
+  build.plotter.colorBySample(res, plotter.params = list())
+  
+  build.plotter.highlightSample(curr.sample,
                                   res,
                                   plotter.params = list(),
                                   merge.offset.outgroup = TRUE)
                                   
-  build.plotter.highlightBySample.colorByLane(curr.sample,
+  build.plotter.highlightSample.colorByLane(curr.sample,
                                   res,
                                   plotter.params = list(),
                                   merge.offset.outgroup = TRUE)
@@ -65,23 +68,23 @@
       \itemize{
         \item \code{"contrasting.colors"}: colors to use for contrast. By default these are set to a series of reasonably-contrasting colors. However, if you have too many different categories then it may be hard to tell some colors apart.
         \item \code{"contrasting.pch"}: point types to use for contrast (see \code{pch} in \link{graphical parameters}). By default this is set to the basic point types, then following through the upper and lower case letters.
-        \item \code{"std.lines.lty"}: Line type to use for the "highlighted" bams. (see \code{lty} in \link{graphical parameters})
-        \item \code{"std.lines.lwd"}: Line width to use for the "highlighted" bams. (see \code{lwd} in \link{graphical parameters})
-        \item \code{"std.lines.alpha"}: Alpha transparency value to use on lines for the "highlighted" bams. Numeric value between 0 and 255.
-        \item \code{"std.lines.color"}: Color to use for the "highlighted" bams.
-        \item \code{"std.points.pch"}: Character to use for points for the "highlighted" bams. (see \code{pch} in \link{graphical parameters})
-        \item \code{"std.points.alpha"}: Alpha transparency value to use on points for the "highlighted" bams. Numeric value between 0 and 255.
-        \item \code{"std.points.color"}: Color to use for the "highlighted" bams.
-        \item \code{"std.NVC.colors"}: A named list with elements named "A", "T","C", and "G", with each element specifying a color. The colors used to indicate each base for the "highlighted" bams in the nucleotide-rate-by-position plots.
+        \item \code{"std.lines.lty"}: Line type to use for the "highlighted" replicates. (see \code{lty} in \link{graphical parameters})
+        \item \code{"std.lines.lwd"}: Line width to use for the "highlighted" replicates. (see \code{lwd} in \link{graphical parameters})
+        \item \code{"std.lines.alpha"}: Alpha transparency value to use on lines for the "highlighted" replicates. Numeric value between 0 and 255.
+        \item \code{"std.lines.color"}: Color to use for the "highlighted" replicates.
+        \item \code{"std.points.pch"}: Character to use for points for the "highlighted" replicates. (see \code{pch} in \link{graphical parameters})
+        \item \code{"std.points.alpha"}: Alpha transparency value to use on points for the "highlighted" replicates. Numeric value between 0 and 255.
+        \item \code{"std.points.color"}: Color to use for the "highlighted" replicates.
+        \item \code{"std.NVC.colors"}: A named list with elements named "A", "T","C", and "G", with each element specifying a color. The colors used to indicate each base for the "highlighted" replicates in the nucleotide-rate-by-position plots.
 
-        \item \code{"alt.lines.lty"}: Line type to use for the "non-highlighted" bams. (see \code{lty} in \link{graphical parameters})
-        \item \code{"alt.lines.lwd"}: Line width to use for the "non-highlighted" bams. (see \code{lwd} in \link{graphical parameters})
-        \item \code{"alt.lines.alpha"}: Alpha transparency value to use on lines for the "non-highlighted" bams. Numeric value between 0 and 255.
-        \item \code{"alt.lines.color"}: Color to use for the "non-highlighted" bams.
-        \item \code{"alt.points.pch"}: Character to use for points for the "non-highlighted" bams. (see \code{pch} in \link{graphical parameters})
-        \item \code{"alt.points.alpha"}: Alpha transparency value to use on points for the "non-highlighted" bams. Numeric value between 0 and 255.
-        \item \code{"alt.points.color"}: Color to use for the "non-highlighted" bams.
-        \item \code{"alt.NVC.colors"}: A named list with elements named "A", "T","C", and "G", with each element specifying a color. The colors used to indicate each base for the "non-highlighted" bams in the nucleotide-rate-by-position plots.
+        \item \code{"alt.lines.lty"}: Line type to use for the "non-highlighted" replicates. (see \code{lty} in \link{graphical parameters})
+        \item \code{"alt.lines.lwd"}: Line width to use for the "non-highlighted" replicates. (see \code{lwd} in \link{graphical parameters})
+        \item \code{"alt.lines.alpha"}: Alpha transparency value to use on lines for the "non-highlighted" replicates. Numeric value between 0 and 255.
+        \item \code{"alt.lines.color"}: Color to use for the "non-highlighted" replicates.
+        \item \code{"alt.points.pch"}: Character to use for points for the "non-highlighted" replicates. (see \code{pch} in \link{graphical parameters})
+        \item \code{"alt.points.alpha"}: Alpha transparency value to use on points for the "non-highlighted" replicates. Numeric value between 0 and 255.
+        \item \code{"alt.points.color"}: Color to use for the "non-highlighted" replicates.
+        \item \code{"alt.NVC.colors"}: A named list with elements named "A", "T","C", and "G", with each element specifying a color. The colors used to indicate each base for the "non-highlighted" replicates in the nucleotide-rate-by-position plots.
         
         \item \code{"show.legend"}: DEPRECIATED. Currently nonfunctional.
 

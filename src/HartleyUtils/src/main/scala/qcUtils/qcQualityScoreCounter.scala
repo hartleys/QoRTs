@@ -31,7 +31,7 @@ object qcQualityScoreCounter {
   val MAX_QUALITY_SCORE = 41;
 }
 
-class qcQualityScoreCounter(readLength : Int, maxQualScore : Int) extends QCUtility[Unit] {
+class qcQualityScoreCounter(isSingleEnd : Boolean, readLength : Int, maxQualScore : Int) extends QCUtility[Unit] {
   reportln("Init QualityScoreDistribution","progress");
   
   //var minQualByPos_r1 : Array[Byte] = new Array[Byte](readLen);
@@ -46,32 +46,31 @@ class qcQualityScoreCounter(readLength : Int, maxQualScore : Int) extends QCUtil
   //val max = 41;
 
   def runOnReadPair(r1 : SAMRecord, r2 : SAMRecord, readNum : Int){
-    runOnRead_helper(r1,r1.getFirstOfPairFlag());
-    runOnRead_helper(r2,r2.getFirstOfPairFlag());
+    if(isSingleEnd){
+      runOnRead_helper(r1,true);
+    } else {
+      runOnRead_helper(r1,r1.getFirstOfPairFlag());
+      runOnRead_helper(r2,r2.getFirstOfPairFlag());
+    }
   }
   
   def runOnRead_helper(r : SAMRecord, isFirstRead : Boolean){
-    if(isFirstRead){
-      if(r.getReadNegativeStrandFlag){
-        r.getBaseQualities().zip((0 until readLength).reverse).map((qi : (Byte, Int)) => {
-           qualByPos_r1(qi._2)(qi._1.toInt) += 1;
-        });
-      } else {
-        r.getBaseQualities().zip(0 until readLength).map((qi : (Byte, Int)) => {
-           qualByPos_r1(qi._2)(qi._1.toInt) += 1;
-        });
-      }
-
+    val ((leadHardClip, leadSoftClip),(tailHardClip, tailSoftClip)) = getAllClipLengthsSimple(r);
+    val baseQuals = r.getBaseQualities();
+    val qualIndices = if(r.getReadNegativeStrandFlag()){
+      (leadHardClip until (leadHardClip + baseQuals.length)).reverse;
     } else {
-      if(r.getReadNegativeStrandFlag){
-        r.getBaseQualities().zip((0 until readLength).reverse).map((qi : (Byte, Int)) => {
-          qualByPos_r2(qi._2)(qi._1.toInt) += 1;
+      (leadHardClip until (leadHardClip + baseQuals.length));
+    }
+    
+    if(isFirstRead){
+        r.getBaseQualities().zip(qualIndices).map((qi : (Byte, Int)) => {
+           qualByPos_r1(qi._2)(qi._1.toInt) += 1;
         });
-      } else {
-        r.getBaseQualities().zip(0 until readLength).map((qi : (Byte, Int)) => {
-          qualByPos_r2(qi._2)(qi._1.toInt) += 1;
+    } else {
+        r.getBaseQualities().zip(qualIndices).map((qi : (Byte, Int)) => {
+           qualByPos_r2(qi._2)(qi._1.toInt) += 1;
         });
-      }
     }
     //readPairCt += 1;
   }
@@ -80,7 +79,10 @@ class qcQualityScoreCounter(readLength : Int, maxQualScore : Int) extends QCUtil
     val pcts = Seq[Double](0.0,0.25,0.5,0.75,1.0);
     
     writeOutput(pcts, qualByPos_r1, outfile + ".quals.r1.txt");
-    writeOutput(pcts, qualByPos_r2, outfile + ".quals.r2.txt");
+    
+    if(! isSingleEnd){
+      writeOutput(pcts, qualByPos_r2, outfile + ".quals.r2.txt");
+    }
   }
   
   

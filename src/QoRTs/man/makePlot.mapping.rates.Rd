@@ -8,9 +8,9 @@
    Plots the rates at which reads map to the genome.
 }
 \usage{
-makePlot.mapping.rates(plotter, plot.mm = TRUE, 
+makePlot.mapping.rates(plotter, plot.mm = NULL, 
                    y.counts.in.millions = TRUE, 
-                   debugMode,
+                   debugMode, singleEndMode,
                    \dots)
 }
 \arguments{
@@ -18,13 +18,18 @@ makePlot.mapping.rates(plotter, plot.mm = TRUE,
     A \code{QoRT_Plotter} reference object. See \code{\link{build.plotter}}.
   }
   \item{plot.mm}{
-    Plot multi-mapping rates.
+    Plot multi-mapping rates. By default, it autodetects whether multimapping data was included in the original decoder.
   }
   \item{y.counts.in.millions}{
     Label/scale the y-axis in millions of reads.
   }
   \item{debugMode}{
     Logical. If TRUE, debugging data will be printed to the console.
+  }
+  \item{singleEndMode}{
+      Logical. Determines whether the dataset consists of single-ended reads. 
+      By default this is determined from the data. Thus, this parameter should 
+      never need to be set by the user.
   }
   \item{\dots}{ 
     Arguments to be passed to methods, such as

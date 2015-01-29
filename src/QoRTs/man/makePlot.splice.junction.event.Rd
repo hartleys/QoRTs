@@ -14,19 +14,19 @@
 \usage{
    makePlot.splice.junction.event.counts(plotter,
                                     high.low.cutoff = 4, 
-                                    debugMode, 
+                                    debugMode, singleEndMode, 
                                     ...)
    makePlot.splice.junction.event.ratesPerRead(plotter,
                                     high.low.cutoff = 4, 
-                                    debugMode, 
+                                    debugMode, singleEndMode,
                                     ...)   
    makePlot.splice.junction.event.proportions(plotter,
                                     high.low.cutoff = 4, 
-                                    debugMode, 
+                                    debugMode, singleEndMode,
                                     ...) 
    makePlot.splice.junction.event.proportionsByType(plotter, 
                                     high.low.cutoff = 4, 
-                                    debugMode, 
+                                    debugMode, singleEndMode,
                                     ...)
 }
 \arguments{
@@ -38,6 +38,11 @@
   }
   \item{debugMode}{
     Activates debug mode, which causes more verbose reporting.
+  }
+  \item{singleEndMode}{
+      Logical. Determines whether the dataset consists of single-ended reads. 
+      By default this is determined from the data. Thus, this parameter should 
+      never need to be set by the user.
   }
   \item{\dots}{ 
     Arguments to be passed to methods, such as

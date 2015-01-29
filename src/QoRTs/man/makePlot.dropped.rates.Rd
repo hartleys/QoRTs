@@ -9,14 +9,23 @@
    analysis for various causes.
 }
 \usage{
-makePlot.dropped.rates(plotter, debugMode, \dots)
+makePlot.dropped.rates(plotter, dropAlwaysZeroRows = FALSE, 
+                       debugMode, singleEndMode, \dots)
 }
 \arguments{
   \item{plotter}{
     A \code{QoRT_Plotter} reference object. See \code{\link{build.plotter}}.
   }
+  \item{dropAlwaysZeroRows}{
+    Logical. If TRUE, drop-reasons that never occur in the dataset will not be plotted. This often cleans up the plot somewhat, since in many production pipelines reads that fail many of the filtering steps may have already been filtered out.
+  }
   \item{debugMode}{
     Logical. If TRUE, debugging data will be printed to the console.
+  }
+  \item{singleEndMode}{
+      Logical. Determines whether the dataset consists of single-ended reads. 
+      By default this is determined from the data. Thus, this parameter should 
+      never need to be set by the user.
   }
   \item{\dots}{ 
     Arguments to be passed to methods, such as

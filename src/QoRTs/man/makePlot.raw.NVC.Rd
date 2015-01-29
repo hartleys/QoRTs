@@ -19,7 +19,7 @@ makePlot.raw.NVC(plotter,  r2.buffer = NULL,
                          raster.height = 1000, 
                          raster.width = 2000,
                          show.base.legend = TRUE, 
-                         debugMode,
+                         debugMode, singleEndMode,
                          \dots)
                          
 makePlot.minus.clipping.NVC(plotter,  r2.buffer = NULL, 
@@ -31,7 +31,7 @@ makePlot.minus.clipping.NVC(plotter,  r2.buffer = NULL,
                          raster.height = 1000, 
                          raster.width = 2000,
                          show.base.legend = TRUE, 
-                         debugMode,
+                         debugMode, singleEndMode,
                          \dots)
 }
 \arguments{
@@ -84,6 +84,11 @@ makePlot.minus.clipping.NVC(plotter,  r2.buffer = NULL,
   }
   \item{debugMode}{
     Logical. If TRUE, debugging data will be printed to the console.
+  }
+  \item{singleEndMode}{
+      Logical. Determines whether the dataset consists of single-ended reads. 
+      By default this is determined from the data. Thus, this parameter should 
+      never need to be set by the user.
   }
   \item{\dots}{ 
     Arguments to be passed to methods, such as

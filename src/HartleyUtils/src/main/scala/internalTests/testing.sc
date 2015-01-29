@@ -2,9 +2,19 @@ package internalTests
 
 import net.sf.samtools._
 
-
 object testing {
   println("Welcome to the Scala worksheet")       //> Welcome to the Scala worksheet
+  
+
+  val L1 = List("A","B","C","D","E","F","G","H","I","J","K","L","M","N")
+                                                  //> L1  : List[String] = List(A, B, C, D, E, F, G, H, I, J, K, L, M, N)
+
+  val iterL = L1.iterator                         //> iterL  : Iterator[String] = non-empty iterator
+ 
+  val giterL = iterL.grouped(3)                   //> giterL  : internalTests.testing.iterL.GroupedIterator[String] = non-empty it
+                                                  //| erator
+  
+  giterL.next                                     //> res0: List[String] = List(A, B, C)
   
   val t = CigarOperator.INSERTION                 //> t  : net.sf.samtools.CigarOperator = I
   val t2 = CigarOperator.SOFT_CLIP.consumesReadBases()
@@ -31,10 +41,10 @@ object testing {
   }
   
   val tc = new TestClass();                       //> tc  : internalTests.testing.TestClass = internalTests.testing$$anonfun$main$
-                                                  //| 1$TestClass$1@422f3d17
+                                                  //| 1$TestClass$1@4f013415
   
   val tct1 = tc(1);                               //> tct1  : Int = 1
-val tct3 = tc(2);                                 //> tct3  : Int = 2
+  val tct3 = tc(2);                               //> tct3  : Int = 2
   tc(2) += 1;
   
 val tct2 = tc(2);                                 //> tct2  : Int = 3
@@ -59,11 +69,13 @@ val tct2 = tc(2);                                 //> tct2  : Int = 3
   val merged = (r1b ++ r2b).sorted                //> merged  : scala.collection.immutable.Vector[(Int, Int)] = Vector((386666,38
                                                   //| 6766), (386793,386893))
   
-  merged.tail                                     //> res0: scala.collection.immutable.Vector[(Int, Int)] = Vector((386793,386893
+  merged.tail                                     //> res1: scala.collection.immutable.Vector[(Int, Int)] = Vector((386793,386893
                                                   //| ))
-  merged.head                                     //> res1: (Int, Int) = (386666,386766)
+  merged.head                                     //> res2: (Int, Int) = (386666,386766)
   
-  
+  "A".compareTo("B")                              //> res3: Int = -1
+  "B".compareTo("A")                              //> res4: Int = 1
+  "B".compareTo("B")                              //> res5: Int = 0
   
   merged.tail.foldLeft(Vector(merged.head))( (soFar,curr) =>{
       if(curr._1 <= soFar.last._2){
@@ -75,8 +87,9 @@ val tct2 = tc(2);                                 //> tct2  : Int = 3
       } else {
         soFar :+ curr;
       }
-    })                                            //> res2: scala.collection.immutable.Vector[(Int, Int)] = Vector((386666,386766
+    })                                            //> res6: scala.collection.immutable.Vector[(Int, Int)] = Vector((386666,386766
                                                   //| ), (386793,386893))
     
+
     
 }

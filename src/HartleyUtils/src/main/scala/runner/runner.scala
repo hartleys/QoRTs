@@ -9,8 +9,8 @@ import internalUtils.commandLineUI._;
 
 object runner {
   
-  final val QORTS_VERSION = "0.0.32"; // REPLACE_THIS_QORTS_VERSION_VARIABLE_WITH_VERSION_NUMBER          (note this exact text is used in a search-and-replace. Do not change it.)
-  final val QORTS_COMPILE_DATE = "Fri Jan  9 15:57:25 EST 2015"; // REPLACE_THIS_QORTS_DATE_VARIABLE_WITH_DATE          (note this exact text is used in a search-and-replace. Do not change it.)
+  final val QORTS_VERSION = "0.1.0"; // REPLACE_THIS_QORTS_VERSION_VARIABLE_WITH_VERSION_NUMBER          (note this exact text is used in a search-and-replace. Do not change it.)
+  final val QORTS_COMPILE_DATE = "Thu Jan 29 16:55:04 EST 2015"; // REPLACE_THIS_QORTS_DATE_VARIABLE_WITH_DATE          (note this exact text is used in a search-and-replace. Do not change it.)
   
   //final val FOR_HELP_STRING = "For help, use command: "
   
@@ -57,11 +57,18 @@ object runner {
   def main(args: Array[String]){
     //println("Initializing...");
     
-    internalUtils.Reporter.init_stderrOnly;
+    if(args.contains("--verbose")){
+      internalUtils.Reporter.init_stderrOnly(internalUtils.Reporter.VERBOSE_CONSOLE_VERBOSITY);
+    } else if(args.contains("--quiet")){
+      internalUtils.Reporter.init_stderrOnly(internalUtils.Reporter.QUIET_CONSOLE_VERBOSITY);
+    } else {
+      internalUtils.Reporter.init_stderrOnly();
+    }
+    
     internalUtils.Reporter.reportln("Starting QoRTs v"+QORTS_VERSION+" (Compiled " + QORTS_COMPILE_DATE + ")","debug");
     internalUtils.Reporter.reportln("Starting time: ("+(new java.util.Date()).toString+")","debug");
 
-    //try{
+    try{
     if(args.length == 0){
       internalUtils.Reporter.reportln("No command given!","output");
       helpDocs.generalHelp;
@@ -88,6 +95,17 @@ object runner {
         }
       }
     }}
+    } catch {
+      case e : Exception => {
+        internalUtils.Reporter.reportln("============================FATAL_ERROR============================\n"+
+                                        "QoRTs encountered a FATAL ERROR. For general help, use command:\n"+
+                                        "          java -jar path/to/jar/QoRTs.jar --help\n"+
+                                        "============================FATAL_ERROR============================\n"+
+                                        "Error info:","note");
+        throw e;
+      }
+    }
+    
    // helloWorld.run(args);
     //} catch {
     //  case e : Exception => {

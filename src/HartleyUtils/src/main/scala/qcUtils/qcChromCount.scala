@@ -12,25 +12,21 @@ import scala.collection.JavaConversions._;
 
 import internalUtils.genomicUtils._;
 import internalUtils.optionHolder._;
+import internalUtils.commonSeqUtils._;
 
 object qcChromCount {
 
 }
 
 
-class qcChromCount(fr_secondStrand : Boolean) extends QCUtility[Unit] {
+class qcChromCount(isSingleEnd : Boolean, fr_secondStrand : Boolean) extends QCUtility[Unit] {
   reportln("Init chromCount","progress");
 
   
   var chromMap : Map[(String,Char),Int] = Map[(String,Char),Int]().withDefault((x) => 0);
   
   def runOnReadPair(r1 : SAMRecord, r2 : SAMRecord, readNum : Int){
-    
-    val strand = if(fr_secondStrand != r1.getFirstOfPairFlag) {
-      if(r1.getReadNegativeStrandFlag()) '+' else '-';
-    } else {
-      if(r1.getReadNegativeStrandFlag()) '-' else '+';
-    }
+    val strand = getStrand(r1, true,fr_secondStrand);
     
     val chrom = r1.getReferenceName();
     val cs = (chrom,strand);

@@ -42,12 +42,27 @@ object bamToWiggle {
                         ""+
                         "",
           argList = 
+           
                     new BinaryArgument[Double](   name = "sizefactor",
                                                         arg = List("--sizefactor"),  
                                                         valueName = "float", 
                                                         argDesc = "The size factor, for normalization. Defaults to 1. If set, then the count of every cell will be divided by the given value.", 
                                                         defaultValue = Some(1.0)
                                                         ) ::
+                    new UnaryArgument( name = "coordSorted",
+                                         arg = List("--coordSorted"), // name of value
+                                         argDesc = "Flag to indicate that input bam file is coordinate-sorted, rather than name-sorted. "+
+                                                   "Note that QoRTs will take longer to run and use more memory in this mode. To improve performance, sort the data by name prior to using of QoRTs. "+
+                                                   "In addition, if an (extremely) large fraction of the read-pairs are "+
+                                                   "mapped to extremely distant loci (or different chromosomes), then memory issues may arise. However, this should not be a problem with most datasets. "+
+                                                   "Technically this function will also allow QoRTs to work on unsorted bam files, but this is STRONGLY not recommended, as memory usage will by greatly increased." // description
+                                       ) ::
+                    new BinaryArgument[Int](name = "minMAPQ",
+                                           arg = List("--minMAPQ"),  
+                                           valueName = "num", 
+                                           argDesc = "Filter reads for the given minimum MAPQ. Set to 0 to turn off mapq filtering.", 
+                                           defaultValue = Some(255)
+                                           ) :: 
                     new UnaryArgument(    name = "noGzipOutput",
                                          arg = List("--noGzipOutput"), // name of value
                                          argDesc = "Flag to indicate that output should NOT be gzipped." // description
@@ -58,10 +73,16 @@ object bamToWiggle {
                                        ) ::
                     new UnaryArgument(    name = "countByReadPair",
                                          arg = List("--countByReadPair"), // name of value
-                                         argDesc = "Flag to indicate that this utility should count 'read-pair coverage' rather than 'read coverage'. "+
+                                         argDesc = "DEPRECIATED (This behavior is now default) Flag to indicate that this utility should count 'read-pair coverage' rather than 'read coverage'. "+
                                                    "If this flag is raised, then regions where a read-pair overlaps will be counted "+
-                                                   "ONCE. By default each read is counted separately, so a read-pair where the reads overlap "+
-                                                   " will be double-counted." // description
+                                                   "ONCE. This behavior is now the default, and this parameter is now depreciated (nonfunctional)." // description
+                                       ) ::
+                    new UnaryArgument(    name = "simpleCountByRead",
+                                         arg = List("--simpleCountByRead"), // name of value
+                                         argDesc = "Flag to indicate that this utility should count 'read coverage' rather than 'read-pair coverage'. "+
+                                                   "If this flag is raised, then regions where a read-pair overlaps will be counted "+
+                                                   "TWICE, one for each read. By default each read is counted separately, so a read-pair where the reads overlap "+
+                                                   "will be double-counted. By default, overlapping regions of read-pairs are counted only once." // description
                                        ) ::
                     new UnaryArgument(    name = "testRun",
                                          arg = List("--testRun","-t"), // name of value
@@ -75,8 +96,8 @@ object bamToWiggle {
                                          arg = List("--stranded_fr_secondstrand"), // name of value
                                          argDesc = "If this option is set, the data is assumed to be a fr_secondstrand type stranded library. By default the assumed library type for stranded data is fr_firststrand." // description
                                        ) ::
-                    new UnaryArgument(   name = "isSingleEnd", 
-                                         arg = List("--isSingleEnd"), // name of value
+                    new UnaryArgument(   name = "singleEnded", 
+                                         arg = List("--singleEnded"), // name of value
                                          argDesc = "Flag for single-end data. Note that many other options do not apply in this case (for example: option --countPairsTogether does nothing in single-end mode)" 
                                        ) ::
                     new UnaryArgument( name = "keepMultiMapped",
@@ -120,7 +141,7 @@ object bamToWiggle {
                                                         valueName = "num", 
                                                         argDesc = "The length, in base-pairs, for each counting bin, or \"window\". Note: if this is set low the utility will take longer to run and will consume more memory. The default window size is 100bp.", 
                                                         defaultValue = Some(100)
-                                                        ) ::
+                                                        ) :: 
                     new FinalArgument[List[String]](
                                          name = "infiles",
                                          valueName = "infile.bam[,infile2.bam,...]",
@@ -157,19 +178,21 @@ object bamToWiggle {
              parser.get[String]("chromLengthFile"),
              parser.get[Boolean]("noTruncate"),
              parser.get[Int]("windowSize"),
-             parser.get[Boolean]("isSingleEnd"),
+             parser.get[Boolean]("singleEnded"),
              parser.get[Boolean]("stranded"),
              parser.get[Boolean]("fr_secondstrand"),
              parser.get[Double]("sizefactor"),
              parser.get[Boolean]("testRun"),
              parser.get[Boolean]("noGzipOutput"),
              parser.get[Boolean]("negativeReverseStrand"),
-             parser.get[Boolean]("countByReadPair"),
+             ! parser.get[Boolean]("simpleCountByRead"),
              parser.get[Boolean]("keepMultiMapped"),
              parser.get[Option[String]]("readGroup"),
              parser.get[Boolean]("includeTrackDefLine"),
              parser.get[Option[String]]("rgbColor"),
-             parser.get[Option[String]]("additionalTrackOptions")
+             parser.get[Option[String]]("additionalTrackOptions"),
+             parser.get[Boolean]("coordSorted"),
+             parser.get[Int]("minMAPQ")
            );
          }
      }
@@ -194,7 +217,8 @@ object bamToWiggle {
       keepMultiMapped : Boolean, readGroup : Option[String],
       includeTrackDef : Boolean,
       rgbColor : Option[String],
-      additionalTrackOptions : Option[String]){
+      additionalTrackOptions : Option[String],
+      coordSorted : Boolean, minMAPQ : Int){
     
     //registerGlobalParam[Boolean]("noGzipOutput", noGzipOutput);
     internalUtils.optionHolder.OPTION_noGzipOutput = noGzipOutput;
@@ -205,7 +229,8 @@ object bamToWiggle {
     val qcBTW : QcBamToWig = new QcBamToWig(trackName , chromLengthFile , noTruncate , windowSize , isSingleEnd, stranded , fr_secondStrand, sizeFactor, negativeReverseStrand, countPairsTogether , includeTrackDef, rgbColor, additionalTrackOptions);
     
     for(infile <- infiles){
-      runOnFile(infile , qcBTW , testRun, isSingleEnd, keepMultiMapped, readGroup);
+      //runOnFile(infile , qcBTW , testRun, isSingleEnd, keepMultiMapped, readGroup);
+      runOnFile2(infile, qcBTW, testRun, keepMultiMapped, readGroup, minMAPQ, isSingleEnd, coordSorted);
     }
     
     val postRunStamp = TimeStampUtil();
@@ -217,6 +242,91 @@ object bamToWiggle {
     standardStatusReport(finalStamp);
   }
     
+  def runOnFile2(  
+                   infile : String, 
+                   qcBTW : QcBamToWig,
+                   testRun  :Boolean, 
+                   keepMultiMapped : Boolean, 
+                   readGroup : Option[String],
+                   minMAPQ : Int,
+                   isSingleEnd : Boolean,
+                   unsorted : Boolean){
+    
+    
+    val peekCt = 2000;
+    val (samFileAttributes, recordIter) = initSamRecordIterator(infile, peekCt);
+    
+    val pairedIter : Iterator[(SAMRecord,SAMRecord)] = 
+      if(isSingleEnd){
+        if(testRun) samRecordPairIterator_withMulti_singleEnd(recordIter, true, 200000) else samRecordPairIterator_withMulti_singleEnd(recordIter);
+      } else {
+        if(unsorted){
+          if(testRun) samRecordPairIterator_unsorted(recordIter, true, 200000) else samRecordPairIterator_unsorted(recordIter)
+        // Faster noMultiMapped running is DEPRECIATED!
+        //} else if(noMultiMapped){
+        //  if(testRun) samRecordPairIterator(recordIter, true, 200000) else samRecordPairIterator(recordIter)
+        } else {
+          if(testRun) samRecordPairIterator_withMulti(recordIter, true, 200000) else samRecordPairIterator_withMulti(recordIter)
+        }
+      }
+    
+    val maxObservedReadLength = samFileAttributes.readLength;
+    val readLength = maxObservedReadLength 
+    val isSortedByName = samFileAttributes.isSortedByName;
+    val isSortedByPosition = samFileAttributes.isSortedByPosition;
+    val isDefinitelyPairedEnd = samFileAttributes.isDefinitelyPairedEnd;
+    val minReadLength = samFileAttributes.minReadLength;
+    
+    //if(readLength != minReadLength){reportln("Note: Read length is not consistent. "+
+    //                                         "In the first "+peekCt+" reads, read length varies from "+minReadLength+" to " +maxObservedReadLength+"!\n"+
+    //                                         "Note that using data that is hard-clipped prior to alignment is NOT recommended, because this makes it difficult (or impossible) "+
+    //                                         "to determine the sequencer read-cycle of each nucleotide base. This may obfuscate cycle-specific artifacts, trends, or errors, the detection of which is one of the primary purposes of QoRTs!"+
+    //                                         "In addition, hard clipping (whether before or after alignment) removes quality score data, and thus quality score metrics may be misleadingly optimistic. "+
+    //                                         "A MUCH preferable method of removing undesired sequence is to replace such sequence with N's, which preserves the quality score and the sequencer cycle information.","note")}
+    //if((readLength != minReadLength) & (maxReadLength.isEmpty)){
+    //  reportln("WARNING WARNING WARNING: Read length is not consistent, AND \"--maxReadLength\" option is not set!\n"+
+    //          "QoRTs has ATTEMPTED to determine the maximum read length ("+readLength+").\n"+
+    //           "It is STRONGLY recommended that you use the --maxReadLength option \n"+
+    //           "to set the maximum possible read length, or else errors may occur if/when \n"+
+    //           "reads longer than "+readLength+ " appear.","note")
+    //}
+    
+    if(samFileAttributes.allReadsMarkedPaired & isSingleEnd) reportln("WARNING WARNING WARNING! Running in single-end mode, but reads appear to be paired-end! Errors may follow.\nStrongly recommend removing the '--isSingleEnd' option!","warn");
+    if(samFileAttributes.allReadsMarkedSingle & (! isSingleEnd)) reportln("WARNING WARNING WARNING! Running in paired-end mode, but reads appear to be single-end! Errors may follow.\nStrongly recommend using the '--isSingleEnd' option","warn");
+    if(samFileAttributes.mixedSingleAndPaired) reportln("WARNING WARNING WARNING! Data appears to be a mixture of single-end and paired-end reads! QoRTs was not designed to function under these conditions. Errors may follow!","warn");
+    
+    if(! isSingleEnd){
+      if( (! isDefinitelyPairedEnd)){ reportln("Warning: Have not found any matched read pairs in the first "+peekCt+" reads. Is data paired-end? Use option --singleEnd for single-end data.","warn"); }
+      if( isSortedByPosition & (! unsorted )){ reportln("Based on the first "+peekCt+" reads, SAM/BAM file appears to be sorted by read position. If this is so, you should probably use the \"--coordSorted\" option.","warn"); }
+      if( ((! isSortedByPosition) & ( unsorted ))){ reportln("WARNING: You are using the \"--coordSorted\" option, but data does NOT appear to be sorted by read position (based on the first "+peekCt+" reads)! This is technically ok, but may cause QoRTs to use too much memory!","warn"); }
+      if( ((! isSortedByName) & (! unsorted ))) error("FATAL ERROR: SAM/BAM file is not sorted by name (based on the first "+peekCt+" reads)! Either sort the file by name, or sort by read position and use the \"--coordSorted\" option.");
+    }
+   
+    
+    //reportln("SAMRecord Reader Generated. Read length: "+readLength+".","note");
+
+    val coda : Array[Int] = internalUtils.commonSeqUtils.getNewCauseOfDropArray;
+    val coda_options : Array[Boolean] = internalUtils.commonSeqUtils.CODA_DEFAULT_OPTIONS.toArray;
+    if(isSingleEnd) CODA_SINGLE_END_OFF_OPTIONS.foreach( coda_options(_) = false );
+    if(keepMultiMapped) coda_options(internalUtils.commonSeqUtils.CODA_NOT_UNIQUE_ALIGNMENT) = false;
+    if(! readGroup.isEmpty) coda_options(internalUtils.commonSeqUtils.CODA_NOT_MARKED_RG) = true;
+    
+    var readNum = 0;
+    val samIterationTimeStamp = TimeStampUtil();
+    
+    
+    for(pair <- pairedIter){
+    //for((pair,readNum) <- numberedIter){
+      val (r1,r2) = pair;
+      readNum += 1;
+      if(internalUtils.commonSeqUtils.useReadPair(r1,r2,coda, coda_options, Set[String](), readGroup, minMAPQ = minMAPQ)){
+        qcBTW.runOnReadPair(r1,r2,readNum);
+      }
+    }
+    
+  } 
+  
+  
   def runOnFile(infile : String, qcBTW : QcBamToWig, testRun : Boolean, isSingleEnd : Boolean, keepMultiMapped : Boolean, readGroup : Option[String]){
     val (samFileAttributes, recordIter) = initSamRecordIterator(infile);
     val pairedIter : Iterator[(SAMRecord,SAMRecord)] = 

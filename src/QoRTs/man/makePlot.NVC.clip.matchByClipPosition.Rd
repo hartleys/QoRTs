@@ -22,7 +22,7 @@ makePlot.NVC.lead.clip.matchByClipPosition(plotter,
             raster.width = 1000,
             show.base.legend = TRUE, 
             load.results = TRUE, 
-            debugMode, ...)
+            debugMode, singleEndMode, ...)
 
 makePlot.NVC.tail.clip.matchByClipPosition(plotter, 
             clip.amt, r2.buffer,
@@ -33,7 +33,7 @@ makePlot.NVC.tail.clip.matchByClipPosition(plotter,
             raster.height = 1000, 
             raster.width = 1000,
             show.base.legend = TRUE, 
-            debugMode, ...)
+            debugMode, singleEndMode, ...)
 }
 \arguments{
   \item{plotter}{
@@ -77,6 +77,11 @@ makePlot.NVC.tail.clip.matchByClipPosition(plotter,
   }
   \item{debugMode}{
     UNDOCUMENTED
+  }
+  \item{singleEndMode}{
+      Logical. Determines whether the dataset consists of single-ended reads. 
+      By default this is determined from the data. Thus, this parameter should 
+      never need to be set by the user.
   }
   \item{\dots}{ 
     Arguments to be passed to methods, such as

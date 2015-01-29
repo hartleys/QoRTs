@@ -183,7 +183,7 @@ object prepFlatGtfFile {
     
     //var aggregateIntervalMap : Map[String,GenomicInterval] = Map[String,GenomicInterval]();
 
-    reportln("FlatteningGtf: Iterating through the step-vector...("+getDateAndTimeString+")","progress");
+    reportln("FlatteningGtf: Iterating through the step-vector...("+getDateAndTimeString+")","debug");
     val featureListMap = txArray.getSteps.foldLeft( Map[String,IndexedSeq[FlatGtfLine]]().withDefault( (k) => IndexedSeq[FlatGtfLine]() ) )( (soFar, pair) =>{
       val (iv,txSet) = pair;
       if(! txSet.isEmpty){
@@ -199,7 +199,7 @@ object prepFlatGtfFile {
       }
     });
     
-    reportln("FlatteningGtf: Adding the aggregate genes themselves...("+getDateAndTimeString+")","progress");
+    reportln("FlatteningGtf: Adding the aggregate genes themselves...("+getDateAndTimeString+")","debug");
     val featureListMap2 = aggregateSet.foldLeft(featureListMap)((soFar, aggregateGene) =>{
       val features = soFar(aggregateGene);
       val iv = new GenomicInterval(features.head.chromName, features.head.strand, features.head.start, features.last.end);
@@ -207,7 +207,7 @@ object prepFlatGtfFile {
       soFar.updated(aggregateGene, gtfLine +: features);
     });
     
-    reportln("FlatteningGtf: Iterating through the splice junctions...("+getDateAndTimeString+")","progress");
+    reportln("FlatteningGtf: Iterating through the splice junctions...("+getDateAndTimeString+")","debug");
     val featureListMapFinal = spliceJunctionMap.keys.toSeq.sorted.foldLeft(featureListMap2)( (soFar, iv) =>{
       val txSet : Set[String] = spliceJunctionMap(iv);
       val geneSet : Set[String] = txSet.map(tx => txMap(tx));
@@ -218,7 +218,7 @@ object prepFlatGtfFile {
       soFar.updated(aggregateGene, features :+ gtfLine);
     })
     
-    reportln("FlatteningGtf: Sorting the aggregate genes...("+getDateAndTimeString+")","progress");
+    reportln("FlatteningGtf: Sorting the aggregate genes...("+getDateAndTimeString+")","debug");
     val aggregateGeneList = featureListMapFinal.keys.toSeq.sortBy((ag) => featureListMapFinal(ag).head.getGenomicInterval );
     
     //return new Iterator[GtfLine]{
@@ -236,7 +236,7 @@ object prepFlatGtfFile {
     //    }
     //  }
     //}
-    reportln("FlatteningGtf: Folding the FlatGtfLine iterator...("+getDateAndTimeString+")","progress");
+    reportln("FlatteningGtf: Folding the FlatGtfLine iterator...("+getDateAndTimeString+")","debug");
     return aggregateGeneList.foldLeft( Iterator[FlatGtfLine]() )((soFar, curr) =>{
       soFar ++ featureListMapFinal(curr).iterator;
     });
@@ -303,19 +303,19 @@ object prepFlatGtfFile {
 
   
   private def getFlatGtfIterator(infile : String, stranded : Boolean) : Iterator[FlatGtfLine] = {
-    reportln("FlatteningGtf: starting...("+getDateAndTimeString+")","progress");
+    reportln("FlatteningGtf: starting...("+getDateAndTimeString+")","debug");
     val (txArray, txMap) : (GenomicArrayOfSets[String], Map[String,String]) = buildGenomicArrayOfSets_Tx_and_Map(stranded,infile);
-    reportln("FlatteningGtf: gtf file read complete.("+getDateAndTimeString+")","progress");
+    reportln("FlatteningGtf: gtf file read complete.("+getDateAndTimeString+")","debug");
     val spliceJunctionMap : Map[GenomicInterval, Set[String]] = buildSpliceJunctionMap(txArray);
-    reportln("FlatteningGtf: Splice Junction Map read.("+getDateAndTimeString+")","progress");
+    reportln("FlatteningGtf: Splice Junction Map read.("+getDateAndTimeString+")","debug");
     val geneSets : Map[String,Set[String]] = buildGeneSets(txArray, txMap);
-    reportln("FlatteningGtf: gene Sets generated.("+getDateAndTimeString+")","progress");
+    reportln("FlatteningGtf: gene Sets generated.("+getDateAndTimeString+")","debug");
     val (aggregateGeneMap, aggregateSet) : (Map[String,String],Set[String]) = buildAggregateGeneMap(geneSets);
     reportln("FlatteningGtf: Aggregate Sets built.","progress");
 
     //val sortedFeatureList = buildFeatures(stranded, txArray, txMap , spliceJunctionMap , aggregateGeneMap , aggregateSet );
     val sortedFeatureIterator = buildFeatures2(stranded, txArray, txMap , spliceJunctionMap , aggregateGeneMap , aggregateSet );
-    reportln("FlatteningGtf: Features Built.("+getDateAndTimeString+")","progress");
+    reportln("FlatteningGtf: Features Built.("+getDateAndTimeString+")","debug");
     return(sortedFeatureIterator);
   }
   

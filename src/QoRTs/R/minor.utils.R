@@ -47,16 +47,16 @@ can.select.raster.device <- function(){
    }
    return(FALSE);
 }
-autoselect.raster.device <- function(){
+autoselect.raster.device <- function(debugMode){
    if(is.available.raster.device("png")){
-     message("selecting png raster device.");
+     if(debugMode) message(">     (rasterizingPlot) selecting png raster device.");
      rasterDev <- grDevices::png;
      outDev <- function(...){
        rasterDev(units = "px", ...);
      }
      return(outDev);
    } else if(is.available.raster.device("CairoPNG")){
-     message("selecting CairoPNG raster device.");
+     if(debugMode) message("selecting CairoPNG raster device.");
      rasterDev <- CairoPNG;
      return(rasterDev);
    } else {
@@ -83,14 +83,14 @@ make.mixed.raster.vector.function <- function(use.raster.device = NULL, raster.h
   }
 
   if(is.null(use.raster.device)){
-    use.raster.device <- autoselect.raster.device();
+    use.raster.device <- autoselect.raster.device(debugMode);
   }
   usetempfile <- tempfile();
-  if(debugMode) message("Selecting temp file location: ",usetempfile);
+  if(debugMode) message(">     (rasterizingPlot) Selecting temp file location: ",usetempfile);
   initRaster <- function(){
-    if(debugMode) message("Writing temp file to",usetempfile);
+    if(debugMode) message(">     (rasterizingPlot) Writing temp file to",usetempfile);
     use.raster.device(filename = usetempfile, height=raster.height, width=raster.width, bg = "transparent", ...);
-    if(debugMode) message("Temp file built.");
+    if(debugMode) message(">     (rasterizingPlot) Temp file built.");
     par(mar = c(0,0,0,0));
   }
   
@@ -99,12 +99,12 @@ make.mixed.raster.vector.function <- function(use.raster.device = NULL, raster.h
   }
   
   printRaster <- function(){
-    if(debugMode) message("Reading Rasterized image...");
+    #if(debugMode) message(">     (rasterizingPlot) Reading Rasterized image...");
     require(png);
     imgData <- png::readPNG(usetempfile);
-    if(debugMode) message("Rasterized image read.");
+    #if(debugMode) message(">     (rasterizingPlot) Rasterized image read.");
     rasterData <- as.raster(imgData);
-    if(debugMode) message("Cast Rasterized image to raster class.");
+    #if(debugMode) message(">     (rasterizingPlot) Cast Rasterized image to raster class.");
     usr <- par("usr");
     xlog <- par("xlog");
     ylog <- par("ylog");
@@ -114,14 +114,14 @@ make.mixed.raster.vector.function <- function(use.raster.device = NULL, raster.h
     if(ylog){
        usr[3:4] <- 10 ^ usr[3:4];
     }
-    if(debugMode) message("Printing raster image...");
+    #if(debugMode) message(">     (rasterizingPlot) Printing raster image...");
     rasterImage(rasterData, usr[1], usr[3], usr[2], usr[4]);
     
-    if(debugMode) message("deleting temp raster image: ",usetempfile);
+    if(debugMode) message(">     (rasterizingPlot) deleting temp raster image: ",usetempfile);
     unlink(usetempfile);
   }
   
-  if(debugMode) message("Built rasterization fcn.");
+  #if(debugMode) message(">     (rasterizingPlot) Built rasterization fcn.");
   
   return(list(initRaster = initRaster, closeRaster = closeRaster, printRaster = printRaster, usetempfile = usetempfile));
 }
@@ -262,15 +262,7 @@ color2transparent <- function(someColor,alpha){
     blue=curcoldata[3],alpha=alpha, maxColorValue=255)})
 }
 
-blank.plot <- function(label, cex = NULL, ...){
-  plot(0,0,col="transparent", xlim=c(0,1),ylim=c(0,1),axes=F,xlab="",ylab="");
-  label.text <- paste0(label,collapse="\n");
-  if(is.null(cex)){
-    cex <- fit.character.vector(label.text)
-  }
-  text(0.5,0.5, labels = label.text, cex = cex, ...);
-  box();
-}
+
 
 
 

@@ -67,6 +67,17 @@ List(
     //}
     
     //private 
+    
+    
+    private def filterOutFinalArgs[T](arg : Argument[T]) : Boolean = {
+      arg match {
+        case a : FinalArgument[T] => true;
+        case a : Any => false;
+      }
+    }
+    val finalArgList = argList.filter(filterOutFinalArgs);
+    val paramArgList = argList.filterNot(filterOutFinalArgs);
+    
     def get[T](key : String) : T = {
       argList.find(arg => arg.getName() == key) match {
         case Some(arg) => {
@@ -195,10 +206,22 @@ List(
     }
     
     private def parseArgs_master(inputArguments : List[String], debugMode : Boolean = internalUtils.optionHolder.OPTION_debugMode){
-      parseArgs(inputArguments, debugMode);
+      if(inputArguments.length < finalArgList.length){
+         throwSyntaxErrorMessage("Not enough arguments: Require at least " + finalArgList.length + " arguments!\nRequired syntax is:\n" + getShortHelp());
+      }
+      
+      val (inputParamArgs, inputFinalArgs) = inputArguments.splitAt( inputArguments.length - finalArgList.length );
+      
+      for((p,arg) <- inputFinalArgs.zip(finalArgList)){
+        arg.parse(List(p));
+        if(debugMode) reportln("INPUT_ARG("+arg.getName()+")="+arg(),"debug");
+      }
+      parseParamArgs(inputParamArgs, debugMode);
+      
+      //Now check to make sure all mandatory parameters are set:
       argList.find(! _.isReady()) match {
         case Some(unreadyArg) =>{
-          throwSyntaxErrorMessage("Argument is flagged unready: " + unreadyArg.getShortSyntax());
+          throwSyntaxErrorMessage("Mandatory argument is not set: " + unreadyArg.getShortSyntax());
         } 
         case None =>{
           //do nothing
@@ -209,7 +232,7 @@ List(
       //////}
     }
     
-    private def parseArgs(inputArguments : List[String], debugMode : Boolean){
+    private def parseParamArgs(inputArguments : List[String], debugMode : Boolean){
       if(inputArguments.length != 0){
         //if(inputArguments.exists(isArgument(_))){
           //if(isArgument(inputArguments.head)){
@@ -217,9 +240,11 @@ List(
               case Some(arg) => {
                 val remainder = arg.parse(inputArguments);
                 if(debugMode) reportln("INPUT_ARG("+arg.getName()+")="+arg(),"debug");
-                parseArgs(remainder, debugMode);
+                parseParamArgs(remainder, debugMode);
               }
-              case None => throwSyntaxErrorMessage("Unrecognized Argument: " + inputArguments.head);
+              case None => {
+                throwSyntaxErrorMessage("Unrecognized Argument: " + inputArguments.head);
+              }
             }
          // } else {
           // throwSyntaxErrorMessage("Unexpected string (not recognized as an option name or argument): " + inputArguments.head);

@@ -55,9 +55,9 @@ BiocStyle::latex()
 National Human Genome Research Institute\\
 National Institutes of Health}
 \date{August 8 2014\\
-January 09, 2015 %REPLACE_THIS_LINE_WITH_REVISION_DATE
+January 29, 2015 %REPLACE_THIS_LINE_WITH_REVISION_DATE
 \\
-v0.0.32 %REPLACE_THIS_LINE_WITH_VERSION_NUMBER
+v0.1.0 %REPLACE_THIS_LINE_WITH_VERSION_NUMBER
 }
 
 \begin{document}
@@ -102,17 +102,7 @@ The QoRTs software package comes in two distinct parts: a java jar-file and an R
 
 QoRTs is designed to run on paired-end next-gen RNA-Seq data. The data must be aligned (or "mapped") to a reference genome before QoRTs can be run. RNA-Star\cite{STAR}, GSNAP\cite{GSNAP}, and TopHat2\cite{TopHat2} are all popular aligners for use with RNA-Seq data. The use of short-read or unspliced aligners such as BowTie, ELAND, BWA, or Novoalign is not recommended.
 
-QoRTs requires that the bam files be sorted by read name. This can be accomplished via samtools using the command:
-\begin{verbatim}
-samtools sort -n unsorted.bam sorted
-\end{verbatim}
-
-\noindent or via novosort, which may be faster and more memory-efficient:
-\begin{verbatim}
-novosort -n unsorted.bam > sorted.bam
-\end{verbatim}
-
-In addition, QoRTs requires transcript annotations in the form of a gtf file. If you are using a annotation guided aligner it is likely you already have a transcript gtf file for your reference genome. We recommend you use the same annotation gtf for alignment, QC, and downstream analysis. We have found the Ensembl "Gene Sets" gtf\footnote{Which can be acquired from the Ensembl website at \url{http://www.ensembl.org}} suitable for these purposes. However, any format that adheres to the gtf file specification\footnote{See the gtf file specification at \url{http://genome.ucsc.edu/FAQ/FAQformat.html}} will work.
+QoRTs requires transcript annotations in the form of a gtf file. If you are using a annotation guided aligner it is likely you already have a transcript gtf file for your reference genome. We recommend you use the same annotation gtf for alignment, QC, and downstream analysis. We have found the Ensembl "Gene Sets" gtf\footnote{Which can be acquired from the Ensembl website at \url{http://www.ensembl.org}} suitable for these purposes. However, any format that adheres to the gtf file specification\footnote{See the gtf file specification at \url{http://genome.ucsc.edu/FAQ/FAQformat.html}} will work.
 
 In general, it is assumed that the dataset consists of sequencing data derived from multiple biological samples, each with a known biological condition or "group". Using barcoding, it is possible to build a combined library of multiple distinct samples which can be run together on the sequencing machine and then demultiplexed afterward.  This is often desirable, because mitigates and minimizes the effect of batch effects on downstream analysis. To produce sufficient data for downstream analysis, it may be necessary to run such combined libraries on multiple lanes. In this case, it is recommended that alignment and QoRTs QC analyses be performed BEFORE merging the data from these "technical replicates". This can make it easier to distinguish lane-/batch-specific sequencing artifacts from sample-specific abnormalities.
 
@@ -122,28 +112,61 @@ In general, it is assumed that the dataset consists of sequencing data derived f
 
 The QoRTs package comes in two distinct parts: a java jar executable and an R package. First the java jar executable must be run on each bam file in the dataset. The bulk of the data processing takes place in this step. Second, the R package can be used to produce compiled graphs, plots, and tables.
 
+%-----------------------------------------------------------
+\subsection{Sorting}  \label{sec:sort}
+%-----------------------------------------------------------
+
+For paired-end data, QoRTs requires that the bam files be sorted by either read name or by position. Sorting by name will result in a smaller memory footprint, but sorting by coordinate is more common in most production pipelines. Sorting can be accomplished via the samtools or novosort tools (which are NOT included with QoRTs). Sorting is unnecessary for single-end data.
+
+\noindent To sort by coordinate:
+\begin{verbatim}
+samtools sort unsorted.bam sorted
+OR
+novosort unsorted.bam > sorted.bam
+\end{verbatim}
+
+\noindent Or, to sort by read name:
+\begin{verbatim}
+samtools sort -n unsorted.bam sortedByName
+OR
+novosort -n unsorted.bam > sortedByName.bam
+\end{verbatim}
+
+Technically, unsorted bam files can be run through QoRTs using the \verb|--coordSorted| option. However, this is NOT RECOMMENDED, as the memory footprint may grow very large. As QoRTs iterates through the bam file it generates a (hash-table based) ref-map of unpaired reads. Thus, if too many read pairs are too far apart in the bam file then out-of-memory errors may occur. Similarly, certain unusual datasets containing large quantities of chimeric read-pairs (in which many read pairs are mapped to distant loci) may use unacceptable quantities of memory. QoRTs will print several warnings if the number of unpaired reads grows too high. In this case, it is recommended that the bam file be sorted by name.
+
 %----------
 \subsection{Bam file decoder} \label{sec:decoder}
 %----------
 
-Several QoRTs functions will require a "decoder" file, which describes each sample and all of its technical replicates (if any). 
+Several QoRTs functions will require a "decoder" (either a file or data frame), which describes each sample and all of its technical replicates (if any). All of the columns are optional except for unique.ID, however if group, lane, and/or technical replicate information is not supplied then QoRTs obviously will not be able to produce plots that grouped and/or colored by these factors.
 
-\noindent \emph{Required Fields}:
+\noindent \emph{Fields}:
   \begin{itemize}
-    \item \emph{unique.ID}: A unique identifier for the row. QoRTs will also accept the synonym "lanebam.ID".
-    \item \emph{lane.ID}: The ID of the lane or batch.
-    \item \emph{group.ID}: The ID of the "group". For example: "Case" or "Control".
-    \item \emph{sample.ID}: The ID of the biological sample from which the data originated. Each sample can have multiple rows, representing technical replicates (in which the same sample is sequenced on multiple lanes or runs).
+    \item \emph{unique.ID}: A unique identifier for the row. QoRTs will also accept the synonym "lanebam.ID". THIS IS THE ONLY MANDATORY FIELD.
+    \item \emph{lane.ID}: The ID of the lane or batch. By default this will be set to "UNKNOWN".
+    \item \emph{group.ID}: The ID of the "group". For example: "Case" or "Control". By default this will be set to "UNKNOWN".
+    \item \emph{sample.ID}: The ID of the biological sample from which the data originated. Each sample can have multiple rows, representing technical replicates (in which the same sample is sequenced on multiple lanes or runs). By default QoRTs will assume that every row comes from a separate sample, and will thus set the sample.ID to equal the unique.ID.
     \item \emph{qc.data.dir}: The directory in which the java utility saved all the output data. If this column does not exist, by default it will be set to be unique.ID.
+    \item \emph{input.read.pair.count}: The number of reads in the original fastq file, prior to alignment.
+    \item \emph{multi.mapped.read.pair.count}: The number of reads that were multi-mapped by the aligner.
   \end{itemize}
 
-\noindent \emph{Optional Fields}: The following additional fields are optional. Note that you should not use these names 
-  \begin{itemize}
-    \item \emph{input.read.pair.count}: The number of reads in the original fastq file, before alignment.
-    \item \emph{multi.mapped.read.pair.count}: The number of reads that were multi-mapped by the aligner.
-    \item \emph{cycle.CT}: The number of bases in each read. By default this will be auto-detected from the data and need not be included.
-  \end{itemize}
-In addition, the decoder can contain any other additional columns as desired, as long as all of the column names are distinct and do not match the column names listed above.
+In addition, the decoder can contain any other additional columns as desired, as long as all of the column names are distinct.
+
+While QoRTs is primarily designed to allow comparisons between biological groups, lanes, sequencing-runs, etc, it can also be used on simpler datasets, or even individual samples. Thus, only the unique.ID variable is actually required. For testing purposes, you can produce a completed decoder (with all default values filled in) using the \verb|completeAndCheckDecoder| function.
+
+The simplest example would just be a character vector of unique.ID's:
+<<showSimplifiedExpansion>>=
+completeAndCheckDecoder(c("SAMPLE1","SAMPLE2","SAMPLE3"));
+@
+
+Alternatively, any of the optional fields can be included or left out, as desired:
+<<showLessSimplifiedExpansion>>=
+incompleteDecoder <- data.frame(unique.ID = c("SAMPLE1", "SAMPLE2"),
+                                group.ID = c("CASE","CONTROL")
+                                );
+completeAndCheckDecoder(incompleteDecoder);
+@
 
 %----------
 \subsection{Example data} \label{subsec:exampledata}
@@ -164,6 +187,12 @@ decoder.data <- read.table(decoder.file,
 print(decoder.data);
 @
 
+Due to size constraints the example dataset includes only the QC output data, not the raw bam files themselves. The raw bamfiles can be found on the QoRTs github website (\url{https://github.com/hartleys/QoRTs}).
+
+The example dataset is derived from a set of rat pineal gland samples, which were multiplexed and sequenced across six sequencer lanes. For the sake of simplicity, the example dataset was limited to only six samples and three lanes. However, the bam files alone would still occupy 18 gigabytes of disk space, which would make it unsuitable for distribution as an example dataset. To further reduce the example bamfile sizes, only reads that mapped to chromosomes chr14, chr15, chrX, and chrM were included. Additionally, all the selected chromosomes EXCEPT for chromosome 14 were randomly downsampled to 30 percent of their original read counts.
+
+THIS DATASET IS INTENDED FOR DEMONSTRATION AND TESTING PURPOSES ONLY. Due to the various alterations that have been made to reduce file sizes and improve portability, it is really not suitable for any actual analyses.
+
 %-----------------------------------------------------------
 \section{Processing of aligned RNA-Seq data}  \label{sec:initialProcessing}
 %-----------------------------------------------------------
@@ -173,13 +202,11 @@ The first step is to process the aligned RNA-Seq data. The bulk of the data-proc
 \begin{verbatim}
 java -jar /path/to/jarfile/QoRTs.jar QC
                    mybamfile.bam
-                   Rattus_norvegicus.RGSC3.4.69.gtf.gz
+                   transcriptAnnotationFile.gtf.gz
                    /qc/data/dir/path/
 \end{verbatim}
 
 In the above command (which must be entered as a single line), you must replace \verb|/path/to/jarfile/| with the file-path to the directory in which the jar file is kept. The path \verb|/qc/data/dir/path/| should be replaced with the path you want the QC data to be written. This should match the path located in the decoder in the qc.data.dir column for this sample-run.
-
-\emph{IMPORTANT NOTE:} As mentioned in section \ref{sec:reqs}, input bam files MUST be sorted by \emph{NAME}. QoRTs can also be set to read bam files from a stdin, by simply substituting '-' (without quotes) for the bamfile name. See section \ref{sec:reqs} for more details.
 
 The bam processing tool includes numerous options. A full description of these options can be found by entering the command:
 \begin{verbatim}
@@ -188,18 +215,26 @@ java -jar /path/to/jarfile/QoRTs.jar QC --man
 
 There are a number of crucial points that require attention when using the QoRTs.jar QC command.
 
-\emph{Stranded data:} By default, QoRTs assumes that the data is NOT strand-specific. For strand-specific data, the \verb|--stranded| flag must be added to the command line, like so:
+  \begin{itemize}
+    \item \emph{Stranded Data:} By default, QoRTs assumes that the data is \emph{NOT} strand-specific. For strand-specific data, the \verb|--stranded| option must be used.
+    \item \emph{Stranded Library Type:} The \verb|--fr_secondStrand| option may be required depending on the stranded library type. QoRTs does not attempt to automatically detect the platform and protocol used for stranded data. There are two types of strand-specific protocols, which are described by the TopHat/CuffLinks documentation at \url{http://cufflinks.cbcb.umd.edu/manual.html#library} as \verb|fr-firststrand| and \verb|fr-secondstrand|. In HTSeq, these same library type options are defined as \verb|-s reverse| and \verb|-s yes| respectively. According to the CuffLinks manual, \verb|fr-firststrand| (the default used by QoRTs for stranded data) applies to dUTP, NSR, and NNSR protocols, whereas \verb|fr-secondstrand| applies to "Directional Illumina (ligation)" and "Standard SOLiD" protocols. If you are unsure which library type applies to your dataset, don't worry: one of the tests will report stranded library type. If you use this test to determine library type, be aware that you may have to re-run QoRTs with the correct library type set.
+    \item \emph{Read Groups:} Depending on the production pipeline, each biological sample may be run across multiple sequencer lanes. These seperate files can be merged together either before or after analysis with QoRTs (and maybe even before alignment). However, if the merger occurs before analysis with QoRTs, then each bam file will consist of multiple seperate lanes or runs. In this case, it is STRONGLY recommended that seperate QC runs be performed on each "read group", using the \verb|--readGroup| option. This will prevent run- or lane-specific biases, artifacts, or errors from being obfuscated.
+    \item \emph{Read Sorting:} For paired-end data reads must be sorted. By default, QoRTs assumes that the bam file is sorted by \emph{NAME}. If the bam file is instead sorted by position, then the \verb|--coordSorted| option must be used. Sorting is unnecessary for single-end data.
+    \item \emph{Single-end vs paired-end:} By default, QoRTs assumes the input bam file consists of paired-end data. For single-end data, the \verb|--isSingleEnd| option must be used.
+  \end{itemize}
+
+For example, to read the first read group bam-file for SAMP1 from the example dataset (which is stranded, coordinate-sorted, and uses the \verb|fr_firstStrand| stranded library type), one would use the following command:
 
 \begin{verbatim}
 java -jar /path/to/jarfile/QoRTs.jar QC
                    --stranded
-                   mybamfile.bam
-                   Rattus_norvegicus.RGSC3.4.69.gtf.gz
-                   /qc/data/dir/path/
+                   --coordSorted
+                   inputData/bamFiles/SAMP1_RG1.bam
+                   inputData/annoFiles/anno.gtf.gz
+                   outputData/qortsData/SAMP1_RG1/
 \end{verbatim}
 
-\emph{Stranded library type:} The \verb|--fr_secondStrand| option may be required depending on the stranded library type. QoRTs does not attempt to automatically detect the platform and protocol used for stranded data. There are two types of strand-specific protocols, which are described by the TopHat/CuffLinks documentation at \url{http://cufflinks.cbcb.umd.edu/manual.html#library} as \verb|fr-firststrand| and \verb|fr-secondstrand|. In HTSeq, these same library type options are defined as \verb|-s reverse| and \verb|-s yes| respectively. According to the CuffLinks manual, \verb|fr-firststrand| (the default used by QoRTs for stranded data) applies to dUTP, NSR, and NNSR protocols, whereas \verb|fr-secondstrand| applies to "Directional Illumina (ligation)" and "Standard SOLiD" protocols. If you are unsure which library type applies to your dataset, don't worry: one of the tests will report stranded library type. If you use this test to determine library type, be aware that you may have to re-run QoRTs with the correct library type set.
-
+This command must be run on each bam file (and possibly more than once on each, if each bam file consists of multiple separate read-groups).
 
 %-----------------------------------------------------------
 \section{Visualization}  \label{sec:visualization}
@@ -209,11 +244,11 @@ Next, you must read in all the QC output from the java utility, using the comman
 
 %
 <<getRes, results="hide">>=
-res <- read.qc.results.data(directory, decoder.data.frame = decoder.data,
+res <- read.qc.results.data(directory, decoder = decoder.data,
                             calc.DESeq2 = TRUE, calc.edgeR = TRUE);
 @
 
-Note that the \Robject{calc.DESeq2} and \Robject{calc.edgeR} options are optional, and tell QoRTs to attempt to load the \Biocpkg{DESeq2} and \Biocpkg{edgeR} packages respectively, and use the packages to calculate their respective normalization size factors. This is not strictly needed for most purposes, but allows QoRTs to plot the normalization factors against one another. See section \ref{subsec:plotDesc-19} for more information.
+Note that the \Robject{calc.DESeq2} and \Robject{calc.edgeR} options are optional, and tell QoRTs to attempt to load the \Biocpkg{DESeq2} and \Biocpkg{edgeR} packages (respectively) and use the packages to calculate additional normalization size factors. This is not strictly needed for most purposes, but allows QoRTs to plot the normalization factors against one another. See section \ref{subsec:plotDesc-19} for more information.
 
 %----------
 \subsection{Generating all default plots}
@@ -223,12 +258,19 @@ To generate all the default compiled plots all at once, use the command:
 
 %
 <<compileAllPlots, eval = FALSE>>=
-makePlot.all.std(res, 
-             outfile.dir = "./", 
-             plot.device.name = "CairoPNG");
+makeMultiPlot.all(res, outfile.dir = "./");
 @
 
-This will usually take some time to run, but will produce all the compiled summary plots described in the rest of this section, including separate highlight plots for every sample in the dataset.
+This will usually take some time to run, but will produce all the compiled summary plots described in the rest of this section, including separate highlight plots for every sample in the dataset. By default all images will saved to file as pngs. There are a number of alternatives, which can be selected using the \verb|plot.device.name| parameter. For example:
+
+<<compileAllPlots2, eval = FALSE>>=
+#Generate multi-page pdf reports:
+makeMultiPlot.all(res, outfile.dir = "./", plot.device.name = "pdf");
+#Generate svg vector drawings:
+makeMultiPlot.all(res, outfile.dir = "./", plot.device.name = "svg");
+@
+
+Note: The R PDF device primarily uses vector drawings, however, some of the plots are too large to be efficiently stored as vectors. Thus, it is strongly recommended that the \verb|png| R package be installed, as well as either the \verb|Cairo| package or png device support (which you can test using the R command: \verb|capabilities()[["png"]]|). This will allow QoRTs to rasterize the plotting areas of certain large plots (in particular: the gene diversity plots and the various NVC plots). Unless these conditions are met the function above will issue a warning, and the resultant pdfs may be very large and may not be printable. Setting the \verb|rasterize.large.plots| parameter to \verb|FALSE| will deactivate these warnings. The \verb|raster.height| and \verb|raster.width| parameters can be used to increase the pixel resolution of the rasterized plotting regions, if desired.
 
 %----------
 \subsection{Plotting by sample, lane, or group} \label{subsec:plotterDesc}
@@ -236,23 +278,22 @@ This will usually take some time to run, but will produce all the compiled summa
 
 QoRTs includes automated methods for organizing and plotting the results in numerous different ways. The intent is to make patterns and biases more visible to the user.
 
-All plotting functions in QoRTs require a \Robject{QoRT\_Plotter} object. A \Robject{QoRT\_Plotter} is a \Robject{RefClass} object that contains all the QC data along with a set of parameters that determine how to color and draw each bam file's data. A full accounting of all possible options available in the is beyond the scope of this manual, but can be found in the help docs for the \Robject{QoRT\_Plotter} class.
+All plotting functions in QoRTs require a \Robject{QoRTs\_Plotter} object. A \Robject{QoRTs\_Plotter} is a \Robject{RefClass} object that contains all the QC data along with a set of parameters that determine how to color and draw each bam file's data. A full accounting of all possible options available in the is beyond the scope of this manual, but can be found in the help docs for the \Robject{QoRTs\_Plotter} class.
 
 \pagebreak
 %----------
 \subsubsection{Summary Plots} \label{subsec:plotterDesc1}
 %----------
 
-The simplest QoRTs plotter is the summary plotter. The summary plotter can be created using the command:
-
+The most basic \Robject{QoRTs\_Plotter} can be created using the command:
 <<makePlotter-1,results="hide">>=
-summary.plotter <- build.plotter.summary(res);
+basic.plotter <- build.plotter.basic(res);
 @
 
-This plotter will plot all the bam-files on top of one another in semi-transparent gray. For example:
+This \Robject{QoRTs\_Plotter} object can be used to plot all the bam-files on top of one another in semi-transparent gray. For example:
 
 <<plotterExamples-1,results="hide", fig.width=6.5, fig.height=5.5>>=
-makePlot.insert.size(summary.plotter);
+makePlot.insert.size(basic.plotter);
 @
 
 Which produces Figure \ref{plotterExamples-1-fig}:
@@ -263,7 +304,7 @@ The above example plot displays the "Insert Size" of each bam file, as described
 
 In addition, a compiled multi-plot in this style, containing all the standard QC plots, can be generated with the command:
 <<compileSummaryPlots1, fig.width=30, fig.height=25>>=
-makePlot.summary.basic(res);
+makeMultiPlot.basic(res);
 @
 
 Which produces Figure \ref{compileSummaryPlots1-fig}:
@@ -308,26 +349,24 @@ This plot includes many sub-plots, all in a single frame. The sub-plots are:
 
 A printable pdf version of this multi-plot, with 6 plots on each page, can be generated with using the options:
 <<compileSummaryPlots1b, eval = FALSE>>=
-makePlot.summary.basic(res, plot.device.name = "pdf");
+makeMultiPlot.basic(res, plot.device.name = "pdf");
 @
-The R PDF device uses vector drawings, however, some of the plots are too large to be efficiently stored as vectors. Thus, it is strongly recommended that the png R package be installed, as well as either the Cairo package or png device support. This will allow QoRTs to rasterize the plotting areas of certain large plots (in particular: the gene diversity plots and the various NVC plots). Unless these conditions are met the function above will issue a warning, and the resultant pdfs may be very large and difficult to print. Setting the \verb|rasterize.large.plots| parameter to \verb|FALSE| will deactivate these warnings. The \verb|raster.height| and \verb|raster.width| parameters can be used to increase the pixel resolution of the rasterized plots, if desired.
 
 \pagebreak
 %----------
-\subsubsection{Colored by Lane/Batch} \label{subsec:plotterDesc2}
+\subsubsection{Colored by Sample} \label{subsec:plotterDesc2}
 %----------
 
-In order to more easily detect batch effects, it is possible to color each bam-file by lane/batch. For this, you make a plotter with the command:
-
+For small datasets, it can be useful to simply color each sample a distinct color, so that outliers can be easily identified. For this, you first generate a \Robject{QoRTs\_Plotter} using the command:
 <<makePlotter-2,results="hide">>=
-byLane.plotter <- build.plotter.colorByLane(res);
+bySample.plotter <- build.plotter.colorBySample(res);
 @
 
-The plotter will draw all the bam-files on top of one another, but color them based on their lane.ID. The plotter can then be used to create various QC plots, for example:
+This \Robject{QoRTs\_Plotter} can be used to draw all the bam-files on top of one another, but color them based on their sample.ID. The plotter can then be used to create various QC plots, for example:
 
 <<plotterExamples-2,results="hide", fig.width=6.5, fig.height=5.5>>=
-makePlot.insert.size(byLane.plotter);
-makePlot.legend.over("topright",byLane.plotter);
+makePlot.insert.size(bySample.plotter);
+makePlot.legend.over("topright",bySample.plotter);
 @
 
 Which produces Figure \ref{plotterExamples-2-fig}:
@@ -338,7 +377,36 @@ The above example plot displays the "Insert Size" of each bam file, as described
 
 In addition, a compiled multi-plot in this style, containing all the standard QC plots, can be generated with the command:
 <<compileSummaryPlots2, eval = FALSE>>=
-makePlot.summary.colorByLane(res);
+makeMultiPlot.colorBySample(res);
+@
+
+\pagebreak
+%----------
+\subsubsection{Colored by Lane/Batch} \label{subsec:plotterDesc2b}
+%----------
+
+In order to more easily detect batch effects, it is possible to color each bam-file by lane/batch. For this, you can generate a \Robject{QoRTs\_Plotter} with the command:
+
+<<makePlotter-2b,results="hide">>=
+byLane.plotter <- build.plotter.colorByLane(res);
+@
+
+This \Robject{QoRTs\_Plotter} can be used to color replicates based on lane.ID. The \Robject{QoRTs\_Plotter} can then be used to create various QC plots, for example:
+
+<<plotterExamples-2b,results="hide", fig.width=6.5, fig.height=5.5>>=
+makePlot.insert.size(byLane.plotter);
+makePlot.legend.over("topright",byLane.plotter);
+@
+
+Which produces Figure \ref{plotterExamples-2b-fig}:
+
+\myincfig{plotterExamples-2b}{0.75\textwidth}{Phred Quality Score Plots}
+
+The above example plot displays the "Insert Size" of each bam file, as described in Section \ref{subsec:plotDesc-5}.
+
+In addition, a compiled multi-plot in this style, containing all the standard QC plots, can be generated with the command:
+<<compileSummaryPlots2b, eval = FALSE>>=
+makeMultiPlot.colorByLane(res);
 @
 
 \pagebreak
@@ -346,13 +414,13 @@ makePlot.summary.colorByLane(res);
 \subsubsection{Colored by Group/Phenotype} \label{subsec:plotterDesc3}
 %----------
 
-Next, it is sometimes useful to color samples by group.ID.
+To detect variations caused by biological conditions (or artifacts and errors that occur disproportionately in certain biological conditions), it is sometimes useful to color samples by group.ID.
 
 <<makePlotter-3,results="hide">>=
 byGroup.plotter <- build.plotter.colorByGroup(res);
 @
 
-This plotter can then be used to create various QC plots, for example:
+This \Robject{QoRTs\_Plotter} can then be used to create various QC plots, for example:
 <<plotterExamples-3,results="hide", fig.width=6.5, fig.height=5.5>>=
 makePlot.insert.size(byGroup.plotter);
 makePlot.legend.over("topright",byGroup.plotter);
@@ -366,7 +434,7 @@ The above example plot displays the "Insert Size" of each bam file, as described
 
 In addition, a compiled multi-plot in this style, containing all the standard QC plots, can be generated with the command:
 <<compileSummaryPlots3, eval = FALSE>>=
-makePlot.summary.colorByGroup(res);
+makeMultiPlot.colorByGroup(res);
 @
 
 \pagebreak
@@ -374,17 +442,17 @@ makePlot.summary.colorByGroup(res);
 \subsubsection{Basic Sample Highlight} \label{subsec:plotterDesc4}
 %----------
 
-Sometimes it is useful to highlight an individual sample.
+Sometimes it is useful to "highlight" an individual sample.
 
 <<makePlotter-4,results="hide">>=
-sample.D1.plotter <- build.plotter.highlightBySample("D1",res);
+sample.SAMP1.plotter <- build.plotter.highlightSample("SAMP1",res);
 @
 
-This plotter can then be used to create various QC plots, for example:
+This \Robject{QoRTs\_Plotter} can then be used to create various QC plots, for example:
 
 <<plotterExamples-4,results="hide", fig.width=6.5, fig.height=5.5>>=
-makePlot.insert.size(sample.D1.plotter);
-makePlot.legend.over("topright",sample.D1.plotter);
+makePlot.insert.size(sample.SAMP1.plotter);
+makePlot.legend.over("topright",sample.SAMP1.plotter);
 @
 
 Which produces Figure \ref{plotterExamples-4-fig}:
@@ -395,8 +463,8 @@ The above example plot displays the "Insert Size" of each bam file, as described
 
 In addition, a compiled multi-plot in this style, containing all the standard QC plots, can be generated with the command:
 <<compileSummaryPlots4, eval = FALSE>>=
-makePlot.summary.sample.highlight(res,
-                   curr.sample = "D1");
+makeMultiPlot.highlightSample(res,
+                   curr.sample = "SAMP1");
 @
 
 \pagebreak
@@ -407,15 +475,15 @@ makePlot.summary.sample.highlight(res,
 Sometimes it can be useful to highlight an individual sample. However, if that sample has multiple bam files ("technical replicates", derived from multiple separate lanes/runs on the same library), it can be useful to color the different runs with different distinct colors. With this plotter, only the "highlighted" sample is colored, all other samples are colored Gray.
 
 <<makePlotter-5,results="hide">>=
-sample.D1.colorByLane.plotter <- 
-            build.plotter.highlightBySample.colorByLane("D1",res);
+sample.SAMP1.colorByLane.plotter <- 
+            build.plotter.highlightSample.colorByLane("SAMP1",res);
 @
 
-This plotter can then be used to create various QC plots, for example:
+This \Robject{QoRTs\_Plotter} can then be used to create various QC plots, for example:
 
 <<plotterExamples-5,results="hide", fig.width=6.5, fig.height=5.5>>=
-makePlot.insert.size(sample.D1.colorByLane.plotter);
-makePlot.legend.over("topright",sample.D1.colorByLane.plotter);
+makePlot.insert.size(sample.SAMP1.colorByLane.plotter);
+makePlot.legend.over("topright",sample.SAMP1.colorByLane.plotter);
 @
 
 Which produces Figure \ref{plotterExamples-5-fig}:
@@ -426,8 +494,8 @@ The above example plot displays the "Insert Size" of each bam file, as described
 
 In addition, a compiled multi-plot in this style, containing all the standard QC plots, can be generated with the command:
 <<compileSummaryPlots5, eval = FALSE>>=
-makePlot.summary.sample.highlight.andColorByLane(res,
-                   curr.sample = "D1");
+makeMultiPlot.highlightSample.colorByLane(res,
+                   curr.sample = "SAMP1");
 @
 
 \pagebreak
@@ -439,7 +507,7 @@ QoRTs is capable of producing a wide variety of different plots and graphs. Whil
 
 %MORE INFO HERE
 
-The example plots in the following section all use the \verb|byLane.plotter| object (from Section \ref{subsec:plotterDesc2}), which colors each bamfile by its lane ID.
+The example plots in the following section all use the \verb|byLane.plotter| \Robject{QoRTs\_Plotter} (from Section \ref{subsec:plotterDesc2b}), which colors each replicate by its lane ID.
 
 \pagebreak
 %----------
@@ -464,14 +532,14 @@ Note that the Phred score is always an integer, and as such these plots would no
 These plots can be generated individually with the commands:
 
 <<indivPlot-1,results="hide", fig.width=6.5, fig.height=5.5>>=
-makePlot.qual.pair(byLane.plotter,"min");
 makePlot.qual.pair(byLane.plotter,"lowerQuartile");
 makePlot.qual.pair(byLane.plotter,"median");
+makePlot.qual.pair(byLane.plotter,"upperQuartile");
 @
 
 \noindent Additional options (Not shown):
 <<indivPlot-1-4, results="hide", eval = FALSE>>=
-makePlot.qual.pair(byLane.plotter,"upperQuartile");
+makePlot.qual.pair(byLane.plotter,"min");
 makePlot.qual.pair(byLane.plotter,"max");
 @
 
@@ -490,7 +558,7 @@ This plot can be generated individually with the command:
 makePlot.gc(byLane.plotter);
 @
 
-The \verb|paired| option can be used to calculate the GC-distribution for read-pairs rather than for all reads individually. This is disabled by default because it often results in a jagged distribution when a appreciable proportion of the reads have an insert size equal to or smaller than the read length. When this occurs, the read-pair will almost always have an even number of G/C nucleotides.
+The \verb|byPair| option can be used to calculate the GC-distribution for read-pairs rather than for all reads individually. This is disabled by default because it often results in a jagged distribution when a appreciable proportion of the reads have an insert size equal to or smaller than the read length. When this occurs, the read-pair will almost always have an even number of G/C nucleotides.
 
 \pagebreak
 %----------
@@ -1040,8 +1108,8 @@ Alternatively, the merger can be performed for a single sample directly, via the
 
 \begin{verbatim}
 java -jar /path/to/jarfile/QoRTs.jar mergeCounts 
-          ./CtrlDay1_RG1/,./CtrlDay1_RG2/,./CtrlDay1_RG3/
-          ./merged/CD1/ 
+          ./SAMP1_RG1/,./SAMP1_RG2/,./SAMP1_RG3/
+          ./merged/SAMP1/ 
 \end{verbatim}
 
 The list of QC data directories must be separated by commas and contain no whitespace.

@@ -36,10 +36,15 @@ DEFAULTDEBUGMODE <- TRUE;
 #            other than these 2 required columns, it can have any other columns desired, as long as the column names are unique.
 #
 
-read.qc.results.data <- function(infile.dir, decoder.files = NULL, decoder.data.frame = NULL, calc.DESeq2 = FALSE, calc.edgeR = FALSE, debugMode = DEFAULTDEBUGMODE ) {
-   decoder <- NULL;
-   if(! is.null(decoder.data.frame)){
-     decoder <- decoder.data.frame;
+read.qc.results.data <- function(infile.dir, decoder = NULL, decoder.files = NULL, calc.DESeq2 = FALSE, calc.edgeR = FALSE, debugMode = DEFAULTDEBUGMODE ) {
+   decoder.final <- completeAndCheckDecoder(decoder = decoder, decoder.files = decoder.files);
+   
+   return(read.in.results.data.with.decoder(decoder = decoder.final, infile.dir = infile.dir, calc.DESeq2 = calc.DESeq2 , calc.edgeR = calc.edgeR, debugMode = debugMode) );
+}
+
+completeAndCheckDecoder <- function(decoder = NULL, decoder.files = NULL){
+   if(! is.null(decoder)){
+     #Do nothing!
    } else if(! is.null(decoder.files)){
      decoder.file <- as.character(decoder.files);
      if(length(decoder.files) == 1){
@@ -50,11 +55,93 @@ read.qc.results.data <- function(infile.dir, decoder.files = NULL, decoder.data.
        stop("Fatal Error: QoRTs.read.results.data(): decoder.files must have length of 1 or 2!");
      }
    } else {
-     stop("Fatal Error: QoRTs.read.results.data(): either decoder.files or decoder.data.frame must be set!");
+     stop("Fatal Error: QoRTs.read.results.data(): either decoder or decoder.files must be set!");
    }
-   if(is.null(decoder)) stop("FATAL ERROR: Null Decoder?");
    
-   return(read.in.results.data.with.decoder(decoder = decoder, infile.dir = infile.dir, calc.DESeq2 = calc.DESeq2 , calc.edgeR = calc.edgeR, debugMode = debugMode) );
+   decoder.final <- expandAndCheckDecoder(decoder);
+   
+   return(decoder.final);
+}
+
+expandAndCheckDecoder <- function(decoder) {
+  #Simplest decoder possible: just a list of sample ID's:
+  if(class(decoder) == "character"){
+    decoder <- data.frame(unique.ID = decoder);
+    message("Simple decoder found, list of sample/unique ID's. Building complete decoder.");
+  }
+  if(class(decoder) == "matrix"){
+    decoder <- data.frame(decoder);
+  }
+  if(class(decoder) != "data.frame"){
+    message("Decoder must be either a matrix, a character vector (of unique ID's), or a data.frame. Decoder follows:");
+    print(decoder);
+    stop("ERROR: Decoder must be either a matrix, a character vector (of unique ID's), or a data.frame.");
+  }
+  if(is.null(names(decoder))){
+    message("Decoder must have column names! Decoder follows:");
+    print(decoder);
+    stop("ERROR: decoder must have column names!");
+  }
+  if(any(duplicated(names(decoder)))) stop("Decoder error: names(decoder) contains duplicates.");
+  
+  if((! ("unique.ID" %in% names(decoder))) & (! ("lanebam.ID" %in% names(decoder)))  & (! ("sample.ID" %in% names(decoder)))  ){
+    err <- "Decoder must contain a unique.ID or sample.ID row.";
+    message(err, " Decoder follows:");
+    print(decoder);
+    stop("ERROR: ",err);
+  }
+  
+  #If unique.ID AND lanebam.ID is unspecified, define it as the sample.ID 
+  #   (note: this assumes 1-1 sample to readGroup)
+  if((! ("unique.ID" %in% names(decoder))) & (! ("lanebam.ID" %in% names(decoder)))){
+    decoder$unique.ID = decoder$sample.ID;
+  }
+  #If unique.ID is specified but lanebam.ID exists, then use lanebam.ID as a synonym for unique.ID
+  if(! ("unique.ID" %in% names(decoder))){
+    decoder$unique.ID = decoder$lanebam.ID;
+  }
+  #If they decided to specify by sample.ID, then use the sample.ID to define the unique id 
+  #   (note: this assumes 1-1 sample to readGroup)
+  if(! ("sample.ID" %in% names(decoder))){
+    decoder$sample.ID = decoder$unique.ID;
+  }
+  # if lane.ID is unspecified, mark them UNKNOWN.
+  if(! ("lane.ID" %in% names(decoder))){
+    decoder$lane.ID = "UNKNOWN";
+  }
+  # if group.ID is unspecified, mark them UNKNOWN.
+  if(! ("group.ID" %in% names(decoder))){ 
+    decoder$group.ID = "UNKNOWN";
+  }
+  # if qc.data.dir is unspecified, assume they used the unique.ID's as the qc.data.dir.
+  #   This one might cause confusion, so print a minor warning just to be safe:
+  if(! ("qc.data.dir" %in% names(decoder))){ 
+    message("column 'qc.data.dir' not found in the decoder, assuming qc.data.dir = unique.ID");
+    decoder$qc.data.dir = decoder$unique.ID;
+  }
+  
+  #Now do checks for validity:
+  
+  #These should never be triggered, since these variables were all set above. But just in case:
+  if(is.null(decoder$unique.ID)) stop("Decoder formatting error: no column labelled unique.ID");
+  if(is.null(decoder$lane.ID)) stop("Decoder formatting error: no column labelled lane.ID");
+  if(is.null(decoder$group.ID)) stop("Decoder formatting error: no column labelled group.ID");
+  if(is.null(decoder$sample.ID)) stop("Decoder formatting error: no column labelled sample.ID");
+  
+  if(any(duplicated( decoder$unique.ID ))) stop("Decoder error: unique.ID's must be unique.");
+  if(any(duplicated(names(decoder)))) stop("Decoder error: names(decoder) contains duplicates.");
+  
+  for(samp in unique(decoder$sample.ID)){
+    subsetDecoder <- decoder[ decoder$sample.ID == samp,];
+    if(nrow(subsetDecoder) > 1){
+      if(length(unique(subsetDecoder$group.ID)) != 1){
+        stop("Decoder error: sample ",samp," has inconsistent group.ID depending on decoder row: (",paste0(unique,collapse=","),")");
+      }
+    }
+  }
+  
+  return(decoder);
+  
 }
 
 ##########################################################################################
@@ -62,64 +149,52 @@ read.qc.results.data <- function(infile.dir, decoder.files = NULL, decoder.data.
 get.decoder.from.single.file <- function(decoder.file){
   decoder <- read.table(decoder.file,header=TRUE,stringsAsFactors=F);
   
-  if(! is.null(decoder$lanebam.ID)){
-    decoder$unique.ID <- decoder$lanebam.ID;
-  }
-  if(is.null(decoder$unique.ID)) stop("Decoder formatting error: no column labelled unique.ID");
-  if(is.null(decoder$lane.ID)) stop("Decoder formatting error: no column labelled lane.ID");
-  if(is.null(decoder$group.ID)) stop("Decoder formatting error: no column labelled group.ID");
-  if(is.null(decoder$sample.ID)) stop("Decoder formatting error: no column labelled sample.ID");
+  #if(! is.null(decoder$lanebam.ID)){
+  #  decoder$unique.ID <- decoder$lanebam.ID;
+  #}
+  #if(is.null(decoder$unique.ID)) stop("Decoder formatting error: no column labelled unique.ID");
+  #if(is.null(decoder$lane.ID)) stop("Decoder formatting error: no column labelled lane.ID");
+  #if(is.null(decoder$group.ID)) stop("Decoder formatting error: no column labelled group.ID");
+  #if(is.null(decoder$sample.ID)) stop("Decoder formatting error: no column labelled sample.ID");
   
-  if(is.null(decoder$qc.data.dir)){
-     message("qc.data.dir not found, assuming qc.data.dir = unique.ID");
-     decoder$qc.data.dir <- decoder$unique.ID;
-  }  
+  #if(is.null(decoder$qc.data.dir)){
+  #   message("qc.data.dir not found, assuming qc.data.dir = unique.ID");
+  #   decoder$qc.data.dir <- decoder$unique.ID;
+  #}  
   
-  if(length(unique(decoder$unique.ID)) < length(decoder$unique.ID)) stop("Decoder formatting error: unique.ID must be unique!");
-  #more checks?
-  if( length(unique(names(decoder))) != length(names(decoder)) ) stop("Decoder formatting error: column names must be unique!");
+  #if(length(unique(decoder$unique.ID)) < length(decoder$unique.ID)) stop("Decoder formatting error: unique.ID must be unique!");
+  ##more checks?
+  #if( length(unique(names(decoder))) != length(names(decoder)) ) stop("Decoder formatting error: column names must be unique!");
   return(decoder);
 }
 
 get.decoder.from.dual.file <- function(lanebam.decoder, sample.decoder){
   sample.decoder <- read.table(sample.decoder,header=TRUE,stringsAsFactors=F);
   lanebam.decoder <- read.table(lanebam.decoder,header=TRUE,stringsAsFactors=F);
+  
   if(! is.null(lanebam.decoder$lanebam.ID)){
     lanebam.decoder$unique.ID <- lanebam.decoder$lanebam.ID;
   }
-  
-  if(is.null(lanebam.decoder$unique.ID)) stop("Replicate Decoder formatting error: no column labelled unique.ID");
-  if(is.null(lanebam.decoder$lane.ID)) stop("Replicate Decoder formatting error: no column labelled lane.ID");
-  if(is.null(lanebam.decoder$sample.ID)) stop("Replicate Decoder formatting error: no column labelled sample.ID");
-  if(is.null(lanebam.decoder$qc.data.dir)){
-     message("qc.data.dir not found, assuming qc.data.dir = unique.ID");
-     lanebam.decoder$qc.data.dir <- lanebam.decoder$unique.ID;
-  } 
-  if(length(unique(lanebam.decoder$unique.ID)) < length(lanebam.decoder$unique.ID)) stop("Lanebam Decoder formatting error: unique.ID must be unique!");
-  if( length(unique(names(lanebam.decoder))) != length(names(lanebam.decoder)) ) stop("Lanebam Decoder formatting error: column names must be unique!");
+  if(is.null(lanebam.decoder$unique.ID)) stop("Replicate Decoder (File: ",lanebam.decoder,") formatting error: no column labelled unique.ID");
+  if(is.null(lanebam.decoder$sample.ID)) stop("Replicate Decoder (File: ",lanebam.decoder,") formatting error: no column labelled sample.ID");
+  if(any(duplicated(lanebam.decoder$unique.ID))) stop("Replicate Decoder (File: ",lanebam.decoder,") formatting error: unique.ID must be unique!");
+  if(any(duplicated(names(lanebam.decoder)))) stop("Replicate Decoder (File: ",lanebam.decoder,") formatting error: column names must be unique!");
 
-  if(is.null(sample.decoder$sample.ID)) stop("Sample Decoder formatting error: no column labelled sample.ID");
-  if(is.null(sample.decoder$group.ID)) stop("Sample Decoder formatting error: no column labelled group.ID");
-  if(length(unique(sample.decoder$sample.ID)) < length(sample.decoder$sample.ID)) stop("Sample Decoder formatting error: sample.ID must be unique!");
+  if(is.null(sample.decoder$sample.ID)) stop("Sample Decoder (File: ",sample.decoder,") formatting error: no column labelled sample.ID");
+  if(any(duplicated(sample.decoder$sample.ID))) stop("Sample Decoder (File: ",sample.decoder,") formatting error: sample.ID must be unique!");
+  if(any(duplicated(names(sample.decoder)))) stop("Sample Decoder (File: ",sample.decoder,") formatting error: column names must be unique!");
 
   if(! all(unique(sample.decoder$sample.ID) %in% unique(lanebam.decoder$sample.ID) )) {
-    stop("Sample/Lanebam Decoders formatting error: no 1-to-1 matching between the two decoders sample.IDs!\n     Missing from lanebam.decoder: ", paste0(unique(sample.decoder$sample.ID)[ ! unique(sample.decoder$sample.ID) %in% unique(lanebam.decoder$sample.ID) ], collapse=",")  )
+    stop("Sample/Lanebam Decoders formatting error: no 1-to-1 matching between the two decoders sample.IDs!\n     Missing from replicate decoder: ", paste0(unique(sample.decoder$sample.ID)[ ! unique(sample.decoder$sample.ID) %in% unique(lanebam.decoder$sample.ID) ], collapse=",")  )
   }
-   
   if(! all(unique(lanebam.decoder$sample.ID) %in% unique(sample.decoder$sample.ID) )) {
-    stop("Sample/Lanebam Decoders formatting error: no 1-to-1 matching between the two decoders sample.IDs!\n     Missing from sample.decoder: ", paste0(unique(lanebam.decoder$sample.ID)[ ! unique(lanebam.decoder$sample.ID) %in% unique(sample.decoder$sample.ID) ],collapse=",")  )
+    stop("Sample/Lanebam Decoders formatting error: no 1-to-1 matching between the two decoders sample.IDs!\n     Missing from sample decoder: ", paste0(unique(lanebam.decoder$sample.ID)[ ! unique(lanebam.decoder$sample.ID) %in% unique(sample.decoder$sample.ID) ],collapse=",")  )
   }
-
-  if( length(unique(names(sample.decoder))) != length(names(sample.decoder)) ) stop("Sample Decoder formatting error: column names must be unique!");
-
-  merged.decoder <- lanebam.decoder;
   
-  merged.decoder$group.ID <- sapply(lanebam.decoder$sample.ID,FUN=function(samp){
-    sample.decoder$group.ID[sample.decoder$sample.ID == samp];
-  });
+  merged.decoder <- lanebam.decoder;
 
   for(pheno.var in names(sample.decoder)){
-    if(! pheno.var %in% c("sample.ID","group.ID")){
+    if(! pheno.var %in% c("sample.ID")){
       merged.decoder[[pheno.var]] <- sapply(lanebam.decoder$sample.ID, FUN=function(samp){
         sample.decoder[[pheno.var]][sample.decoder$sample.ID == samp];
       });
@@ -131,7 +206,7 @@ get.decoder.from.dual.file <- function(lanebam.decoder, sample.decoder){
 
 ###############################################################
 
-read.in.results.data.with.decoder <- function(decoder, infile.dir = "", calc.DESeq2 = FALSE, calc.edgeR = FALSE , debugMode){
+read.in.results.data.with.decoder <- function(decoder, infile.dir = "", calc.DESeq2 = FALSE, calc.edgeR = FALSE , debugMode = DEFAULTDEBUGMODE){
   if(! is.null(decoder$lanebam.ID)){
     decoder$unique.ID <- decoder$lanebam.ID;
   }
@@ -146,10 +221,14 @@ read.in.results.data.with.decoder <- function(decoder, infile.dir = "", calc.DES
 
   if( is.null(decoder$input.read.pair.count)){
     message("Note: no input.read.pair.count column found. This column is optional, but without it mapping rates cannot be calculated.");
-  } else {
-    message("Note: successfully found input.read.pair.count column. This will be used to calculate mapping rates.");
-  }
-
+  }# else {
+  #  message("Note: successfully found input.read.pair.count column. This will be used to calculate mapping rates.");
+  #}
+  if( is.null(decoder$multi.mapped.read.pair.count)){
+    message("Note: no multi.mapped.read.pair.count column found. This column is optional, but without it multi-mapping rates cannot be plotted.");
+  }# else {
+  #  message("Note: successfully found multi.mapped.read.pair.count: column. This will be used to plot multi-mapping rates.");
+  #}
   
   for(i in 1:length(decoder$unique.ID)){
     if(! file.exists(paste0(infile.dir,decoder$qc.data.dir[i]))){
@@ -157,7 +236,7 @@ read.in.results.data.with.decoder <- function(decoder, infile.dir = "", calc.DES
     }
   }
 
-  res <- new("QoRT_QC_Results");
+  res <- new("QoRTs_QC_Results");
   res@lanebam.list <- decoder$unique.ID;
   res@sample.list <- unique(decoder$sample.ID);
   res@lane.list <- unique(decoder$lane.ID);
@@ -171,13 +250,35 @@ read.in.results.data.with.decoder <- function(decoder, infile.dir = "", calc.DES
   qc.data.dir.list <- as.list(decoder$qc.data.dir);
   names(qc.data.dir.list) <- decoder$unique.ID
 
-  res@qc.data <- lapply(QC_INTERNAL_SCALAQC_FILE_LIST, FUN=function(scalaqc_file){
+  read.scalaqc.file.helper <- function(scalaqc_file){
     if(debugMode) ts <- timestamp();
     out <- read.in.scalaQC.files(infile.dir,lanebam.list, qc.data.dir.list,scalaqc_file);
     if(debugMode) reportTimeAndDiff(ts);
     out;
-  });
+  }
+  
+  res@qc.data <- list(summary = read.scalaqc.file.helper(QC_INTERNAL_SCALAQC_SUMMARY_FILE));
+
+  allSingleEnd <- any(sapply(res@qc.data[["summary"]], function(dl){
+    dl$COUNT[dl$FIELD == "IS_SINGLE_END"] == 1;
+  }));
+  allPairedEnd <- any(sapply(res@qc.data[["summary"]], function(dl){
+    dl$COUNT[dl$FIELD == "IS_SINGLE_END"] == 0;
+  }));
+  if(! (allSingleEnd | allPairedEnd)){
+    stop("FATAL ERROR: Dataset is a mixture of single-end and paired-end data! You must analyse paired-end and single-end datasets separately.");
+  }
+  res@singleEnd <- allSingleEnd;
+
+  if(res@singleEnd){
+    if(debugMode) message("Autodetected Single-End mode.");
+    res@qc.data <- c(res@qc.data,lapply(QC_INTERNAL_SCALAQC_FILE_LIST_SINGLE_END, FUN=read.scalaqc.file.helper));
+  } else {
+    if(debugMode) message("Autodetected Paired-End mode.");
+    res@qc.data <- c(res@qc.data,lapply(QC_INTERNAL_SCALAQC_FILE_LIST, FUN=read.scalaqc.file.helper));
+  }
   res@calc.data <- list();
+
   
   message("calculating secondary data:");
   if(debugMode) ts <- timestamp();
@@ -192,9 +293,11 @@ read.in.results.data.with.decoder <- function(decoder, infile.dir = "", calc.DES
 #LIST OF FILES:
 ##################################################################################################################################
 
-QC_INTERNAL_SCALAQC_FILE_LIST <- list( summary = "QCsummary.txt",
-                                       gc.paired = "QC.gc.txt.gz",
-                                       gc.unpaired = "QC.gc.RB.txt.gz",
+QC_INTERNAL_SCALAQC_SUMMARY_FILE <- "QC.summary.txt";
+
+QC_INTERNAL_SCALAQC_FILE_LIST <- list( gc.byPair = "QC.gc.byPair.txt.gz",
+                                       gc.byRead = "QC.gc.byRead.txt.gz",
+                                       gc.byRead.vsBaseCt = "QC.gc.byRead.vsBaseCt.txt.gz",
                                        quals.r1 = "QC.quals.r1.txt.gz", 
                                        quals.r2 = "QC.quals.r2.txt.gz",
                                        cigarOpDistribution.byReadCycle.R1 = "QC.cigarOpDistribution.byReadCycle.R1.txt.gz",
@@ -219,6 +322,26 @@ QC_INTERNAL_SCALAQC_FILE_LIST <- list( summary = "QCsummary.txt",
                                        #spliceJunctionCounts.novelSplices = "scalaQC.spliceJunctionCounts.novelSplices.txt.gz"
                                        #
 );
+
+QC_INTERNAL_SCALAQC_FILE_LIST_SINGLE_END <- list(
+                                       gc.byRead = "QC.gc.byRead.txt.gz",
+                                       gc.byRead.vsBaseCt = "QC.gc.byRead.vsBaseCt.txt.gz",
+                                       quals.r1 = "QC.quals.r1.txt.gz",
+                                       cigarOpDistribution.byReadCycle.R1 = "QC.cigarOpDistribution.byReadCycle.R1.txt.gz",
+                                       cigarOpLengths.byOp.R1 = "QC.cigarOpLengths.byOp.R1.txt.gz",
+                                       geneBodyCoverage.by.expression.level = "QC.geneBodyCoverage.by.expression.level.txt.gz",
+                                       geneCounts = "QC.geneCounts.txt.gz",
+                                       NVC.raw.R1 =            "QC.NVC.raw.R1.txt.gz",
+                                       NVC.lead.clip.R1 =      "QC.NVC.lead.clip.R1.txt.gz",
+                                       NVC.tail.clip.R1 =      "QC.NVC.tail.clip.R1.txt.gz",
+                                       NVC.minus.clipping.R1 = "QC.NVC.minus.clipping.R1.txt.gz",
+                                       chrom.counts = "QC.chromCount.txt.gz"
+                                       #,
+                                       #spliceJunctionCounts.knownSplices = "scalaQC.spliceJunctionCounts.knownSplices.txt.gz"
+                                       #spliceJunctionCounts.novelSplices = "scalaQC.spliceJunctionCounts.novelSplices.txt.gz"
+                                       #
+);
+
 
 ##################################################################################################################################
 ##################################################################################################################################
@@ -272,7 +395,6 @@ read.in.scalaQC.files <- function(infile.prefix, lanebam.list, qc.data.dir.list,
 ########################################################################################################################
 ########################################################################################################################
 
-
 check.all.completed.without.error <- function(res){
    summaries <- res@qc.data[["summary"]];
    if(is.null(summaries)){
@@ -300,7 +422,6 @@ check.all.completed.without.error <- function(res){
 }
 
 calc.results.data <- function(res, calc.DESeq2, calc.edgeR ){
-   
    res <- fix.summary.to.numeric(res);
    check.all.completed.without.error(res);
    res <- calc.quals(res);
@@ -314,7 +435,6 @@ calc.results.data <- function(res, calc.DESeq2, calc.edgeR ){
    res <- add.to.summary(res);
    return(res);
 }
-
 
 fix.summary.to.numeric <- function(res){
    buf <- res@qc.data[["summary"]];
@@ -348,11 +468,13 @@ add.to.summary <- function(res){
    
  #message("names(res@qc.data) = ",paste0(names(res@qc.data),collapse=","));
  #message("debug 1");
-   summary <- INTERNAL.calcAndAdd.averages(summary = summary, summary.names = summary.names, data.list = res@qc.data[["insert.size"]], x.name = "InsertSize", y.name = "Ct", data.title = "InsertSize")
+   if(! res@singleEnd){
+     summary <- INTERNAL.calcAndAdd.averages(summary = summary, summary.names = summary.names, data.list = res@qc.data[["insert.size"]], x.name = "InsertSize", y.name = "Ct", data.title = "InsertSize")
+     summary <- INTERNAL.calcAndAdd.averages(summary = summary, summary.names = summary.names, data.list = res@qc.data[["gc.byPair"]], x.name = "NUM_BASES_GC", y.name = "CT", data.title = "GC_byPair")
+   }
  #message("debug 2");
-   summary <- INTERNAL.calcAndAdd.averages(summary = summary, summary.names = summary.names, data.list = res@qc.data[["gc.unpaired"]], x.name = "NUM_BASES_GC", y.name = "CT", data.title = "GC_Unpaired")
+   summary <- INTERNAL.calcAndAdd.averages(summary = summary, summary.names = summary.names, data.list = res@qc.data[["gc.byRead"]], x.name = "NUM_BASES_GC", y.name = "CT", data.title = "GC_byRead")
  #message("debug 3");
-   summary <- INTERNAL.calcAndAdd.averages(summary = summary, summary.names = summary.names, data.list = res@qc.data[["gc.paired"]], x.name = "NUM_BASES_GC", y.name = "CT", data.title = "GC_Paired")
  #message("debug 4");
    raw.data.list <- res@qc.data[["geneBodyCoverage.by.expression.level"]];
    step.size <- raw.data.list[[1]]$QUANTILE[2] - raw.data.list[[1]]$QUANTILE[1];

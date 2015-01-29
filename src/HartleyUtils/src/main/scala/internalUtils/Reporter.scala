@@ -102,17 +102,79 @@ object Reporter {
     def close() {
       //do nothing.
     }
-  } 
+  }
+  
+  private case class StringReportLogger(vset : Array[Boolean]) extends ReportLogger {
+    val verbositySetting = vset;
+    val sb : StringBuilder = new StringBuilder();
+    
+    def report_basefunction(str : String){
+      sb.append(str);
+    }
+    def close() {
+      //do nothing.
+    }
+    def getLogString() : String = return sb.toString();
+  }
+  
+  private case class AddedFileReportLogger(logfile : String, srl : StringReportLogger) extends ReportLogger {
+    val verbositySetting = srl.verbositySetting;
+    val writer = fileUtils.openWriter(logfile);
+    writer.write(srl.getLogString());
+    
+    def report_basefunction(str : String){
+      writer.write(str);
+      writer.flush();
+    }
+    def close() {
+      writer.close();
+      /*try {
+        
+        writer.write(srl.getLogString());
+        
+      } catch {
+        case e : Exception => {
+          //do nothing!
+        }
+      }*/
+    }
+  }
+  /*
+   * 
+   *     } catch {
+      case e : Exception => {
+        internalUtils.Reporter.reportln("============================FATAL_ERROR============================\n"+
+                                        "QoRTs encountered a FATAL ERROR. For general help, use command:\n"+
+                                        "          java -jar path/to/jar/QoRTs.jar --help\n"+
+                                        "============================FATAL_ERROR============================\n"+
+                                        "Error info:","note");
+        throw e;
+      }
+    }
+   */
  
   private var loggers : List[ReportLogger] = List[ReportLogger]();
+
   
 /*
  * USAGE METHODS:
  */
   
-  val consoleVerbositySetting = Array(true,true,true,true,true,true,true,true);
+  //final val verbosityNames = List("output","error","warn","report","note","progress","debug","deepdebug");
+
+  val DEFAULT_CONSOLE_VERBOSITY = Array(true,true,true,true,true,true,false,false);
+  val QUIET_CONSOLE_VERBOSITY = Array(true,true,true,false,false,false,false,false);
+  val VERBOSE_CONSOLE_VERBOSITY = Array(true,true,true,true,true,true,true,true);
+  
   val logVerbositySetting = Array(true,true,true,true,true,true,true,true);
   val debugLogVerbositySetting = Array(true,true,true,true,true,true,true,true);
+  val warningLogVerbositySetting = Array(false,true,true,false,false,false,false,false);
+  
+  //default internal logger:
+  private val internalLog : StringReportLogger = StringReportLogger(logVerbositySetting);
+  loggers = internalLog :: loggers;
+  private val warningLog : StringReportLogger = StringReportLogger(warningLogVerbositySetting);
+  loggers = warningLog :: loggers;
   
   /*
    * Initializers:
@@ -123,7 +185,7 @@ object Reporter {
     
     val fileLogger = FileReportLogger(logVerbositySetting, logfile);
     val debugFileLogger = FileReportLogger(debugLogVerbositySetting, debugLogfile);
-    val consoleLogger = ConsoleReportLogger(consoleVerbositySetting);
+    val consoleLogger = ConsoleReportLogger(DEFAULT_CONSOLE_VERBOSITY);
     
     loggers = fileLogger :: debugFileLogger :: consoleLogger :: loggers;
   }
@@ -133,34 +195,55 @@ object Reporter {
     //val debugLogfile = logDir + "debugLog.log";
     
     val fileLogger = FileReportLogger(logVerbositySetting, logfile);
-    val consoleLogger = ConsoleReportLogger(consoleVerbositySetting);
+    val consoleLogger = ConsoleReportLogger(DEFAULT_CONSOLE_VERBOSITY);
     
     loggers = fileLogger :: consoleLogger :: loggers;
   }
   
   def init_logfilefree {
-    val consoleLogger = ConsoleReportLogger(consoleVerbositySetting);
+    val consoleLogger = ConsoleReportLogger(DEFAULT_CONSOLE_VERBOSITY);
     loggers = consoleLogger :: loggers;
   }
   
-  def init_stderrOnly {
-    val errLogger = ErrConsoleReportLogger(consoleVerbositySetting);
+  def init_stderrOnly(verbositySetting : Array[Boolean] = DEFAULT_CONSOLE_VERBOSITY) {
+    val errLogger = ErrConsoleReportLogger(verbositySetting);
     loggers = errLogger :: loggers;
+  }
+  
+  def init_completeLogFile(logfile : String) {
+    val fileLogger = AddedFileReportLogger(logfile, internalLog)
+    loggers = fileLogger :: loggers;
+  }
+  def init_warningLogFile(logfile : String) {
+    val fileLogger = AddedFileReportLogger(logfile, warningLog)
+    loggers = fileLogger :: loggers;
   }
   
   /*
    * Reporting options:
    */
   
+  var anyWarning : Boolean = false;
+  
   def reportln(str : String, verb : String) {
+    if(verb == "warn"){
+      anyWarning = true;
+    }
+    
     loggers.map((logger) => logger.reportln(str,verb))
   }
   
   def report(str : String, verb : String){
+    if(verb == "warn"){
+      anyWarning = true;
+    }
     loggers.map((logger) => logger.report(str,verb))
   }
   
   def startReport(str : String, verb : String){
+    if(verb == "warn"){
+      anyWarning = true;
+    }
     loggers.map((logger) => logger.startReport(str,verb))
   }
   
@@ -190,6 +273,7 @@ object Reporter {
   }
   
   def closeLogs() {
-    loggers.map((logger) => logger.close)
+    loggers.map((logger) => logger.close);
+    loggers = List();
   }
 }

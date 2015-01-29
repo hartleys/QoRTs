@@ -101,10 +101,9 @@ object qcCigarDistribution {
 
 }
 
-class qcCigarDistribution(readLen : Int)  extends QCUtility[Unit]  {
+class qcCigarDistribution(isSingleEnd : Boolean, readLen : Int)  extends QCUtility[Unit]  {
   reportln("Init CigarOpDistribution","progress");
 
-  
   val readLength : Int = readLen;
   val positionOpDistribution1 : Array[scala.collection.mutable.Map[(CigarOperator,Int),Int]] = new Array[scala.collection.mutable.Map[(CigarOperator,Int),Int]](readLength);
   for(i <- 0 until positionOpDistribution1.length){
@@ -120,19 +119,23 @@ class qcCigarDistribution(readLen : Int)  extends QCUtility[Unit]  {
   def runOnReadPair(r1 : SAMRecord, r2 : SAMRecord, readNum : Int){
       //if(useRead(r1) & useRead(r2)){
         val r1c = r1.getCigar();
-        val r2c = r2.getCigar();
-        
         qcCigarDistribution.readCigar(r1c,positionOpDistribution1, opLengthDistribution1, r1.getReadNegativeStrandFlag());
-        qcCigarDistribution.readCigar(r2c,positionOpDistribution2, opLengthDistribution2, r2.getReadNegativeStrandFlag());
+        
+        if(! isSingleEnd){
+          val r2c = r2.getCigar();
+          qcCigarDistribution.readCigar(r2c,positionOpDistribution2, opLengthDistribution2, r2.getReadNegativeStrandFlag());
+        }
       //}
   }
   
   def writeOutput(outfile : String, summaryWriter : WriterUtil){
     qcCigarDistribution.writePositionOpDistribution( positionOpDistribution1 , outfile + ".cigarOpDistribution.byReadCycle.R1.txt");
-    qcCigarDistribution.writePositionOpDistribution( positionOpDistribution2 , outfile + ".cigarOpDistribution.byReadCycle.R2.txt");
-
     qcCigarDistribution.writeOpLengthDistribution(opLengthDistribution1, outfile + ".cigarOpLengths.byOp.R1.txt");
-    qcCigarDistribution.writeOpLengthDistribution(opLengthDistribution2, outfile + ".cigarOpLengths.byOp.R2.txt");
+    
+    if(! isSingleEnd){
+      qcCigarDistribution.writePositionOpDistribution( positionOpDistribution2 , outfile + ".cigarOpDistribution.byReadCycle.R2.txt");
+      qcCigarDistribution.writeOpLengthDistribution(   opLengthDistribution2,    outfile + ".cigarOpLengths.byOp.R2.txt");
+    }
   }
   
   def getUtilityName : String = "CigarOpDistribution";

@@ -16,6 +16,7 @@
                 rasterize.plotting.area = FALSE, 
                 raster.height = 1000, 
                 raster.width = 1000,
+                singleEndMode,
                 ...)
 }
 \arguments{
@@ -52,6 +53,11 @@
   \item{raster.width}{
     Numeric. If rasterize.plotting.area is TRUE, then this is the
     width of the plotting area raster image, in pixels.
+  }
+  \item{singleEndMode}{
+      Logical. Determines whether the dataset consists of single-ended reads. 
+      By default this is determined from the data. Thus, this parameter should 
+      never need to be set by the user.
   }
   \item{\dots}{ 
     Arguments to be passed to methods, such as

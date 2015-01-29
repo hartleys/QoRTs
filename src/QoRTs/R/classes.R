@@ -9,21 +9,23 @@ require(methods);
 require(base);
 
 
-setClass("QoRT_QC_Results",representation(
+setClass("QoRTs_QC_Results",representation(
                                      lanebam.list="character",
                                      sample.list="character",
                                      lane.list="character",
                                      group.list="character",
                                      decoder="data.frame", #decoder has columns: unique.ID	sample.ID	lane.ID	group.ID	cycle.CT	and then any number of user-defined columns (which are ignored internally)
                                      qc.data="list", #List of Lists. Each element corresponds to one qc test, and is composed of a list, one element for each lanebam.
-                                     calc.data="list" #List of Lists. Same as above, except it holds data calculated within R rather than raw scala output. Each element corresponds to one qc test, and is composed of a list, one element for each lanebam.
+                                     calc.data="list", #List of Lists. Same as above, except it holds data calculated within R rather than raw scala output. Each element corresponds to one qc test, and is composed of a list, one element for each lanebam.
+                                     singleEnd="logical" #Logical. whether any of the samples are single-end. Note that paired-end samples can be plotted in single-end mode, but NOT vice versa.
                                      ));
 
 
-setMethod("show","QoRT_QC_Results",
+setMethod("show","QoRTs_QC_Results",
    function(object){
-      cat("QoRT_QC_Results object:\n");
+      cat("QoRTs_QC_Results object:\n");
       cat("lanebam.list:            [",paste0(object@lanebam.list,collapse=","),"]\n");
+      cat("singleEnd:               [",paste0(object@singleEnd),"]\n");
       cat("sample.list:             [",paste0(object@sample.list,collapse=","),"]\n");
       cat("lane.list:               [",paste0(object@lane.list,collapse=","),"]\n");
       cat("files included:          [", paste0(names(object@qc.data), collapse=","),"]\n" );
@@ -87,8 +89,8 @@ check.isValid <- function(object){
 # Plotter Parameter Holder:
 #############################################################
 
-QoRT_Plotter <- setRefClass("QoRT_Plotter",fields = list(
-                       res = "QoRT_QC_Results",
+QoRTs_Plotter <- setRefClass("QoRTs_Plotter",fields = list(
+                       res = "QoRTs_QC_Results",
                        plot.type = "character",
                        title.highlight.name = "character",
                        legend.params = "data.frame",   #has columns: name	lines.col	lines.lty	lines.lwd	points.pch	points.col
@@ -118,7 +120,7 @@ QoRT_Plotter <- setRefClass("QoRT_Plotter",fields = list(
 #);
 
 generate.plotter <- function(res, plot.type, title.highlight.name, legend.params, showLegend, nvc.colors, nvc.colors.light, lanebam.params){
-  QoRT_Plotter$new(res = res, plot.type = plot.type, title.highlight.name = title.highlight.name, legend.params = legend.params, showLegend = showLegend, nvc.colors = nvc.colors, nvc.colors.light = nvc.colors.light, lanebam.params = lanebam.params);
+  QoRTs_Plotter$new(res = res, plot.type = plot.type, title.highlight.name = title.highlight.name, legend.params = legend.params, showLegend = showLegend, nvc.colors = nvc.colors, nvc.colors.light = nvc.colors.light, lanebam.params = lanebam.params);
 }
 
 #############################################################
@@ -145,7 +147,6 @@ setClass("QoRTs_Compiled_Plotting_Params", representation(
 setMethod("show","QoRTs_Compiled_Plotting_Params",
    function(object){
       cat("Master plotting parameters object for QoRTs:\n");
-      cat("[NOTE: SHOW FUNCTION IS UNFINISHED!]\n");
    }
 );
 

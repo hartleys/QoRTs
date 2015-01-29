@@ -85,6 +85,64 @@ object stdUtils {
    * Sequence/iterator utilities:
    **************************************************************************************************************************/
   
+  def bufferIterator[A](iter : Iterator[A], bufferSize : Int) : Iterator[A] = {
+    return new Iterator[A](){
+      val groupIter = iter.grouped(bufferSize);
+      var buffer : Seq[A] = Seq[A]();
+      def hasNext : Boolean = if(buffer.isEmpty) groupIter.hasNext else true;
+      def next : A = {
+        if(buffer.isEmpty){
+          buffer = groupIter.next;
+          next();
+        } else {
+          val out = buffer.head;
+          buffer = buffer.tail;
+          out; 
+        }
+      }
+    }
+  }
+  
+  
+  class filterWithCount[A](iter : Iterator[A], filterFunction : (A => Boolean)) extends Iterator[A] {
+    private val nextHolder : Array[Option[A]] = Array.ofDim[Option[A]](1);
+    private var dropCt : Int = 0;
+    
+    def getDropCt : Int = dropCt;
+    def hasNext : Boolean = ! nextHolder(0).isEmpty;
+    def next : A = {
+      val out = nextHolder(0).get;
+      if(iter.hasNext){
+        var curr = iter.next;
+        while(! filterFunction(curr)){
+          if(! iter.hasNext){
+            nextHolder(0) = None;
+            return(out);
+          }
+          dropCt += 1;
+          curr = iter.next;
+        }
+        nextHolder(0) = Some(curr);
+        return(out);
+      } else {
+        nextHolder(0) = None;
+        return(out);
+      }
+        
+    }
+  }
+  
+  def seqIsSortedBy[A](s : Seq[A], compareToFunc : ((A,A) => Boolean)) : Boolean = {
+    if(s.length <= 1){ 
+      true;
+    } else {
+      s.zip(s.tail).forall( a12 => {
+        compareToFunc(a12._1,a12._2); 
+      })
+    }
+  }
+  
+  
   //Natural Number Iterator:
   def getNaturalNumberIterator(start : Int) : Iterator[Int] = {
     return new Iterator[Int](){
@@ -107,6 +165,13 @@ object stdUtils {
     else if(times == 1) return Seq(toCopy);
     else {
       return ((0 until times).map((x) => toCopy) ).toSeq;
+    }
+  }
+  def repToVector[T](toCopy : T, times : Int): Vector[T] = {
+    if(times == 0) return Vector[T]()
+    else if(times == 1) return Vector[T](toCopy);
+    else {
+      return ((0 until times).map((x) => toCopy) ).toVector;
     }
   }
   

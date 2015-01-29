@@ -11,7 +11,7 @@
 \usage{
   makePlot.insert.size(plotter, calc.rate = TRUE, pct.cutoff = 0.98,
                    plot.medians = TRUE, plot.means = NULL,
-                   debugMode,
+                   debugMode, singleEndMode,
                    \dots)
 }
 \arguments{
@@ -40,6 +40,11 @@
   }
   \item{debugMode}{
     Logical. If TRUE, debugging data will be printed to the console.
+  }
+  \item{singleEndMode}{
+      Logical. Determines whether the dataset consists of single-ended reads. 
+      By default this is determined from the data. Thus, this parameter should 
+      never need to be set by the user.
   }
   \item{\dots}{ 
     Arguments to be passed to methods, such as

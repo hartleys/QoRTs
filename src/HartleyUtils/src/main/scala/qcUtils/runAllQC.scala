@@ -25,7 +25,7 @@ import scala.collection.parallel.immutable.ParVector;
 
 object runAllQC {
   
-  final val QC_DEFAULT_ON_FUNCTION_LIST  : Set[String] = Set("InsertSize",
+  final val QC_DEFAULT_ON_FUNCTION_LIST  : scala.collection.immutable.Set[String] = scala.collection.immutable.Set("InsertSize",
                                                              "NVC",
                                                              "CigarOpDistribution",
                                                              "QualityScoreDistribution",
@@ -42,14 +42,13 @@ object runAllQC {
                                                              "writeGeneCounts", 
                                                              "writeClippedNVC", 
                                                              "chromCounts");
-  final val QC_DEFAULT_OFF_FUNCTION_LIST : Set[String] = Set("FPKM","makeAllBrowserTracks", "cigarMatch");
-  final val QC_FUNCTION_LIST : Set[String] = QC_DEFAULT_ON_FUNCTION_LIST ++ QC_DEFAULT_OFF_FUNCTION_LIST;
+  final val QC_DEFAULT_OFF_FUNCTION_LIST : scala.collection.immutable.Set[String] = scala.collection.immutable.Set("FPKM","makeWiggles","makeAllBrowserTracks", "cigarMatch");
+  final val QC_FUNCTION_LIST : scala.collection.immutable.Set[String] = QC_DEFAULT_ON_FUNCTION_LIST ++ QC_DEFAULT_OFF_FUNCTION_LIST;
   final val COMPLETED_OK_FILENAME = "QORTS_COMPLETED_OK";
-  final val MASTERLEVEL_FUNCTION_LIST = List[String]("GeneCalcs", "InsertSize","NVC","CigarOpDistribution","QualityScoreDistribution","GCDistribution","JunctionCalcs","StrandCheck","chromCounts","cigarMatch");
+  final val MASTERLEVEL_FUNCTION_LIST = List[String]("GeneCalcs", "InsertSize","NVC","CigarOpDistribution","QualityScoreDistribution","GCDistribution","JunctionCalcs","StrandCheck","chromCounts","cigarMatch","makeWiggles");
 
-  
-  final val QC_INCOMPATIBLE_WITH_SINGLE_END_FUNCTION_LIST : Set[String] = Set(
-      "InsertSize"
+  final val QC_INCOMPATIBLE_WITH_SINGLE_END_FUNCTION_LIST : scala.collection.immutable.Set[String] = scala.collection.immutable.Set(
+      "InsertSize","cigarMatch"
   );
   
   //"InsertSize","NVC","CigarOpDistribution","QualityScoreDistribution","GCDistribution","GeneCalcs",
@@ -100,17 +99,39 @@ object runAllQC {
                                                    "the \"makeFlatGtf\" command.\n"+
                                                    "If the filename ends with \".gz\" or \".zip\", the file will be parsed using the appropriate decompression method."
                                         ) ::
-                    new UnaryArgument(   name = "isSingleEnd", 
-                                         arg = List("--isSingleEnd","-e"), // name of value
+                    new UnaryArgument(   name = "singleEnded", 
+                                         arg = List("--singleEnded","-e"), // name of value
                                          argDesc = "Flag to indicate that reads are single end. WARNING: UNIMPLEMENTED and UNSUPPORTED AT THIS TIME! This utility is not designed for, and will not function properly on single-strand data!" // description
                                        ) ::
                     new UnaryArgument( name = "stranded",
                                          arg = List("--stranded","-s"), // name of value
                                          argDesc = "Flag to indicate that data is stranded." // description
                                        ) ::
+                    new UnaryArgument( name = "verbose",
+                                         arg = List("--verbose"), // name of value
+                                         argDesc = "Flag to indicate that debugging information and extra progress information should be sent to stderr." // description
+                                       ) ::
+                    new UnaryArgument( name = "quiet",
+                                         arg = List("--quiet","-s"), // name of value
+                                         argDesc = "Flag to indicate that only errors and warnings should be sent to stderr." // description
+                                       ) ::
+                    new BinaryOptionArgument[Int](
+                                         name = "maxReadLength", 
+                                         arg = List("--maxReadLength"), 
+                                         valueName = "len",
+                                         argDesc =  "Sets the maximum read length. For unclipped datasets this option is OPTIONAL since the read length can be determined from the data. "+
+                                                    "By default, QoRTs will attempt to determine the max read length by examining the first 1000 reads. "+
+                                                    "If your data is hard-clipped prior to alignment, then it is STRONGLY recommended that this option be included, or else an error may occur. "+
+                                                    "Note that using data that is hard-clipped prior to alignment is NOT recommended, because this makes it difficult (or impossible) "+
+                                                    "to determine the sequencer read-cycle of each nucleotide base. This may obfuscate cycle-specific artifacts, trends, or errors, the detection of which is one of the primary purposes of QoRTs!"+
+                                                    "In addition, hard clipping (whether before or after alignment) removes quality score data, and thus quality score metrics may be misleadingly optimistic. "+
+                                                    "A MUCH preferable method of removing undesired sequence is to replace such sequence with N's, which preserves the quality score and the sequencer cycle information. "+
+                                                    " "+
+                                                    " "
+                                        ) ::
                     new UnaryArgument( name = "fr_secondStrand",
                                          arg = List("--stranded_fr_secondstrand","-a"), // name of value
-                                         argDesc = "Flag to indicate that reads are from a fr_secondstrand type of stranded library (equivalent to the \"stranded = yes\" option in HTSeq). "+
+                                         argDesc = "Flag to indicate that reads are from a fr_secondstrand type of stranded library (equivalent to the \"stranded = yes\" option in HTSeq or the \"fr_secondStrand\" library-type option in TopHat/CuffLinks). "+
                                                    "If your data is stranded, you must know the library type in order to analyze it properly. This utility uses the same "+
                                                    "definitions as cufflinks to define strandedness type. By default, the fr_firststrand "+
                                                    "library type is assumed for all stranded data (equivalent to the \"stranded = reverse\" option in HTSeq)." // description
@@ -121,12 +142,24 @@ object runAllQC {
                                        ) ::
                     new UnaryArgument( name = "noMultiMapped",
                                          arg = List("--fileContainsNoMultiMappedReads"), // name of value
-                                         argDesc = "Flag to indicate that the input sam/bam file contains only primary alignments (ie, no multi-mapped reads). This flag is ALWAYS OPTIONAL, but when applicable this utility will run (slightly) faster when using this argument. DEPRECIATED!" // description
+                                         argDesc = "Flag to indicate that the input sam/bam file contains only primary alignments (ie, no multi-mapped reads). This flag is ALWAYS OPTIONAL, but when applicable this utility will run (slightly) faster when using this argument. (DEPRECIATED! The performance improvement was marginal)" // description
                                        ) ::
                     new UnaryArgument( name = "keepMultiMapped",
                                          arg = List("--keepMultiMapped"), // name of value
                                          argDesc = "Flag to indicate that the tool should NOT filter out multi-mapped reads. Note that even with this flag raised this utility will still only use the 'primary' alignment location for each read. By default any reads that are marked as multi-mapped will be ignored entirely." // description
                                        ) ::
+                    new UnaryArgument( name = "coordSorted",
+                                         arg = List("--coordSorted"), // name of value
+                                         argDesc = "Flag to indicate that input bam file is coordinate-sorted, rather than name-sorted. "+
+                                                   "Note that QoRTs will take longer to run and use more memory in this mode. To improve performance, sort the data by name prior to using of QoRTs. "+
+                                                   "In addition, if an (extremely) large fraction of the read-pairs are "+
+                                                   "mapped to extremely distant loci (or different chromosomes), then memory issues may arise. However, this should not be a problem with most datasets. "+
+                                                   "Technically this function will also allow QoRTs to work on unsorted bam files, but this is STRONGLY not recommended, as memory usage will by greatly increased." // description
+                                       ) ::
+                    //new UnaryArgument( name = "neverPartiallyUnpaired",
+                    //                     arg = List("--neverPartiallyUnpaired"), // name of value
+                    //                     argDesc = "Flag to indicate that when a read's mate is unmapped, it always appears in the input file. This option is always optional, but will improve performance." // description
+                    //                  ) ::
                     new UnaryArgument( name = "noGzipOutput",
                                          arg = List("--noGzipOutput"), // name of value
                                          argDesc = "Flag to indicate that output files should NOT be compressed into the gzip format. By default almost all output files are compressed to save space." // description
@@ -228,7 +261,7 @@ object runAllQC {
           parser.get[String]("gtffile"),
           parser.get[Option[String]]("flatgfffile"),
           parser.get[List[String]]("dropChromList"),
-          parser.get[Boolean]("isSingleEnd"),
+          parser.get[Boolean]("singleEnded"),
           parser.get[Boolean]("stranded"),
           parser.get[Boolean]("fr_secondStrand"),
           parser.get[Boolean]("testRun"),
@@ -243,7 +276,9 @@ object runAllQC {
           parser.get[Boolean]("parallelFileRead"),
           parser.get[Int]("minMAPQ"),
           parser.get[Option[String]]("restrictToGeneList"),
-          parser.get[Option[String]]("dropGeneList")
+          parser.get[Option[String]]("dropGeneList"),
+          parser.get[Boolean]("coordSorted"),
+          parser.get[Option[Int]]("maxReadLength")
       );
       }
     }
@@ -269,8 +304,12 @@ object runAllQC {
           parallelFileRead : Boolean,
           minMAPQ: Int,
           restrictToGeneList : Option[String],
-          dropGeneList : Option[String]){
+          dropGeneList : Option[String],
+          unsorted : Boolean,
+          maxReadLength : Option[Int]){
 
+    internalUtils.Reporter.init_completeLogFile(outfile + ".log");
+    
     reportln("Starting ALLQC:","note");
     val initialTimeStamp = TimeStampUtil();
     standardStatusReport(initialTimeStamp);
@@ -285,7 +324,7 @@ object runAllQC {
     val stdGtfCodes = new internalUtils.GtfTool.GtfCodes();
     val flatGtfCodes = new internalUtils.GtfTool.GtfCodes();
     
-    if(isSingleEnd) error("FATAL ERROR: Single-end option SET. Single-end data is not currently supported!");
+    if(isSingleEnd) reportln("Single-end option SET. Single-end support is in BETA.","warn");
     
     val dropChrom = dropChromList.toSet;
     
@@ -295,14 +334,14 @@ object runAllQC {
       runFunctions.toSet -- dropFunctions.toSet;
     }
     
-    val runFuncTEMP : scala.collection.immutable.Set[String] = if(restrictToGeneList.isEmpty & dropGeneList.isEmpty) scala.collection.immutable.Set[String]() else scala.collection.immutable.Set[String]("GeneCalcs");
-    val runFunc = (runFunc_initial ++ runFuncTEMP).foldLeft(runFunc_initial ++ runFuncTEMP)((soFar,currFunc) => {
+    val runFuncTEMP : scala.collection.immutable.Set[String] = (if(restrictToGeneList.isEmpty & dropGeneList.isEmpty) scala.collection.immutable.Set[String]() else scala.collection.immutable.Set[String]("GeneCalcs"));
+    val runFuncTEMP2 = (runFunc_initial ++ runFuncTEMP).foldLeft(runFunc_initial ++ runFuncTEMP)((soFar,currFunc) => {
       QC_FUNCTION_DEPENDANCIES.get(currFunc) match {
         case Some(reqFunc) => {
           if(soFar.contains(reqFunc)){
             soFar;
           } else {
-            reportln("Function \"" + currFunc +"\" requires top-level function \"" + reqFunc+ "\". Adding the required function to the active function list.","warning");
+            reportln("Function \"" + currFunc +"\" requires top-level function \"" + reqFunc+ "\". Adding the required function to the active function list.","warn");
             soFar + reqFunc;
           }
         }
@@ -311,11 +350,16 @@ object runAllQC {
         }
       }
     });
+    val runFunc = if(! isSingleEnd) runFuncTEMP2 else {
+      runFuncTEMP2 -- QC_INCOMPATIBLE_WITH_SINGLE_END_FUNCTION_LIST;
+    }
     
     val notFoundFunc = runFunc.find(  ! QC_FUNCTION_LIST.contains(_) ) ;
     if( ! notFoundFunc.isEmpty ){
       error("ERROR: Function not found: \"" + notFoundFunc.get +"\"");
     }
+    
+    
     
     reportln("Running functions: " + runFunc.mkString(","),"progress");
     
@@ -357,9 +401,8 @@ object runAllQC {
       reportln("ERROR ERROR ERROR: parallell file read is NOT IMPLEMENTED AT THIS TIME!","warn");
       //runOnSeqFile_PAR(initialTimeStamp = initialTimeStamp, infile = infile, outfile = outfile, anno_holder = anno_holder, testRun = testRun, runFunc = runFunc, stranded = stranded, fr_secondStrand = fr_secondStrand, dropChrom = dropChrom, keepMultiMapped = keepMultiMapped, noMultiMapped = noMultiMapped, numThreads = numThreads, readGroup )
     } else {
-      runOnSeqFile(initialTimeStamp = initialTimeStamp, infile = infile, outfile = outfile, anno_holder = anno_holder, testRun = testRun, runFunc = runFunc, stranded = stranded, fr_secondStrand = fr_secondStrand, dropChrom = dropChrom, keepMultiMapped = keepMultiMapped, noMultiMapped = noMultiMapped, numThreads = numThreads, readGroup , minMAPQ = minMAPQ, geneKeepFunc = geneKeepFunc, isSingleEnd = isSingleEnd)
+      runOnSeqFile(initialTimeStamp = initialTimeStamp, infile = infile, outfile = outfile, anno_holder = anno_holder, testRun = testRun, runFunc = runFunc, stranded = stranded, fr_secondStrand = fr_secondStrand, dropChrom = dropChrom, keepMultiMapped = keepMultiMapped, noMultiMapped = noMultiMapped, numThreads = numThreads, readGroup , minMAPQ = minMAPQ, geneKeepFunc = geneKeepFunc, isSingleEnd = isSingleEnd, unsorted = unsorted, maxReadLength = maxReadLength)
     }
-    
   }
   
   def runOnSeqFile(initialTimeStamp : TimeStampUtil, 
@@ -377,32 +420,62 @@ object runAllQC {
                    readGroup : Option[String],
                    minMAPQ : Int,
                    geneKeepFunc : (String => Boolean),
-                   isSingleEnd : Boolean){
+                   isSingleEnd : Boolean,
+                   unsorted : Boolean,
+                   maxReadLength : Option[Int]){
     
+    
+    val peekCt = 2000;
     val COMPLETED_OK_FILEPATH = outfile + COMPLETED_OK_FILENAME;
-    val (samFileAttributes, recordIter) = initSamRecordIterator(infile);
+    val (samFileAttributes, recordIter) = initSamRecordIterator(infile, peekCt);
+    
     val pairedIter : Iterator[(SAMRecord,SAMRecord)] = 
       if(isSingleEnd){
         if(testRun) samRecordPairIterator_withMulti_singleEnd(recordIter, true, 200000) else samRecordPairIterator_withMulti_singleEnd(recordIter);
       } else {
-        if(noMultiMapped){
-          if(testRun) samRecordPairIterator(recordIter, true, 200000) else samRecordPairIterator(recordIter)
+        if(unsorted){
+          if(testRun) samRecordPairIterator_unsorted(recordIter, true, 200000) else samRecordPairIterator_unsorted(recordIter)
+        // Faster noMultiMapped running is DEPRECIATED!
+        //} else if(noMultiMapped){
+        //  if(testRun) samRecordPairIterator(recordIter, true, 200000) else samRecordPairIterator(recordIter)
         } else {
           if(testRun) samRecordPairIterator_withMulti(recordIter, true, 200000) else samRecordPairIterator_withMulti(recordIter)
         }
-      }
+      } 
     
-    val readLength = samFileAttributes.readLength;
+    val maxObservedReadLength = samFileAttributes.readLength;
+    val readLength = if(maxReadLength.isEmpty) maxObservedReadLength else maxReadLength.get;
     val isSortedByName = samFileAttributes.isSortedByName;
     val isSortedByPosition = samFileAttributes.isSortedByPosition;
     val isDefinitelyPairedEnd = samFileAttributes.isDefinitelyPairedEnd;
     val minReadLength = samFileAttributes.minReadLength;
     
-    if(readLength != minReadLength){reportln("Warning: Read length is not consistent! In the first 1000 reads, read length varies from "+minReadLength+" to " +readLength+"!\nThis may cause odd things to happen. In general, it is STRONGLY recommended that you always avoid hard clipping of reads. (error detected in initial 1000 reads)","warning")}
-    if(! isDefinitelyPairedEnd){ reportln("Warning: Have not found any matched read pairs in the first 1000 reads. Is data paired end? WARNING: This utility is only designed for use on paired end data! (error detected in initial 1000 reads)","warning"); }
-    if(isSortedByPosition){ reportln("SAM/BAM file looks like it might be sorted by position. If so: this mode is not currently supported! (error detected in initial 1000 reads)","warning"); }
-    if(! isSortedByName) error("FATAL ERROR: SAM/BAM file is not sorted by name! Sort the file by name! (error detected in initial 1000 reads)");
-    reportln("SAMRecord Reader Generated. Based on the first 1000 reads, the reads appear to be of length: "+readLength+".","note");
+    if(readLength != minReadLength){reportln("Note: Read length is not consistent. "+
+                                             "In the first "+peekCt+" reads, read length varies from "+minReadLength+" to " +maxObservedReadLength+"!\n"+
+                                             "Note that using data that is hard-clipped prior to alignment is NOT recommended, because this makes it difficult (or impossible) "+
+                                             "to determine the sequencer read-cycle of each nucleotide base. This may obfuscate cycle-specific artifacts, trends, or errors, the detection of which is one of the primary purposes of QoRTs!"+
+                                             "In addition, hard clipping (whether before or after alignment) removes quality score data, and thus quality score metrics may be misleadingly optimistic. "+
+                                             "A MUCH preferable method of removing undesired sequence is to replace such sequence with N's, which preserves the quality score and the sequencer cycle information.","note")}
+    if((readLength != minReadLength) & (maxReadLength.isEmpty)){
+      reportln("WARNING WARNING WARNING: Read length is not consistent, AND \"--maxReadLength\" option is not set!\n"+
+               "QoRTs has ATTEMPTED to determine the maximum read length ("+readLength+").\n"+
+               "It is STRONGLY recommended that you use the --maxReadLength option \n"+
+               "to set the maximum possible read length, or else errors may occur if/when \n"+
+               "reads longer than "+readLength+ " appear.","warn")
+    }
+    
+    if(samFileAttributes.allReadsMarkedPaired & isSingleEnd) reportln("WARNING WARNING WARNING! Running in single-end mode, but reads appear to be paired-end! Errors may follow.\nStrongly recommend removing the '--isSingleEnd' option!","warn");
+    if(samFileAttributes.allReadsMarkedSingle & (! isSingleEnd)) reportln("WARNING WARNING WARNING! Running in paired-end mode, but reads appear to be single-end! Errors may follow.\nStrongly recommend using the '--isSingleEnd' option","warn");
+    if(samFileAttributes.mixedSingleAndPaired) reportln("WARNING WARNING WARNING! Data appears to be a mixture of single-end and paired-end reads! QoRTs was not designed to function under these conditions. Errors may follow!","warn");
+    
+    if(! isSingleEnd){
+      if( (! isDefinitelyPairedEnd)){ reportln("Warning: Have not found any matched read pairs in the first "+peekCt+" reads. Is data paired-end? Use option --singleEnd for single-end data.","warn"); }
+      if( isSortedByPosition & (! unsorted )){ reportln("Based on the first "+peekCt+" reads, SAM/BAM file appears to be sorted by read position. If this is so, you should probably use the \"--coordSorted\" option.","warn"); }
+      if( ((! isSortedByPosition) & ( unsorted ))){ reportln("WARNING: You are using the \"--coordSorted\" option, but data does NOT appear to be sorted by read position (based on the first "+peekCt+" reads)! This is technically ok, but may cause QoRTs to use too much memory!","warn"); }
+      if( ((! isSortedByName) & (! unsorted ))) error("FATAL ERROR: SAM/BAM file is not sorted by name (based on the first "+peekCt+" reads)! Either sort the file by name, or sort by read position and use the \"--coordSorted\" option.");
+    }
+    
+    reportln("SAMRecord Reader Generated. Read length: "+readLength+".","note");
     standardStatusReport(initialTimeStamp);
 
     val coda : Array[Int] = internalUtils.commonSeqUtils.getNewCauseOfDropArray;
@@ -415,14 +488,27 @@ object runAllQC {
     //  final val QC_FUNCTION_LIST : Seq[String] = Seq("InsertSize","NVC","CigarOpDistribution","QualityScoreDistribution","GCDistribution","GeneCounts","JunctionCounts");
     val qcGGC:  QCUtility[String] =   if(runFunc.contains("GeneCalcs"))                 new qcGetGeneCounts(stranded,fr_secondStrand,anno_holder,coda,coda_options,40, runFunc.contains("FPKM"), runFunc.contains("writeGenewiseGeneBody"), runFunc.contains("writeDESeq"), runFunc.contains("writeGeneCounts"), geneKeepFunc) else QCUtility.getBlankStringUtil;
     val qcIS :  QCUtility[Unit]   =   if(runFunc.contains("InsertSize"))                new qcInnerDistance(anno_holder, stranded, fr_secondStrand, readLength)        else QCUtility.getBlankUnitUtil;
-    val qcCS :  QCUtility[Unit]   =   if(runFunc.contains("NVC"))                       new qcNVC(readLength, runFunc.contains("writeClippedNVC"))                     else QCUtility.getBlankUnitUtil;
-    val qcJD :  QCUtility[Unit]   =   if(runFunc.contains("CigarOpDistribution"))       new qcCigarDistribution(readLength)                                            else QCUtility.getBlankUnitUtil;
-    val qcQSC : QCUtility[Unit]   =   if(runFunc.contains("QualityScoreDistribution"))  new qcQualityScoreCounter(readLength, qcQualityScoreCounter.MAX_QUALITY_SCORE) else QCUtility.getBlankUnitUtil;
-    val qcGC :  QCUtility[Unit]   =   if(runFunc.contains("GCDistribution"))            new qcGCContentCount(readLength)                                               else QCUtility.getBlankUnitUtil;
+    val qcCS :  QCUtility[Unit]   =   if(runFunc.contains("NVC"))                       new qcNVC(isSingleEnd, readLength, runFunc.contains("writeClippedNVC"))                     else QCUtility.getBlankUnitUtil;
+    val qcJD :  QCUtility[Unit]   =   if(runFunc.contains("CigarOpDistribution"))       new qcCigarDistribution(isSingleEnd, readLength)                                            else QCUtility.getBlankUnitUtil;
+    val qcQSC : QCUtility[Unit]   =   if(runFunc.contains("QualityScoreDistribution"))  new qcQualityScoreCounter(isSingleEnd, readLength, qcQualityScoreCounter.MAX_QUALITY_SCORE) else QCUtility.getBlankUnitUtil;
+    val qcGC :  QCUtility[Unit]   =   if(runFunc.contains("GCDistribution"))            new qcGCContentCount(isSingleEnd, readLength)                                               else QCUtility.getBlankUnitUtil;
     val qcJC :  QCUtility[Unit]   =   if(runFunc.contains("JunctionCalcs"))             new qcJunctionCounts(anno_holder, stranded, fr_secondStrand, runFunc.contains("writeDEXSeq"), runFunc.contains("writeSpliceExon"), runFunc.contains("writeKnownSplices"), runFunc.contains("writeNovelSplices"))                   else QCUtility.getBlankUnitUtil;
-    val qcST :  QCUtility[Unit]   =   if(runFunc.contains("StrandCheck"))               new qcStrandTest(anno_holder, stranded, fr_secondStrand)                       else QCUtility.getBlankUnitUtil;
-    val qcCC :  QCUtility[Unit]   =   if(runFunc.contains("chromCounts"))               new qcChromCount( fr_secondStrand)                                             else QCUtility.getBlankUnitUtil;
+    val qcST :  QCUtility[Unit]   =   if(runFunc.contains("StrandCheck"))               new qcStrandTest(isSingleEnd, anno_holder, stranded, fr_secondStrand)                       else QCUtility.getBlankUnitUtil;
+    val qcCC :  QCUtility[Unit]   =   if(runFunc.contains("chromCounts"))               new qcChromCount(isSingleEnd, fr_secondStrand)                                              else QCUtility.getBlankUnitUtil;
     val qcCM :  QCUtility[Unit]   =   if(runFunc.contains("cigarMatch"))                new qcCigarMatch(readLength)                                                   else QCUtility.getBlankUnitUtil;
+    //val qcWIG : QCUtility[Unit]   =   if(runFunc.contains("makeWiggles"))               new fileConversionUtils.bamToWiggle.QcBamToWig("track",) 
+    //                                                                                    else QCUtility.getBlankUnitUtil;
+    
+    
+    /*
+     QcBamToWig(trackName : String, chromLengthFile : String, 
+                   noTruncate : Boolean, windowSize : Int, 
+                   isSingleEnd: Boolean, stranded : Boolean,
+                   fr_secondStrand : Boolean, sizeFactor : Double, 
+                   negativeReverseStrand : Boolean, countPairsTogether : Boolean, 
+                   includeTrackDef : Boolean, rgbColor : Option[String],
+                   additionalTrackOptions : Option[String])
+     */
     
     val qcALL = parConvert(Vector(qcGGC, qcIS, qcCS, qcJD, qcQSC, qcGC, qcJC, qcST, qcCC, qcCM), numThreads);
     
@@ -452,17 +538,19 @@ object runAllQC {
           }
       }
     }
+    
     reportln("Finished reading SAM. Read: " + readNum + " read-pairs","note");
     standardStatusReport(initialTimeStamp);
     
     val outputIterationTimeStamp = TimeStampUtil();
     reportln("Read Stats:\n" + internalUtils.commonSeqUtils.causeOfDropArrayToString(coda, coda_options),"note");
     
-    val summaryWriter = openWriter(outfile + "summary.txt");
+    val summaryWriter = openWriter(outfile + ".summary.txt");
     val strandedCode = if(! stranded){ 0 } else {if(fr_secondStrand) 2; else 1;}
 
     summaryWriter.write("FIELD	COUNT\n");
     summaryWriter.write("Stranded_Rule_Code	"+strandedCode+"\n");
+    summaryWriter.write(internalUtils.commonSeqUtils.causeOfDropArrayToStringTabbed(coda, coda_options));
     
     val iterationMinutes = (outputIterationTimeStamp.compareTo(samIterationTimeStamp) / 1000).toDouble / 60.toDouble;
     val minutesPerMillion = iterationMinutes / (readNum.toDouble / 1000000.toDouble);

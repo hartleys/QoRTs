@@ -27,37 +27,42 @@ import internalUtils.optionHolder._;
 object qcNVC {
 
   
-  val CLIPPING_SEQ_BYTE = 'S'.toByte;
-  val MISSING_SEQ_BYTE = 'H'.toByte;
+  val SOFTCLIP_SEQ_BYTE = 'S'.toByte;
+  val HARDCLIP_SEQ_BYTE = 'H'.toByte;
+  val MISSING_SEQ_BYTE = 'M'.toByte;
   val ALL_BASE_BYTES : Seq[Byte] = Vector('A'.toByte,'C'.toByte,'G'.toByte,'T'.toByte,'N'.toByte);
-  val ALL_CHAR_BYTES : Seq[Byte] = Vector('A'.toByte,'C'.toByte,'G'.toByte,'T'.toByte,'N'.toByte, CLIPPING_SEQ_BYTE, MISSING_SEQ_BYTE);
+  val ALL_CHAR_BYTES : Seq[Byte] = Vector('A'.toByte,'C'.toByte,'G'.toByte,'T'.toByte,'N'.toByte, SOFTCLIP_SEQ_BYTE, HARDCLIP_SEQ_BYTE, MISSING_SEQ_BYTE);
   val BYTE_CODE_MAP : Array[Int] = Array.ofDim(ALL_CHAR_BYTES.max + 1);
   BYTE_CODE_MAP('A'.toInt) = 0;
   BYTE_CODE_MAP('C'.toInt) = 1;
   BYTE_CODE_MAP('G'.toInt) = 2;
   BYTE_CODE_MAP('T'.toInt) = 3;
   BYTE_CODE_MAP('N'.toInt) = 4;
-  BYTE_CODE_MAP(CLIPPING_SEQ_BYTE.toInt) = 5;
-  BYTE_CODE_MAP(MISSING_SEQ_BYTE.toInt) = 6;
+  BYTE_CODE_MAP(SOFTCLIP_SEQ_BYTE.toInt) = 5;
+  BYTE_CODE_MAP(HARDCLIP_SEQ_BYTE.toInt) = 6;
+  BYTE_CODE_MAP(MISSING_SEQ_BYTE.toInt) = 7;
   
-  def writeTabulatedSequence(outfile : String, maxLeadClip : Int, maxTailClip : Int, nvcCounter : NvcCounter, readLengthSet : Set[Int], writeClippedNVC : Boolean){
+  def writeTabulatedSequence(outfile : String, maxLeadClip : Int, maxTailClip : Int, nvcCounter : NvcCounter, readLengthSet : Set[Int], writeClippedNVC : Boolean, isSingleEnd : Boolean){
     writeRawClippingData(true  , outfile , nvcCounter );
-    writeRawClippingData(false , outfile , nvcCounter );
     
     val readLengthList = readLengthSet.toVector.sorted;
     
     if(writeClippedNVC){
       writeLeadClippingData(true,outfile , maxLeadClip , maxTailClip , nvcCounter , readLengthList );
-      writeLeadClippingData(false,outfile , maxLeadClip , maxTailClip , nvcCounter , readLengthList );
-      
       writeTailClippingData(true,outfile , maxLeadClip , maxTailClip , nvcCounter , readLengthList );
-      writeTailClippingData(false,outfile , maxLeadClip , maxTailClip , nvcCounter , readLengthList );
     }
     writeNoClippingData(true,outfile , maxLeadClip , maxTailClip , nvcCounter , readLengthList );
-    writeNoClippingData(false,outfile , maxLeadClip , maxTailClip , nvcCounter , readLengthList );
-
+    
+    if(! isSingleEnd){
+      writeRawClippingData(false , outfile , nvcCounter );
+      if(writeClippedNVC){
+        writeLeadClippingData(false,outfile , maxLeadClip , maxTailClip , nvcCounter , readLengthList );
+        writeTailClippingData(false,outfile , maxLeadClip , maxTailClip , nvcCounter , readLengthList );
+      }
+      writeNoClippingData(false,outfile , maxLeadClip , maxTailClip , nvcCounter , readLengthList );
+    }
+    
     //get_clippingNvcCount(isLeadingClip : Boolean, isFirstRead : Boolean, isFwdRefStrand: Boolean, clipAmt : Int, readLength : Int, pos : Int, base : Byte)
-
   }
   
   def writeRawClippingData(isFirstRead : Boolean, outfile : String, nvcCounter : NvcCounter){
@@ -87,7 +92,7 @@ object qcNVC {
         val revCt = nvcCounter.get_noClipNvcCount(isFirstRead,false, readPos, reverseBaseByteMap(b));
         writer.write(""+readPos+"	"+b.toChar+"	"+fwdCt+"	"+revCt+"	"+(fwdCt+revCt)+"\n");
       }
-      val b = CLIPPING_SEQ_BYTE;
+      val b = SOFTCLIP_SEQ_BYTE;
       val fwdCt = nvcCounter.get_noClipNvcCount(isFirstRead,true, readPos, b);
       val revCt = nvcCounter.get_noClipNvcCount(isFirstRead,false, readPos, b);
       writer.write(""+readPos+"	"+b.toChar+"	"+fwdCt+"	"+revCt+"	"+(fwdCt+revCt)+"\n");
@@ -204,22 +209,8 @@ object qcNVC {
     
   }
   
-  def getClipLengths(r : SAMRecord) : (Int, Int) = {
-    val cigarSeq = getCigarSeq(r, r.getReadNegativeStrandFlag());
-    
-    val leadClipLen = if(cigarSeq.head.getOperator() == CigarOperator.SOFT_CLIP) { cigarSeq.head.getLength() } else 0;
-    val tailClipLen = if(cigarSeq.last.getOperator() == CigarOperator.SOFT_CLIP) { cigarSeq.last.getLength() } else 0;
-    
-    return (leadClipLen, tailClipLen);
-  }
-  
-  def getBasePairs(r : SAMRecord) : Seq[Byte] = {
-    if(r.getReadNegativeStrandFlag()){
-      return r.getReadBases().toVector.reverse;
-    } else {
-      return r.getReadBases().toVector;
-    }
-  }
+  //leadHardClip, tailHardClip, leadSoftClip, tailSoftClip
+ 
   
     /*def getClippingNvcCountArray(isLeadingClip : Boolean, isFirstRead : Boolean, isFwdRefStrand : Boolean, clipAmt : Int, readLength : Int) : Array[Array[Int]] = {
       clippingNvcCounterArrayMap((isLeadingClip, isFirstRead, isFwdRefStrand, clipAmt, readLength));
@@ -231,8 +222,7 @@ object qcNVC {
       rawNvcCounterArrayMap(isFirstRead, isFwdRefStrand)
     }*/
   
-  def countAll_v2(r : SAMRecord, isFirstRead : Boolean, nvcCounter : NvcCounter) : (Int, Int, Int) = {
-    
+  /*def countAll_v2(r : SAMRecord, isFirstRead : Boolean, nvcCounter : NvcCounter) : (Int, Int, Int) = {
     val (leadClipLen, tailClipLen) = getClipLengths(r);
     val basePairs = getBasePairs(r);
     val isFwdRefStrand = ! r.getReadNegativeStrandFlag();
@@ -260,14 +250,47 @@ object qcNVC {
       val c = BYTE_CODE_MAP(basePairs(i));
       rawArray(i)(c) += 1;
       tailClipArray(i)(c) += 1;
-      noClipArray(i)(BYTE_CODE_MAP(CLIPPING_SEQ_BYTE)) += 1;
+      noClipArray(i)(BYTE_CODE_MAP(SOFTCLIP_SEQ_BYTE)) += 1;
     }
     
     return (leadClipLen, tailClipLen, readLength);
-  }
-
-  def countAll(r : SAMRecord, isFirstRead : Boolean, nvcCounter : NvcCounter) : (Int, Int, Int) = {
+  }*/
+  
+  
+  def countAll_v3(r : SAMRecord, isFirstRead : Boolean, nvcCounter : NvcCounter) : (Int, Int, Int) = {
     
+    val ((leadHardClip,leadSoftClip),(tailHardClip,tailSoftClip)) = getAllClipLengthsSimple(r);
+    
+    val maxReadLength = nvcCounter.readLength;
+    val (leadClipLen, tailClipLen) = (leadSoftClip+leadHardClip, tailSoftClip+tailHardClip);
+    //val basePairs : Seq[Byte] = getBasePairsWithH(r, nvcCounter.readLength, true);
+    val basePairs = getBasePairs(r);
+    val isFwdRefStrand = ! r.getReadNegativeStrandFlag();
+    val currReadLength = basePairs.length;
+    
+    //(0 until leadHardClip).map( (i : Int) => nvcCounter.count_rawNvcCount(isFirstRead, isFwdRefStrand, i, HARDCLIP_SEQ_BYTE) )
+    (leadHardClip until (basePairs.length + leadHardClip)).map( (i : Int) => {
+      nvcCounter.count_rawNvcCount(isFirstRead, isFwdRefStrand, i, basePairs(i - leadHardClip));
+    });
+    //((basePairs.length + leadHardClip) until (basePairs.length + leadHardClip + tailHardClip)).map( (i : Int) => nvcCounter.count_rawNvcCount(isFirstRead, isFwdRefStrand, i, HARDCLIP_SEQ_BYTE) );
+    //((basePairs.length + leadHardClip + tailHardClip) until maxReadLength).map( (i : Int) => nvcCounter.count_rawNvcCount(isFirstRead, isFwdRefStrand, i, MISSING_SEQ_BYTE) );
+    
+    ((leadHardClip + leadSoftClip) until (basePairs.length + leadHardClip - tailSoftClip)).map((i : Int) => {
+      nvcCounter.count_noClipNvcCount(isFirstRead, isFwdRefStrand, i, basePairs(i - leadHardClip));
+    });
+    
+    (leadHardClip until (leadHardClip + leadSoftClip)).map((i : Int) => {
+      nvcCounter.count_clippingNvcCount(true, isFirstRead, isFwdRefStrand, leadClipLen, i, basePairs(i - leadHardClip));
+    })
+    
+    ((basePairs.length + leadHardClip - tailSoftClip) until (basePairs.length + leadHardClip)).map((i : Int) => {
+      nvcCounter.count_clippingNvcCount(false, isFirstRead, isFwdRefStrand, tailClipLen, i, basePairs(i - leadHardClip));
+    })
+    
+    return (leadClipLen, tailClipLen, currReadLength + leadHardClip + tailHardClip);
+  } 
+  def countAll(r : SAMRecord, isFirstRead : Boolean, nvcCounter : NvcCounter) : (Int, Int, Int) = {
+        
     val (leadClipLen, tailClipLen) = getClipLengths(r);
     val basePairs = getBasePairs(r);
     val isFwdRefStrand = ! r.getReadNegativeStrandFlag();
@@ -286,7 +309,7 @@ object qcNVC {
       if(leadClipLen <= i && i < (readLength - tailClipLen)){
         nvcCounter.count_noClipNvcCount(isFirstRead, isFwdRefStrand, i, basePairs(i));
       } else {
-        nvcCounter.count_noClipNvcCount(isFirstRead, isFwdRefStrand, i, CLIPPING_SEQ_BYTE);
+        nvcCounter.count_noClipNvcCount(isFirstRead, isFwdRefStrand, i, SOFTCLIP_SEQ_BYTE);
       }
     }
     
@@ -358,13 +381,7 @@ object qcNVC {
     return clipLength;
   }*/
   
-  def getCigarSeq(r : SAMRecord, reverse : Boolean) : Seq[CigarElement] = {
-    if(reverse){
-      r.getCigar().getCigarElements().toVector.reverse;
-    } else {
-      r.getCigar().getCigarElements().toVector;
-    }
-  }
+
   
   /*
   def readCigar(c : Cigar, cca : Array[HashMap[(CigarOperator,Int),Int]], tabOps : HashMap[(CigarOperator,Int),Int], reverse : Boolean){
@@ -400,7 +417,7 @@ object qcNVC {
     }
   }*/
   
-  def getStrand(samRecord : SAMRecord) : Char = {
+  /*def getStrand(samRecord : SAMRecord) : Char = {
     if(samRecord.getFirstOfPairFlag()){
       if(samRecord.getReadNegativeStrandFlag) '-' else '+';
     } else {
@@ -422,14 +439,13 @@ object qcNVC {
     
     //add more checks here?
     return true;
-  }
+  }*/
   
 }
 
-class qcNVC(readLen : Int, writeClippedNVC : Boolean)  extends QCUtility[Unit] {
+class qcNVC(isSingleEnd : Boolean, readLen : Int, writeClippedNVC : Boolean)  extends QCUtility[Unit] {
   reportln("Init NVC","progress");
 
-  
   val readLength : Int = readLen;
   val nvcCounter : qcNVC.NvcCounter = new qcNVC.NvcCounter(readLength);
   var readLengthSet : Set[Int] = Set[Int]();
@@ -438,8 +454,8 @@ class qcNVC(readLen : Int, writeClippedNVC : Boolean)  extends QCUtility[Unit] {
   
   def runOnReadPair(r1 : SAMRecord, r2 : SAMRecord, readNum : Int){
     //if(useRead(r1) && useRead(r2) ){
-      val (r1_leadClip, r1_tailClip, r1_curr_readLength) = qcNVC.countAll(r1, true, nvcCounter);
-      val (r2_leadClip, r2_tailClip, r2_curr_readLength) = qcNVC.countAll(r2, false, nvcCounter);
+      val (r1_leadClip, r1_tailClip, r1_curr_readLength) = qcNVC.countAll_v3(r1, true, nvcCounter);
+      val (r2_leadClip, r2_tailClip, r2_curr_readLength) = qcNVC.countAll_v3(r2, false, nvcCounter);
       maxLeadClip = math.max(maxLeadClip, math.max(r1_leadClip,r2_leadClip));
       maxTailClip = math.max(maxTailClip, math.max(r1_tailClip,r2_tailClip));
         
@@ -448,9 +464,8 @@ class qcNVC(readLen : Int, writeClippedNVC : Boolean)  extends QCUtility[Unit] {
     //}
   }
   def writeOutput(outfile : String, summaryWriter : WriterUtil){
-     qcNVC.writeTabulatedSequence(outfile, maxLeadClip, maxTailClip, nvcCounter, readLengthSet, writeClippedNVC);
+     qcNVC.writeTabulatedSequence(outfile, maxLeadClip, maxTailClip, nvcCounter, readLengthSet, writeClippedNVC, isSingleEnd);
   }
   def getUtilityName : String = "NVC";
-  
-  
+
 }

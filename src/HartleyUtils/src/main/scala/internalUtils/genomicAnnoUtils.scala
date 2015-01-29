@@ -83,7 +83,7 @@ object genomicAnnoUtils {
   
   /*
    * Implementation:
-   */
+   */ 
   
   class GenomicArrayOfSets_Generic[B](in_isStranded : Boolean) extends GenomicArrayOfSets[B] {
     private val chromSet : scala.collection.mutable.Set[String] = scala.collection.mutable.Set[String]();

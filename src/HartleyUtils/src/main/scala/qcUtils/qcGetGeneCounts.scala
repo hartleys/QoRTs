@@ -428,12 +428,12 @@ class qcGetGeneCounts( stranded : Boolean,
   
   def writeOutput(outfile : String, summaryWriter : WriterUtil){
     
-    //Start with the summary:
+    ////Start with the summary:
     
-    //val writerSummary = openWriter(outfile + ".geneMappingSummary.txt");
+    ////val writerSummary = openWriter(outfile + ".geneMappingSummary.txt");
 
-    summaryWriter.write(internalUtils.commonSeqUtils.causeOfDropArrayToStringTabbed(coda, coda_options));
-    //summaryWriter.write("ReadPairs_AmbigGene	"+utilCounts("_ambiguous")+"\n");
+    //summaryWriter.write(internalUtils.commonSeqUtils.causeOfDropArrayToStringTabbed(coda, coda_options));
+    ////summaryWriter.write("ReadPairs_AmbigGene	"+utilCounts("_ambiguous")+"\n");
     summaryWriter.write("ReadPairs_AmbigGene	"+readAmbiguous+"\n");
     summaryWriter.write("ReadPairs_UniqueGene	"+readExonCount+"\n");
     summaryWriter.write("ReadPairs_UniqueGene_CDS	"+readCdsCount+"\n");

@@ -9,7 +9,7 @@
    categories.
 }
 \usage{
-makePlot.gene.assignment.rates(plotter,  debugMode, \dots)
+makePlot.gene.assignment.rates(plotter,  debugMode, singleEndMode, \dots)
                          
 }
 \arguments{
@@ -18,6 +18,11 @@ makePlot.gene.assignment.rates(plotter,  debugMode, \dots)
   }
   \item{debugMode}{
     Logical. If TRUE, debugging data will be printed to the console.
+  }
+  \item{singleEndMode}{
+      Logical. Determines whether the dataset consists of single-ended reads. 
+      By default this is determined from the data. Thus, this parameter should 
+      never need to be set by the user.
   }
   \item{\dots}{ 
     Arguments to be passed to methods, such as

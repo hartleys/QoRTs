@@ -32,20 +32,34 @@ object qcStrandTest {
     val r1B = hasReadFeatures(r1,true,false, featureArray);
     val r2A = hasReadFeatures(r2,true,true,  featureArray);
     val r2B = hasReadFeatures(r2,true,false, featureArray);
-    
+     
     val r1t = if(r1A && r1B) 3 else if(r1A) 1 else if(r1B) 2 else 0;
     val r2t = if(r2A && r2B) 3 else if(r2A) 2 else if(r2B) 1 else 0;
     
-    return ((r1t, r2t));
+    return (r1t, r2t);
+    
+    //(strandTestSingleRead(r1,featureArray),strandTestSingleRead(r2,featureArray));
+  }
+  
+  def strandTestSingleRead(r1 : SAMRecord, featureArray : GenomicArrayOfSets[String]) : Int = {
+    // 0 = no feature.
+    // 1 = feature on read strand
+    // 2 = feature on opposite strand
+    // 3 = features on both
+    
+    val r1A = hasReadFeatures(r1,true,true,  featureArray);
+    val r1B = hasReadFeatures(r1,true,false, featureArray);
+    
+    val r1t = if(r1A && r1B) 3 else if(r1A) 1 else if(r1B) 2 else 0;
+    
+    return (r1t);
   }
   
 }
 
-class qcStrandTest(anno_holder : qcGtfAnnotationBuilder, stranded : Boolean, fr_secondStrand_bool : Boolean) extends QCUtility[Unit] {
+class qcStrandTest(isSingleEnd : Boolean, anno_holder : qcGtfAnnotationBuilder, stranded : Boolean, fr_secondStrand_bool : Boolean) extends QCUtility[Unit] {
   reportln("Init StrandCheck","progress");
 
-  
-  
   val strandedGeneArray = anno_holder.strandedGeneArray;
   
   var fr_firstStrand = 0;
@@ -55,18 +69,31 @@ class qcStrandTest(anno_holder : qcGtfAnnotationBuilder, stranded : Boolean, fr_
   var ambig_other = 0;
   
   def runOnReadPair(r1 : SAMRecord, r2 : SAMRecord, readNum : Int){
-    val (r1t, r2t) = qcStrandTest.strandTestPair(r1,r2,strandedGeneArray);
+    if(! isSingleEnd){
+      val (r1t, r2t) = qcStrandTest.strandTestPair(r1,r2,strandedGeneArray);
     
-    if( r1t == 1 && r2t == 2){
-      fr_secondStrand += 1;
-    } else if(r1t == 2 && r2t == 1){
-      fr_firstStrand += 1;
-    } else if(r1t == 3 || r2t == 3){
-      ambig_featuresFoundOnBothStrands += 1;
-    } else if(r1t == 0 || r2t == 0){
-      ambig_noFeature += 1;
+      if( r1t == 1 && r2t == 2){
+        fr_secondStrand += 1;
+      } else if(r1t == 2 && r2t == 1){
+        fr_firstStrand += 1;
+      } else if(r1t == 3 || r2t == 3){
+        ambig_featuresFoundOnBothStrands += 1;
+      } else if(r1t == 0 || r2t == 0){
+        ambig_noFeature += 1;
+      } else {
+        ambig_other += 1;
+      }
     } else {
-      ambig_other += 1;
+      val r1t = qcStrandTest.strandTestSingleRead(r1, strandedGeneArray);
+      if(r1t == 1){
+        fr_secondStrand += 1;
+      } else if(r1t == 2){
+        fr_firstStrand += 1;
+      } else if(r1t == 3){
+        ambig_featuresFoundOnBothStrands += 1;
+      } else if(r1t == 0){
+        ambig_noFeature += 1;
+      }
     }
   }
   def writeOutput(outfile : String, summaryWriter : WriterUtil){
