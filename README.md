@@ -12,6 +12,14 @@ The java jar file does not need to be installed.
 Just execute it using the java command:
 java -jar /path/to/jarfile/QoRTs.jar QC input.bam anno.gtf.gz /output/dir/
 
+EXAMPLE DATA:
+The example QC output can be found on the github main page, and installed
+with the command:
+install.packages("QoRTsExampleData_0.1.0.tar.gz", repos = NULL, type="source")
+
+The original bam files are currently too large to upload to github. 
+Finding a good place to host these files is WIP.
+
 MORE INFORMATION:
 For more information, see the QoRTs vignette, QoRTs-vignette.pdf
 
