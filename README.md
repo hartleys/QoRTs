@@ -1,12 +1,12 @@
-QoRTs v0.1.0
-(Compiled Thu Jan 29 16:55:04 EST 2015)
+QoRTs v0.1.1
+(Compiled Fri Jan 30 12:15:49 EST 2015)
 
 INSTALLATION:
 The R package can be installed in R using the command:
-install.packages("QoRTs_0.1.0.tar.gz", repos = NULL, type="source")
+install.packages("QoRTs_0.1.1.tar.gz", repos = NULL, type="source")
 
 or using the command-line tool, in linux:
-R CMD INSTALL QoRTs_0.1.0.tar.gz
+R CMD INSTALL QoRTs_0.1.1.tar.gz
 
 The java jar file does not need to be installed. 
 Just execute it using the java command:

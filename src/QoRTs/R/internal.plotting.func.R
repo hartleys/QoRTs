@@ -25,12 +25,13 @@ plotter.error.wrapper <- function(plot.name, plotterFcn, ...){
    tryCatch({
      plotterFcn();
    }, error = function(e){
-     message("WARNING: Uncaught error in attempting ",plot.name,".\nError: (",e,")");
+     message("    (Skipped ",plot.name," due to encountering errors)");
    });
 }
 
 errorPlot <- function(plot.name, e, code = "UNKNOWN", newPlot = TRUE, cex = NULL, ...){
-     message(paste0("WARNING: Error encountered (Code ",code,") while attempting ",plot.name,". Encountered error: (", removeLineBreaks(e),")"));
+     message("WARNING: Error encountered (Code ",code,") while attempting ",plot.name,"\n",
+             "    (Error Text: \"", removeLineBreaks(e),"\"");
      blank.plot(c("Error encountered attempting ",plot.name,"\nSkipping..."), newPlot = newPlot, ...);
 }
 

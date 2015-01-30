@@ -55,9 +55,9 @@ BiocStyle::latex()
 National Human Genome Research Institute\\
 National Institutes of Health}
 \date{August 8 2014\\
-January 29, 2015 %REPLACE_THIS_LINE_WITH_REVISION_DATE
+January 30, 2015 %REPLACE_THIS_LINE_WITH_REVISION_DATE
 \\
-v0.1.0 %REPLACE_THIS_LINE_WITH_VERSION_NUMBER
+v0.1.1 %REPLACE_THIS_LINE_WITH_VERSION_NUMBER
 }
 
 \begin{document}
@@ -98,7 +98,7 @@ The QoRTs java utility is written in the Scala programming language (v2.11.1). H
 \section{Requirements}  \label{sec:reqs}
 %-----------------------------------------------------------
 
-The QoRTs software package comes in two distinct parts: a java jar-file and an R package. Installing the R package only requires R version 3.0.2 or higher. Running the java jar-file requires any version of java 6 or higher. The java utility does the bulk of the data processing, and will generally require at least 10-20gb of RAM. The R package is only responsible for some light data processing and for plotting/visualization, and thus has much lower resource requirements. It should run adequately on any reasonably-powerful 64-bit workstation.
+The QoRTs software package comes in two distinct parts: a java jar-file and an R package. Installing the R package only requires R version 3.0.2 or higher. Running the java jar-file requires any version of java 6 or higher. The java utility does the bulk of the data processing, and will generally require at least 4gb of RAM. In general at least 8-16gb is recommended. The R package is only responsible for some light data processing and for plotting/visualization, and thus has much lower resource requirements. It should run adequately on any reasonably-powerful 64-bit workstation.
 
 QoRTs is designed to run on paired-end next-gen RNA-Seq data. The data must be aligned (or "mapped") to a reference genome before QoRTs can be run. RNA-Star\cite{STAR}, GSNAP\cite{GSNAP}, and TopHat2\cite{TopHat2} are all popular aligners for use with RNA-Seq data. The use of short-read or unspliced aligners such as BowTie, ELAND, BWA, or Novoalign is not recommended.
 
@@ -235,6 +235,32 @@ java -jar /path/to/jarfile/QoRTs.jar QC
 \end{verbatim}
 
 This command must be run on each bam file (and possibly more than once on each, if each bam file consists of multiple separate read-groups).
+
+%-----------------------------------------------------------
+\subsection{Memory Usage}  \label{sec:memUsage}
+%-----------------------------------------------------------
+
+\emph{Memory usage:} The QoRTs QC utility requires at least 4gb or RAM for most genomes / datasets. Larger genomes, genomes with more annotated genes/transcripts, or larger bam files may require more RAM. You can set the maximum amount of RAM allocated to the JVM using the options \verb|-Xmx4000M -Xms2000M|. The \verb|-Xms| parameter must always be smaller than \verb|-Xmx|. This should be included before the \verb|-jar| in the command line. For example:
+
+\begin{verbatim}
+#Set the maximum to the minimum recommended 4 gigabytes:
+java -Xmx4000M -Xms2000M -jar /path/to/jarfile/QoRTs.jar QC
+                   --stranded
+                   --coordSorted
+                   inputData/bamFiles/SAMP1_RG1.bam
+                   inputData/annoFiles/anno.gtf.gz
+                   outputData/qortsData/SAMP1_RG1/
+
+#Or Set the maximum to 16 gigabytes:
+java -Xmx16000M -Xms2000M -jar /path/to/jarfile/QoRTs.jar QC
+                   --stranded
+                   --coordSorted
+                   inputData/bamFiles/SAMP1_RG1.bam
+                   inputData/annoFiles/anno.gtf.gz
+                   outputData/qortsData/SAMP1_RG1/
+\end{verbatim}
+
+This option can be used with any and all of the QoRTs java utilities.
 
 %-----------------------------------------------------------
 \section{Visualization}  \label{sec:visualization}
@@ -990,22 +1016,23 @@ makePlot.dropped.rates(byLane.plotter);
 @
 
 %-----------------------------------------------------------
-\section{Other Minor Utilities} \label{sec:minorUtils}
+\section{Secondary Utilities} \label{sec:minorUtils}
 %-----------------------------------------------------------
 
 In addition to the standard quality-control tools described in the previous sections, QoRTs also includes a number of other minor utilities intended to assist in data visualization, cleaning, and preparation for downstream analyses. 
 
 %----------
-\subsection{Optional: Generating a flattened annotation file} \label{sec:flatAnnoGen}
+\subsection{Generating a flattened annotation file} \label{sec:flatAnnoGen}
 %----------
 
 Before counting exons and splice junctions, QoRTs generates a set of non-overlapping exonic fragments out of all the exons in the genome annotation gtf file. It then assigns each exonic fragment a unique identifier. Similarly, it assigns every splice junction its own unique identifier. A gtf file listing all these genomic features and their unique identifiers can be created using the following command:
 
 \begin{verbatim}
 java -jar /path/to/jarfile/QoRTs.jar makeFlatGtf 
-                                     input.gtf 
+                                     input.gtf
                                      flattened.gff
 \end{verbatim}
+Both the input and output annotation files can be either .zip or .gz compressed. Compression is autodetected from the file extension.
 
 \emph{strandedness:} You must use the \verb|--stranded| option to create the flattened gff for use with stranded datasets. DO NOT mix stranded flattened gff with unstranded data, or vice versa.
 
@@ -1031,15 +1058,22 @@ java -jar /path/to/jarfile/QoRTs.jar bamToWiggle
                                      outfilePrefix
 \end{verbatim}
 
-The chromLengthFile is a simple tab-delimited text file that includes each chromosome in the first column and the chromosome's length (in base-pairs) in the second column. If the wiggle file is intended for use with a standard genome on the UCSC genome browser, then the UCSC utility \verb|fetchChromSizes| should be used to generate this file. (see \url{http://genome.ucsc.edu/goldenPath/help/bigWig.html} for more information on \verb|fetchChromSizes|, as well as information on how to compress your wig files into smaller and more efficient bigWig files)
+The chromLengthFile is a simple tab-delimited text file that includes each chromosome in the first column and the chromosome's length (in base-pairs) in the second column. If the wiggle file is intended for use with a standard genome on the UCSC genome browser, then the UCSC utility \verb|fetchChromSizes| should be used to generate this file. (see \url{http://genome.ucsc.edu/goldenPath/help/bigWig.html} for more information on \verb|fetchChromSizes|, as well as information on how to compress your wig files into smaller and more efficient bigWig files). It also takes 
 
 \noindent Common options and flags for this function include:
   \begin{itemize}
     \item \verb|--sizefactor 1.0|: A float value. All the coverage values will be divided by this factor. Useful for comparing two samples that may have different normalization factors.
     \item \verb|--stranded|: Flag to indicate that data should be treated as stranded.
-    \item \verb|--stranded_fr_secondstrand|: Flag to indicate that the data is of the fr\_secondstrand stranded library type. (See section \ref{sec:initialProcessing} for more information on the two stranded library types) 
+    \item \verb|--fr_secondStrand|: Flag to indicate that the data is of the fr\_secondstrand stranded library type. (See section \ref{sec:initialProcessing} for more information on the two stranded library types).
     \item \verb|--negativeReverseStrand|: If this flag is set, then the negative strand will be counted in negative numbers. This can be useful for plotting both strands in a single multiwig track, via a trackhub. (see \url{http://genome.ucsc.edu/goldenPath/help/trackDb/trackDbDoc.html})
+    \item \verb|--simpleCountByRead|: If this flag is raised, then each read of each read-pair will be counted separately. Thus the wiggle plot will count simple read coverage depth rather than read-pair coverage depth. This means that when read-pairs overlap they will be counted twice over the overlapping region.
   \end{itemize}
+Many of the other parameters are identical to those used by the QC tool: \verb|--singleEnded|, \verb|--coordSorted|, etc. 
+
+For more information and a full accounting of all parameters and options, use the command:
+\begin{verbatim}
+java -jar /path/to/jarfile/QoRTs.jar bamToWiggle --man
+\end{verbatim}
 
 \subsubsection{Merging wiggle tracks}
 
@@ -1064,7 +1098,7 @@ The filelist.txt is a simple text file that contains the list of wiggle files to
 
 For more information and a full accounting of all parameters and options, use the command:
 \begin{verbatim}
-java -jar /path/to/jarfile/QoRTs.jar mergeWig ?
+java -jar /path/to/jarfile/QoRTs.jar mergeWig --man
 \end{verbatim}
 
 \subsubsection{Generating splice-junction tracks}
@@ -1086,7 +1120,7 @@ java -jar /path/to/jarfile/QoRTs.jar makeSpliceBed
 
 For more information and a full accounting of all parameters and options, use the command:
 \begin{verbatim}
-java -jar /path/to/jarfile/QoRTs.jar makeSpliceBed ?
+java -jar /path/to/jarfile/QoRTs.jar makeSpliceBed --man
 \end{verbatim}
 
 %----------
@@ -1095,14 +1129,14 @@ java -jar /path/to/jarfile/QoRTs.jar makeSpliceBed ?
 
 For the purposes of quality control it is generally preferable to run QoRTs on each sample-run individually, so that potential technical artifacts related to sequencing run or lane can be identified. However, for most downstream purposes these "technical replicates" will be combined and treated as a single sample. Differential expression tools like \Biocpkg{DESeq}, \Biocpkg{DESeq2}\cite{DESeq}, \Biocpkg{DEXSeq}\cite{DEXSeq}, and \Biocpkg{EdgeR}\cite{edgeRsoftware} assume that each set of gene counts (or exon counts, for \Biocpkg{DEXSeq}) is derived from a different biological  sample.
 
-Thus, the java utility includes a function for quickly and easily calculating merged sample-wise counts.
-
+Thus, the java utility includes a function for quickly and easily calculating merged sample-wise counts:
 \begin{verbatim}
 java -jar /path/to/jarfile/QoRTs.jar mergeAllCounts 
                                     decoder.txt 
                                     /path/to/qc/results/dir/ 
                                     ./merged/
 \end{verbatim}
+This decoder MUST contain the unique.ID and sample.ID columns.
 
 Alternatively, the merger can be performed for a single sample directly, via the command:
 
@@ -1116,9 +1150,9 @@ The list of QC data directories must be separated by commas and contain no white
 
 For more information and a full accounting of all parameters and options, use the command:
 \begin{verbatim}
-java -jar /path/to/jarfile/QoRTs.jar mergeAllCounts ?
+java -jar /path/to/jarfile/QoRTs.jar mergeAllCounts--man
 and
-java -jar /path/to/jarfile/QoRTs.jar mergeCounts ?
+java -jar /path/to/jarfile/QoRTs.jar mergeCounts --man
 \end{verbatim}
 
 %----------

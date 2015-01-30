@@ -561,7 +561,7 @@ object commonSeqUtils {
   }
   
   private def getSRPairIterUnsorted(iter : Iterator[SAMRecord]) : Iterator[(SAMRecord,SAMRecord)] = {
-    val initialPairContainerWarningSize = 10000;
+    val initialPairContainerWarningSize = 50000;
     val warningSizeMultiplier = 2;
     
     return new Iterator[(SAMRecord,SAMRecord)] {
@@ -582,7 +582,7 @@ object commonSeqUtils {
           reportln("WARNING WARNING WARNING: Reached end of bam file, there are "+(pairContainer.size+1)+" orphaned reads, which are marked as having a mapped pair, but no corresponding pair is found in the bam file. \n(Example Orphaned Read Name: "+curr.getReadName()+")","warn");
         }
         if(pairContainerWarningSize < pairContainer.size){
-          reportln("NOTE: Unmatched Read Buffer Size > "+pairContainerWarningSize,"note");
+          reportln("NOTE: Unmatched Read Buffer Size > "+pairContainerWarningSize+" [Mem usage:"+MemoryUtil.memInfo+"]","note");
           if(pairContainerWarningSize == initialPairContainerWarningSize){
             reportln("    (This is generally not a problem, but if this increases further then OutOfMemoryExceptions\n"+
                      "    may occur.\n"+
@@ -592,7 +592,6 @@ object commonSeqUtils {
                      "    chimeric read-pairs. Or it could occur simply due to the presence of genomic\n"+
                      "    loci with extremly high coverage.)", "note");
           }
-          reportln("    [Mem usage:"+MemoryUtil.memInfo+"]","note")
           pairContainerWarningSize = pairContainerWarningSize * warningSizeMultiplier;
         }
         

@@ -92,11 +92,10 @@ object runAllQC {
                                          name = "flatgfffile", 
                                          arg = List("--flatgff"), 
                                          valueName = "flattenedGffFile.gff.gz",  
-                                         argDesc = "A \"flattened\" gtf file that matches the standard gtf file. Optional, "+
-                                                   "but using this option may make the utility run faster and consume less memory."+
-                                                   " It may also be useful for downstream analyses, as it assigns unique identifiers to all exons and splice "+
+                                         argDesc = "A \"flattened\" gtf file that matches the standard gtf file. Optional."+
+                                                   "It may also be useful for downstream analyses, as it assigns unique identifiers to all exons and splice "+
                                                    "junctions. The flattened gtf file can be generated using "+
-                                                   "the \"makeFlatGtf\" command.\n"+
+                                                   "the \"makeFlatGtf\" command. Note that the command must be run with the same strandedness code.\n"+
                                                    "If the filename ends with \".gz\" or \".zip\", the file will be parsed using the appropriate decompression method."
                                         ) ::
                     new UnaryArgument(   name = "singleEnded", 
@@ -126,8 +125,8 @@ object runAllQC {
                                                     "to determine the sequencer read-cycle of each nucleotide base. This may obfuscate cycle-specific artifacts, trends, or errors, the detection of which is one of the primary purposes of QoRTs!"+
                                                     "In addition, hard clipping (whether before or after alignment) removes quality score data, and thus quality score metrics may be misleadingly optimistic. "+
                                                     "A MUCH preferable method of removing undesired sequence is to replace such sequence with N's, which preserves the quality score and the sequencer cycle information. "+
-                                                    " "+
-                                                    " "
+                                                    ""+
+                                                    ""
                                         ) ::
                     new UnaryArgument( name = "fr_secondStrand",
                                          arg = List("--stranded_fr_secondstrand","-a"), // name of value
@@ -166,7 +165,7 @@ object runAllQC {
                                        ) ::
                     new UnaryArgument( name = "parallelFileRead",
                                          arg = List("--parallelFileRead"), // name of value
-                                         argDesc = "Flag to indicate that bam file reading should be run in paralell for increased speed. Note that in this mode you CANNOT read from stdin. Also note that for this to do anything useful, the numThreads option must be set to some number greater than 1. Also note that additional threads above 9 will have no appreciable affect on speed." // description
+                                         argDesc = "DEPRECIATED: DO NOT USE. Flag to indicate that bam file reading should be run in paralell for increased speed. Note that in this mode you CANNOT read from stdin. Also note that for this to do anything useful, the numThreads option must be set to some number greater than 1. Also note that additional threads above 9 will have no appreciable affect on speed." // description
                                        ) ::
                     new BinaryOptionArgument[String](
                                          name = "readGroup", 
@@ -207,7 +206,7 @@ object runAllQC {
                     new BinaryArgument[Int](name = "numThreads",
                                                         arg = List("--numThreads"),  
                                                         valueName = "num", 
-                                                        argDesc = "The number of threads to allow. By default this utility will only allow one thread to be used.", 
+                                                        argDesc = "DEPRECIATED: DO NOT USE. The number of threads to allow. By default this utility will only allow one thread to be used.", 
                                                         defaultValue = Some(1)
                                                         ) :: 
                     new BinaryArgument[List[String]](   name = "dropChromList",

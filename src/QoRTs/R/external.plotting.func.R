@@ -139,7 +139,7 @@ makePlot.clipping <- function(plotter, rate.per.million = FALSE, r2.buffer = NUL
 }
 
 #tryCatch({
-#}, error = function(e){ errorPlot(plot.name,e, code = 0)});
+#}, error = function(e){ errorPlot(plot.name,e, code = 0); stop(e);});
 makePlot.cigarOp.byCycle <- function(plotter,op, r2.buffer = NULL, rate.per.million = TRUE, debugMode = DEFAULTDEBUGMODE, singleEndMode = plotter$res@singleEnd,...){
   SUFFIX.FIELD.IDS <- c("_S","_M","_E","_B")
   H.FIELD.IDS <- paste0("H",SUFFIX.FIELD.IDS);
@@ -195,7 +195,7 @@ makePlot.cigarOp.byCycle <- function(plotter,op, r2.buffer = NULL, rate.per.mill
         cigarOpRate.list.r2 <- get.cigarOpRate.from.dl(plotter$res@qc.data[["cigarOpDistribution.byReadCycle.R2"]]);
         xlim <- c(1,max(plotter$res@decoder$cycle.CT))
         if(is.null(r2.buffer)) r2.buffer <- xlim[2] / 10;
-      }, error = function(e){ errorPlot(plot.name,e, code = 0)});
+      }, error = function(e){ errorPlot(plot.name,e, code = 0); stop(e);});
       makePlot.generic.pair(plot.name,cigarOpRate.list.r1, 
                              cigarOpRate.list.r2, 
                              plotter = plotter, 
@@ -233,7 +233,7 @@ makePlot.cigarOp.byCycle <- function(plotter,op, r2.buffer = NULL, rate.per.mill
         }
         cigarOpRate.list.r1 <- get.cigarOpRate.from.dl(plotter$res@qc.data[["cigarOpDistribution.byReadCycle.R1"]]);
         xlim <- c(1,max(plotter$res@decoder$cycle.CT))
-      }, error = function(e){ errorPlot(plot.name,e, code = 0)});
+      }, error = function(e){ errorPlot(plot.name,e, code = 0); stop(e);});
       makePlot.generic(plot.name,cigarOpRate.list.r1, 
                              plotter = plotter, 
                              x.name = "CYCLE",
@@ -303,7 +303,7 @@ makePlot.insert.size <- function(plotter, calc.rate = TRUE, pct.cutoff = 0.98, p
           abline(v=max.cycle.ct,col="gray",lty=3);
           abline(v=max.cycle.ct * 2,col="gray",lty=3);
         }
-      }, error = function(e){ errorPlot(plot.name,e, code = 0)});
+      }, error = function(e){ errorPlot(plot.name,e, code = 0); stop(e);});
       makePlot.generic(plot.name,res@qc.data[["insert.size"]], plotter, 
                x.name = "InsertSize",y.name = "Ct",
                norm.x = FALSE, avg.y = calc.rate,
@@ -341,7 +341,7 @@ makePlot.genebody.coverage <- function(plotter, plot.medians = NULL, plot.means 
         data.list <- lapply(raw.data.list,function(df){
           data.frame(Quantile = df$QUANTILE - (step.size / 2), GeneBodyCoverage = apply(df[,c("X1.bottomHalf","X2.upperMidQuartile","X3.75to90","X4.high")],1,sum));
         });
-      }, error = function(e){ errorPlot(plot.name,e, code = 0)});
+      }, error = function(e){ errorPlot(plot.name,e, code = 0); stop(e);});
   
       makePlot.generic(plot.name, data.list, plotter, 
                x.name = "Quantile",y.name = "GeneBodyCoverage", 
@@ -380,7 +380,7 @@ makePlot.genebody.coverage.UMQuartile <- function(plotter, plot.medians = NULL, 
         data.list <- lapply(raw.data.list,function(df){
           data.frame(Quantile = df$QUANTILE - (step.size / 2), GeneBodyCoverage = df[,"X2.upperMidQuartile"]);
         });
-      }, error = function(e){ errorPlot(plot.name,e, code = 0)});
+      }, error = function(e){ errorPlot(plot.name,e, code = 0); stop(e);});
       makePlot.generic(plot.name, data.list, plotter, 
                    x.name = "Quantile",y.name = "GeneBodyCoverage", 
                    norm.x = TRUE, avg.y = TRUE,
@@ -418,7 +418,7 @@ makePlot.genebody.coverage.lowExpress <- function(plotter, plot.medians = NULL, 
         data.list <- lapply(raw.data.list,function(df){
           data.frame(Quantile = df$QUANTILE - (step.size / 2), GeneBodyCoverage = df[,"X1.bottomHalf"]);
         });
-      }, error = function(e){ errorPlot(plot.name,e, code = 0)});
+      }, error = function(e){ errorPlot(plot.name,e, code = 0); stop(e);});
       makePlot.generic(plot.name, data.list, plotter, 
                    x.name = "Quantile",y.name = "GeneBodyCoverage", 
                    norm.x = TRUE, avg.y = TRUE,
@@ -455,7 +455,7 @@ makePlot.missingness.rate <- function(plotter,  r2.buffer = NULL, debugMode = DE
         });
         
          xlim <- c(1,max(plotter$res@decoder$cycle.CT))
-       }, error = function(e){ errorPlot(plot.name,e, code = 0)});
+       }, error = function(e){ errorPlot(plot.name,e, code = 0); stop(e);});
        makePlot.generic(plot.name, data.list.r1, 
                                  plotter = plotter, 
                                  x.name = "readPos",
@@ -490,7 +490,7 @@ makePlot.missingness.rate <- function(plotter,  r2.buffer = NULL, debugMode = DE
 
          xlim <- c(1,max(plotter$res@decoder$cycle.CT))
          if(is.null(r2.buffer)) r2.buffer <- xlim[2] / 10;
-       }, error = function(e){ errorPlot(plot.name,e, code = 0)});
+       }, error = function(e){ errorPlot(plot.name,e, code = 0); stop(e);});
        makePlot.generic.pair(plot.name,        data.list.r1, 
                                  data.list.r2, 
                                  plotter = plotter, 
@@ -576,7 +576,7 @@ makePlot.cigarLength.distribution <- function(plotter,op, r2.buffer = NULL, perM
         xlim.min <- min(sapply(cigarLenData.list.r1, function(df){min(df$LEN)}))
 
         xlim <- c(xlim.min,xlim.max)
-      }, error = function(e){ errorPlot(plot.name,e, code = 0)});
+      }, error = function(e){ errorPlot(plot.name,e, code = 0); stop(e);});
       makePlot.generic(plot.name,cigarLenData.list.r1, 
                                  plotter = plotter, 
                                  x.name = "LEN",
@@ -632,7 +632,7 @@ makePlot.cigarLength.distribution <- function(plotter,op, r2.buffer = NULL, perM
 
         xlim <- c(xlim.min,xlim.max)
         if(is.null(r2.buffer)) r2.buffer <- (xlim.max - xlim.min) / 10;
-      }, error = function(e){ errorPlot(plot.name,e, code = 0)});
+      }, error = function(e){ errorPlot(plot.name,e, code = 0); stop(e);});
       makePlot.generic.pair(plot.name,        cigarLenData.list.r1, 
                                  cigarLenData.list.r2, 
                                  plotter = plotter, 
@@ -1253,7 +1253,7 @@ makePlot.gene.assignment.rates <- function(plotter, debugMode = DEFAULTDEBUGMODE
                                      norm.by = "READ_PAIR_OK",
                                      offset.horiz = 0.5,
                                      horiz.offsets = plotter$lanebam.params$horiz.offsets);
-      }, error = function(e){ errorPlot(plot.name,e, code = 0)});
+      }, error = function(e){ errorPlot(plot.name,e, code = 0); stop(e);});
       makePlot.generic.points(plot.name, tf.list,plotter, pre.plot.func = pre.plot.func,...)
       #title(xlab="Rate");
       title(ylab="Rate");
@@ -1299,7 +1299,7 @@ makePlot.splice.junction.loci.counts <- function(plotter, calc.rate = FALSE, hig
                                      norm.by = norm.by,
                                      offset.horiz = 0.5,
                                      horiz.offsets = plotter$lanebam.params$horiz.offsets);
-      }, error = function(e){ errorPlot(plot.name,e, code = 0)});
+      }, error = function(e){ errorPlot(plot.name,e, code = 0); stop(e);});
       makePlot.generic.points(plot.name,tf.list,plotter,pre.plot.func=pre.plot.func,...)
 
       if(calc.rate){
@@ -1351,7 +1351,7 @@ makePlot.splice.junction.event.ratesPerRead <- function(plotter, high.low.cutoff
                                      norm.by = norm.by,
                                      offset.horiz = 0.5,
                                      horiz.offsets = plotter$lanebam.params$horiz.offsets);
-      }, error = function(e){ errorPlot(plot.name,e, code = 0)});
+      }, error = function(e){ errorPlot(plot.name,e, code = 0); stop(e);});
       makePlot.generic.points(plot.name,tf.list,plotter,pre.plot.func=pre.plot.func,...)
 
       title(ylab="Events per Read-Pair");
@@ -1404,7 +1404,7 @@ makePlot.splice.junction.event.proportions <- function(plotter, high.low.cutoff 
                                      norm.by = norm.by,
                                      offset.horiz = 0.5,
                                      horiz.offsets = plotter$lanebam.params$horiz.offsets);
-      }, error = function(e){ errorPlot(plot.name,e, code = 0)});
+      }, error = function(e){ errorPlot(plot.name,e, code = 0); stop(e);});
       makePlot.generic.points(plot.name,tf.list,plotter,pre.plot.func=pre.plot.func,...)
 
 
@@ -1458,7 +1458,7 @@ makePlot.splice.junction.event.counts <- function(plotter, high.low.cutoff = 4, 
                                      norm.by = norm.by,
                                      offset.horiz = 0.5,
                                      horiz.offsets = plotter$lanebam.params$horiz.offsets);
-      }, error = function(e){ errorPlot(plot.name,e, code = 0)});
+      }, error = function(e){ errorPlot(plot.name,e, code = 0); stop(e);});
       makePlot.generic.points(plot.name,tf.list,plotter,pre.plot.func=pre.plot.func,...)
 
       title(ylab="# Splice Events");
@@ -1525,7 +1525,7 @@ makePlot.splice.junction.event.proportionsByType <- function(plotter, high.low.c
 
              text(c(1.5,3.5,5.5),par("usr")[4],categoryText, cex = categoryText.cex, adj=c(0.5,0.95));
         }
-      }, error = function(e){ errorPlot(plot.name,e, code = 0)});
+      }, error = function(e){ errorPlot(plot.name,e, code = 0); stop(e);});
       makePlot.generic.points(plot.name,tf.list,plotter,pre.plot.func=pre.plot.func,...)
            #usr <- par("usr");
            #text(1.5,usr[4],"All Events",adj=c(0.5,1.1));
@@ -1565,7 +1565,7 @@ makePlot.strandedness.test <- function(plotter, plot.target.boxes = FALSE, debug
                                      norm.by = c("StrandTest_frFirstStrand","StrandTest_frSecondStrand"),
                                      offset.horiz = 0.5,
                                      horiz.offsets = plotter$lanebam.params$horiz.offsets);
-      }, error = function(e){ errorPlot(plot.name,e, code = 0)});
+      }, error = function(e){ errorPlot(plot.name,e, code = 0); stop(e);});
       makePlot.generic.points(plot.name,tf.list,plotter,ylim=c(0,1),pre.plot.func=pre.plot.func,...)
       title(ylab="Rate");
       internal.plot.main.title("Strandedness Test", plotter, ...);
@@ -1638,7 +1638,7 @@ makePlot.dropped.rates <- function(plotter, dropAlwaysZeroRows = FALSE, debugMod
         tf.list <- lapply(tf.list, function(tf){
           tf[keep.rows, , drop=F];
         });
-      }, error = function(e){ errorPlot(plot.name,e, code = 0)});
+      }, error = function(e){ errorPlot(plot.name,e, code = 0); stop(e);});
       if(nrow(tf.list[[1]]) == 0){
         blank.plot("No Reads Dropped");
       } else {
@@ -1699,7 +1699,7 @@ makePlot.mapping.rates <- function(plotter, plot.mm = NULL, y.counts.in.millions
                                           norm.by = c("total.reads"),
                                           offset.horiz = 0.5,
                                           horiz.offsets = plotter$lanebam.params$horiz.offsets);
-         }, error = function(e){ errorPlot(plot.name,e, code = 0)});
+         }, error = function(e){ errorPlot(plot.name,e, code = 0); stop(e);});
          makePlot.generic.points(plot.name,tf.list,plotter, leave.blank.cols = 4, label.y = F,...);
          makePlot.generic.points.right(plot.name,tf.list.2, plotter, section.offset = 4.5, ylim.data = c(0,1));
          usr <- par("usr");
@@ -1724,7 +1724,7 @@ makePlot.mapping.rates <- function(plotter, plot.mm = NULL, y.counts.in.millions
                                           norm.by = c("total.reads"),
                                           offset.horiz = 0.5,
                                           horiz.offsets = plotter$lanebam.params$horiz.offsets);
-         }, error = function(e){ errorPlot(plot.name,e, code = 0)});
+         }, error = function(e){ errorPlot(plot.name,e, code = 0); stop(e);});
          makePlot.generic.points(plot.name,tf.list,plotter, leave.blank.cols = 3, label.y = F,...);
          makePlot.generic.points.right(plot.name,tf.list.2, plotter, section.offset = 3.5, ylim.data = c(0,1));
          usr <- par("usr");
@@ -1937,7 +1937,7 @@ makePlot.chrom.type.rates <- function(plotter,
         pre.plot.func <- function(){
            abline(h=0.0,col="gray",lty=3);
         }
-      }, error = function(e){ errorPlot(plot.name,e, code = 0)});
+      }, error = function(e){ errorPlot(plot.name,e, code = 0); stop(e);});
       makePlot.generic.points(plot.name,tf.list, plotter, pre.plot.func = pre.plot.func,...);
 
       if(plot.rates) {
@@ -1992,7 +1992,7 @@ makePlot.norm.factors <- function(plotter, by.sample = TRUE, return.table = FALS
                                   offset.horiz = 0.5,
                                   horiz.offsets = plotter$lanebam.params$horiz.offsets
                                   )
-      }, error = function(e){ errorPlot(plot.name,e, code = 0)});
+      }, error = function(e){ errorPlot(plot.name,e, code = 0); stop(e);});
       makePlot.generic.points(plot.name,tf.list,plotter,pre.plot.func=pre.plot.func,...);
       internal.plot.main.title("Normalization Factors", plotter, ...);
       title(ylab="Normalization Factor");
@@ -2045,7 +2045,7 @@ makePlot.norm.factors.vs.TC <- function(plotter, by.sample = TRUE, return.table 
         pre.plot.func <- function(){
            abline(h=1.0,col="gray",lty=3);
         }
-      }, error = function(e){ errorPlot(plot.name,e, code = 0)});
+      }, error = function(e){ errorPlot(plot.name,e, code = 0); stop(e);});
       makePlot.generic.points(plot.name,tf.tf.list,plotter,pre.plot.func=pre.plot.func,...);
       internal.plot.main.title("Normalization Factors vs Total-Count Normalization", plotter, ...);
       title(ylab="Alt vs TC ratio");
@@ -2087,7 +2087,7 @@ makePlot.cigarMismatch <- function(plotter,debugMode = DEFAULTDEBUGMODE,  single
                                      norm.by = c("StrandTest_frFirstStrand","StrandTest_frSecondStrand"),
                                      offset.horiz = 0.5,
                                      horiz.offsets = plotter$lanebam.params$horiz.offsets);
-      }, error = function(e){ errorPlot(plot.name,e, code = 0)});
+      }, error = function(e){ errorPlot(plot.name,e, code = 0); stop(e);});
       makePlot.generic.points(plot.name,tf.list,plotter,ylim=c(0,1),pre.plot.func=pre.plot.func,...)
       title(ylab="Rate");
       internal.plot.main.title("Strandedness Test", plotter, ...);
@@ -2116,7 +2116,7 @@ makePlot.splicing.mismatch <- function(plotter, debugMode = DEFAULTDEBUGMODE,  s
                                      norm.by = NULL,
                                      offset.horiz = 0.5,
                                      horiz.offsets = plotter$lanebam.params$horiz.offsets);
-      }, error = function(e){ errorPlot(plot.name,e, code = 0)});
+      }, error = function(e){ errorPlot(plot.name,e, code = 0); stop(e);});
     }
   })
 }
@@ -2147,14 +2147,14 @@ makePlot.legend.box <- function(plotter,debugMode = DEFAULTDEBUGMODE, singleEndM
     #internal.plot.legend(plotter,"points","bottomright");
 
 
-    if(plotter$plot.type == "highlightBySample.colorByLane"){
+    if(plotter$plot.type == "highlightSample.colorByLane"){
       title.text <- paste0("Sample Highlight:\n",plotter$title.highlight.name,"\nColored by Lane")
       title.cex <- fit.character.vector(title.text);
 
       text(0.5,1,title.text,adj=c(0.5,1),cex=title.cex);
       internal.plot.legend(plotter,"lnpt","bottom");
       #internal.plot.legend(plotter.NVC,"NVC.both","center");
-    } else if(plotter$plot.type == "highlightBySample") {
+    } else if(plotter$plot.type == "highlightSample") {
       #internal.plot.legend(plotter.NVC,"NVC.both","center");
       title.text <- paste0("Sample Highlight:\n",plotter$title.highlight.name)
       title.cex <- fit.character.vector(title.text);
