@@ -1,0 +1,32 @@
+===============================================================
+v0.1.1: Numerous substantial changes, improvements and updates.
+
+* QoRTs no longer requires bam files be sorted by name. It can now accept coordinate sorted bam files using the "--coordSorted" option.
+* QoRTs no longer requires a full decoder including lane.ID, group.ID, and so on. It can now fill in default values for all decoder columns except for the unique.ID column. You can even pass it a character vector, which it will take as the unique.ID column. Added function completeAndCheckDecoder which fills in all missing columns with their default values.
+* Added substantial error-checking, error-catching, etc. Multiplots will no longer crash entirely if they encounter an error in one individual sub-plot. Instead they will replace the sub-plot with a warning placeholder plot, send a warning to the console, and move on to the next sub-plot.
+* Added additional support for hard-clipped reads. QoRTs now has a "--maxReadLength" option which can be used to set the maximum read length. Without this option QoRTs will attempt to autodetect the maximum read length based on the first 1000 reads, which may not always work if there is substantial variation in read lengths. Note that in general hard-clipping reads prior to QC is NOT RECOMMENDED, as this can make it impossible to determine the sequencer read cycle of each base. It is much preferred to replace undesirable sequence with N's. If reads are found to be hard-clipped, then QoRTs will assume they are only hard clipped from the tails and treat them accordingly. If they are clipped from both ends, then cycle-specific artifacts and errors may be obfuscated!
+* The QoRTs manual and readme no longer recommends using "?" to call up the manual. It now recommends the "--man" command. Many consoles will replace the "?" character, causing odd behavior.
+* A few minor optimizations were made, resulting in a considerable improvements in speed.
+* The "required" RAM listed in the manual and documentation was reduced to 4 gigabytes. This is not due to any change in the code itself, simply the observation that the original listed requirement was overly conservative. We still recommend allocating ~16 gigabytes of RAM, as this will usually increase performance by reducing time spent on garbage collection.
+* QoRTs now outputs a verbose log file to the QC directory.
+* Numerous improvements and additions to the manual and documentation.
+
+Several new options are added to the wiggle-file utility bamToWiggle, allowing additional attribute pairs to be added to the wiggle file's track definition line.
+* The --includeTrackDefLine option causes the utility to include a track definition line.
+* The --rgbColor can be used to set the track's color. It also sets the itemRgb attribute to ON.
+* The --additionalTrackOptions can be used to set arbitrary options. Note that this must be captured with "quotes" or else any whitespace will cause the utility to misinterpret the attributes as additional QoRTs options.
+* Like the QC utility, this utility now supports single-end and coordinate-sorted modes using the --singleEnded and --coordSorted options.
+
+IMPORTANT NOTE:
+This version of QoRTs contains a few major revisions and breaks backward compatability with previous versions.
+* Renamed many functions. "makePlot.summary" functions are now renamed as "makeMultiPlot". Function "build.plotter.highlightBySample" has been renamed "build.plotter.highlightSample". Thus:  "makePlot.summary.highlightBySample" has been renamed "makeMultiPlot.highlightSample", etc.
+* Added Single-End mode. When run on single-ended read data, the insert size plot will be skipped and all plots that normally show two sub-plots for each read will now only have a single plot. Note that you cannot compare single-end and paired-end data in the same plots.
+* Renamed some of the internal files for consistency and clarity. "QCsummary.txt" is now "QC.summary.txt"; "gc.txt.gz" is now "gc.byPair.txt.gz"; "gc.RB.txt.gz" is now "gc.byRead.txt.gz".
+* Added a new gc count: "gc.byRead.vsBaseCt.txt.gz" includes a table of the G/C base count vs the number of non-missing bases in the read. This may be useful if artifacts are encountered related to variations in read length.
+* The (now-depreciated) option --countByReadPair has been made the DEFAULT behavior for the bamToWiggle utility. It can be turned off using the --simpleCountByRead option. This option causes the wiggle file generator to count total read coverage depth rather than read-pair (aka fragment) coverage depth. In other words: if read-pairs overlap with one another, the overlapping section will be "counted twice". As of v0.1.1, such overlapping sections are counted once.
+
+
+
+
+
+
