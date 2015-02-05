@@ -5,6 +5,11 @@ import net.sf.samtools._
 object testing {
   println("Welcome to the Scala worksheet")       //> Welcome to the Scala worksheet
   
+  
+  val s = "Hello\nMy\nName is Steve\n";           //> s  : String = "Hello
+                                                  //| My
+                                                  //| Name is Steve
+                                                  //| "
 
   val L1 = List("A","B","C","D","E","F","G","H","I","J","K","L","M","N")
                                                   //> L1  : List[String] = List(A, B, C, D, E, F, G, H, I, J, K, L, M, N)
@@ -41,7 +46,7 @@ object testing {
   }
   
   val tc = new TestClass();                       //> tc  : internalTests.testing.TestClass = internalTests.testing$$anonfun$main$
-                                                  //| 1$TestClass$1@4f013415
+                                                  //| 1$TestClass$1@50d0843b
   
   val tct1 = tc(1);                               //> tct1  : Int = 1
   val tct3 = tc(2);                               //> tct3  : Int = 2

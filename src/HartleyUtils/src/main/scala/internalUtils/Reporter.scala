@@ -161,21 +161,21 @@ object Reporter {
  */
   
   //final val verbosityNames = List("output","error","warn","report","note","progress","debug","deepdebug");
-
-  val DEFAULT_CONSOLE_VERBOSITY = Array(true,true,true,true,true,true,false,false);
-  val QUIET_CONSOLE_VERBOSITY = Array(true,true,true,false,false,false,false,false);
-  val VERBOSE_CONSOLE_VERBOSITY = Array(true,true,true,true,true,true,true,true);
+  val DEFAULT_CONSOLE_VERBOSITY = Array(false,true,true,true,true,true,false,false);
+  val QUIET_CONSOLE_VERBOSITY = Array(false,true,true,false,false,false,false,false);
+  val VERBOSE_CONSOLE_VERBOSITY = Array(false,true,true,true,true,true,true,true);
+  val OUTPUT_VERBOSITY = Array(true, false, false, false, false,false,false,false);
   
-  val logVerbositySetting = Array(true,true,true,true,true,true,true,true);
-  val debugLogVerbositySetting = Array(true,true,true,true,true,true,true,true);
+  val logVerbositySetting = Array(false,true,true,true,true,true,true,true);
+  val debugLogVerbositySetting = Array(false,true,true,true,true,true,true,true);
   val warningLogVerbositySetting = Array(false,true,true,false,false,false,false,false);
   
   //default internal logger:
   private val internalLog : StringReportLogger = StringReportLogger(logVerbositySetting);
-  loggers = internalLog :: loggers;
   private val warningLog : StringReportLogger = StringReportLogger(warningLogVerbositySetting);
-  loggers = warningLog :: loggers;
+  private val outputLog : ConsoleReportLogger = ConsoleReportLogger(OUTPUT_VERBOSITY);
   
+  def getWarnings : String = warningLog.getLogString();
   /*
    * Initializers:
    */
@@ -219,11 +219,20 @@ object Reporter {
     loggers = fileLogger :: loggers;
   }
   
+  def init_base(){
+    loggers = internalLog :: loggers;
+    loggers = warningLog :: loggers;
+    loggers = outputLog :: loggers;
+    
+  }
+  
   /*
    * Reporting options:
    */
   
   var anyWarning : Boolean = false;
+  
+  def hasWarningOccurred() : Boolean = anyWarning;
   
   def reportln(str : String, verb : String) {
     if(verb == "warn"){

@@ -14,7 +14,7 @@ object qcGCContentCount {
 }
 
 class qcGCContentCount(isSingleEnd : Boolean, readLength : Int) extends QCUtility[Unit] {
-  reportln("Init GC counts","progress");
+  reportln("> Init GC counts Utility","debug");
   val readLen = readLength;
   val gcContentCounts : Array[Int] = Array.ofDim[Int](2 * readLen + 1);
   val gcContentCountsR1 : Array[Int] =  Array.ofDim[Int](readLen + 1);

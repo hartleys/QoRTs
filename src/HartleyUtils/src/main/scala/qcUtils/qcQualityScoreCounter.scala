@@ -32,7 +32,7 @@ object qcQualityScoreCounter {
 }
 
 class qcQualityScoreCounter(isSingleEnd : Boolean, readLength : Int, maxQualScore : Int) extends QCUtility[Unit] {
-  reportln("Init QualityScoreDistribution","progress");
+  reportln("> Init QualityScoreDistribution Utility","debug");
   
   //var minQualByPos_r1 : Array[Byte] = new Array[Byte](readLen);
  // var maxQualByPos_r1 : Array[Byte] = new Array[Byte](readLen);

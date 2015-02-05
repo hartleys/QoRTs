@@ -444,7 +444,7 @@ object qcNVC {
 }
 
 class qcNVC(isSingleEnd : Boolean, readLen : Int, writeClippedNVC : Boolean)  extends QCUtility[Unit] {
-  reportln("Init NVC","progress");
+  reportln("> Init NVC utility","debug");
 
   val readLength : Int = readLen;
   val nvcCounter : qcNVC.NvcCounter = new qcNVC.NvcCounter(readLength);

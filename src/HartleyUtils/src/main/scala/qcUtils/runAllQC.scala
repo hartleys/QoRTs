@@ -44,7 +44,8 @@ object runAllQC {
                                                              "chromCounts");
   final val QC_DEFAULT_OFF_FUNCTION_LIST : scala.collection.immutable.Set[String] = scala.collection.immutable.Set("FPKM","makeWiggles","makeAllBrowserTracks", "cigarMatch");
   final val QC_FUNCTION_LIST : scala.collection.immutable.Set[String] = QC_DEFAULT_ON_FUNCTION_LIST ++ QC_DEFAULT_OFF_FUNCTION_LIST;
-  final val COMPLETED_OK_FILENAME = "QORTS_COMPLETED_OK";
+  final val COMPLETED_OK_FILENAME = ".QORTS_COMPLETED_OK";
+  final val COMPLETED_WARN_FILENAME = ".QORTS_COMPLETED_WARN";
   final val MASTERLEVEL_FUNCTION_LIST = List[String]("GeneCalcs", "InsertSize","NVC","CigarOpDistribution","QualityScoreDistribution","GCDistribution","JunctionCalcs","StrandCheck","chromCounts","cigarMatch","makeWiggles");
 
   final val QC_INCOMPATIBLE_WITH_SINGLE_END_FUNCTION_LIST : scala.collection.immutable.Set[String] = scala.collection.immutable.Set(
@@ -105,14 +106,6 @@ object runAllQC {
                     new UnaryArgument( name = "stranded",
                                          arg = List("--stranded","-s"), // name of value
                                          argDesc = "Flag to indicate that data is stranded." // description
-                                       ) ::
-                    new UnaryArgument( name = "verbose",
-                                         arg = List("--verbose"), // name of value
-                                         argDesc = "Flag to indicate that debugging information and extra progress information should be sent to stderr." // description
-                                       ) ::
-                    new UnaryArgument( name = "quiet",
-                                         arg = List("--quiet","-s"), // name of value
-                                         argDesc = "Flag to indicate that only errors and warnings should be sent to stderr." // description
                                        ) ::
                     new BinaryOptionArgument[Int](
                                          name = "maxReadLength", 
@@ -230,7 +223,7 @@ object runAllQC {
                     new BinaryArgument[List[String]](name = "runFunctions",
                                                         arg = List("--runFunctions"),  
                                                         valueName = "func1,func2,...", 
-                                                        argDesc = "The complete list of functions to run. Setting this option turns off ALL functions EXCEPT for the ones explicitly requested here. Followed by a comma delimited list, with no internal whitespace. Allowed options are: "+QC_FUNCTION_LIST.mkString(", "), 
+                                                        argDesc = "The complete list of functions to run. Setting this option turns off ALL functions EXCEPT for the ones explicitly requested here. Some functions require other functions. If these functions are requested, all functions it is dependent on will also run. Followed by a comma delimited list, with no internal whitespace. Allowed options are: "+QC_FUNCTION_LIST.mkString(", "), 
                                                         defaultValue = Some(List[String]())
                                                         ) :: 
                     new FinalArgument[String]( 
@@ -248,7 +241,7 @@ object runAllQC {
                                          name = "outfile",
                                          valueName = "outfiledir",
                                          argDesc = "The output file directory." // description
-                                        ) :: List()
+                                        ) :: internalUtils.commandLineUI.CLUI_UNIVERSAL_ARGS
       );
     
     def run(args : Array[String]){
@@ -309,7 +302,19 @@ object runAllQC {
 
     internalUtils.Reporter.init_completeLogFile(outfile + ".log");
     
-    reportln("Starting ALLQC:","note");
+    val gigsMaxMem = getMaxMemoryXmxInGigs;
+    if(gigsMaxMem < 4){
+      reportln("NOTE: maximum allocation memory = " + gigsMaxMem + " gigabytes.\n"+
+               "    This might be ok, or might cause OutOfMemoryExceptions later.\n"+
+               "    For most large datasets/genomes at least 4 gb is recommended.\n"+
+               "    (Actual required memory may be less than this.)\n"+
+               "    To increase the memory maximum, include the parameter -Xmx\n"+
+               "    in between the java command and the -jar parameter.\n"+
+               "    For example: to increase the memory maximum to 4 gigabytes:\n"+
+               "        java -Xmx4G -jar /path/to/jar/QoRTs.jar QC ...","note");
+    }
+    
+    reportln("Starting QC","note");
     val initialTimeStamp = TimeStampUtil();
     standardStatusReport(initialTimeStamp);
 
@@ -359,8 +364,8 @@ object runAllQC {
     }
     
     
-    
-    reportln("Running functions: " + runFunc.mkString(","),"progress");
+    //wrapSimpleLineWithIndent_staggered(line : String, width : Int, indent : String, firstLineIndent : String)
+    reportln("Running functions: " + wrapSimpleLineWithIndent_staggered(runFunc.mkString(", "), 68, "        ", ""),"progress");
     
     //reportln("infile: " + infile , "note");
     //reportln("outfile: " + outfile , "note");
@@ -426,6 +431,7 @@ object runAllQC {
     
     val peekCt = 2000;
     val COMPLETED_OK_FILEPATH = outfile + COMPLETED_OK_FILENAME;
+    val COMPLETED_WARN_FILEPATH = outfile + COMPLETED_WARN_FILENAME;
     val (samFileAttributes, recordIter) = initSamRecordIterator(infile, peekCt);
     
     val pairedIter : Iterator[(SAMRecord,SAMRecord)] = 
@@ -462,7 +468,7 @@ object runAllQC {
                "to set the maximum possible read length, or else errors may occur if/when \n"+
                "reads longer than "+readLength+ " appear.","warn")
     }
-    
+     
     if(samFileAttributes.allReadsMarkedPaired & isSingleEnd) reportln("WARNING WARNING WARNING! Running in single-end mode, but reads appear to be paired-end! Errors may follow.\nStrongly recommend removing the '--isSingleEnd' option!","warn");
     if(samFileAttributes.allReadsMarkedSingle & (! isSingleEnd)) reportln("WARNING WARNING WARNING! Running in paired-end mode, but reads appear to be single-end! Errors may follow.\nStrongly recommend using the '--isSingleEnd' option","warn");
     if(samFileAttributes.mixedSingleAndPaired) reportln("WARNING WARNING WARNING! Data appears to be a mixture of single-end and paired-end reads! QoRTs was not designed to function under these conditions. Errors may follow!","warn");
@@ -542,7 +548,7 @@ object runAllQC {
     standardStatusReport(initialTimeStamp);
     
     val outputIterationTimeStamp = TimeStampUtil();
-    reportln("Read Stats:\n" + internalUtils.commonSeqUtils.causeOfDropArrayToString(coda, coda_options),"note");
+    report("> Read Stats:\n" + stripFinalNewline(indentifyLines(internalUtils.commonSeqUtils.causeOfDropArrayToString(coda, coda_options),">   ")),"note");
     
     val summaryWriter = openWriter(outfile + ".summary.txt");
     val strandedCode = if(! stranded){ 0 } else {if(fr_secondStrand) 2; else 1;}
@@ -570,7 +576,7 @@ object runAllQC {
     //qcJC.writeOutput(outfile, summaryWriter);
     //qcST.writeOutput(outfile, summaryWriter);
     //qcCC.writeOutput(outfile, summaryWriter);
-    reportln("Done.","note");
+    
     
     if(isSingleEnd){
       summaryWriter.write("IS_SINGLE_END	1\n");
@@ -578,16 +584,29 @@ object runAllQC {
       summaryWriter.write("IS_SINGLE_END	0\n");
     }
     
+    if(internalUtils.Reporter.hasWarningOccurred()){
+      summaryWriter.write("COMPLETED_WITHOUT_WARNING	0\n");
+      reportln("QoRTs completed WITH WARNINGS! See log for details.","warn");
+      val completedWarnWriter = openWriter(COMPLETED_WARN_FILEPATH);
+      completedWarnWriter.write("# Note: if this file EXISTS, then QoRTs QC completed WITH WARNINGS. Warning messages follow:\n");
+      completedWarnWriter.write(internalUtils.Reporter.getWarnings+"\n");
+      completedWarnWriter.close();
+    } else {
+      summaryWriter.write("COMPLETED_WITHOUT_WARNING	1\n");
+      reportln("QoRTs QC complete with no problems.","note");
+    }
+    
     summaryWriter.write("COMPLETED_WITHOUT_ERROR	1\n");
     
     close(summaryWriter);
     
     if(runFunc.contains("makeAllBrowserTracks")){
-      reportln("Making (optional) browser tracks...","note");
+      reportln("Making (optional) browser tracks... (NOT CURRENTLY IMPLEMENTED!)","note");
       //TO DO!
       reportln("Done making browser tracks.","note");
     }
     
+    reportln("Done.","note");
     
     val finalTimeStamp = TimeStampUtil();
     reportln("Time spent on setup:           " + TimeStampUtil.timeDifferenceFormatter(samIterationTimeStamp.compareTo(initialTimeStamp)),"note");
@@ -598,7 +617,7 @@ object runAllQC {
     reportln("Total runtime:                 " + TimeStampUtil.timeDifferenceFormatter(finalTimeStamp.compareTo(initialTimeStamp)),"note");
     
     val completedOkWriter = openWriter(COMPLETED_OK_FILEPATH);
-    completedOkWriter.write("# Note: if this file EXISTS, then QoRTs completed without errors.");
+    completedOkWriter.write("# Note: if this file EXISTS, then QoRTs completed without ERRORS.\n#If there were any warnings, then a file \""+COMPLETED_WARN_FILEPATH+"\" will also exist.\n#See QC.log for details.");
     completedOkWriter.close();
   }
   /*

@@ -1,7 +1,0 @@
-package qcUtils
-
-object qcMakeSpliceBeds {
-  
-  
-  
-}

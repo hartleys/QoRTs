@@ -332,7 +332,7 @@ class qcGetGeneCounts( stranded : Boolean,
                        calcRPKM : Boolean, writeGenewiseGeneBody : Boolean, writeDESeq : Boolean, writeGeneCounts : Boolean,
                        geneKeepFunc : (String => Boolean)) extends QCUtility[String] {
   
-  reportln("Init GeneCalcs","progress");
+  reportln("> Init GeneCalcs Utility","debug");
   
   val geneArray : GenomicArrayOfSets[String] = anno_holder.geneArray;
   val strandedGeneArray : GenomicArrayOfSets[String] = anno_holder.strandedGeneArray;

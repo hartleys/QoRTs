@@ -66,7 +66,7 @@ object convertSpliceCountsToBed {
                                          name = "outfile",
                                          valueName = "outfile",
                                          argDesc = "The output bed file, or '-' to write to stdout. If the filename ends with \".gz\" or \".zip\" then the file will be compressed using the appropriate method." // description
-                                        ) :: List() );
+                                        ) :: internalUtils.commandLineUI.CLUI_UNIVERSAL_ARGS );
       
      def run(args : Array[String]) {
        val out = parser.parseArguments(args.toList.tail);

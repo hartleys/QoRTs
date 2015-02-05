@@ -8,6 +8,9 @@ import internalUtils.stdUtils._;
 
 object commandLineUI {
 
+  final val HELP_COMMAND_LIST : List[String] = List("help", "-help", "--help");
+  final val MANUAL_COMMAND_LIST : List[String] = List("?","'?'", "\"?\"","man","-man","--man");
+  
   var CLUI_CONSOLE_LINE_WIDTH = 68;
   
   final val ALWAYS_DEBUG_MODE = true;
@@ -48,14 +51,41 @@ List(
     def run(args : Array[String]);
   }
   
+
+  
+  /*final val helpCommandList : Map[String, () => CommandLineRunUtil] = 
+    Map(
+           ("'?'" -> (() => new helpDocs())),
+           ("\"?\"" -> (() => new helpDocs())),
+           ("?" -> (() => new helpDocs())),
+           ("help" -> (() => new helpDocs())),
+           ("man" -> (() => new helpDocs())),
+           ("--help" -> (() => new helpDocs())),
+           ("--man" -> (() => new helpDocs())),
+           ("-help" -> (() => new helpDocs())),
+           ("-man" -> (() => new helpDocs()))
+       );*/
+  
+  
   //
   //command: the name of the command used to execute the utility
   //quickSynopsis: a short (less than 48-char) description of what the utility does.
   //synopsis: DEPRECIATED. The synopsis is now generated automatically.
   //description: a multi-line or even multi-paragraph description of the utility.
   
+  val CLUI_UNIVERSAL_ARGS : List[Argument[Any]] = 
+                    new UnaryArgument( name = "verbose",
+                                         arg = List("--verbose"), // name of value
+                                         argDesc = "Flag to indicate that debugging information and extra progress information should be sent to stderr." // description
+                                       ) ::
+                    new UnaryArgument( name = "quiet",
+                                         arg = List("--quiet","-s"), // name of value
+                                         argDesc = "Flag to indicate that only errors and warnings should be sent to stderr." // description
+                                       ) :: 
+                                       List();
+  
   class CommandLineArgParser(command : String, quickSynopsis : String, synopsis : String, description : String,  argList : List[Argument[Any]], authors : List[String] = DEFAULT_AUTHOR, legal : List[String] = DEFAULT_LEGAL) {
- 
+
     //private var argMap = Map.empty[String,(Type, Any)];
     //private def registerArg[T](name : String, item : T)(implicit t : TypeTag[T]){
     //  argMap = argMap.updated(name, typeOf[T] -> item);
@@ -112,10 +142,10 @@ List(
       if(args.length < 1){
         reportShortHelp();
         false;
-      } else if(args(0) == "--man" || args(0) == "?"){
+      } else if(MANUAL_COMMAND_LIST.contains(args(0))){
         reportManual();
         false;
-      } else if(args(0) == "--help"){
+      } else if(HELP_COMMAND_LIST.contains(args(0))){
         reportShortHelp();
         false;
       } else {
@@ -133,8 +163,8 @@ List(
       }
     }
     
-    def reportManual() {
-      report(getManual(),"output");
+    def reportManual(verb : String = "output") {
+      report(getManual(),verb);
     }
     def getManual() : String = {
       val sb = new StringBuilder("");
@@ -177,8 +207,8 @@ List(
       return(ss.foldLeft("")((soFar,s) => soFar + "\n" + s));
     }
     
-    def reportShortHelp(){
-      report(getShortHelp(),"output");
+    def reportShortHelp(verb : String = "output"){
+      report(getShortHelp(),verb);
     } 
     def getShortHelp() : String = {
       "java [Java Options] -jar " + runner.runner.Runner_ThisProgramsExecutableJarFileName + " " + command + " [options] " +
@@ -212,9 +242,11 @@ List(
       
       val (inputParamArgs, inputFinalArgs) = inputArguments.splitAt( inputArguments.length - finalArgList.length );
       
+      reportln("INPUT_COMMAND("+command+")","note");
+      
       for((p,arg) <- inputFinalArgs.zip(finalArgList)){
         arg.parse(List(p));
-        if(debugMode) reportln("INPUT_ARG("+arg.getName()+")="+arg(),"debug");
+        if(debugMode) reportln("  INPUT_ARG("+arg.getName()+")="+arg(),"note");
       }
       parseParamArgs(inputParamArgs, debugMode);
       
@@ -239,7 +271,7 @@ List(
             argList.find(_.isNamed(inputArguments.head)) match {
               case Some(arg) => {
                 val remainder = arg.parse(inputArguments);
-                if(debugMode) reportln("INPUT_ARG("+arg.getName()+")="+arg(),"debug");
+                if(debugMode) reportln("  INPUT_ARG("+arg.getName()+")="+arg(),"note");
                 parseParamArgs(remainder, debugMode);
               }
               case None => {

@@ -58,7 +58,7 @@ object qcStrandTest {
 }
 
 class qcStrandTest(isSingleEnd : Boolean, anno_holder : qcGtfAnnotationBuilder, stranded : Boolean, fr_secondStrand_bool : Boolean) extends QCUtility[Unit] {
-  reportln("Init StrandCheck","progress");
+  reportln("> Init StrandCheck Utility","debug");
 
   val strandedGeneArray = anno_holder.strandedGeneArray;
   
@@ -109,6 +109,53 @@ class qcStrandTest(isSingleEnd : Boolean, anno_holder : qcGtfAnnotationBuilder, 
                           else if(inferredStrandType == "fr_firstStrand" && stranded && ! fr_secondStrand_bool) 1;
                           else if(inferredStrandType == "fr_unstranded" && (! stranded)) 1;
                           else 0;
+    
+    
+    //Check the strandedness. If it doesn't match the data, send a warning:
+    if(stranded){
+      if((! fr_secondStrand_bool) && inferredStrandType == "fr_secondStrand"){
+        reportln("WARNING: The data appears to be follow the fr_secondStrand rule, but\n"+
+                 "         QoRTs ran in fr_firstStrand mode!\n"+
+                 "      Are you sure that the data follows the fr_firstStrand rule?\n"+
+                 "      Under the fr_firstStrand rule, the first read aligns to the strand\n"+
+                 "      opposite the original RNA transcript, and the second read aligns to\n"+
+                 "      the same strand as the original RNA transcript.\n"+
+                 "      If the data follows the fr_secondStrand rule, you should probably\n"+
+                 "      re-run QoRTs with the \"--stranded\" and \"--stranded_fr_secondstrand\" options.","warn");
+      } else if(fr_secondStrand_bool && inferredStrandType == "fr_firstStrand") {
+        reportln("WARNING: The data appears to be follow the fr_firstStrand rule, but\n"+
+                 "         QoRTs ran in fr_secondStrand mode!\n"+
+                 "      Are you sure that the data follows the fr_secondStrand rule?\n"+
+                 "      Under the fr_firstStrand rule, the first read aligns to the strand\n"+
+                 "      opposite the original RNA transcript, and the second read aligns to\n"+
+                 "      the same strand as the original RNA transcript.\n"+
+                 "      If the data follows the fr_firstStrand rule, you should probably\n"+
+                 "      re-run QoRTs WITHOUT the \"--stranded_fr_secondstrand\" option.","warn");
+      } else if(inferredStrandType == "fr_unstranded"){
+        reportln("WARNING: The data appears to be unstranded, but\n"+
+                 "         QoRTs ran in stranded mode!\n"+
+                 "      Are you sure that the data is stranded?\n"+
+                 "      If not, you should probably\n"+
+                 "      re-run QoRTs with the \"--stranded\" option.","warn");
+      }
+    } else {
+      if(inferredStrandType == "fr_firstStrand"){
+        reportln("WARNING: The data appears to be STRANDED, following the fr_firstStrand rule.\n"+
+                 "         Are you sure this isn't stranded data? If it is stranded, then you should probably\n"+
+                 "         re-run QoRTs with the \"--stranded\" option!","warn");
+      } else if(inferredStrandType == "fr_secondStrand") {
+        reportln("WARNING: The data appears to be STRANDED, following the fr_secondStrand rule.\n"+
+                 "         Are you sure this isn't stranded data? If it is stranded, then you should probably\n"+
+                 "         re-run QoRTs with the \"--stranded\" and \"--stranded_fr_secondstrand\" options!","warn");
+      }
+    }
+    
+    if(inferredStrandType == "UNKNOWN_STRANDEDNESS"){
+        reportln("WARNING: QoRTs is unable to infer the strandedness from the data!\n"+
+                 "         This isn't a problem per-se, since QoRTs requires that strandedness\n"+
+                 "         mode be set manually. However, it might be indicative that something\n"+
+                 "         is very wrong with your dataset and/or transcript annotation.","warn");
+    }
     
     summaryWriter.write("StrandTest_frFirstStrand	"+fr_firstStrand+"\n");
     summaryWriter.write("StrandTest_frSecondStrand	"+fr_secondStrand+"\n");

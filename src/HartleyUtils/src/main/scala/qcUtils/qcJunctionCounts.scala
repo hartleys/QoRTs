@@ -84,7 +84,7 @@ object qcJunctionCounts {
 class qcJunctionCounts(anno_holder : qcGtfAnnotationBuilder, stranded : Boolean, fr_secondStrand : Boolean, 
                        writeDEXSeq : Boolean, writeSpliceExon : Boolean, writeKnownSplices : Boolean, writeNovelSplices : Boolean,
                        limit_high_expressed_sj : Int = 3)  extends QCUtility[Unit] {
-  reportln("Init JunctionCalcs","progress");
+  reportln("> Init JunctionCalcs utility","debug");
   
   val knownSpliceMap : GenMap[GenomicInterval, String] = anno_holder.knownSpliceJunctionNameMap;
   val flatFeatureList : IndexedSeq[String] = anno_holder.flatFeatureList;

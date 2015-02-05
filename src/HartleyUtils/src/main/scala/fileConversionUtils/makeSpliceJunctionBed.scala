@@ -13,7 +13,7 @@ object makeSpliceJunctionBed {
   class converter extends CommandLineRunUtil { 
      val parser : CommandLineArgParser = 
        new CommandLineArgParser(
-          command = "makeSpliceBed", 
+          command = "makeJunctionTrack", 
           quickSynopsis = "", 
           synopsis = "", 
           description = "This utility takes the splice junction count files created by the QoRTs QC utility "+
@@ -27,7 +27,7 @@ object makeSpliceJunctionBed {
                         ""+
                         ""+
                         ""+
-                        "",   
+                        "",
           argList = 
                     new BinaryOptionArgument[String](
                                          name = "rgb", 
@@ -35,31 +35,33 @@ object makeSpliceJunctionBed {
                                          valueName = "r,g,b",  
                                          argDesc = "The rgb color for all the bed file lines."
                                         ) ::
-                    new BinaryOptionArgument[List[Double]](
-                                         name = "sizeFactors", 
-                                         arg = List("--sizeFactors"), 
-                                         valueName = "val",  
-                                         argDesc = "A double-precision floating-point value. If this option is set, all counts will be divided by the given normalization factors. The length must be the same as the length of infiles."
+                    new BinaryOptionArgument[String](
+                                         name = "trackDefLine", 
+                                         arg = List("--trackDefLine"), 
+                                         valueName = "\"track name=mytrackname etc\"",  
+                                         argDesc = "The track definition line of the bed file, if desired. Note this is not necessary if a trackhub is going to be used, but if "+
+                                                   "uploading directly to UCSC / your genome browser of choice this may be required. Note that the entire line must be QUOTED, so that the whitespace "+
+                                                   "doesn't split it into multiple separate parameters. See the UCSC browser documentation (http://genome.ucsc.edu/goldenpath/help/customTrack.html#TRACK) for more information on browser track options."
                                         ) ::
                     new UnaryArgument(name = "includeFullSpliceNames",
                               arg = List("--includeFullSpliceNames"), // name of value
                               argDesc = "Flag to indicate that full splice names, including gene ID, should be used." // description
                               ) :: 
-                    new UnaryArgument(name = "calcSum",
-                              arg = List("--calcSum"), // name of value
-                              argDesc = "Flag to indicate that the splice junction counts should be summed, rather than averaged." // description
+                    new UnaryArgument(name = "calcMean",
+                              arg = List("--calcMean"), // name of value
+                              argDesc = "Flag to indicate that the splice junction counts should be averaged, rather than added up." // description
                               ) :: 
-                    new UnaryArgument(name = "infileIsTable",
-                              arg = List("--infileIsTable"), // name of value
-                              argDesc = "Flag to indicate that the infile isn't a junction counts file itself, but rather a tab-delimited table containing 2 columns: the junction file file path and the size factors." // description
-                              ) :: 
+                    new UnaryArgument(name = "ignoreSizeFactors",
+                              arg = List("--ignoreSizeFactors"), // name of value
+                              argDesc = "Flag to indicate that this utility should ignore size factors even if they are found in the input listFile." // description
+                              ) ::
                     new UnaryArgument(name = "stranded",
                               arg = List("--stranded"), // name of value
                               argDesc = "Flag to indicate that data is stranded." // description
                               ) :: 
                     new UnaryArgument(name = "nonflatgtf",
                               arg = List("--nonflatgtf"), // name of value
-                              argDesc = "Flag to indicate that, instead of a flattened gtf file, a standard gtf file. If this flag is raised, it will automatically create the standard flattened gtf information, in memory. It will not be written to disk" // description
+                              argDesc = "Flag to indicate that instead of a \"flattened\" gff file, a standard-format gtf file has been specified. If this flag is raised, it will automatically create the standard flattened gtf information, in memory. It will not be written to disk" // description
                               ) :: 
                     new BinaryArgument[Int](   name = "digits",
                                                         arg = List("--digits"),  
@@ -79,16 +81,47 @@ object makeSpliceJunctionBed {
                                                         argDesc = "A file suffix for all input junction count files. By default the full file path should be specified by the infile parameter.", 
                                                         defaultValue = Some("")
                                                         ) ::
+                    new BinaryOptionArgument[String](
+                                         name = "sizeFactorFile", 
+                                         arg = List("--sizeFactorFile"), 
+                                         valueName = "val",  
+                                         argDesc = "A file containing (at least) two columns: a list of sample ID's and their double-precision floating-point size factors. "+
+                                                   "The first line must include at least two columns: \"sample.ID\" and \"size.factor\""+
+                                                   "If this option is set, all counts will be divided by the given normalization factors. The length must be the same as the length of infiles."+
+                                                   "If sample.ID's is not specified by the --sampleList or --sampleListFile parameters, then all listed samples will be merged."
+                                        ) ::
+                    new BinaryOptionArgument[List[Double]](
+                                         name = "sizeFactors", 
+                                         arg = List("--sizeFactors"), 
+                                         valueName = "val",  
+                                         argDesc = "A list of double-precision floating-point values. "+
+                                                   "If this or any size factor option is set,"+
+                                                   " all counts will be divided by the given normalization factors."+
+                                                   " The length must be the same as the number of files to merge."
+                                        ) ::
+                    new BinaryOptionArgument[List[String]](
+                                         name = "filenames", 
+                                         arg = List("--filenames"), 
+                                         valueName = "file1.wig,file2.wig,file3.wig.gz,...",  
+                                         argDesc = "A comma-delimited list of wiggle files to merge. "+
+                                                   "This is optional, and filenames can be inferred from --infilePrefix, --infileSuffix, and the --sampleList, if those options are specified."+
+                                                   ""+
+                                                   ""
+                                        ) ::
+                    new BinaryOptionArgument[String](
+                                         name = "sampleList", 
+                                         arg = List("--sampleList"), 
+                                         valueName = "[sampleList.txt | - | samp1,samp2,samp3,...]",  
+                                         argDesc = "Either a comma-delimited list of sample id's or a file containing a list of sample id's."+
+                                                   "The file must either contain no title line, or contain a title line that includes a \"sample.ID\" column."+
+                                                   ""+
+                                                   ""
+                                        ) ::
                    new BinaryOptionArgument[String](
                                          name = "title", 
                                          arg = List("--title"), 
                                          valueName = "title",  
                                          argDesc = "A title to be prepended to each splice junction name"
-                                        ) ::
-                    new FinalArgument[List[String]](
-                                         name = "infile",
-                                         valueName = "infile[,infile2,infile3,...]",
-                                         argDesc = "The input splice counts file, or '-' to read from stdin.  If the filename ends with \".gz\" or \".zip\" then the file will be read using the appropriate decompression method." // description
                                         ) ::
                     new FinalArgument[String](
                                          name = "gff",
@@ -99,49 +132,162 @@ object makeSpliceJunctionBed {
                                          name = "outfile",
                                          valueName = "outfile",
                                          argDesc = "The output bed file, or '-' to write to stdout. If the filename ends with \".gz\" or \".zip\" then the file will be compressed using the appropriate method." // description
-                                        ) :: List() );
+                                        ) :: internalUtils.commandLineUI.CLUI_UNIVERSAL_ARGS );
       
      def run(args : Array[String]) {
        val out = parser.parseArguments(args.toList.tail);
       
        if(out){
          makeSpliceJunctionBed.run(
+             parser.get[Option[String]]("sizeFactorFile"),
+             parser.get[Option[List[Double]]]("sizeFactors"),
+             parser.get[Option[List[String]]]("filenames"),
+             parser.get[Option[String]]("sampleList"),
              parser.get[Option[String]]("title"),
-             parser.get[List[String]]("infile"),
+             parser.get[Boolean]("ignoreSizeFactors"),
              parser.get[String]("outfile"),
              parser.get[String]("infilePrefix"),
              parser.get[String]("infileSuffix"),
              parser.get[String]("gff"),
              parser.get[Boolean]("stranded"),
-             parser.get[Option[List[Double]]]("sizeFactors"),
-             parser.get[Option[String]]("rgb"),
              parser.get[Int]("digits"),
              parser.get[Boolean]("includeFullSpliceNames"),
-             parser.get[Boolean]("calcSum"),
-             parser.get[Boolean]("infileIsTable"),
-             parser.get[Boolean]("nonflatgtf")
+             parser.get[Boolean]("calcMean"),
+             parser.get[Boolean]("nonflatgtf"),
+             parser.get[Option[String]]("rgb"),
+             parser.get[Option[String]]("trackDefLine")
            );
          }
      }
    }
   
-  def run(opt_title : Option[String], infile : List[String], outfile : String, infilePrefix : String, infileSuffix : String, gff : String, stranded : Boolean, opt_sizeFactor : Option[List[Double]], opt_rgb : Option[String], digits : Int, includeFullSpliceNames : Boolean, calcSum : Boolean, infileIsTable : Boolean, nonflatgtf : Boolean) {
-    if(infileIsTable){
+  def run(sizeFactorFile : Option[String], sizeFactors : Option[List[Double]], 
+          filenames : Option[List[String]], sampleList : Option[String],
+          title : Option[String],
+          ignoreSizeFactors : Boolean,
+          outfile : String, infilePrefix : String, infileSuffix : String, gff  : String, stranded : Boolean,
+          digits : Int, includeFullSpliceNames : Boolean, calcMean : Boolean,
+          nonflatgtf : Boolean, rgb : Option[String],
+          trackDefLine : Option[String]){
+
+    val samples = getSampleList(sampleList, filenames);
+    val sf = getSizeFactors(samples, ignoreSizeFactors, sizeFactorFile, sizeFactors);
+    val infiles = if(filenames.isEmpty){
+      samples.map(infilePrefix + _ + infileSuffix);
+    } else {
+      filenames.get.map(infilePrefix + _ + infileSuffix).toVector;
+    }
+    
+    if(infiles.length != samples.length){
+      error("ERROR: filenames length != # samples");
+    }
+    
+    run_helper(title, infiles, outfile , gff , stranded , sf, rgb , digits , includeFullSpliceNames , calcMean , nonflatgtf, trackDefLine );
+  }
+  
+  def getSampleList(sampleList : Option[String], filenames : Option[List[String]]) : Vector[String] = {
+    if(! sampleList.isEmpty){
+      if(sampleList.get.endsWith(".txt") | sampleList.get.endsWith(".txt.gz") | sampleList.get.endsWith(".txt.zip") | sampleList.get == "-"){
+        val rawlines = getLinesSmartUnzip(sampleList.get, true).toVector;
+        val cells = rawlines.map(_.split("\\s+").toVector);
+        if(cells.head.contains("sample.ID")){
+          val sampleCol = cells.head.indexOf("sample.ID");
+          return cells.tail.map(c => c(sampleCol));
+        } else {
+          return cells.map(c => c(0));
+        }
+      } else {
+        return (sampleList.get.split(",").toVector);
+      }
+    } else if(! filenames.isEmpty) {
+      return (filenames.get.toVector);
+    } else {
+      error("either --sampleList or --fileNames must be set!");
+      return Vector();
+    }
+  }
+  
+  def getSizeFactors(samples : Vector[String], ignoreSizeFactors : Boolean, sizeFactorFile : Option[String], sizeFactors : Option[List[Double]]) : Option[Vector[Double]] = {
+    if(ignoreSizeFactors){
+      return None;
+    } else {
+      if(sizeFactors.isEmpty){
+        if(sizeFactorFile.isEmpty){
+          return None;
+        } else {
+          val rawlines = getLinesSmartUnzip(sizeFactorFile.get).toVector;
+          val cells = rawlines.map(_.split("\\s+").toVector);
+          val sfmap = (if(cells.head.contains("sample.ID")){
+              val sampleCol = cells.head.indexOf("sample.ID");
+              val sfCol = cells.head.indexOf("size.factor");
+              if(cells.exists(_.length < math.max(sampleCol, sfCol)+1 )){
+                error("Error: Size factor file formatting error: less than "+(math.max(sampleCol, sfCol)+1)+" columns found for line " + cells.indexWhere(_.length < 2));
+              }
+              cells.tail.map(c => (c(sampleCol), string2double(c(sfCol))));
+            } else {
+              if(cells.exists(_.length < 2)){
+                error("Error: Size factor file formatting error: less than 2 columns found for line " + cells.indexWhere(_.length < 2));
+              }
+              cells.map(c => (c(0), string2double(c(1))));
+          }).toMap;
+          
+          val sf = samples.map(s => {
+            sfmap.get(s) match {
+              case Some(f) => f;
+              case None => {
+                error("FATAL ERROR: Sample "+s+" not found in size factor file.");
+                -1.0;
+              }
+            }
+          })
+          return Some(sf);
+        }
+      } else {
+        if(sizeFactors.get.length != samples.length){
+          error("FATAL ERROR: # of samples != # of size factors.");
+        }
+        return Some(sizeFactors.get.toVector);
+      }
+    }
+
+  }
+
+   def normSizeFactors(sf : Vector[(String,Double)], calcMean : Boolean) : Vector[(String,Double)]= {
+     if(calcMean){
+       sf.map(p => (p._1, p._2 * sf.length))
+     } else {
+       sf;
+     }
+   }
+  
+  /*
+  def runOld(opt_title : Option[String], input : String, outfile : String, infilePrefix : String, infileSuffix : String, gff : String, 
+          stranded : Boolean, sizeFactors : Option[List[Double]], opt_rgb : Option[String], digits : Int, includeFullSpliceNames : Boolean, 
+          calcSum : Boolean, ignoreSizeFactors : Boolean, nonflatgtf : Boolean) {
+    
+    val initialpairlist : Vector[(String,Double)] = getSizeFactors(input, ignoreSizeFactors, sizeFactors);
+    
+    val infileList = initialpairlist.map(_._1).toList;
+    val sfList = initialpairlist.map(_._2).toList;
+    
+    run_helper(opt_title : Option[String], infileList.map(infilePrefix + _ + infileSuffix), outfile , gff , stranded , Some(sfList), opt_rgb , digits , includeFullSpliceNames , calcSum , nonflatgtf );
+    
+    /*if(infileIsTable){
       val tableLinesTemp = getLinesSmartUnzip(infile.head, true).toList;
-      val table : List[(String,Double)] = if(tableLinesTemp.head.substring(0,9) == "sample.ID") {
+      val table : List[(String,Double)] = (if(tableLinesTemp.head.substring(0,9) == "sample.ID") {
         if(tableLinesTemp.head.substring(0,21) != "sample.ID	size.factor"){
           error("Error: first two columns of table must be sample.ID and size.factor. The table must be tab-delimited.");
         }
         tableLinesTemp.tail.map(line => { 
           val cells = line.split("	");
           (cells(0),string2double(cells(1)));
-        }).toList;
+        }).toVector;
       } else {
         tableLinesTemp.map(line => { 
           val cells = line.split("	");
           (cells(0),string2double(cells(1)));
-        }).toList;
-      }
+        }).toVector;
+      }).toList
       
       val infileList = table.map(_._1);
       val sfList = table.map(_._2);
@@ -149,11 +295,12 @@ object makeSpliceJunctionBed {
       run_helper(opt_title : Option[String], infileList.map(infilePrefix + _ + infileSuffix), outfile , gff , stranded , Some(sfList), opt_rgb , digits , includeFullSpliceNames , calcSum , nonflatgtf );
     } else {
       run_helper(opt_title : Option[String], infile.map(infilePrefix + _ + infileSuffix), outfile , gff , stranded , opt_sizeFactor, opt_rgb , digits , includeFullSpliceNames , calcSum , nonflatgtf );
-    }
-  }
-
-  
-  def run_helper(opt_title : Option[String], infile : List[String], outfile : String, gff : String, stranded : Boolean, opt_sizeFactor : Option[List[Double]], opt_rgb : Option[String], digits : Int, includeFullSpliceNames : Boolean, calcSum : Boolean, nonflatgtf : Boolean) {
+    }*/
+  }*/
+   
+  def run_helper(opt_title : Option[String], infile : Vector[String], outfile : String, gff : String, stranded : Boolean, 
+                 opt_sizeFactor : Option[Vector[Double]], opt_rgb : Option[String], digits : Int, 
+                 includeFullSpliceNames : Boolean, calcSum : Boolean, nonflatgtf : Boolean, trackDefLine : Option[String]) {
     val rgb = if(opt_rgb.isEmpty) "0,0,0" else opt_rgb.get;
 
     val sizeFactorSimple = if(opt_sizeFactor.isEmpty) repToSeq(1.toDouble,infile.length) else opt_sizeFactor.get;
@@ -197,7 +344,7 @@ object makeSpliceJunctionBed {
     });
     reportln("> makeSpliceJunctionBed: calculated final counts.","note");
 
-    writeBed(title, counts, outfile , rgb, sjmap , includeFullSpliceNames, digits);
+    writeBed(title, counts, outfile , rgb, sjmap , includeFullSpliceNames, digits, trackDefLine = trackDefLine);
     //convert(infile,outfile, rgb, countFilter, scoreFunction, sizeFactor, includeSpliceNames);
   }
   
@@ -212,7 +359,7 @@ object makeSpliceJunctionBed {
     return out;
   }
   
-  def writeBed(title : String, counts : Iterator[(String,Double)], outfile : String, rgb : String, sjmap : scala.collection.GenMap[String,FlatGtfLine], includeFullSpliceNames : Boolean, digits : Int, delim : String = "	") {
+  def writeBed(title : String, counts : Iterator[(String,Double)], outfile : String, rgb : String, sjmap : scala.collection.GenMap[String,FlatGtfLine], includeFullSpliceNames : Boolean, digits : Int, delim : String = "	", trackDefLine : Option[String]) {
     
     val lines : Vector[((String,Int),String)] = counts.filter{case(junctionName, ct) =>{ 
       val featureCode = junctionName.split(":")(1).substring(0,1);
@@ -238,6 +385,10 @@ object makeSpliceJunctionBed {
     }}.toVector.sortBy{case(pair,line) => pair};
     
     val writer : WriterUtil = openWriterSmart(outfile, true);
+    
+    if(! trackDefLine.isEmpty){
+      writer.write(trackDefLine.get + "\n");
+    }
     
     for((pair,line) <- lines){
       writer.write(line);

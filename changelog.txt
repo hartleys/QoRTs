@@ -1,8 +1,33 @@
 ===============================================================
+v0.1.3: Minor changes.
+
+Minor changes:
+* Various cosmetic improvements to the plotting functions.
+* Added options to vary resolution and base figure size in multiPlots.
+
+Addition of warnings / messages under various conditions:
+* QoRTs QC will now print a message if memory allocation is < 4gb.
+* QoRTs QC will now print a warning if the selected strand mode does not
+appear to match the obverved data.
+* QoRTs QC will now print a warning if the read buffer grows larger than 
+500k reads (due to distant-pairs).
+
+Syntax changes to advanced functions:
+* QoRTs makeJunctionTrack and mergeWig function syntax changed. Syntax of
+the two tools now approximately match one another. Syntax is also more
+flexible, allowing size factors to be supplied as a separate file, and
+allowing explicit, list-file, or stdin-based selection of samples to 
+merge.
+
+===============================================================
 v0.1.1: Numerous substantial changes, improvements and updates.
 
 * QoRTs no longer requires bam files be sorted by name. It can now accept 
 coordinate sorted bam files using the "--coordSorted" option.
+* Added Single-End mode. When run on single-ended read data, the insert size 
+plot will be skipped and all plots that normally show two sub-plots for each 
+read will now only have a single plot. Note that you cannot compare single-end 
+and paired-end data in the same plots.
 * QoRTs no longer requires a full decoder including lane.ID, group.ID, and so 
 on. It can now fill in default values for all decoder columns except for the 
 unique.ID column. You can even pass it a character vector, which it will take 
@@ -53,11 +78,9 @@ IMPORTANT NOTE:
 This version of QoRTs contains a few major revisions and breaks backward 
 compatability with previous versions.
 * Renamed many functions. "makePlot.summary" functions are now renamed as 
-"makeMultiPlot". Function "build.plotter.highlightBySample" has been renamed "build.plotter.highlightSample". Thus:  "makePlot.summary.highlightBySample" has been renamed "makeMultiPlot.highlightSample", etc.
-* Added Single-End mode. When run on single-ended read data, the insert size 
-plot will be skipped and all plots that normally show two sub-plots for each 
-read will now only have a single plot. Note that you cannot compare single-end 
-and paired-end data in the same plots.
+"makeMultiPlot". Function "build.plotter.highlightBySample" has been renamed 
+"build.plotter.highlightSample". Thus:  "makePlot.summary.highlightBySample" 
+has been renamed "makeMultiPlot.highlightSample", etc.
 * Renamed some of the internal files for consistency and clarity. 
 "QCsummary.txt" is now "QC.summary.txt"; "gc.txt.gz" is now 
 "gc.byPair.txt.gz"; "gc.RB.txt.gz" is now "gc.byRead.txt.gz".

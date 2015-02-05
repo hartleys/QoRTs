@@ -15,6 +15,7 @@ import internalUtils.optionHolder._;
 
 import scala.collection.GenMap;
 
+
 class qcGtfAnnotationBuilder(gtffile : String, flatgtffile : Option[String], stranded : Boolean, stdCodes : GtfCodes, flatCodes : GtfCodes){
   
   def makeStdReader : Iterator[StdGtfLine] = GtfReader.getStdGtfReader(gtffile, stranded, true, "\\s+", stdCodes);
@@ -32,7 +33,7 @@ class qcGtfAnnotationBuilder(gtffile : String, flatgtffile : Option[String], str
   //} else {
      
   //}
-  
+
   val spliceJunctionTreeMap : GenMap[(String,Char),TreeSet[(Int,Int)]] = qcGtfAnnotationBuilder.qcInnerDistance_readSplicesFromGtfFile(makeFlatReader,stranded, flatCodes);
   val knownSpliceJunctionNameMap : GenMap[GenomicInterval,String] = qcGtfAnnotationBuilder.qcJunctionCounts_makeJunctionMap(makeFlatReader, stranded, flatCodes);
   val geneArray : GenomicArrayOfSets[String] = qcGtfAnnotationBuilder.qcGetGeneCounts_readGtf(stranded,gtffile, stdCodes).finalizeStepVectors;
@@ -52,21 +53,34 @@ class qcGtfAnnotationBuilder(gtffile : String, flatgtffile : Option[String], str
   }
   
   def initializationReport() {
-    reportln("initializationReport: qcInnerDistance_spliceMapTree.size: " + spliceJunctionTreeMap.size + " Chromosomes with splice Junction sites.", "note");
-    reportln("initializationReport: qcJunctionCounts_knownSpliceMap.size: " + knownSpliceJunctionNameMap.size + " Annotated Splice Junction Sites.", "note");
-    reportln("initializationReport: qcGetGeneCounts_geneArray.getValueSet.size: " + geneArray.getValueSet.size + " Genes.", "note");
-    reportln("initializationReport: qcGetGeneCounts_cdsArray.getValueSet.size: " + qcGetGeneCounts_cdsArray.getValueSet.size + " Genes with CDS.", "note");
-    reportln("initializationReport: qcGetGeneCounts_intronArray.getValueSet.size: " + qcGetGeneCounts_intronArray.getValueSet.size + " Genes with introns.", "note");
-    reportln("initializationReport: flatExonArray.getValueSet.size: " + flatExonArray.getValueSet.size + " flattened exons bins.", "note");
-    reportln("initializationReport: geneLengthMap.size: " + geneLengthMap.size + " Genes.", "note");
-    reportln("initializationReport: flatGeneSet.size: " + flatGeneSet.size + " Genes.", "note");
-    reportln("initializationReport: flatFeatureList.size: " + flatFeatureList.size + " Features.", "note");
+    reportln("initializationReport: qcInnerDistance_spliceMapTree.size: " + spliceJunctionTreeMap.size + " chromosome/strands with annotated splice Junction sites.", "debug");
+    reportln("initializationReport: qcJunctionCounts_knownSpliceMap.size: " + knownSpliceJunctionNameMap.size + " annotated splice junction sites.", "debug");
+    reportln("initializationReport: qcGetGeneCounts_geneArray.getValueSet.size: " + geneArray.getValueSet.size + " annotated genes.", "debug");
+    reportln("initializationReport: qcGetGeneCounts_cdsArray.getValueSet.size: " + qcGetGeneCounts_cdsArray.getValueSet.size + " annotated genes with annotated CDS.", "debug");
+    reportln("initializationReport: qcGetGeneCounts_intronArray.getValueSet.size: " + qcGetGeneCounts_intronArray.getValueSet.size + " genes with annotated splice junctions.", "debug");
+    reportln("initializationReport: flatExonArray.getValueSet.size: " + flatExonArray.getValueSet.size + " flattened exons bins.", "debug");
+    reportln("initializationReport: geneLengthMap.size: " + geneLengthMap.size + " genes.", "debug");
+    reportln("initializationReport: flatGeneSet.size: " + flatGeneSet.size + " aggregate-genes.", "debug");
+    reportln("initializationReport: flatFeatureList.size: " + flatFeatureList.size + " gene features.", "debug");
   }
   
   initializationReport();
 }
 
 object qcGtfAnnotationBuilder {
+  
+  //UNIMPLEMENTED: For potential future work:
+  final val INDEX_REQUIRE_ANNO_SPLICEJUNCTIONTREEMAP = 0;
+  final val INDEX_REQUIRE_ANNO_KNOWNSPLICEJUNCTIONNAMEMAP = 1;
+  final val INDEX_REQUIRE_ANNO_GENEARRAY = 2;
+  final val INDEX_REQUIRE_ANNO_CDSARRAY = 3;
+  final val INDEX_REQUIRE_ANNO_INTRONARRAY = 4;
+  final val INDEX_REQUIRE_ANNO_FLATFEATURELIST = 5;
+  final val INDEX_REQUIRE_ANNO_GENELENGTHMAP = 6;
+  final val INDEX_REQUIRE_ANNO_FLATEXONARRAY = 7;
+  final val INDEX_REQUIRE_ANNO_FLATGENESET = 8;
+  
+  final val LENGTH_REQUIRE_ANNO_ARRAY = 9;
   
   def initializeCounter[B <: AnyRef](bset : Set[B]) : scala.collection.mutable.Map[B,Int] = {
     val out = scala.collection.mutable.AnyRefMap[B,Int]();

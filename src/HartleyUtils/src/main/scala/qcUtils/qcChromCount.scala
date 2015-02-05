@@ -20,7 +20,7 @@ object qcChromCount {
 
 
 class qcChromCount(isSingleEnd : Boolean, fr_secondStrand : Boolean) extends QCUtility[Unit] {
-  reportln("Init chromCount","progress");
+  reportln("> Init chromCount Utility","debug");
 
   
   var chromMap : Map[(String,Char),Int] = Map[(String,Char),Int]().withDefault((x) => 0);

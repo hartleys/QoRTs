@@ -16,16 +16,17 @@ makeMultiPlot.all <- function(res, outfile.dir = "./",
                          raster.width = 1000,
                          exclude.autosomes.chrom.rate.plot = TRUE,
                          chromosome.name.style = "UCSC",
+                         fig.res = 150, fig.base.height.inches = 7,
                          ...){
 
   get.summary.table(res, outfile = paste0(outfile.dir,"summary.table.txt"), debugMode = debugMode);
 
-                                makeMultiPlot.basic(res = res, outfile.dir = outfile.dir, plotter.params = plotter.params, plot.device.name = plot.device.name, plotting.device.params = plotting.device.params, rasterize.large.plots = rasterize.large.plots, raster.height = raster.height, raster.width = raster.width, chromosome.name.style = chromosome.name.style, exclude.autosomes.chrom.rate.plot = exclude.autosomes.chrom.rate.plot, ...);
-                        makeMultiPlot.colorBySample(res = res, outfile.dir = outfile.dir, plotter.params = plotter.params, plot.device.name = plot.device.name, plotting.device.params = plotting.device.params, rasterize.large.plots = rasterize.large.plots, raster.height = raster.height, raster.width = raster.width, chromosome.name.style = chromosome.name.style, exclude.autosomes.chrom.rate.plot = exclude.autosomes.chrom.rate.plot, ...);
-                         makeMultiPlot.colorByGroup(res = res, outfile.dir = outfile.dir, plotter.params = plotter.params, plot.device.name = plot.device.name, plotting.device.params = plotting.device.params, rasterize.large.plots = rasterize.large.plots, raster.height = raster.height, raster.width = raster.width, chromosome.name.style = chromosome.name.style, exclude.autosomes.chrom.rate.plot = exclude.autosomes.chrom.rate.plot, ...);
-                          makeMultiPlot.colorByLane(res = res, outfile.dir = outfile.dir, plotter.params = plotter.params, plot.device.name = plot.device.name, plotting.device.params = plotting.device.params, rasterize.large.plots = rasterize.large.plots, raster.height = raster.height, raster.width = raster.width, chromosome.name.style = chromosome.name.style, exclude.autosomes.chrom.rate.plot = exclude.autosomes.chrom.rate.plot, ...);
-                  makeMultiPlot.highlightSample.all(res = res, outfile.dir = outfile.dir, plotter.params = plotter.params, plot.device.name = plot.device.name, plotting.device.params = plotting.device.params, rasterize.large.plots = rasterize.large.plots, raster.height = raster.height, raster.width = raster.width, chromosome.name.style = chromosome.name.style, exclude.autosomes.chrom.rate.plot = exclude.autosomes.chrom.rate.plot, ...);
-      makeMultiPlot.highlightSample.colorByLane.all(res = res, outfile.dir = outfile.dir, plotter.params = plotter.params, plot.device.name = plot.device.name, plotting.device.params = plotting.device.params, rasterize.large.plots = rasterize.large.plots, raster.height = raster.height, raster.width = raster.width, chromosome.name.style = chromosome.name.style, exclude.autosomes.chrom.rate.plot = exclude.autosomes.chrom.rate.plot, ...);
+                                makeMultiPlot.basic(res = res, outfile.dir = outfile.dir, plotter.params = plotter.params, plot.device.name = plot.device.name, plotting.device.params = plotting.device.params, rasterize.large.plots = rasterize.large.plots, raster.height = raster.height, raster.width = raster.width, chromosome.name.style = chromosome.name.style, exclude.autosomes.chrom.rate.plot = exclude.autosomes.chrom.rate.plot, fig.res = fig.res, fig.base.height.inches = fig.base.height.inches,...);
+                        makeMultiPlot.colorBySample(res = res, outfile.dir = outfile.dir, plotter.params = plotter.params, plot.device.name = plot.device.name, plotting.device.params = plotting.device.params, rasterize.large.plots = rasterize.large.plots, raster.height = raster.height, raster.width = raster.width, chromosome.name.style = chromosome.name.style, exclude.autosomes.chrom.rate.plot = exclude.autosomes.chrom.rate.plot, fig.res = fig.res, fig.base.height.inches = fig.base.height.inches, ...);
+                         makeMultiPlot.colorByGroup(res = res, outfile.dir = outfile.dir, plotter.params = plotter.params, plot.device.name = plot.device.name, plotting.device.params = plotting.device.params, rasterize.large.plots = rasterize.large.plots, raster.height = raster.height, raster.width = raster.width, chromosome.name.style = chromosome.name.style, exclude.autosomes.chrom.rate.plot = exclude.autosomes.chrom.rate.plot, fig.res = fig.res, fig.base.height.inches = fig.base.height.inches, ...);
+                          makeMultiPlot.colorByLane(res = res, outfile.dir = outfile.dir, plotter.params = plotter.params, plot.device.name = plot.device.name, plotting.device.params = plotting.device.params, rasterize.large.plots = rasterize.large.plots, raster.height = raster.height, raster.width = raster.width, chromosome.name.style = chromosome.name.style, exclude.autosomes.chrom.rate.plot = exclude.autosomes.chrom.rate.plot, fig.res = fig.res, fig.base.height.inches = fig.base.height.inches, ...);
+                  makeMultiPlot.highlightSample.all(res = res, outfile.dir = outfile.dir, plotter.params = plotter.params, plot.device.name = plot.device.name, plotting.device.params = plotting.device.params, rasterize.large.plots = rasterize.large.plots, raster.height = raster.height, raster.width = raster.width, chromosome.name.style = chromosome.name.style, exclude.autosomes.chrom.rate.plot = exclude.autosomes.chrom.rate.plot, fig.res = fig.res, fig.base.height.inches = fig.base.height.inches, ...);
+      makeMultiPlot.highlightSample.colorByLane.all(res = res, outfile.dir = outfile.dir, plotter.params = plotter.params, plot.device.name = plot.device.name, plotting.device.params = plotting.device.params, rasterize.large.plots = rasterize.large.plots, raster.height = raster.height, raster.width = raster.width, chromosome.name.style = chromosome.name.style, exclude.autosomes.chrom.rate.plot = exclude.autosomes.chrom.rate.plot, fig.res = fig.res, fig.base.height.inches = fig.base.height.inches, ...);
 
 }
 
@@ -44,6 +45,7 @@ makeMultiPlot.highlightSample.all <- function(res, outfile.dir = "./",
                                                   raster.width = 1000,
                                                   exclude.autosomes.chrom.rate.plot = TRUE,
                                                   chromosome.name.style = "UCSC",
+                                                  fig.res = 150, fig.base.height.inches = 7,
                                                   ...){
   for(curr.sample in unique(res@decoder$sample.ID)){
     makeMultiPlot.highlightSample(res = res, 
@@ -54,6 +56,7 @@ makeMultiPlot.highlightSample.all <- function(res, outfile.dir = "./",
                                      plot.device.name = plot.device.name,
                                      rasterize.large.plots = rasterize.large.plots, 
                                      raster.height = raster.height, raster.width = raster.width, chromosome.name.style = chromosome.name.style, exclude.autosomes.chrom.rate.plot = exclude.autosomes.chrom.rate.plot,
+                                     fig.res = fig.res, fig.base.height.inches = fig.base.height.inches,
                                      ...);
     if(verbose) message(paste0(curr.sample," complete!"));
   }
@@ -70,6 +73,7 @@ makeMultiPlot.highlightSample.colorByLane.all <- function(res, outfile.dir = "./
                                                                  raster.width = 1000,
                                                                  exclude.autosomes.chrom.rate.plot = TRUE,
                                                                  chromosome.name.style = "UCSC",
+                                                                 fig.res = 150, fig.base.height.inches = 7,
                                                                  ...){
   for(curr.sample in unique(res@decoder$sample.ID)){
     makeMultiPlot.highlightSample.colorByLane(res = res,
@@ -80,6 +84,7 @@ makeMultiPlot.highlightSample.colorByLane.all <- function(res, outfile.dir = "./
                     plot.device.name = plot.device.name, 
                     rasterize.large.plots = rasterize.large.plots, 
                     raster.height = raster.height, raster.width = raster.width, chromosome.name.style = chromosome.name.style, exclude.autosomes.chrom.rate.plot = exclude.autosomes.chrom.rate.plot,
+                    fig.res = fig.res, fig.base.height.inches = fig.base.height.inches,
                     ...);
     if(verbose) message(paste0(curr.sample," complete!"));
   }
@@ -93,7 +98,7 @@ makeMultiPlot.highlightSample.colorByLane.all <- function(res, outfile.dir = "./
 
 makeMultiPlot.basic <- function(res,  outfile = NULL, 
                                    outfile.dir = "./",
-                                   outfile.prefix = "plot.basic", 
+                                   outfile.prefix = "plot-basic", 
                                    outfile.ext = NULL, 
                                    plotter.params = list(), 
                                    plot.device.name = "curr", 
@@ -106,6 +111,7 @@ makeMultiPlot.basic <- function(res,  outfile = NULL,
                                    separatePlots = FALSE,
                                    exclude.autosomes.chrom.rate.plot = TRUE,
                                    chromosome.name.style = "UCSC",
+                                   fig.res = 150, fig.base.height.inches = 7,
                                    ...){  
 
     build.plotter.function <- function(){
@@ -128,6 +134,7 @@ makeMultiPlot.basic <- function(res,  outfile = NULL,
                          raster.height = raster.height, raster.width = raster.width, chromosome.name.style = chromosome.name.style, exclude.autosomes.chrom.rate.plot = exclude.autosomes.chrom.rate.plot,
                          separatePlots = separatePlots,
                          nvc.highlight.points = FALSE,
+                         fig.res = fig.res, fig.base.height.inches = fig.base.height.inches,
                          ...);
 
 }
@@ -138,7 +145,7 @@ makeMultiPlot.basic <- function(res,  outfile = NULL,
 
 makeMultiPlot.colorByGroup <- function(res, outfile = NULL, 
                                           outfile.dir = "./",
-                                          outfile.prefix = "plot.colorByGroup", 
+                                          outfile.prefix = "plot-colorByGroup", 
                                           outfile.ext = NULL, 
                                           plotter.params = list(), 
                                           plot.device.name = "curr", 
@@ -151,6 +158,7 @@ makeMultiPlot.colorByGroup <- function(res, outfile = NULL,
                                           separatePlots = FALSE,
                                           exclude.autosomes.chrom.rate.plot = TRUE,
                                           chromosome.name.style = "UCSC",
+                                          fig.res = 150, fig.base.height.inches = 7,
                                           ...){
     build.plotter.function <- function(){
       build.plotter.colorByGroup(res, plotter.params = plotter.params);
@@ -170,7 +178,7 @@ makeMultiPlot.colorByGroup <- function(res, outfile = NULL,
                          cdf.plotIntercepts = FALSE, 
                          rasterize.large.plots = rasterize.large.plots, 
                          raster.height = raster.height, raster.width = raster.width, chromosome.name.style = chromosome.name.style, exclude.autosomes.chrom.rate.plot = exclude.autosomes.chrom.rate.plot,
-                         separatePlots = separatePlots,
+                         separatePlots = separatePlots, fig.res = fig.res, fig.base.height.inches = fig.base.height.inches,
                          ...);
 }
 
@@ -180,7 +188,7 @@ makeMultiPlot.colorByGroup <- function(res, outfile = NULL,
 
 makeMultiPlot.colorByLane <- function(res, outfile = NULL, 
                                          outfile.dir = "./",
-                                         outfile.prefix = "plot.colorByLane", 
+                                         outfile.prefix = "plot-colorByLane", 
                                          outfile.ext = NULL, 
                                          plotter.params = list(), 
                                          plot.device.name = "curr",
@@ -193,6 +201,7 @@ makeMultiPlot.colorByLane <- function(res, outfile = NULL,
                                          separatePlots = FALSE,
                                          exclude.autosomes.chrom.rate.plot = TRUE,
                                          chromosome.name.style = "UCSC",
+                                         fig.res = 150, fig.base.height.inches = 7,
                                          ...){
     build.plotter.function <- function(){
       build.plotter.colorByLane(res, plotter.params = plotter.params);
@@ -212,7 +221,7 @@ makeMultiPlot.colorByLane <- function(res, outfile = NULL,
                          cdf.plotIntercepts = FALSE, 
                          rasterize.large.plots = rasterize.large.plots,
                          raster.height = raster.height, raster.width = raster.width, chromosome.name.style = chromosome.name.style, exclude.autosomes.chrom.rate.plot = exclude.autosomes.chrom.rate.plot,
-                         separatePlots = separatePlots,
+                         separatePlots = separatePlots, fig.res = fig.res, fig.base.height.inches = fig.base.height.inches,
                          ...);
 }
 
@@ -222,7 +231,7 @@ makeMultiPlot.colorByLane <- function(res, outfile = NULL,
 
 makeMultiPlot.colorBySample <- function(res, outfile = NULL, 
                                          outfile.dir = "./",
-                                         outfile.prefix = "plot.colorBySample", 
+                                         outfile.prefix = "plot-colorBySample", 
                                          outfile.ext = NULL, 
                                          plotter.params = list(), 
                                          plot.device.name = "curr",
@@ -235,6 +244,7 @@ makeMultiPlot.colorBySample <- function(res, outfile = NULL,
                                          separatePlots = FALSE,
                                          exclude.autosomes.chrom.rate.plot = TRUE,
                                          chromosome.name.style = "UCSC",
+                                         fig.res = 150, fig.base.height.inches = 7,
                                          ...){
     build.plotter.function <- function(){
       build.plotter.colorBySample(res, plotter.params = plotter.params);
@@ -254,7 +264,7 @@ makeMultiPlot.colorBySample <- function(res, outfile = NULL,
                          cdf.plotIntercepts = FALSE, 
                          rasterize.large.plots = rasterize.large.plots,
                          raster.height = raster.height, raster.width = raster.width, chromosome.name.style = chromosome.name.style, exclude.autosomes.chrom.rate.plot = exclude.autosomes.chrom.rate.plot,
-                         separatePlots = separatePlots,
+                         separatePlots = separatePlots, fig.res = fig.res, fig.base.height.inches = fig.base.height.inches,
                          ...);
 }
 
@@ -266,7 +276,7 @@ makeMultiPlot.colorBySample <- function(res, outfile = NULL,
 
 makeMultiPlot.highlightSample <- function(res,curr.sample,outfile = NULL, 
                                               outfile.dir = "./",
-                                              outfile.prefix = paste0("plot.sampleHL.",curr.sample), 
+                                              outfile.prefix = paste0("plot-sampleHL-",curr.sample), 
                                               outfile.ext = NULL,
                                               plotter.params = list(), 
                                               plot.device.name = "curr", 
@@ -278,6 +288,7 @@ makeMultiPlot.highlightSample <- function(res,curr.sample,outfile = NULL,
                                               separatePlots = FALSE,
                                               exclude.autosomes.chrom.rate.plot = TRUE,
                                               chromosome.name.style = "UCSC",
+                                              fig.res = 150, fig.base.height.inches = 7,
                                               ...){
 
     build.plotter.function <- function(){
@@ -298,7 +309,7 @@ makeMultiPlot.highlightSample <- function(res,curr.sample,outfile = NULL,
                          cdf.plotIntercepts = TRUE, 
                          rasterize.large.plots = rasterize.large.plots,
                          raster.height = raster.height, raster.width = raster.width, chromosome.name.style = chromosome.name.style, exclude.autosomes.chrom.rate.plot = exclude.autosomes.chrom.rate.plot,
-                         separatePlots = separatePlots,
+                         separatePlots = separatePlots, fig.res = fig.res, fig.base.height.inches = fig.base.height.inches,
                          ...);
 }
 
@@ -308,7 +319,7 @@ makeMultiPlot.highlightSample <- function(res,curr.sample,outfile = NULL,
 
 makeMultiPlot.highlightSample.colorByLane <- function(res,curr.sample, outfile = NULL, 
                                                              outfile.dir = "./",
-                                                             outfile.prefix = paste0("plot.sampleHL.coloredByLane.",curr.sample), 
+                                                             outfile.prefix = paste0("plot-sampleHL-coloredByLane-",curr.sample), 
                                                              outfile.ext = NULL, 
                                                              plotter.params = list(),  
                                                              plot.device.name = "curr", 
@@ -321,6 +332,7 @@ makeMultiPlot.highlightSample.colorByLane <- function(res,curr.sample, outfile =
                                                              separatePlots = FALSE,
                                                              exclude.autosomes.chrom.rate.plot = TRUE,
                                                              chromosome.name.style = "UCSC",
+                                                             fig.res = 150, fig.base.height.inches = 7,
                                                              ...){
     build.plotter.function <- function(){
       build.plotter.highlightSample.colorByLane(curr.sample,res, merge.offset.outgroup = FALSE, plotter.params = plotter.params);
@@ -340,7 +352,7 @@ makeMultiPlot.highlightSample.colorByLane <- function(res,curr.sample, outfile =
                          cdf.plotIntercepts = TRUE, 
                          rasterize.large.plots = rasterize.large.plots,
                          raster.height = raster.height, raster.width = raster.width, chromosome.name.style = chromosome.name.style, exclude.autosomes.chrom.rate.plot = exclude.autosomes.chrom.rate.plot,
-                         separatePlots = separatePlots,
+                         separatePlots = separatePlots, fig.res = fig.res, fig.base.height.inches = fig.base.height.inches,
                          ...);
 }
 
@@ -364,14 +376,15 @@ makeMultiPlot.GENERIC <- function(res,
                                  nvc.highlight.points = TRUE,
                                  exclude.autosomes.chrom.rate.plot = TRUE,
                                  chromosome.name.style = "UCSC",
+                                 fig.res = 150, fig.base.height.inches = 7,
                                  ... ){
 
 
 
-  height.per.px <- 1000;
-  width.per.px <- 1000;
-  height.per.inches <- 7;
-  width.per.inches <- 7;
+  height.per.px <- fig.res * fig.base.height.inches;
+  width.per.px <- fig.res * fig.base.height.inches;
+  height.per.inches <- fig.base.height.inches;
+  width.per.inches <- fig.base.height.inches;
 
   if(separatePlots){
     height.mult <- 1;

@@ -32,7 +32,7 @@ object prepFlatGtfFile {
   class prepFlatGtfFile_runner extends CommandLineRunUtil {
     val parser : CommandLineArgParser = 
       new CommandLineArgParser(
-          command = "makeFlatGtf", 
+          command = "makeFlatGff", 
           quickSynopsis = "", 
           synopsis = "", 
           description = "When running the QC command, QoRT first generates a set of non-overlapping exonic "+
@@ -56,9 +56,9 @@ object prepFlatGtfFile {
                                         ) ::
             new FinalArgument[String](
                                          name = "outfile",
-                                         valueName = "flatgtffile",
-                                         argDesc = "The output destination for the \"flattened\" gtf annotation file to be created, or '-' to write to stdout. Note: if the filename ends in \".zip\" or \".gz\" the corresponding compression method will be applied." // description
-            ) :: List()
+                                         valueName = "flatgfffile",
+                                         argDesc = "The output destination for the \"flattened\" gff annotation file to be created, or '-' to write to stdout. Note: if the filename ends in \".zip\" or \".gz\" the corresponding compression method will be applied." // description
+            ) :: internalUtils.commandLineUI.CLUI_UNIVERSAL_ARGS
       );
     
     def run(args : Array[String]){
@@ -311,7 +311,7 @@ object prepFlatGtfFile {
     val geneSets : Map[String,Set[String]] = buildGeneSets(txArray, txMap);
     reportln("FlatteningGtf: gene Sets generated.("+getDateAndTimeString+")","debug");
     val (aggregateGeneMap, aggregateSet) : (Map[String,String],Set[String]) = buildAggregateGeneMap(geneSets);
-    reportln("FlatteningGtf: Aggregate Sets built.","progress");
+    reportln("FlatteningGtf: Aggregate Sets built.","debug");
 
     //val sortedFeatureList = buildFeatures(stranded, txArray, txMap , spliceJunctionMap , aggregateGeneMap , aggregateSet );
     val sortedFeatureIterator = buildFeatures2(stranded, txArray, txMap , spliceJunctionMap , aggregateGeneMap , aggregateSet );

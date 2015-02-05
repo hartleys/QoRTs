@@ -186,7 +186,7 @@ object qcCigarMatch {
 
 
 class qcCigarMatch(readLen : Int) extends QCUtility[Unit] {
-  reportln("Init cigarMatch","progress");
+  reportln("> Init cigarMatch utility","debug");
   reportln("WARNING: This function is INCOMPLETE, and not ready for general use!","progress");
   
   //COUNTING BINS:

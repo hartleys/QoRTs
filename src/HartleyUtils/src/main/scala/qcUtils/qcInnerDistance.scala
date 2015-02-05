@@ -344,7 +344,7 @@ object qcInnerDistance {
 }
 
 class qcInnerDistance(annoHolder : qcGtfAnnotationBuilder, stranded : Boolean, fr_secondStrand : Boolean, readLength : Int)  extends QCUtility[Unit] {
-  reportln("Init InsertSize","progress");
+  reportln("> Init InsertSize Utility","debug");
   val spliceAnnotation : GenMap[(String,Char),TreeSet[(Int,Int)]] = annoHolder.spliceJunctionTreeMap;
   
   //var insertSizeMap : Map[Int,Int] = Map[Int,Int]().withDefault(i => 0);

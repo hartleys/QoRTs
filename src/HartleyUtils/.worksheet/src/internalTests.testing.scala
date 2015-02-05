@@ -3,8 +3,10 @@ package internalTests
 import net.sf.samtools._
 
 object testing {;import org.scalaide.worksheet.runtime.library.WorksheetSupport._; def main(args: Array[String])=$execute{;$skip(109); 
-  println("Welcome to the Scala worksheet");$skip(77); 
+  println("Welcome to the Scala worksheet");$skip(46); 
   
+  
+  val s = "Hello\nMy\nName is Steve\n";System.out.println("""s  : String = """ + $show(s ));$skip(74); ;
 
   val L1 = List("A","B","C","D","E","F","G","H","I","J","K","L","M","N");System.out.println("""L1  : List[String] = """ + $show(L1 ));$skip(27); 
 

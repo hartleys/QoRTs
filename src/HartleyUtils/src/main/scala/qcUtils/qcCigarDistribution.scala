@@ -102,7 +102,7 @@ object qcCigarDistribution {
 }
 
 class qcCigarDistribution(isSingleEnd : Boolean, readLen : Int)  extends QCUtility[Unit]  {
-  reportln("Init CigarOpDistribution","progress");
+  reportln("> Init CigarOpDistribution Utility","debug");
 
   val readLength : Int = readLen;
   val positionOpDistribution1 : Array[scala.collection.mutable.Map[(CigarOperator,Int),Int]] = new Array[scala.collection.mutable.Map[(CigarOperator,Int),Int]](readLength);

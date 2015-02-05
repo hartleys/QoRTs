@@ -16,7 +16,7 @@
 \usage{
   makeMultiPlot.basic(res, outfile,
                       outfile.dir = "./", 
-                      outfile.prefix = "plot.basic",
+                      outfile.prefix = "plot-basic",
                       outfile.ext,
                       plotter.params = list(), 
                       plot.device.name = "curr", 
@@ -29,11 +29,12 @@
                       separatePlots = FALSE,
                       exclude.autosomes.chrom.rate.plot = TRUE,
                       chromosome.name.style = "UCSC",
+                      fig.res = 150, fig.base.height.inches = 7,
                       \dots)
                       
   makeMultiPlot.colorByGroup(res, outfile,
                       outfile.dir = "./", 
-                      outfile.prefix = "plot.colorByGroup",
+                      outfile.prefix = "plot-colorByGroup",
                       outfile.ext,
                       plotter.params = list(), 
                       plot.device.name = "curr", 
@@ -46,11 +47,12 @@
                       separatePlots = FALSE,
                       exclude.autosomes.chrom.rate.plot = TRUE,
                       chromosome.name.style = "UCSC",
+                      fig.res = 150, fig.base.height.inches = 7,
                       \dots)
                       
   makeMultiPlot.colorByLane(res, outfile,
                       outfile.dir = "./", 
-                      outfile.prefix = "plot.colorByLane",
+                      outfile.prefix = "plot-colorByLane",
                       outfile.ext, 
                       plotter.params = list(), 
                       plot.device.name = "curr", 
@@ -63,11 +65,12 @@
                       separatePlots = FALSE,
                       exclude.autosomes.chrom.rate.plot = TRUE,
                       chromosome.name.style = "UCSC",
+                      fig.res = 150, fig.base.height.inches = 7,
                       \dots)                
 
   makeMultiPlot.colorBySample(res, outfile,
                       outfile.dir = "./", 
-                      outfile.prefix = "plot.colorBySample",
+                      outfile.prefix = "plot-colorBySample",
                       outfile.ext, 
                       plotter.params = list(), 
                       plot.device.name = "curr", 
@@ -80,6 +83,7 @@
                       separatePlots = FALSE,
                       exclude.autosomes.chrom.rate.plot = TRUE,
                       chromosome.name.style = "UCSC",
+                      fig.res = 150, fig.base.height.inches = 7,
                       \dots)  
 
   makeMultiPlot.highlightSample(res,
@@ -99,6 +103,7 @@
                       separatePlots = FALSE,
                       exclude.autosomes.chrom.rate.plot = TRUE,
                       chromosome.name.style = "UCSC",
+                      fig.res = 150, fig.base.height.inches = 7,
                       \dots)   
 
   makeMultiPlot.highlightSample.colorByLane(res,
@@ -118,6 +123,7 @@
                       separatePlots = FALSE,
                       exclude.autosomes.chrom.rate.plot = TRUE,
                       chromosome.name.style = "UCSC",
+                      fig.res = 150, fig.base.height.inches = 7,
                       \dots)   
 
 }
@@ -231,6 +237,16 @@
     A string value indicating the style of the chromosome names, 
     and also how to split up the categories. See 
     \code{\link{makePlot.chrom.type.rates}}
+  }
+  \item{fig.res}{
+    Numeric value. The number of pixels per "inch" (for raster devices only).
+    For some plotting devices the figure height will be in pixels not inches, and
+    will equal this value multiplied by the fig.base.height.inches value.
+  }
+  \item{fig.base.height.inches}{
+    Numeric value. The base height, in inches, of each sub-figure in the plot. This
+    will be equal to the height for vector devices, or used to calculate the height
+    in pixels using the fig.res value (see above).
   }
   \item{\dots}{ 
     Arguments to be passed to methods, such as

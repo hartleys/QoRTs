@@ -58,7 +58,9 @@ makePlot.qual.pair <- function(plotter, y.name, r2.buffer = NULL, debugMode = DE
        
        #text(xlim[2] / 2,-0.5,adj=c(0.5,0), labels = "Read 1");
        #text(xlim[2] + r2.buffer + (xlim[2] / 2),-0.5, labels = "Read 2",adj=c(0.5,0));
-       internal.plot.read.labels(plotter,"bottom",r2.buffer,xlim[2]);
+       if(! singleEndMode){
+         internal.plot.read.labels(plotter,"bottom",r2.buffer,xlim[2]);
+       }
        title(xlab = "Read Cycle");
        title(ylab = paste0(plot.name));
    
@@ -210,7 +212,10 @@ makePlot.cigarOp.byCycle <- function(plotter,op, r2.buffer = NULL, rate.per.mill
                              override.lty = 1,
                              r2.buffer = r2.buffer,
                              ...);
-      internal.plot.read.labels(plotter,"top",r2.buffer,xlim[2]);
+      
+      if(! singleEndMode){
+        internal.plot.read.labels(plotter,"top",r2.buffer,xlim[2]);
+      }
       title(xlab="Read Cycle");
       if(rate.per.million){
          title(ylab=paste0(op.title," (per Million Reads)"));
@@ -1686,6 +1691,11 @@ makePlot.mapping.rates <- function(plotter, plot.mm = NULL, y.counts.in.millions
       if(plot.mm){
          tryCatch({
            #par(mar = c(5,4,4,4) + 0.1);
+           old.mar <- par("mar");
+           curr.mar <- par("mar");
+           curr.mar[4] <- curr.mar[2];
+           par(mar = curr.mar);
+           
            tf.list <- generic.points.tf(plotter$res@calc.data[["map.rates"]], 
                                         x.names = c("total.reads","mapped.reads","mm.reads"),
                                         x.titles = c("Input\nRead\nPairs","Uniquely\nMapped\nPairs","Multi\nMapped\nPairs"),
@@ -1701,15 +1711,21 @@ makePlot.mapping.rates <- function(plotter, plot.mm = NULL, y.counts.in.millions
                                           horiz.offsets = plotter$lanebam.params$horiz.offsets);
          }, error = function(e){ errorPlot(plot.name,e, code = 0); stop(e);});
          makePlot.generic.points(plot.name,tf.list,plotter, leave.blank.cols = 4, label.y = F,...);
-         makePlot.generic.points.right(plot.name,tf.list.2, plotter, section.offset = 4.5, ylim.data = c(0,1));
+         makePlot.generic.points.right(plot.name,tf.list.2, plotter, section.offset = 4.5, ylim.data = c(0,1), ...);
          usr <- par("usr");
-         yrange <- usr[4] - usr[3];
-         rect.y <- c(usr[3] - yrange, usr[4] + yrange);
-         rect(4,rect.y[1],4.5, rect.y[2],col="white");
+         yrange <- abs(usr[4] - usr[3]);
+         rect(4,usr[3] - yrange*0.02,4.5, usr[4] + yrange*0.02, border = "white",col="white", xpd = TRUE,...);
+         rect(4,usr[3] - yrange     ,4.5, usr[4] + yrange     , border = "black",col="white", xpd = FALSE,...);
+         
          text(2,usr[4],"Read Count",adj=c(0.5,1.1));
          text(6,usr[4],"Rates",adj=c(0.5,1.1));
+         par(mar = old.mar);
       } else {
          tryCatch({
+           old.mar <- par("mar");
+	   curr.mar <- par("mar");
+	   curr.mar[4] <- curr.mar[2];
+           par(mar = curr.mar);
            #par(mar = c(5,4,4,4) + 0.1);
            tf.list <- generic.points.tf(plotter$res@calc.data[["map.rates"]], 
                                         x.names = c("total.reads","mapped.reads"),
@@ -1731,8 +1747,14 @@ makePlot.mapping.rates <- function(plotter, plot.mm = NULL, y.counts.in.millions
          yrange <- usr[4] - usr[3];
          rect.y <- c(usr[3] - yrange, usr[4] + yrange);
          rect(3,rect.y[1],3.5, rect.y[2],col="white");
+         rect(3,usr[3] - yrange*0.02,4.5, usr[4] + yrange*0.02, border = "white",col="white", xpd = TRUE,...);
+         rect(3,usr[3] - yrange     ,3.5, usr[4] + yrange     , border = "black",col="white", xpd = FALSE,...);
+         
+         
          text(1.5,usr[4],"Read Counts",adj=c(0.5,1.1));
          text(4.5,usr[4],"Rates",adj=c(0.5,1.1));
+         
+         par(mar = old.mar);
       }
       if(y.counts.in.millions){
         usr <- par("usr");

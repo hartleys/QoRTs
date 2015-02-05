@@ -18,6 +18,7 @@
                      raster.width = 1000,
                      exclude.autosomes.chrom.rate.plot = TRUE,
                      chromosome.name.style = "UCSC",
+                     fig.res = 150, fig.base.height.inches = 7,
                      \dots)
 }
 \arguments{
@@ -80,6 +81,17 @@
     and also how to split up the categories. See 
     \code{\link{makePlot.chrom.type.rates}}
   }
+  \item{fig.res}{
+    Numeric value. The number of pixels per "inch" (for raster devices only).
+    For some plotting devices the figure height will be in pixels not inches, and
+    will equal this value multiplied by the fig.base.height.inches value.
+  }
+  \item{fig.base.height.inches}{
+    Numeric value. The base height, in inches, of each sub-figure in the plot. This
+    will be equal to the height for vector devices, or used to calculate the height
+    in pixels using the fig.res value (see above).
+  }
+  
   \item{\dots}{ 
     Arguments to be passed to methods, such as
     \link{graphical parameters} (see \code{\link{par}}).

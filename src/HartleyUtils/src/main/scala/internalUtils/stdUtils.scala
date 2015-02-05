@@ -18,7 +18,14 @@ object stdUtils {
    * timestamp / memory-usage utilities
    **************************************************************************************************************************/
   
-  def standardStatusReport(initialTimeStamp : TimeStampUtil, lineStart : String = "") {
+  def standardStatusReport(initialTimeStamp : TimeStampUtil, lineStart : String = "", verbosity : String = "note", printOnThreeLines : Boolean = false) {
+    if(printOnThreeLines){
+      standardStatusReport_threeLine(initialTimeStamp,lineStart, verbosity);
+    } else {
+      standardStatusReport_singleLine(initialTimeStamp,lineStart, verbosity);
+    }
+  }
+  def standardStatusReport_threeLine(initialTimeStamp : TimeStampUtil, lineStart : String = "", verbosity : String = "note") {
     val currTime = TimeStampUtil();
     
     val rawLineSeq : Seq[(String,String)] = Seq[(String,String)]( 
@@ -29,8 +36,14 @@ object stdUtils {
     val fmtLineSeq : Seq[String] = leftRightJustifySeq(rawLineSeq);
     
     fmtLineSeq.foreach((str) =>{
-      reportln(str,"note");
+      reportln(str,verbosity);
     });
+  }
+  def standardStatusReport_singleLine(initialTimeStamp : TimeStampUtil, lineStart : String = "", verbosity : String = "note") {
+    val currTime = TimeStampUtil();
+    
+    reportln(lineStart + "[Time: " + currTime.toString + "] [Mem usage: " + MemoryUtil.memInfo + "] [Elapsed Time: "+ TimeStampUtil.timeDifferenceFormatter(currTime.compareTo(initialTimeStamp)) +"]",
+             verbosity);
   }
   
   val STANDARD_DATE_AND_TIME_FORMATTER = (new java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss"));
@@ -76,9 +89,13 @@ object stdUtils {
     }
     
     def memInfo : String = {
-      val numFormatter : java.text.NumberFormat = java.text.NumberFormat.getInstance();
+      //val numFormatter : java.text.NumberFormat = java.text.NumberFormat.getInstance();
       return "[" + formatByteCount(usedMem) + " / " + formatByteCount(totalMem) + "]";
     }
+  }
+  
+  def getMaxMemoryXmxInGigs : Double = {
+    Runtime.getRuntime().maxMemory().toDouble / 1000000000.00;
   }
   
   /**************************************************************************************************************************
@@ -275,6 +292,18 @@ object stdUtils {
    * String formatting
    **************************************************************************************************************************/
   
+  def indentifyLines(s : String, indent : String) : String = {
+    indent + s.split("\n").toVector.mkString("\n" + indent) + (if(s.charAt(s.length - 1) == '\n') "\n" else "");
+  }
+  
+  def stripFinalNewline(s : String) : String = {
+    if(s.charAt(s.length - 1) == '\n'){
+      return(s.substring(0,s.length-1));
+    } else {
+      return(s);
+    }
+  }
+  
   def addQuotes(s : String) : String = {
     "\"" + s + "\"";
   }
@@ -340,6 +369,20 @@ object stdUtils {
   private val whiteSpaceString = "                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          ";
   private val maxWrapWidth = whiteSpaceString.length;
   
+  
+  /**************************************************************************************************************************
+   * Line Wrapping:
+   **************************************************************************************************************************/
+  
+  def wrapSimpleLineWithIndent_staggered(line : String, width : Int, indent : String, firstLineIndent : String) : String = {
+    if(line.length + firstLineIndent.length < width) {
+      return line;
+    } else {
+      val (firstLine,paraRemainder) = wrapLinesWithIndent_tailRecursiveHelper_buildLine("",line,width, firstLineIndent.length);
+      return firstLineIndent + firstLine + "\n" + wrapLinesWithIndent_tailRecursive(Seq(), paraRemainder, width, indent).mkString("\n");
+    }
+  }
+  
   def wrapLineWithIndent(line : String, width : Int, indent : Int) : String = {
     wrapLinesWithIndent(line, width, whiteSpaceString.substring(0,indent), false);
   } 
@@ -370,12 +413,12 @@ object stdUtils {
     })
   }
   
-  private def wrapLinesWithIndent_tailRecursive_DEPRECIATED(acc : Seq[String], para : String, width : Int, indent : String) :  Seq[String] = {
+  /*private def wrapLinesWithIndent_tailRecursive_DEPRECIATED(acc : Seq[String], para : String, width : Int, indent : String) :  Seq[String] = {
     if(para.length + indent.length <= width) acc :+ (indent + para);
     else  {
       wrapLinesWithIndent_tailRecursive( acc :+ (indent + para.substring(0,width)), para.substring(width), width , indent);
     }
-  }
+  }*/
   
   private def wrapLinesWithIndent_tailRecursive(acc : Seq[String], para : String, width : Int, indent : String) :  Seq[String] = {
     if(para.length + indent.length <= width) acc :+ (indent + para);

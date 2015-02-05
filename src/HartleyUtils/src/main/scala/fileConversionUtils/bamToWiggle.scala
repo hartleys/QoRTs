@@ -31,7 +31,7 @@ object bamToWiggle {
   class wiggleMaker extends CommandLineRunUtil {
      val parser : CommandLineArgParser = 
        new CommandLineArgParser(
-          command = "bamTowiggle", 
+          command = "bamToWiggle", 
           quickSynopsis = "", 
           synopsis = "", 
           description = "Generates '.wig' wiggle files, suitable for use with the UCSC genome browser or "+
@@ -49,6 +49,14 @@ object bamToWiggle {
                                                         argDesc = "The size factor, for normalization. Defaults to 1. If set, then the count of every cell will be divided by the given value.", 
                                                         defaultValue = Some(1.0)
                                                         ) ::
+                    /*new UnaryArgument( name = "verbose",
+                                         arg = List("--verbose"), // name of value
+                                         argDesc = "Flag to indicate that debugging information and extra progress information should be sent to stderr." // description
+                                       ) ::
+                    new UnaryArgument( name = "quiet",
+                                         arg = List("--quiet","-s"), // name of value
+                                         argDesc = "Flag to indicate that only errors and warnings should be sent to stderr." // description
+                                       ) ::*/
                     new UnaryArgument( name = "coordSorted",
                                          arg = List("--coordSorted"), // name of value
                                          argDesc = "Flag to indicate that input bam file is coordinate-sorted, rather than name-sorted. "+
@@ -165,11 +173,11 @@ object bamToWiggle {
                                          name = "outfilePrefix",
                                          valueName = "outfilePrefix",
                                          argDesc = "The output file prefix. If unstranded, this will produce one file named \"outfilePrefix.unstranded.wig.gz\". If stranded, this will produce two files: \"outfilePrefix.fwd.wig.gz\" and \"outfilePrefix.rev.wig.gz\". If the \"--noGzipOutput\" flag is raised then the output files will not have the \".gz\" extension at the end. IMPORTANT NOTE: if the window size is set to any size other than the default of 100, the window size will be added to the filename. The filename will be  \"outfilePrefix.win50.unstranded.wig.gz\" for unstranded wiggles with a 50bp window, and so on." // description
-                                        ) :: List() );
+                                        ) :: internalUtils.commandLineUI.CLUI_UNIVERSAL_ARGS );
       
      def run(args : Array[String]) {
        val out = parser.parseArguments(args.toList.tail);
-      
+       
        if(out){
          bamToWiggle.run(
              parser.get[List[String]]("infiles"),
@@ -224,9 +232,12 @@ object bamToWiggle {
     internalUtils.optionHolder.OPTION_noGzipOutput = noGzipOutput;
     
     val initialTimeStamp = TimeStampUtil();
-    standardStatusReport(initialTimeStamp);
     
     val qcBTW : QcBamToWig = new QcBamToWig(trackName , chromLengthFile , noTruncate , windowSize , isSingleEnd, stranded , fr_secondStrand, sizeFactor, negativeReverseStrand, countPairsTogether , includeTrackDef, rgbColor, additionalTrackOptions);
+    
+    standardStatusReport(initialTimeStamp);
+    val postSetupStamp = TimeStampUtil();
+    reportln("> Time spent on setup:           " + TimeStampUtil.timeDifferenceFormatter(postSetupStamp.compareTo(initialTimeStamp)) +" ]","note");
     
     for(infile <- infiles){
       //runOnFile(infile , qcBTW , testRun, isSingleEnd, keepMultiMapped, readGroup);
@@ -234,12 +245,14 @@ object bamToWiggle {
     }
     
     val postRunStamp = TimeStampUtil();
-    standardStatusReport(postRunStamp);
+    //standardStatusReport(initialTimeStamp);
     
     qcBTW.writeOutput(outfilePrefix, null);
     
     val finalStamp = TimeStampUtil();
-    standardStatusReport(finalStamp);
+    standardStatusReport(postRunStamp);
+    reportln("> Time spent on file output:     " + TimeStampUtil.timeDifferenceFormatter(finalStamp.compareTo(postRunStamp)) +" ]","note");
+    reportln("> Total runtime:                 " + TimeStampUtil.timeDifferenceFormatter(finalStamp.compareTo(initialTimeStamp)) +" ]","note");
   }
     
   def runOnFile2(  
@@ -324,6 +337,15 @@ object bamToWiggle {
       }
     }
     
+    val postRunStamp = TimeStampUtil();
+    
+    val iterationMinutes = (postRunStamp.compareTo(samIterationTimeStamp) / 1000).toDouble / 60.toDouble;
+    val minutesPerMillion = iterationMinutes / (readNum.toDouble / 1000000.toDouble);
+    val minutesPerMillionPF = iterationMinutes / ((coda(internalUtils.commonSeqUtils.CODA_READ_PAIR_OK)).toDouble / 1000000.toDouble);
+
+    reportln("> Time spent on SAM iteration:   " + TimeStampUtil.timeDifferenceFormatter(postRunStamp.compareTo(samIterationTimeStamp)) + " ","note");
+    reportln(">                                (" + minutesPerMillion + " minutes per million read-pairs)"+ " ","note");
+    reportln(">                                (" + minutesPerMillionPF + " minutes per million read-pairs used)"+ " ","note");
   } 
   
   

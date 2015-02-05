@@ -275,7 +275,10 @@ makePlot.generic.pair <- function(plot.name, data.list.r1, data.list.r2, plotter
       }
       axis(2,at=pretty.axis.y, labels= pretty.axis.y.labels, las = y.axis.las);
     }
-    rect(xlim[2] + mini.buffer, ylim[1] - ylim[2], xlim[2]+buffer - mini.buffer, ylim[2] * 2, border="black",col="white");
+    usr <- par("usr");
+    yrange <- abs(usr[4] - usr[3]);
+    rect(xlim[2] + mini.buffer, usr[3] - yrange*0.02,  xlim[2]+buffer - mini.buffer, usr[4] + yrange*0.02, border = "white",col="white", xpd = TRUE,...);
+    rect(xlim[2] + mini.buffer, usr[3] - yrange     ,  xlim[2]+buffer - mini.buffer, usr[4] + yrange     , border = "black",col="white", xpd = FALSE,...);
     return(TRUE);
   }, error = function(e){ errorPlot(plot.name, e, code = 2, newPlot = FALSE);  stop();});
 }
@@ -1063,7 +1066,12 @@ makePlot.generic.NVC.pair.DEFAULT <- function(plot.name, data.list.r1, data.list
 
     box();
     axis(2);
-    rect(xlim[2] + mini.buffer, ylim[1] - ylim[2], xlim[2] + 1 + r2.buffer - mini.buffer, ylim[2] * 2, border="black",col="white");   
+    #rect(xlim[2] + mini.buffer, ylim[1] - ylim[2], xlim[2] + 1 + r2.buffer - mini.buffer, ylim[2] * 2, border="black",col="white");   
+    usr <- par("usr");
+    yrange <- abs(usr[4] - usr[3]);
+    rect(xlim[2] + mini.buffer, usr[3] - yrange*0.02,  xlim[2]+1+r2.buffer - mini.buffer, usr[4] + yrange*0.02, border = "white",col="white", xpd = TRUE,...);
+    rect(xlim[2] + mini.buffer, usr[3] - yrange     ,  xlim[2]+1+r2.buffer - mini.buffer, usr[4] + yrange     , border = "black",col="white", xpd = FALSE,...);
+    
     return(TRUE);
   }, error = function(e){ errorPlot(plot.name, e, code = 2, newPlot = FALSE); stop();});
 
@@ -1262,7 +1270,14 @@ makePlot.generic.NVC.pair.RASTERIZED <- function(plot.name, data.list.r1, data.l
 
     box();
     axis(2);
-    rect(xlim[2] + mini.buffer, ylim[1] - ylim[2], xlim[2] + 1 + r2.buffer - mini.buffer, ylim[2] * 2, border="black",col="white");   
+    #rect(xlim[2] + mini.buffer, ylim[1] - ylim[2], xlim[2] + 1 + r2.buffer - mini.buffer, ylim[2] * 2, border="black",col="white");
+    #rect(xlim[2] + mini.buffer, ylim[1] - abs(ylim[2] - ylim[1])*0.02, xlim[2]+buffer - mini.buffer, (abs(ylim[1]) + abs(ylim[2])) * 2, border="white",col="white", xpd = FALSE,...);
+    #rect(xlim[2] + mini.buffer, ylim[1] - abs(ylim[2] - ylim[1])*0.02, xlim[2]+buffer - mini.buffer, (abs(ylim[1]) + abs(ylim[2])) * 2, border="black",col="white", xpd = TRUE,...);
+    usr <- par("usr");
+    yrange <- abs(usr[4] - usr[3]);
+    rect(xlim[2] + mini.buffer, usr[3] - yrange*0.02,  xlim[2]+1+r2.buffer - mini.buffer, usr[4] + yrange*0.02, border = "white",col="white", xpd = TRUE,...);
+    rect(xlim[2] + mini.buffer, usr[3] - yrange     ,  xlim[2]+1+r2.buffer - mini.buffer, usr[4] + yrange     , border = "black",col="white", xpd = FALSE,...);
+
     return(TRUE);
   }, error = function(e){ errorPlot(plot.name, e, code = 2, newPlot = FALSE); stop();});
 }

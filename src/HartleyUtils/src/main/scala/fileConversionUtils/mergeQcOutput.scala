@@ -48,7 +48,7 @@ object mergeQcOutput {
                                          name = "outfilePrefix",
                                          valueName = "outfilePrefix",
                                          argDesc = "The output file prefix (or directory)" // description
-                                        ) :: List() );
+                                        ) :: internalUtils.commandLineUI.CLUI_UNIVERSAL_ARGS );
       
      def run(args : Array[String]) {
        val out = parser.parseArguments(args.toList.tail);
@@ -110,7 +110,8 @@ object mergeQcOutput {
                                          name = "outfile",
                                          valueName = "outfile",
                                          argDesc = "The output file directory." // description
-                                        ) :: List() );
+                                        ) :: internalUtils.commandLineUI.CLUI_UNIVERSAL_ARGS
+     );
       
      def run(args : Array[String]) {
        val out = parser.parseArguments(args.toList.tail);
@@ -277,16 +278,16 @@ object mergeQcOutput {
        if((new File(infiles.head + unstranded_wiggle_suffix)).exists()){
          report("Merging unstranded wiggle data...","note");
          val pairlist = infiles.map(infile => (infile + unstranded_wiggle_suffix, 1.0));
-         SumWigglesFast.runHelper2(pairlist, outfile + unstranded_wiggle_suffix, false);
+         SumWigglesFast.runHelper2(pairlist, outfile + unstranded_wiggle_suffix, None);
          report("done\n","note");
        }
        if((new File(infiles.head + stranded_wiggle_fwd_suffix)).exists()){
          report("Merging stranded wiggle data...","note");
          val fwdpairlist = infiles.map(infile => (infile + stranded_wiggle_fwd_suffix, 1.0));
-         SumWigglesFast.runHelper2(fwdpairlist, outfile + stranded_wiggle_fwd_suffix, false);
+         SumWigglesFast.runHelper2(fwdpairlist, outfile + stranded_wiggle_fwd_suffix, None);
          
          val revpairlist = infiles.map(infile => (infile + stranded_wiggle_rev_suffix, 1.0));
-         SumWigglesFast.runHelper2(revpairlist, outfile + stranded_wiggle_rev_suffix, false);
+         SumWigglesFast.runHelper2(revpairlist, outfile + stranded_wiggle_rev_suffix, None);
          report("done\n","note");
        }
         
@@ -309,16 +310,16 @@ object mergeQcOutput {
        if(unstrandedWigExists){
          report("Merging unstranded alt-window wiggle data...","note");
          val pairlist = infiles.map(infile => (infile + unstranded_alt_wiggle_suffix, 1.0));
-         SumWigglesFast.runHelper2(pairlist, outfile + unstranded_alt_wiggle_suffix, false);
+         SumWigglesFast.runHelper2(pairlist, outfile + unstranded_alt_wiggle_suffix, None);
          report("done\n","note");
        }
        if(strandedWigExists){
          report("Merging stranded alt-window wiggle data...","note");
          val fwdpairlist = infiles.map(infile => (infile + stranded_alt_wiggle_fwd_suffix, 1.0));
-         SumWigglesFast.runHelper2(fwdpairlist, outfile + stranded_alt_wiggle_fwd_suffix, false);
+         SumWigglesFast.runHelper2(fwdpairlist, outfile + stranded_alt_wiggle_fwd_suffix, None);
          
          val revpairlist = infiles.map(infile => (infile + stranded_alt_wiggle_rev_suffix, 1.0));
-         SumWigglesFast.runHelper2(revpairlist, outfile + stranded_alt_wiggle_rev_suffix, false);
+         SumWigglesFast.runHelper2(revpairlist, outfile + stranded_alt_wiggle_rev_suffix, None);
          report("done\n","note");
        }
        //SumWigglesFast.run(filelist , outfile , false , false , false , true , None)
@@ -426,6 +427,61 @@ object mergeQcOutput {
        return ((cells(0), string2int(cells(1)) ));
      }
    }
+   
+   
+   
+   /*
+    * 
+    *       val tableLinesTemp = getLinesSmartUnzip(infile.head, true).toList;
+      val table : List[(String,Double)] = (if(tableLinesTemp.head.substring(0,9) == "sample.ID") {
+        if(tableLinesTemp.head.substring(0,21) != "sample.ID	size.factor"){
+          error("Error: first two columns of table must be sample.ID and size.factor. The table must be tab-delimited.");
+        }
+        tableLinesTemp.tail.map(line => { 
+          val cells = line.split("	");
+          (cells(0),string2double(cells(1)));
+        }).toVector;
+      } else {
+        tableLinesTemp.map(line => { 
+          val cells = line.split("	");
+          (cells(0),string2double(cells(1)));
+        }).toVector;
+      }).toList
+    * 
+    */
+   
+   /*
+    *      val initialpairlist : (Seq[(String, Double)]) = if((! filelist.endsWith(".txt")) & ( filelist != "-" )){
+       val files = filelist.split(",").toVector;
+       val sf = if(ignoreSizeFactors || sizeFactors.isEmpty){
+         repToSeq(1.0, files.length);
+       } else {
+         sizeFactors.get;
+       }
+       if(sf.length != files.length){
+         error("Syntax error: list of wiggle files and list of size factors have different length!");
+       }
+       files.zip(sf);
+     } else {
+       val lines = getLinesSmartUnzip(filelist, true).toVector;
+       
+       if(lines.head.contains("	")){
+         val files = lines.map(_.split("	")(0));
+         if(ignoreSizeFactors){
+           files.zip(  repToSeq(1.0, lines.length) );
+         } else {
+           if(! lines.forall( _.split("	").length > 1 )){
+             error("Error reading file list: " + filelist + ". Not every line has a size factor listed!");
+           }
+           files.zip(  lines.map(l => string2double(l.split("	")(1))) );
+         }
+       } else {
+         lines.zip( repToSeq(1.0, lines.length) );
+       }
+     }
+    */
+   
+   
 }
 
 

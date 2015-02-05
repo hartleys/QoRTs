@@ -39,7 +39,16 @@ object SumWigglesFast {
                                          valueName = "val,val,val,...",  
                                          argDesc = "normalization factors for each wig file."
                                         ) ::
-             new BinaryArgument[String](   name = "infilePrefix",
+            new BinaryOptionArgument[String](
+                                         name = "trackDefLine", 
+                                         arg = List("--trackDefLine"), 
+                                         valueName = "\"track name=mytrackname type=wiggle_0 etc\"",  
+                                         argDesc = "The track definition line of the wiggle file, if desired. Note this is not necessary if a trackhub is going to be used, but if "+
+                                                   "uploading directly to UCSC / your genome browser of choice this may be required. Note that the entire line must be QUOTED, so that the whitespace "+
+                                                   "doesn't split it into multiple separate parameters. See the UCSC browser documentation (http://genome.ucsc.edu/goldenpath/help/customTrack.html#TRACK) for more information on browser track options."+
+                                                   "NOTE: if this option is present, then any existing \"track\" line from the input wiggle files will be removed."
+                                        ) ::
+            new BinaryArgument[String](   name = "infilePrefix",
                                                         arg = List("--infilePrefix"),  
                                                         valueName = "infilePrefix", 
                                                         argDesc = "A file prefix for all input wiggle files. By default the full file path should be specified by the infile parameter.", 
@@ -53,53 +62,123 @@ object SumWigglesFast {
                                                         ) ::
             new UnaryArgument(name = "ignoreSizeFactors",
                               arg = List("--ignoreSizeFactors"), // name of value
-                              argDesc = "Flag to indicate that this utility should ignore size factors even if they are found in the input listFile. MAKE SURE NOT TO APPLY SIZE FACTORS TWICE!" // description
+                              argDesc = "Flag to indicate that this utility should ignore size factors even if they are found in the input listFile." // description
                               ) ::
             new UnaryArgument(name = "quiet",
                               arg = List("--quiet","-q"), // name of value
                               argDesc = "" // description
                               ) :: 
-            new FinalArgument[String](
-                                         name = "filelist",
-                                         valueName = "<filelist.txt | - | file1.wig,file2.wig,...>",
-                                         argDesc = "One of three things:"+
-                                                   "(1) A comma-delimited list of wig files. Note: NO WHITESPACE!"+
-                                                   "(2) A file ending in '.txt' (or '-' to read from stdin) containing a list of the wig files to merge (one on each line). If the parameter is a file name, then it MUST end in '.txt'. "+
-                                                   "Optionally, the list file can have a second (tab-delimited) column, containing the normalization factors to use. If this column is present, "+
-                                                   "this utility will automatically calculate the normalized totals (or the normalized mean, if --calcMean is set).\n"+
-                                                   "Note: wig filenames cannot contain whitespace or commas.\n"+
-                                                   "Also Note: if the wig file names end in \".gz\" or \".zip\", they will be read using the appropriate decompression method."
+                    new BinaryOptionArgument[String](
+                                         name = "sizeFactorFile", 
+                                         arg = List("--sizeFactorFile"), 
+                                         valueName = "val",  
+                                         argDesc = "A file containing (at least) two columns: a list of sample ID's and their double-precision floating-point size factors. "+
+                                                   "The first line must include at least two columns: \"sample.ID\" and \"size.factor\""+
+                                                   "If this option is set, all counts will be divided by the given normalization factors. The length must be the same as the length of infiles."+
+                                                   "If sample.ID's is not specified by the --sampleList or --sampleListFile parameters, then all listed samples will be merged."
+                                        ) ::
+                    new BinaryOptionArgument[List[Double]](
+                                         name = "sizeFactors", 
+                                         arg = List("--sizeFactors"), 
+                                         valueName = "val",  
+                                         argDesc = "A list of double-precision floating-point values. "+
+                                                   "If this or any size factor option is set,"+
+                                                   " all counts will be divided by the given normalization factors."+
+                                                   " The length must be the same as the number of files to merge."
+                                        ) ::
+                    new BinaryOptionArgument[List[String]](
+                                         name = "filenames", 
+                                         arg = List("--filenames"), 
+                                         valueName = "file1.wig,file2.wig,file3.wig.gz,...",  
+                                         argDesc = "A comma-delimited list of wiggle files to merge. "+
+                                                   "This is optional, and filenames can be inferred from --infilePrefix, --infileSuffix, and the --sampleList, if those options are specified."+
+                                                   ""+
+                                                   ""
+                                        ) ::
+                    new BinaryOptionArgument[String](
+                                         name = "sampleList", 
+                                         arg = List("--sampleList"), 
+                                         valueName = "[sampleList.txt | - | samp1,samp2,samp3,...]",  
+                                         argDesc = "Either a comma-delimited list of sample id's or a file containing a list of sample id's."+
+                                                   "The file must either contain no title line, or contain a title line that includes a \"sample.ID\" column."+
+                                                   ""+
+                                                   ""
                                         ) ::
             new FinalArgument[String](
                                          name = "outfile",
                                          valueName = "outfile",
                                          argDesc = "The name of the output wiggle file, or \'-\' to write to stdout. \n"+
                                          "If this ends with \".gz\" or \".zip\", then the file will automatically be compressed using the appropriate method." 
-            ) :: List()
+            ) :: internalUtils.commandLineUI.CLUI_UNIVERSAL_ARGS
       );
     
     def run(args : Array[String]){
       parser.parseArguments(args.toList.tail);
       
-      SumWigglesFast.run( parser.get[String]("filelist"),
+      SumWigglesFast.run( parser.get[Option[String]]("sizeFactorFile"),
+                          parser.get[Option[List[Double]]]("sizeFactors"),
+                          parser.get[Option[List[String]]]("filenames"),
+                          parser.get[Option[String]]("sampleList"),
                           parser.get[String]("outfile"), 
                           parser.get[Boolean]("makeNegative"), 
                           parser.get[Boolean]("calcMean"), 
-                          parser.get[Boolean]("quiet"),
                           parser.get[Boolean]("ignoreSizeFactors"),
-                          parser.get[Option[List[Double]]]("sizeFactors"),
                           parser.get[String]("infilePrefix"), 
-                          parser.get[String]("infileSuffix")
+                          parser.get[String]("infileSuffix"),
+                          parser.get[Option[String]]("trackDefLine")
                           
       );
     }
   }
-  
-  def run(filelist : String, outfile : String, makeNegative : Boolean, calcAverage : Boolean, quiet : Boolean, ignoreSizeFactors : Boolean, sizeFactors : Option[List[Double]], infilePrefix : String = "", infileSuffix : String = ""){
+
+  def run(sizeFactorFile : Option[String], sizeFactors : Option[List[Double]], filenames : Option[List[String]], sampleList : Option[String],
+         outfile : String, makeNegative : Boolean, calcAverage : Boolean, 
+         ignoreSizeFactors : Boolean, 
+         infilePrefix : String = "", infileSuffix : String = "", trackDefLine : Option[String]){
+
     
+    val samples = fileConversionUtils.makeSpliceJunctionBed.getSampleList(sampleList, filenames);
+    val sf = fileConversionUtils.makeSpliceJunctionBed.getSizeFactors(samples, ignoreSizeFactors, sizeFactorFile, sizeFactors);
+    val infiles = if(filenames.isEmpty){
+      samples.map(infilePrefix + _ + infileSuffix);
+    } else {
+      filenames.get.map(infilePrefix + _ + infileSuffix).toVector;
+    }
+    
+    if(infiles.length != samples.length){
+      error("ERROR: filenames length != # samples");
+    }
+     
+     //getSizeFactors(input : String, ignoreSizeFactors : Boolean, sizeFactors : Option[List[Double]])
+     val initialpairlist : Vector[(String,Double)] = if(sf.isEmpty){
+       samples.map( (_, 1.0) );
+     } else {
+       samples.zip(sf.get);
+     }
+     
+     val secondPairList : Seq[(String,Double)] = initialpairlist.map{ case (fileInfix ,sf ) => (infilePrefix + fileInfix + infileSuffix, sf)};
+     
+     val makeNegativeVal = if(makeNegative) (-1).toDouble else 1.toDouble;
+     val calcAverageVal = if(calcAverage) secondPairList.size.toDouble else 1.toDouble;
+     
+     val pairlist = secondPairList.map( p => (p._1, (p._2 * makeNegativeVal * calcAverageVal)  ) );
+     
+     //val denominator : Double = if(! calcAverage){ if(makeNegative) -1.0 else 1.0 } else
+     //        if(makeNegative){ - sampleList.length.toDouble} else { sampleList.length.toDouble};
+     
+     runHelper2(pairlist , outfile, trackDefLine = trackDefLine);
+  }
+  
+  //def run(filelist : String, outfile : String, makeNegative : Boolean, calcAverage : Boolean, quiet : Boolean, ignoreSizeFactors : Boolean, sizeFactors : Option[List[Double]], infilePrefix : String = "", infileSuffix : String = "", trackDefLine : Option[String]){
+  /*def run(filelist : String, outfile : String, makeNegative : Boolean, calcAverage : Boolean, quiet : Boolean, 
+      ignoreSizeFactors : Boolean, sizeFactors : Option[List[Double]], 
+      infilePrefix : String = "", infileSuffix : String = "", trackDefLine : Option[String]){
      reportln("runing sumWigglesFast. ignoreSizeFactors = " + ignoreSizeFactors, "debug");
     
-     val initialpairlist : (Seq[(String, Double)]) = if(! filelist.endsWith(".txt")){
+     //getSizeFactors(input : String, ignoreSizeFactors : Boolean, sizeFactors : Option[List[Double]])
+     //val initialpairlist : Vector[(String,Double)] = fileConversionUtils.mergeQcOutput.getSizeFactors(filelist, ignoreSizeFactors, sizeFactors);
+     
+     /*val initialpairlist : (Seq[(String, Double)]) = if((! filelist.endsWith(".txt")) & ( filelist != "-" )){
        val files = filelist.split(",").toVector;
        val sf = if(ignoreSizeFactors || sizeFactors.isEmpty){
          repToSeq(1.0, files.length);
@@ -112,6 +191,7 @@ object SumWigglesFast {
        files.zip(sf);
      } else {
        val lines = getLinesSmartUnzip(filelist, true).toVector;
+       
        if(lines.head.contains("	")){
          val files = lines.map(_.split("	")(0));
          if(ignoreSizeFactors){
@@ -125,7 +205,7 @@ object SumWigglesFast {
        } else {
          lines.zip( repToSeq(1.0, lines.length) );
        }
-     }
+     }*/
      val secondPairList : Seq[(String,Double)] = initialpairlist.map{ case (fileInfix ,sf ) => (infilePrefix + fileInfix + infileSuffix, sf)};
      
      
@@ -137,16 +217,22 @@ object SumWigglesFast {
      //val denominator : Double = if(! calcAverage){ if(makeNegative) -1.0 else 1.0 } else
      //        if(makeNegative){ - sampleList.length.toDouble} else { sampleList.length.toDouble};
      
-     runHelper2(pairlist , outfile  , quiet );
-  }
+     runHelper2(pairlist , outfile  , quiet , trackDefLine = trackDefLine);
+  }*/
   
-  def runHelper2(pairlist : Seq[(String,Double)], outfile : String, quiet : Boolean){
+  def runHelper2(pairlist : Seq[(String,Double)], outfile : String, trackDefLine : Option[String]){
     val wigIteratorList : Seq[Iterator[WigLine]] = pairlist.map(pair => {
         report("opening file: " + pair._1 +"\n        with adj factor " + pair._2+"\n","note");
         if(! internalUtils.fileUtils.fileExists(pair._1)){
           report("Error: File does not exist!: " + pair._1,"error");
         }
-        getWigLines(pair._1).map(_.div(pair._2))
+        val wigIter = getWigLines(pair._1).map(_.div(pair._2));
+        
+        if(trackDefLine.isEmpty){
+          wigIter;
+        } else {
+          wigIter.dropWhile(_.toString.startsWith("track"));
+        }
     });
     
     reportln("Made iterators.","debug");
@@ -166,6 +252,10 @@ object SumWigglesFast {
     report("\n","progress");
     
     val writer = openWriterSmart(outfile, true);
+    if(! trackDefLine.isEmpty){
+      writer.write(trackDefLine.get + "\n");
+    }
+    
     lineIterator.foreach(writer.write(_));
     close(writer);
   }

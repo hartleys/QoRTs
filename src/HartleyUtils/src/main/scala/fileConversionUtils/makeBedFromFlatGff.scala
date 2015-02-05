@@ -13,7 +13,7 @@ object makeBedFromFlatGff {
   class converter extends CommandLineRunUtil {
      val parser : CommandLineArgParser = 
        new CommandLineArgParser(
-          command = "makeSpliceBed", 
+          command = "makeSpliceBedFromGff", 
           quickSynopsis = "", 
           synopsis = "", 
           description = ""+
@@ -72,6 +72,8 @@ object makeBedFromFlatGff {
     } else {
       fileConversionUtils.prepFlatGtfFile.getFlatGtfLines(gffFile,stranded).iterator;
     }
+    
+    //INCOMPLETE!
   }
 }
 

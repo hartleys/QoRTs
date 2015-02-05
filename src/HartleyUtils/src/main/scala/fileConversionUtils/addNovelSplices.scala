@@ -75,7 +75,7 @@ object addNovelSplices {
                                          name = "outfileDir",
                                          valueName = "outfileDir",
                                          argDesc = "The output file directory" // description
-                                        ) :: List() );
+                                        ) :: internalUtils.commandLineUI.CLUI_UNIVERSAL_ARGS );
       
      def run(args : Array[String]) {
        val out = parser.parseArguments(args.toList.tail);
