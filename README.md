@@ -39,11 +39,14 @@ can be found using the command:
 And for each sub-utility:
 
     java -jar /path/to/jarfile/QoRTs.jar utilname --man
-
-Options and information for individual R functions can be found using
-the R command:
+    
+For help with individual R functions in the R utility, use the R command:
 
     > help(functionname);
+
+For a full listing of all help topics for the R utility, use the R command: 
+
+    > help(package="QoRTs");
 
 ##LEGAL:
 This software is "United States Government Work" under the terms of the United 
