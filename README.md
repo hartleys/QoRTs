@@ -21,7 +21,7 @@ with the command:
     
     install.packages("QoRTsExampleData_0.1.3.tar.gz", repos = NULL, type="source")
 
-The original bam files are currently too large to upload to github. These files, along with a comprehensive walkthrough demonstrating how all analysis can be run on them, can be found here: ftp://nhgriftp.nhgri.nih.gov/pub/outgoing/mullikin/example_data/QoRTsFullExampleData.zip.
+The original bam files are currently too large to upload to github. These files, along with a comprehensive walkthrough demonstrating how all analysis can be run on them, can be found here: ftp://nhgriftp.nhgri.nih.gov/pub/outgoing/mullikin/example_data/QoRTsFullExampleData.zip. (File is ~1.5gb)
 
 ##MORE INFORMATION:
 For more information, see the QoRTs vignette, QoRTs-vignette.pdf
