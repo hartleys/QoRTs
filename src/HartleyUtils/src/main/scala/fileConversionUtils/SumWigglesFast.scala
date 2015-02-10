@@ -39,15 +39,18 @@ object SumWigglesFast {
                                          valueName = "val,val,val,...",  
                                          argDesc = "normalization factors for each wig file."
                                         ) ::
-            new BinaryOptionArgument[String](
-                                         name = "trackDefLine", 
-                                         arg = List("--trackDefLine"), 
-                                         valueName = "\"track name=mytrackname type=wiggle_0 etc\"",  
-                                         argDesc = "The track definition line of the wiggle file, if desired. Note this is not necessary if a trackhub is going to be used, but if "+
-                                                   "uploading directly to UCSC / your genome browser of choice this may be required. Note that the entire line must be QUOTED, so that the whitespace "+
-                                                   "doesn't split it into multiple separate parameters. See the UCSC browser documentation (http://genome.ucsc.edu/goldenpath/help/customTrack.html#TRACK) for more information on browser track options."+
-                                                   "NOTE: if this option is present, then any existing \"track\" line from the input wiggle files will be removed."
-                                        ) ::
+            new BinaryArgument[String](   name = "trackTitle",
+                                                        arg = List("--trackTitle"),  
+                                                        valueName = "options", 
+                                                        argDesc = "The title of the new merged track.", 
+                                                        defaultValue = Some("UntitledWig")
+                                                        ) ::
+            new BinaryArgument[String](   name = "additionalTrackOptions",
+                                                        arg = List("--additionalTrackOptions"),  
+                                                        valueName = "options", 
+                                                        argDesc = "Additional track definition options, added to the track definition line. See the UCSC documentation for more information.", 
+                                                        defaultValue = Some("")
+                                                        ) ::
             new BinaryArgument[String](   name = "infilePrefix",
                                                         arg = List("--infilePrefix"),  
                                                         valueName = "infilePrefix", 
@@ -125,8 +128,8 @@ object SumWigglesFast {
                           parser.get[Boolean]("ignoreSizeFactors"),
                           parser.get[String]("infilePrefix"), 
                           parser.get[String]("infileSuffix"),
-                          parser.get[Option[String]]("trackDefLine")
-                          
+                          parser.get[String]("trackTitle"),
+                          parser.get[String]("additionalTrackOptions")
       );
     }
   }
@@ -134,7 +137,8 @@ object SumWigglesFast {
   def run(sizeFactorFile : Option[String], sizeFactors : Option[List[Double]], filenames : Option[List[String]], sampleList : Option[String],
          outfile : String, makeNegative : Boolean, calcAverage : Boolean, 
          ignoreSizeFactors : Boolean, 
-         infilePrefix : String = "", infileSuffix : String = "", trackDefLine : Option[String]){
+         infilePrefix : String = "", infileSuffix : String = "", 
+         trackTitle : String, additionalTrackOptions : String){
 
     
     val samples = fileConversionUtils.makeSpliceJunctionBed.getSampleList(sampleList, filenames);
@@ -166,7 +170,7 @@ object SumWigglesFast {
      //val denominator : Double = if(! calcAverage){ if(makeNegative) -1.0 else 1.0 } else
      //        if(makeNegative){ - sampleList.length.toDouble} else { sampleList.length.toDouble};
      
-     runHelper2(pairlist , outfile, trackDefLine = trackDefLine);
+     runHelper2(pairlist , outfile, trackDefLine = Some("track type=wiggle_0 name="+trackTitle+" "+additionalTrackOptions));
   }
   
   //def run(filelist : String, outfile : String, makeNegative : Boolean, calcAverage : Boolean, quiet : Boolean, ignoreSizeFactors : Boolean, sizeFactors : Option[List[Double]], infilePrefix : String = "", infileSuffix : String = "", trackDefLine : Option[String]){

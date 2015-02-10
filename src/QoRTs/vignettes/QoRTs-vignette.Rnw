@@ -63,9 +63,9 @@ BiocStyle::latex()
 National Human Genome Research Institute\\
 National Institutes of Health}
 \date{August 8 2014\\
-February 05, 2015 %REPLACE_THIS_LINE_WITH_REVISION_DATE
+February 10, 2015 %REPLACE_THIS_LINE_WITH_REVISION_DATE
 \\
-v0.1.3 %REPLACE_THIS_LINE_WITH_VERSION_NUMBER
+v0.1.6 %REPLACE_THIS_LINE_WITH_VERSION_NUMBER
 }
 
 \begin{document}
@@ -98,16 +98,15 @@ The QoRTs software package is a fast, efficient, and portable multifunction tool
 
 In its primary role as a QC tool it can produce a wide variety of graphs, plots, and tables that allow the data to be visualized in various ways. Data can be compiled and contrasted in multiple ways to allow systematic errors or artifacts to reveal themselves more easily. While it will not directly assign pass/fail status, it is a powerful tool for bioinformaticians to detect and identify features in the data. In (hopefully) most cases, these plots and graphs will not reveal anything other than mixed statistical noise. Next-Gen sequencing technologies have matured to the point where gross systematic errors and batch-specific biases are relatively modest and rare. However: mistakes can still occur, and basing conclusions on flawed data can be disastrous.
 
-The QoRTs java utility is written in the Scala programming language (v2.11.1). However, it has been compiled to java byte-code and does not require an installation of Scala (or any other external libraries) in order to function. Thus, the entire QoRTs toolkit can be used in almost any operating system that supports java and R.
+The QoRTs package is composed of two parts: a java jar-file (for data processing) and a companion R package (for generating tables, figures, and plots). The java utility is written in the Scala programming language (v2.11.1), however, it has been compiled to java byte-code and does not require an installation of Scala (or any other external libraries) in order to function. The entire QoRTs toolkit can be used in almost any operating system that supports java and R.
 
-This vignette primarily covers the quality control functionality of QoRTs, and only briefly covers the other functionality. A comprehensive walkthrough covering the entire process from post-alignment all the way to differential expression analysis, along with a full example dataset and example output, can be found linked on the QoRTs GitHub site (\url{https://github.com/hartleys/QoRTs}).
+This vignette primarily covers the quality control functionality of QoRTs, and only briefly covers the other functions and capabilities. A comprehensive walkthrough covering the entire process from post-alignment all the way to differential expression analysis, along with a full example dataset and example output, can be found online: \url{ftp://nhgriftp.nhgri.nih.gov/pub/outgoing/mullikin/example_data/QoRTsFullExampleData.zip}.
 
 %-----------------------------------------------------------
 \section{Requirements}  \label{sec:reqs}
 %-----------------------------------------------------------
 
-
-\emph{Hardware:} The java utility does the bulk of the data processing, and will generally require at least 4gb of RAM. In general at least 8gb is recommended, if available. The R package is only responsible for some light data processing and for plotting/visualization, and thus has much lower resource requirements. It should run adequately on any reasonably-powerful workstation.
+\emph{Hardware:} The java utility performs the bulk of the data processing, and will generally require at least 4gb of RAM. In general at least 8gb is recommended if available. The R package is only responsible for some light data processing and for plotting/visualization, and thus has much lower resource requirements. It should run adequately on any reasonably-powerful workstation.
 
 \emph{Software:} The QoRTs software package requires R version 3.0.2 or higher, as well as java 6 or higher.
 
@@ -170,8 +169,8 @@ Several QoRTs functions will require a "decoder" (either a file or data frame), 
     \item \emph{group.ID}: The ID of the "group". For example: "Case" or "Control". By default this will be set to "UNKNOWN".
     \item \emph{sample.ID}: The ID of the biological sample from which the data originated. Each sample can have multiple rows, representing technical replicates (in which the same sample is sequenced on multiple lanes or runs). By default QoRTs will assume that every row comes from a separate sample, and will thus set the sample.ID to equal the unique.ID.
     \item \emph{qc.data.dir}: The directory in which the java utility saved all the output data. If this column does not exist, by default it will be set to be unique.ID.
-    \item \emph{input.read.pair.count}: The number of reads in the original fastq file, prior to alignment.
-    \item \emph{multi.mapped.read.pair.count}: The number of reads that were multi-mapped by the aligner.
+    \item \emph{input.read.pair.count}: (Optional) The number of reads in the original fastq file, prior to alignment. If this field is left out, then QoRTs will skip comparisons and plotting of mapping rates. There are a number of other ways to input this value. See Section \ref{subsec:plotDesc-17}.
+    \item \emph{multi.mapped.read.pair.count}: (Optional) The number of reads that were multi-mapped by the aligner. This field should only be used if filtering for multi-mapped reads is performed prior to analysis with QoRTs (which is not recommended). Even in this case, this field can simply be left out and QoRTs will skip plotting and comparisons of multi-mapping rates.  See Section \ref{subsec:plotDesc-17}.
   \end{itemize}
 
 In addition, the decoder can contain any other additional columns as desired, as long as all of the column names are distinct.
@@ -661,6 +660,8 @@ This plot can be generated individually with the command:
 makePlot.insert.size(byLane.plotter);
 @
 
+If the dataset is single-ended, this will generate a placeholder plot.
+
 \pagebreak
 %----------
 \subsubsection{Gene-Body Coverage} \label{subsec:plotDesc-6}
@@ -961,13 +962,17 @@ makePlot.strandedness.test(byLane.plotter);
 
 \myincfig{indivPlot-17}{0.65\textwidth}{Mapping stats}
 
-For each replicate, Figure \ref{indivPlot-17-fig} displays the mapping rates and counts. 
+For each replicate, Figure \ref{indivPlot-17-fig} displays the mapping rates and counts. In order to plot this data, QoRTs must be provided with the pre-alignment read-count for each replicate. There are a number of ways to provide this information to QoRTs. The easiest method is to list it specifically in the replicate decoder (see Section \ref{sec:decoder}). Alternatively, this information can be provided at the initial processing stage (see Section \ref{sec:initialProcessing}), either by setting the input read count explicitly using the \verb|--seqReadCt| parameter, or by providing one of the unaligned fastq files via the \verb|--rawfastq| parameter, in which case the input read count is calculated simply by dividing the number of lines in the fastq file by 4. For paired-end data, only one of the two fastq files needs to be provided, as both will have the same number of reads.
+
+If the dataset contains multi-mapped reads, then numbers and rates of multi-mapping will be included in this plot. If multi-mapped reads were filtered out of the dataset prior to analysis with QoRTs, the multi-mapping rates can still be specified explicitly using the decoder (see Section \ref{sec:decoder}).
 
 This plot can be generated individually with the command:
 
 <<indivPlot-17,results="hide">>=
 makePlot.mapping.rates(byLane.plotter);
 @
+
+If the input read count data is not found, this will generate a placeholder plot.
 
 \pagebreak
 %----------

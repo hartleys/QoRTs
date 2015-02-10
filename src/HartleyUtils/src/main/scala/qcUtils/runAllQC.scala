@@ -42,12 +42,12 @@ object runAllQC {
                                                              "writeGeneCounts", 
                                                              "writeClippedNVC", 
                                                              "chromCounts");
-  final val QC_DEFAULT_OFF_FUNCTION_LIST : scala.collection.immutable.Set[String] = scala.collection.immutable.Set("FPKM","makeWiggles","makeAllBrowserTracks", "cigarMatch");
+  final val QC_DEFAULT_OFF_FUNCTION_LIST : scala.collection.immutable.Set[String] = scala.collection.immutable.Set("FPKM","makeWiggles","makeJunctionBed","makeAllBrowserTracks", "cigarMatch");
   final val QC_FUNCTION_LIST : scala.collection.immutable.Set[String] = QC_DEFAULT_ON_FUNCTION_LIST ++ QC_DEFAULT_OFF_FUNCTION_LIST;
   final val COMPLETED_OK_FILENAME = ".QORTS_COMPLETED_OK";
   final val COMPLETED_WARN_FILENAME = ".QORTS_COMPLETED_WARN";
   final val MASTERLEVEL_FUNCTION_LIST = List[String]("GeneCalcs", "InsertSize","NVC","CigarOpDistribution","QualityScoreDistribution","GCDistribution","JunctionCalcs","StrandCheck","chromCounts","cigarMatch","makeWiggles");
-
+  
   final val QC_INCOMPATIBLE_WITH_SINGLE_END_FUNCTION_LIST : scala.collection.immutable.Set[String] = scala.collection.immutable.Set(
       "InsertSize","cigarMatch"
   );
@@ -63,8 +63,10 @@ object runAllQC {
       ("writeSpliceExon" -> "JunctionCalcs"),
       ("writeKnownSplices" -> "JunctionCalcs"),
       ("writeNovelSplices" -> "JunctionCalcs"),
-      ("writeClippedNVC" -> "NVC")
-      );
+      ("writeClippedNVC" -> "NVC"),
+      ("makeAllBrowserTracks" -> "makeWiggles"),
+      ("makeAllBrowserTracks" -> "makeJunctionBed")
+  );
   
   
   //def run(args : Array[String]){
@@ -96,7 +98,7 @@ object runAllQC {
                                          argDesc = "A \"flattened\" gtf file that matches the standard gtf file. Optional."+
                                                    "It may also be useful for downstream analyses, as it assigns unique identifiers to all exons and splice "+
                                                    "junctions. The flattened gtf file can be generated using "+
-                                                   "the \"makeFlatGtf\" command. Note that the command must be run with the same strandedness code.\n"+
+                                                   "the \"makeFlatGff\" command. Note that the command must be run with the same strandedness code.\n"+
                                                    "If the filename ends with \".gz\" or \".zip\", the file will be parsed using the appropriate decompression method."
                                         ) ::
                     new UnaryArgument(   name = "singleEnded", 
@@ -138,7 +140,10 @@ object runAllQC {
                                        ) ::
                     new UnaryArgument( name = "keepMultiMapped",
                                          arg = List("--keepMultiMapped"), // name of value
-                                         argDesc = "Flag to indicate that the tool should NOT filter out multi-mapped reads. Note that even with this flag raised this utility will still only use the 'primary' alignment location for each read. By default any reads that are marked as multi-mapped will be ignored entirely." // description
+                                         argDesc = "Flag to indicate that the tool should NOT filter out multi-mapped reads. Note that even with this flag raised this utility will still only "+
+                                                    "use the 'primary' alignment location for each read. By default any reads that are marked as multi-mapped will be ignored entirely."+
+                                                    " Most aligners use the MAPQ value to mark multi-mapped reads. Any read with MAPQ < 255 is assumed to be non-uniquely mapped. "+
+                                                    " Thus: this option is equivalent to setting --minMAPQ to 0."// description
                                        ) ::
                     new UnaryArgument( name = "coordSorted",
                                          arg = List("--coordSorted"), // name of value
@@ -226,6 +231,42 @@ object runAllQC {
                                                         argDesc = "The complete list of functions to run. Setting this option turns off ALL functions EXCEPT for the ones explicitly requested here. Some functions require other functions. If these functions are requested, all functions it is dependent on will also run. Followed by a comma delimited list, with no internal whitespace. Allowed options are: "+QC_FUNCTION_LIST.mkString(", "), 
                                                         defaultValue = Some(List[String]())
                                                         ) :: 
+                    new BinaryOptionArgument[Int](
+                                         name = "seqReadCt", 
+                                         arg = List("--seqReadCt"), 
+                                         valueName = "val",  
+                                         argDesc = "(Optional) The number of reads for the replicate, prior to alignment."+
+                                                   "This will be passed on into the QC.summary.txt file."+
+                                                   ""+
+                                                   ""
+                                        ) ::
+                    new BinaryOptionArgument[String](
+                                         name = "rawfastq", 
+                                         arg = List("--rawfastq"), 
+                                         valueName = "myfastq.fq.gz",  
+                                         argDesc = "(Optional) The raw fastq, prior to alignment. This is used ONLY to calculate the number of pre-alignment reads(or read-pairs) simply by counting the number of lines and dividing by 4. "+
+                                                   "The number of pre-alignment read-pairs can be included explicitly via the --seqReadCt option, or added in the "+
+                                                   "plotting / cross-comparison step by including the input.read.pair.count column in the replicate decoder."+
+                                                   "In general, the --seqReadCt option is recommended when possible.\n"+
+                                                   "If the filename ends with \".gz\" or \".zip\", the file will be parsed using the appropriate decompression method."
+                                        ) ::
+                    new BinaryOptionArgument[String](
+                                         name = "chromSizes", 
+                                         arg = List("--chromSizes"), 
+                                         valueName = "chrom.sizes.txt",  
+                                         argDesc = "A chrom.sizes file. The first (tab-delimited) column must contain all chromosomes found in the dataset. "+
+                                                   "The second column must contain chromosome sizes (in base-pairs). If a standard genome is being used, it is strongly recommended that this be generated by "+
+                                                   "the UCSC utility 'fetchChromSizes'.\n"+
+                                                   "This file is ONLY needed to produce wiggle files. If this is provided, then by default QoRTs will produce 100-bp-window wiggle files (and junction '.bed' files) for the supplied data."+
+                                                   "In order to produce wiggle files, this parameter is REQUIRED."
+                                        ) ::
+                    new BinaryArgument[String](name = "trackTitlePrefix",
+                                           arg = List("--trackTitlePrefix"),  
+                                           valueName = "titlePrefix", 
+                                           argDesc = "The prefix used for the track name in the track definition line of any browser tracks ('.wig' or '.bed' files) generated by this utility."+
+                                                     "Note that no browser tracks will be created by default, unless the '--chromSizes' option is set. Bed files can also be generated using the option '--addFunction makeJunctionBed'", 
+                                           defaultValue = Some("UntitledTrack")
+                                           ) :: 
                     new FinalArgument[String]( 
                                          name = "infile",
                                          valueName = "infile",
@@ -270,7 +311,11 @@ object runAllQC {
           parser.get[Option[String]]("restrictToGeneList"),
           parser.get[Option[String]]("dropGeneList"),
           parser.get[Boolean]("coordSorted"),
-          parser.get[Option[Int]]("maxReadLength")
+          parser.get[Option[Int]]("maxReadLength"),
+          parser.get[Option[Int]]("seqReadCt"),
+          parser.get[Option[String]]("rawfastq"),
+          parser.get[Option[String]]("chromSizes"),
+          parser.get[String]("trackTitlePrefix")
       );
       }
     }
@@ -298,7 +343,11 @@ object runAllQC {
           restrictToGeneList : Option[String],
           dropGeneList : Option[String],
           unsorted : Boolean,
-          maxReadLength : Option[Int]){
+          maxReadLength : Option[Int],
+          seqReadCt : Option[Int],
+          rawfastq : Option[String],
+          chromSizes : Option[String],
+          trackTitlePrefix : String){
 
     internalUtils.Reporter.init_completeLogFile(outfile + ".log");
     
@@ -328,12 +377,19 @@ object runAllQC {
     val stdGtfCodes = new internalUtils.GtfTool.GtfCodes();
     val flatGtfCodes = new internalUtils.GtfTool.GtfCodes();
     
-    if(isSingleEnd) reportln("Single-end option SET. Single-end support is in BETA.","warn");
+    if(isSingleEnd) reportln("QoRTs is Running in single-end mode.","note");
+    else reportln("QoRTs is Running in paired-end mode.","note");
     
     val dropChrom = dropChromList.toSet;
     
+    val defaultFunctonList = if(chromSizes.isEmpty){
+      QC_DEFAULT_ON_FUNCTION_LIST;
+    } else {
+      QC_DEFAULT_ON_FUNCTION_LIST ++ Set("makeWiggles");
+    }
+    
     val runFunc_initial = if(runFunctions.isEmpty){
-      (QC_DEFAULT_ON_FUNCTION_LIST ++ addFunctions.toSet) -- dropFunctions.toSet;
+      (defaultFunctonList ++ addFunctions.toSet) -- dropFunctions.toSet;
     } else {
       runFunctions.toSet -- dropFunctions.toSet;
     }
@@ -345,7 +401,7 @@ object runAllQC {
           if(soFar.contains(reqFunc)){
             soFar;
           } else {
-            reportln("Function \"" + currFunc +"\" requires top-level function \"" + reqFunc+ "\". Adding the required function to the active function list.","warn");
+            reportln("Function \"" + currFunc +"\" requires top-level function \"" + reqFunc+ "\". Adding the required function to the active function list.","note");
             soFar + reqFunc;
           }
         }
@@ -361,6 +417,10 @@ object runAllQC {
     val notFoundFunc = runFunc.find(  ! QC_FUNCTION_LIST.contains(_) ) ;
     if( ! notFoundFunc.isEmpty ){
       error("ERROR: Function not found: \"" + notFoundFunc.get +"\"");
+    }
+    
+    if(runFunc.contains("makeWiggles") && chromSizes.isEmpty){
+      error("Error: function makeWiggles REQUIRES the chromSizes parameter! Set parameter '--chromSizes' or turn off function 'makeWiggles'.");
     }
     
     
@@ -405,7 +465,12 @@ object runAllQC {
       reportln("ERROR ERROR ERROR: parallell file read is NOT IMPLEMENTED AT THIS TIME!","warn");
       //runOnSeqFile_PAR(initialTimeStamp = initialTimeStamp, infile = infile, outfile = outfile, anno_holder = anno_holder, testRun = testRun, runFunc = runFunc, stranded = stranded, fr_secondStrand = fr_secondStrand, dropChrom = dropChrom, keepMultiMapped = keepMultiMapped, noMultiMapped = noMultiMapped, numThreads = numThreads, readGroup )
     } else {
-      runOnSeqFile(initialTimeStamp = initialTimeStamp, infile = infile, outfile = outfile, anno_holder = anno_holder, testRun = testRun, runFunc = runFunc, stranded = stranded, fr_secondStrand = fr_secondStrand, dropChrom = dropChrom, keepMultiMapped = keepMultiMapped, noMultiMapped = noMultiMapped, numThreads = numThreads, readGroup , minMAPQ = minMAPQ, geneKeepFunc = geneKeepFunc, isSingleEnd = isSingleEnd, unsorted = unsorted, maxReadLength = maxReadLength)
+      runOnSeqFile(initialTimeStamp = initialTimeStamp, infile = infile, outfile = outfile, anno_holder = anno_holder, testRun = testRun, 
+          runFunc = runFunc, stranded = stranded, fr_secondStrand = fr_secondStrand, dropChrom = dropChrom, keepMultiMapped = keepMultiMapped, 
+          noMultiMapped = noMultiMapped, numThreads = numThreads, readGroup , minMAPQ = minMAPQ, geneKeepFunc = geneKeepFunc, 
+          isSingleEnd = isSingleEnd, unsorted = unsorted, maxReadLength = maxReadLength,
+          seqReadCt = seqReadCt, rawfastq = rawfastq,
+          chromSizes = chromSizes, trackTitlePrefix = trackTitlePrefix)
     }
   }
   
@@ -413,7 +478,7 @@ object runAllQC {
                    infile : String, 
                    outfile : String, 
                    anno_holder : qcGtfAnnotationBuilder, 
-                   testRun  :Boolean, 
+                   testRun  : Boolean, 
                    runFunc : Set[String], 
                    stranded : Boolean, 
                    fr_secondStrand : Boolean, 
@@ -426,7 +491,29 @@ object runAllQC {
                    geneKeepFunc : (String => Boolean),
                    isSingleEnd : Boolean,
                    unsorted : Boolean,
-                   maxReadLength : Option[Int]){
+                   maxReadLength : Option[Int],
+                   seqReadCt : Option[Int],
+                   rawfastq : Option[String],
+                   chromSizes : Option[String],
+                   trackTitlePrefix : String){
+    
+    val inputReadCt : Option[Int] = seqReadCt match {
+      case Some(ct) => Some(ct);
+      case None => {
+        rawfastq match {
+          case Some(fqfile) => Some(internalUtils.fileUtils.getLinesSmartUnzip(fqfile).length / 4);
+          case None => None;
+        }
+      }
+    }
+      
+      
+     /* if(! rawfastq.isEmpty && (seqReadCt.isEmpty)){
+      reportln("> Reading fastq file to determine unaligned read count","note");
+      val fastqLineCt = internalUtils.fileUtils.getLinesSmartUnzip(rawfastq.get).length;
+      
+      reportln("> done.","note");
+    }*/
     
     
     val peekCt = 2000;
@@ -501,19 +588,10 @@ object runAllQC {
     val qcST :  QCUtility[Unit]   =   if(runFunc.contains("StrandCheck"))               new qcStrandTest(isSingleEnd, anno_holder, stranded, fr_secondStrand)                       else QCUtility.getBlankUnitUtil;
     val qcCC :  QCUtility[Unit]   =   if(runFunc.contains("chromCounts"))               new qcChromCount(isSingleEnd, fr_secondStrand)                                              else QCUtility.getBlankUnitUtil;
     val qcCM :  QCUtility[Unit]   =   if(runFunc.contains("cigarMatch"))                new qcCigarMatch(readLength)                                                   else QCUtility.getBlankUnitUtil;
-    //val qcWIG : QCUtility[Unit]   =   if(runFunc.contains("makeWiggles"))               new fileConversionUtils.bamToWiggle.QcBamToWig("track",) 
-    //                                                                                    else QCUtility.getBlankUnitUtil;
-    
-    
-    /*
-     QcBamToWig(trackName : String, chromLengthFile : String, 
-                   noTruncate : Boolean, windowSize : Int, 
-                   isSingleEnd: Boolean, stranded : Boolean,
-                   fr_secondStrand : Boolean, sizeFactor : Double, 
-                   negativeReverseStrand : Boolean, countPairsTogether : Boolean, 
-                   includeTrackDef : Boolean, rgbColor : Option[String],
-                   additionalTrackOptions : Option[String])
-     */
+    val qcWIG : QCUtility[Unit]   =   if(runFunc.contains("makeWiggles"))               new fileConversionUtils.bamToWiggle.QcBamToWig(trackTitlePrefix,
+                                                                                                                   chromSizes.get,false,100,
+                                                                                                                   isSingleEnd, stranded, fr_secondStrand, 
+                                                                                                                   1.0, true, true, true, None, "") else QCUtility.getBlankUnitUtil;
     
     val qcALL = parConvert(Vector(qcGGC, qcIS, qcCS, qcJD, qcQSC, qcGC, qcJC, qcST, qcCC, qcCM), numThreads);
     
@@ -521,6 +599,7 @@ object runAllQC {
     standardStatusReport(initialTimeStamp);
     //GenomicArrayOfSets.printGenomicArrayToFile("TEST.OUT.gtf",geneArray);
     var readNum = 0;
+    var keptMultiMappedCt = 0;
     val samIterationTimeStamp = TimeStampUtil();
     for(pair <- pairedIter){
     //for((pair,readNum) <- numberedIter){
@@ -540,6 +619,11 @@ object runAllQC {
             qcST.runOnReadPair(r1,r2,readNum);
             qcCC.runOnReadPair(r1,r2,readNum);
             qcCM.runOnReadPair(r1,r2,readNum);
+            qcWIG.runOnReadPair(r1,r2,readNum);
+            
+            if(internalUtils.commonSeqUtils.isReadMultiMapped(r1) || internalUtils.commonSeqUtils.isReadMultiMapped(r2)){
+              keptMultiMappedCt += 1;
+            }
           }
       }
     }
@@ -557,6 +641,22 @@ object runAllQC {
     summaryWriter.write("Stranded_Rule_Code	"+strandedCode+"\n");
     summaryWriter.write(internalUtils.commonSeqUtils.causeOfDropArrayToStringTabbed(coda, coda_options));
     
+    summaryWriter.write("KEPT_NOT_UNIQUE_ALIGNMENT	"+keptMultiMappedCt+"\n");
+    
+    if(isSingleEnd){
+      summaryWriter.write("IS_SINGLE_END	1\n");
+    } else {
+      summaryWriter.write("IS_SINGLE_END	0\n");
+    }
+    
+    if(inputReadCt.isEmpty){
+      summaryWriter.write("PREALIGNMENT_READ_CT	-1\n");
+    } else {
+      summaryWriter.write("PREALIGNMENT_READ_CT	"+inputReadCt.get+"\n");
+    }
+    
+    
+    
     val iterationMinutes = (outputIterationTimeStamp.compareTo(samIterationTimeStamp) / 1000).toDouble / 60.toDouble;
     val minutesPerMillion = iterationMinutes / (readNum.toDouble / 1000000.toDouble);
     val minutesPerMillionPF = iterationMinutes / ((coda(internalUtils.commonSeqUtils.CODA_READ_PAIR_OK)).toDouble / 1000000.toDouble);
@@ -567,6 +667,8 @@ object runAllQC {
     
     reportln("Writing Output...","note");
     qcALL.seq.foreach( _.writeOutput(outfile, summaryWriter) );
+    
+    qcWIG.writeOutput(outfile + "wiggle.", summaryWriter);
     //qcGGC.writeOutput(outfile, summaryWriter);
     //qcCS.writeOutput(outfile, summaryWriter);
     //qcJD.writeOutput(outfile, summaryWriter);
@@ -577,11 +679,38 @@ object runAllQC {
     //qcST.writeOutput(outfile, summaryWriter);
     //qcCC.writeOutput(outfile, summaryWriter);
     
-    
-    if(isSingleEnd){
-      summaryWriter.write("IS_SINGLE_END	1\n");
-    } else {
-      summaryWriter.write("IS_SINGLE_END	0\n");
+    if(runFunc.contains("makeJunctionBed")){
+      reportln("Making '.bed' junction count tracks... ","note");
+      
+      val bedfile = if(internalUtils.optionHolder.OPTION_noGzipOutput){
+        Some(List(outfile + ".spliceJunctionAndExonCounts.forJunctionSeq.txt"))
+      } else {
+        Some(List(outfile + ".spliceJunctionAndExonCounts.forJunctionSeq.txt.gz"))
+      }
+      
+      fileConversionUtils.makeSpliceJunctionBed.run(
+           sizeFactorFile = None, 
+           sizeFactors = None, 
+           filenames = bedfile,
+           sampleList = None,
+           title = Some(trackTitlePrefix),
+           ignoreSizeFactors = true,
+           outfile = outfile + ".junctionBed.known.bed.gz",
+           infilePrefix = "",
+           infileSuffix = "",
+           gffIterator = Some(anno_holder.makeFlatReader()),
+           gff = "NONEXISTANTGFF.gff",
+           stranded = stranded,
+           digits = 2,
+           includeFullSpliceNames = false,
+           calcMean = false,
+           nonflatgtf = false,
+           rgb = None,
+           trackTitle = trackTitlePrefix,
+           additionalTrackOptions = "",
+           skipAnnotatedJunctions = false, skipNovelJunctions = false
+      );
+      reportln("Done making browser tracks.","note");
     }
     
     if(internalUtils.Reporter.hasWarningOccurred()){
@@ -599,12 +728,6 @@ object runAllQC {
     summaryWriter.write("COMPLETED_WITHOUT_ERROR	1\n");
     
     close(summaryWriter);
-    
-    if(runFunc.contains("makeAllBrowserTracks")){
-      reportln("Making (optional) browser tracks... (NOT CURRENTLY IMPLEMENTED!)","note");
-      //TO DO!
-      reportln("Done making browser tracks.","note");
-    }
     
     reportln("Done.","note");
     

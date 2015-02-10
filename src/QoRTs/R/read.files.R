@@ -760,6 +760,12 @@ calc.lanebamwise.bysample.norm.factors <- function(res){
 calc.mapping.rates <- function(res){
   if(! is.null(res@decoder$input.read.pair.count)){
     total.reads <- res@decoder$input.read.pair.count;
+  } else {
+    total.reads <- sapply( res@qc.data[["summary"]], function(df){
+       df$COUNT[df$FIELD == "PREALIGNMENT_READ_CT"];
+    });
+  }
+  if(all(total.reads != -1)){
     mapped.reads <- sapply( res@qc.data[["summary"]], function(df){
        df$COUNT[df$FIELD == "READ_PAIR_OK"];
     });
@@ -767,9 +773,20 @@ calc.mapping.rates <- function(res){
     if(! is.null(res@decoder$multi.mapped.read.pair.count)){
       mm.reads <- res@decoder$multi.mapped.read.pair.count;
       mm.rate <- mm.reads / total.reads;
+    } else {
+      mm.reads <- sapply( res@qc.data[["summary"]], function(df){
+        df$COUNT[df$FIELD == "KEPT_NOT_UNIQUE_ALIGNMENT"] + df$COUNT[df$FIELD == "DROPPED_NOT_UNIQUE_ALIGNMENT"];
+      });
+      mm.rate <- mm.reads / total.reads;
+      
+      if(all(mm.reads == 0)){
+        message("NOTE: no multi-mapping found, and no multi.mapped.read.pair.count column found in decoder. All multi-mapping stats will be skipped.");
+        mm.reads <- NULL;
+      }
     }
+    
     out.list <- lapply(1:length(res@decoder$unique.ID),function(i){
-       if(is.null(res@decoder$multi.mapped.read.pair.count)){
+       if(is.null(mm.reads)){
          data.frame(FIELD = c("total.reads","mapped.reads","mapping.rate"), COUNT = c(total.reads[i], mapped.reads[i], mapping.rate[i]));
        } else {
          data.frame(FIELD = c("total.reads","mapped.reads","mapping.rate","mm.reads","mm.rate"), COUNT = c(total.reads[i], mapped.reads[i], mapping.rate[i],mm.reads[i], mm.rate[i]));

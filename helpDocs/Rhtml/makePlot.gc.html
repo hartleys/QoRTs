@@ -1,0 +1,109 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head><title>R: Plot GC content</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<link rel="stylesheet" type="text/css" href="R.css">
+</head><body>
+
+<table width="100%" summary="page for makePlot.gc {QoRTs}"><tr><td>makePlot.gc {QoRTs}</td><td align="right">R Documentation</td></tr></table>
+
+<h2>
+Plot GC content
+</h2>
+
+<h3>Description</h3>
+
+<p>Plots GC content.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre>
+  makePlot.gc(plotter, plot.medians = NULL, plot.means = TRUE, 
+              plotRate = FALSE, byPair = FALSE,
+              debugMode, singleEndMode, ...)
+</pre>
+
+
+<h3>Arguments</h3>
+
+<table summary="R argblock">
+<tr valign="top"><td><code>plotter</code></td>
+<td>
+
+<p>A <code>QoRT_Plotter</code> reference object. See <code><a href="build.plotter.html">build.plotter</a></code>.
+</p>
+</td></tr>
+<tr valign="top"><td><code>plot.medians</code></td>
+<td>
+
+<p>A logical value indicating whether or not to plot the median 
+average GC content for each bam file at the bottom 
+of the plot. Overrides <code>plot.means</code>.
+</p>
+</td></tr>
+<tr valign="top"><td><code>plot.means</code></td>
+<td>
+
+<p>A logical value indicating whether or not to plot the mean 
+average GC content for each bam file at the bottom 
+of the plot.
+</p>
+</td></tr>
+<tr valign="top"><td><code>plotRate</code></td>
+<td>
+
+<p>A logical value indicating whether or not the X-axis should be 
+the raw number of nucleotides that are G/C, vs the rate G/C.
+</p>
+</td></tr>
+<tr valign="top"><td><code>byPair</code></td>
+<td>
+
+<p>Logical. If FALSE, GC content rates will be calculated for
+all reads individually. If TRUE, GC content rates will be
+calculated for all read-pairs. Note that when the insert
+size is small, the paired plot can sometimes appear jagged,
+as completely-overlapped read-pairs will always have an even
+number of G/C nucleotides.
+</p>
+</td></tr>
+<tr valign="top"><td><code>debugMode</code></td>
+<td>
+
+<p>Logical. If TRUE, debugging data will be printed to the console.
+</p>
+</td></tr>
+<tr valign="top"><td><code>singleEndMode</code></td>
+<td>
+
+<p>Logical. Determines whether the dataset consists of single-ended reads. 
+By default this is determined from the data. Thus, this parameter should 
+never need to be set by the user.
+</p>
+</td></tr>
+<tr valign="top"><td><code>...</code></td>
+<td>
+ 
+<p>Arguments to be passed to methods, such as
+<a href="../../graphics/html/par.html">graphical parameters</a> (see <code><a href="../../graphics/html/par.html">par</a></code>).
+</p>
+</td></tr>
+</table>
+
+
+<h3>Details</h3>
+
+<p>x-axis: Percent of the read-pairs that is made up of G's or C's.
+</p>
+<p>y-axis: Rate at which the given percent occurs.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code><a href="build.plotter.html">build.plotter</a></code>
+</p>
+
+<hr><div align="center">[Package <em>QoRTs</em> version 0.1.6 <a href="00Index.html">Index</a>]</div>
+</body></html>

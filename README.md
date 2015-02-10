@@ -1,14 +1,23 @@
-# QoRTs v0.1.3
-(Compiled Thu Feb  5 12:51:55 EST 2015)
+# QoRTs v0.1.6
+(Compiled Tue Feb 10 17:41:21 EST 2015)
+
+The QoRTs software package is a fast, efficient, and portable multifunction toolkit designed to assist in
+the analysis, quality control, and data management of RNA-Seq datasets. Its primary function is to aid
+in the detection and identification of errors, biases, and artifacts produced by paired-end high-throughput
+RNA-Seq technology. In addition, it can produce count data designed for use with differential expression
+and differential exon usage tools, as well as individual-sample and/or group-summary genome track
+files suitable for use with the UCSC genome browser (or any compatible browser).
+
+The entire QoRTs toolkit can be used in almost any operating system that supports java and R.
 
 ##INSTALLATION:
 The R package can be installed in R using the command:
 
-    > install.packages("QoRTs_0.1.3.tar.gz", repos = NULL, type="source")
+    > install.packages("QoRTs_0.1.6.tar.gz", repos = NULL, type="source")
 
-or using the command-line tool:
+or using the command-line:
     
-    R CMD INSTALL QoRTs_0.1.3.tar.gz
+    R CMD INSTALL QoRTs_0.1.6.tar.gz
 
 The java jar file does not need to be installed. 
 Just execute it using the java command:
@@ -19,9 +28,13 @@ Just execute it using the java command:
 The example QC output can be found on the github main page, and installed
 with the command:
     
-    install.packages("QoRTsExampleData_0.1.3.tar.gz", repos = NULL, type="source")
+    install.packages("QoRTsExampleData_0.1.6.tar.gz", repos = NULL, type="source")
 
-The original bam files are currently too large to upload to github. These files, along with a comprehensive walkthrough demonstrating how all analysis can be run on them, can be found here: ftp://nhgriftp.nhgri.nih.gov/pub/outgoing/mullikin/example_data/QoRTsFullExampleData.zip. (File is ~1.5gb)
+The original bam files are too large to upload to github. 
+These files, along with a comprehensive walkthrough demonstrating 
+how all analysis can be run on them, can be found here: 
+ftp://nhgriftp.nhgri.nih.gov/pub/outgoing/mullikin/example_data/QoRTsFullExampleData.zip. 
+(File is ~1.5gb)
 
 ##MORE INFORMATION:
 For more information, see the QoRTs vignette, QoRTs-vignette.pdf
@@ -50,7 +63,7 @@ For a full listing of all help topics for the R utility, use the R command:
 
 ##LEGAL:
 This software is "United States Government Work" under the terms of the United 
-States Copyright Act. It was written as part of the authorsâ€™ official duties 
+States Copyright Act. It was written as part of the authors’ official duties 
 for the United States Government and thus QoRT Package User Manual cannot be 
 copyrighted. This software is freely available to the public for use without a 
 copyright notice. Restrictions cannot be placed on its present or future use.

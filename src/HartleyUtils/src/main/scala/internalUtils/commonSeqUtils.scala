@@ -711,7 +711,6 @@ object commonSeqUtils {
       }
     }
     
-    
     val r1c = useRead_code(r1, dropOptions, minMAPQ);
     val r2c = useRead_code(r2, dropOptions, minMAPQ);
     
@@ -745,6 +744,10 @@ object commonSeqUtils {
     if(dropOptions(CODA_NOT_PRIMARY_ALIGNMENT) && samRecord.getNotPrimaryAlignmentFlag()) { return CODA_NOT_PRIMARY_ALIGNMENT; }
     if(dropOptions(CODA_NOT_UNIQUE_ALIGNMENT) && samRecord.getMappingQuality() < minMAPQ) { return CODA_NOT_UNIQUE_ALIGNMENT; }
     return CODA_READ_OK;
+  }
+  
+  def isReadMultiMapped(samRecord : SAMRecord) : Boolean = {
+    samRecord.getMappingQuality() < 255;
   }
   
   //def useRead(samRecord : SAMRecord, causeOfDropArray : Array[Int]) : Boolean = {

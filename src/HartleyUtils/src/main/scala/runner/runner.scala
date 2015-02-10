@@ -9,8 +9,8 @@ import internalUtils.commandLineUI._;
 
 object runner {
   
-  final val QORTS_VERSION = "0.1.3"; // REPLACE_THIS_QORTS_VERSION_VARIABLE_WITH_VERSION_NUMBER          (note this exact text is used in a search-and-replace. Do not change it.)
-  final val QORTS_COMPILE_DATE = "Thu Feb  5 12:51:55 EST 2015"; // REPLACE_THIS_QORTS_DATE_VARIABLE_WITH_DATE          (note this exact text is used in a search-and-replace. Do not change it.)
+  final val QORTS_VERSION = "0.1.6"; // REPLACE_THIS_QORTS_VERSION_VARIABLE_WITH_VERSION_NUMBER          (note this exact text is used in a search-and-replace. Do not change it.)
+  final val QORTS_COMPILE_DATE = "Tue Feb 10 17:41:21 EST 2015"; // REPLACE_THIS_QORTS_DATE_VARIABLE_WITH_DATE          (note this exact text is used in a search-and-replace. Do not change it.)
   
   //final val FOR_HELP_STRING = "For help, use command: "
   
@@ -30,6 +30,8 @@ object runner {
            //("makeSpliceBed" ->  (() => new fileConversionUtils.convertSpliceCountsToBed.converter)),
            ("mergeNovelSplices" -> (() => new fileConversionUtils.addNovelSplices.mergeNovelSplices)),
            ("makeJunctionTrack" -> (() => new fileConversionUtils.makeSpliceJunctionBed.converter))
+           
+           
 
           //(("prepFlatGtfFile",((fileConversionUtils.prepFlatGtfFile.run(_), "", "")))),
            //(("QC", ((qcUtils.runAllQC.run(_)),"",""))),
@@ -45,9 +47,9 @@ object runner {
 
   final val commandList = utilCommandList ++ helpCommandList;
          
-  final val depreciated_commandList : Map[String, (Array[String]) => Unit] = 
+  final val depreciated_commandList : Map[String, () => CommandLineRunUtil] = 
      Map(
-         
+         ("makeBedFromGtf" -> (() => new fileConversionUtils.makeBedFromGtf.converter))
          );
 
   def main(args: Array[String]){
@@ -68,32 +70,37 @@ object runner {
     internalUtils.Reporter.reportln("Starting time: ("+(new java.util.Date()).toString+")","debug");
 
     try{
-    if(args.length == 0){
-      internalUtils.Reporter.reportln("No command given!","output");
-      helpDocs.generalHelp;
-    } else {
-    val cmd = commandList.get(args(0));
-    cmd match {
-      case Some(makerFcn) => {
-        val cmdRunner = makerFcn();
-        cmdRunner.run(args);
-      }
-      case None => {
-        if(! allowDepreciated) {
-          internalUtils.Reporter.reportln("[runner.runner Error]: Command " + args(0) + " not found, and depreciated tools are deactivated!","output");
-          helpDocs.generalHelp;
-        } else {
-          val cmdOld = depreciated_commandList.get(args(0));
-          cmdOld match {
-            case Some(c) => c(args);
-            case None => {
-              internalUtils.Reporter.reportln("[runner.runner Error]: Command " + args(0) + " not found!","output");
-              helpDocs.generalHelp;
-            }
-          }
-        }
-      }
-    }}
+	    if(args.length == 0){
+	      internalUtils.Reporter.reportln("No command given!","output");
+	      helpDocs.generalHelp;
+	    } else {
+		    val cmd = commandList.get(args(0));
+		    cmd match {
+		      case Some(makerFcn) => {
+		        val cmdRunner = makerFcn();
+		        cmdRunner.run(args);
+		      }
+		      case None => {
+		        if(! allowDepreciated) {
+		          internalUtils.Reporter.reportln("[runner.runner Error]: Command " + args(0) + " not found, and depreciated tools are deactivated!","output");
+		          helpDocs.generalHelp;
+		        } else {
+		          val cmdOld = depreciated_commandList.get(args(0));
+		          cmdOld match {
+		            case Some(makerFcn) => {
+		              internalUtils.Reporter.reportln("WARNING: Running Beta tool: " + args(0),"warn");
+		              val cmdRunner = makerFcn();
+		              cmdRunner.run(args);
+		            }
+		            case None => {
+		              internalUtils.Reporter.reportln("[runner.runner Error]: Command " + args(0) + " not found!","output");
+		              helpDocs.generalHelp;
+		            }
+		          }
+		        }
+		      }
+		    }
+	    }
     } catch {
       case e : Exception => {
         internalUtils.Reporter.reportln("============================FATAL_ERROR============================\n"+

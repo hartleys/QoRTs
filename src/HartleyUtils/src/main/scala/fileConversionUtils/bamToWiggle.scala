@@ -81,9 +81,7 @@ object bamToWiggle {
                                        ) ::
                     new UnaryArgument(    name = "countByReadPair",
                                          arg = List("--countByReadPair"), // name of value
-                                         argDesc = "DEPRECIATED (This behavior is now default) Flag to indicate that this utility should count 'read-pair coverage' rather than 'read coverage'. "+
-                                                   "If this flag is raised, then regions where a read-pair overlaps will be counted "+
-                                                   "ONCE. This behavior is now the default, and this parameter is now depreciated (nonfunctional)." // description
+                                         argDesc = "DEPRECIATED, nonfunctional." // description
                                        ) ::
                     new UnaryArgument(    name = "simpleCountByRead",
                                          arg = List("--simpleCountByRead"), // name of value
@@ -114,19 +112,18 @@ object bamToWiggle {
                                        ) ::
                     new UnaryArgument( name = "includeTrackDefLine",
                                          arg = List("--includeTrackDefLine"), // name of value
-                                         argDesc = "Flag to indicate that a track definition line should be included. Necessary if you intend to directly use the wig file rather than first converting to bigwig." // description
+                                         argDesc = "DEPRECIATED, nonfunctional" // description
                                        ) ::
-                    new BinaryOptionArgument[String](
-                                         name = "rgbColor", 
-                                         arg = List("--rgbColor"), 
-                                         valueName = "r,g,b",  
-                                         argDesc =  "The color for the track. Nonfunctional unless the --includeTrackDefLine flag is raised. three numbers from 0-255, with no whitespace, defining the color and altColor for the track. For more information refer to the wiggle track definition on the UCSC genome browser website."
-                                        ) ::
-                    new BinaryOptionArgument[String](
+                    new UnaryArgument( name = "omitTrackDefLine",
+                                         arg = List("--omitTrackDefLine"), // name of value
+                                         argDesc = "Flag to indicate that a track definition line should NOT be included." // description
+                                       ) ::
+                    new BinaryArgument[String](
                                          name = "additionalTrackOptions", 
                                          arg = List("--additionalTrackOptions"), 
                                          valueName = "\"track options\"",  
-                                         argDesc =  "More options for the track. For more information refer to the wiggle track definition on the UCSC genome browser website."
+                                         argDesc =  "More options for the track. For more information refer to the wiggle track definition on the UCSC genome browser website.",
+                                         defaultValue = Some("")
                                         ) ::                                        
                     new BinaryOptionArgument[String](
                                          name = "readGroup", 
@@ -135,6 +132,13 @@ object bamToWiggle {
                                          argDesc =  "If this option is set, all analyses will be restricted to ONLY reads that are tagged with the given "+
                                                     "readGroupName (using an RG tag). This can be used if multiple read-groups have already been combined "+
                                                     "into a single bam file, but you want to summarize each read-group separately."
+                                        ) ::
+                    new BinaryOptionArgument[String](
+                                         name = "rgbColor", 
+                                         arg = List("--rgbColor"), 
+                                         valueName = "rval,gval,bval",  
+                                         argDesc =  "A comma delimited list of integers from 0-255, indicating the rgb color and alt-color for the wiggle file."+
+                                                    "This is equivalent to using --additionalTrackOptions \"color=r,g,b altColor=r,g,b itemRgb=On\""
                                         ) ::
                     new UnaryArgument(   name = "noTruncate", 
                                          arg = List("--noTruncate"), // name of value
@@ -156,9 +160,9 @@ object bamToWiggle {
                                          argDesc = "The input sam or bam file or files, or '-' to read from stdin. Note: if you include more than one bam file, the list must be comma delimited with no whitespace!" // description
                                         ) ::
                     new FinalArgument[String](
-                                         name = "trackName",
-                                         valueName = "trackName",
-                                         argDesc = "The name for the wiggle track." // description
+                                         name = "trackTitlePrefix",
+                                         valueName = "trackTitlePrefix",
+                                         argDesc = "The prefix for the title for the wiggle track. Track titles will be " // description
                                         ) ::
                     new FinalArgument[String](
                                          name = "chromLengthFile",
@@ -182,7 +186,7 @@ object bamToWiggle {
          bamToWiggle.run(
              parser.get[List[String]]("infiles"),
              parser.get[String]("outfilePrefix"),
-             parser.get[String]("trackName"),
+             parser.get[String]("trackTitlePrefix"),
              parser.get[String]("chromLengthFile"),
              parser.get[Boolean]("noTruncate"),
              parser.get[Int]("windowSize"),
@@ -196,9 +200,9 @@ object bamToWiggle {
              ! parser.get[Boolean]("simpleCountByRead"),
              parser.get[Boolean]("keepMultiMapped"),
              parser.get[Option[String]]("readGroup"),
-             parser.get[Boolean]("includeTrackDefLine"),
+             ! parser.get[Boolean]("omitTrackDefLine"),
              parser.get[Option[String]]("rgbColor"),
-             parser.get[Option[String]]("additionalTrackOptions"),
+             parser.get[String]("additionalTrackOptions"),
              parser.get[Boolean]("coordSorted"),
              parser.get[Int]("minMAPQ")
            );
@@ -225,7 +229,7 @@ object bamToWiggle {
       keepMultiMapped : Boolean, readGroup : Option[String],
       includeTrackDef : Boolean,
       rgbColor : Option[String],
-      additionalTrackOptions : Option[String],
+      additionalTrackOptions : String,
       coordSorted : Boolean, minMAPQ : Int){
     
     //registerGlobalParam[Boolean]("noGzipOutput", noGzipOutput);
@@ -411,7 +415,7 @@ object bamToWiggle {
                    fr_secondStrand : Boolean, sizeFactor : Double, 
                    negativeReverseStrand : Boolean, countPairsTogether : Boolean, 
                    includeTrackDef : Boolean, rgbColor : Option[String],
-                   additionalTrackOptions : Option[String]) extends QCUtility[Unit] {
+                   additionalTrackOptions : String) extends QCUtility[Unit] {
     
     val chromMap : Map[(String,Char),Chrom] = genChrom(chromLengthFile, windowSize, stranded, ! noTruncate);
     var unknownChromSet : Set[String] = Set[String]();
@@ -467,8 +471,8 @@ object bamToWiggle {
       if(stranded){
         val writerF = openWriterSmart_viaGlobalParam(outfile + windowString + ".fwd.wig");
         val writerR = openWriterSmart_viaGlobalParam(outfile + windowString + ".rev.wig");
-        val rgbColorString = if(rgbColor.isEmpty) " " else " color="+rgbColor.get+" altColor="+rgbColor.get +" ";
-        val additionalOptionsString = if(additionalTrackOptions.isEmpty) " " else " "+additionalTrackOptions.get+" ";
+        val rgbColorString = if(rgbColor.isEmpty) " " else " color="+rgbColor.get+" altColor="+rgbColor.get +" itemRgb=On";
+        val additionalOptionsString = " "+additionalTrackOptions+" ";
         if(includeTrackDef){
           writerF.write("track name="+trackName+"_FWD type=wiggle_0 visibility=full"+rgbColorString+additionalOptionsString+"\n");
           writerR.write("track name="+trackName+"_REV type=wiggle_0 visibility=full"+rgbColorString+additionalOptionsString+"\n");
@@ -487,7 +491,11 @@ object bamToWiggle {
         close(writerR);
       } else {
         val writer = openWriterSmart_viaGlobalParam(outfile + windowString + ".unstranded.wig");
-        //writer.write("track type=wiggle_0 name="+trackName+" visibility=full\n");
+        val rgbColorString = if(rgbColor.isEmpty) " " else " color="+rgbColor.get+" altColor="+rgbColor.get +" ";
+        val additionalOptionsString = " "+additionalTrackOptions+" ";
+        if(includeTrackDef){
+          writer.write("track name="+trackName+" type=wiggle_0 "+rgbColorString+" "+additionalOptionsString+"\n");
+        }
         
         val sortedKeyList : Vector[(String,Char)] = chromMap.keySet.toVector.sorted
         for(chromPairs <- sortedKeyList){

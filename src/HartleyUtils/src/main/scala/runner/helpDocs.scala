@@ -42,7 +42,7 @@ object helpDocs {
   val LEGAL = internalUtils.commandLineUI.DEFAULT_LEGAL;
   
   val DESCRIPTION = List[String](
-      "The first module of the software package QoRT, which is intended for use with Paired-End, High-Throughput RNA-Seq data.",
+      "This jar-file contains the data processing module of the software package QoRTs, which is intended for use with Paired-End or Single-End High-Throughput RNA-Seq data.",
       "This tool can perform a number of different functions to assist in assessing the data quality, detecting errors or biases, "+
       "performing analyses, data cleaning, data visualization, and data formatting."
   );
@@ -55,6 +55,8 @@ object helpDocs {
     //report("Help:","output");
     if(args.length <= 1 || args(1) == "?" || args(1) == "--man" || args(1) == "--help" || args(1) == "help" || args(1) == "-help" || args(1) == "man" || args(1) == "-man"){
       generalHelp;
+    } else if(args(1) == "generateMarkdownPages") {
+      writeMarkdownHelp("./");
     } else {
       //Print help for a specific function:
       
@@ -126,6 +128,44 @@ object helpDocs {
       sb.append(lineseq2string(wrapLinesWithIndent(LEGAL, internalUtils.commandLineUI.CLUI_CONSOLE_LINE_WIDTH, "    ", false)) + "\n");
       
       return sb.toString;
+  }
+  
+  def writeMarkdownHelp(outdir : String) {
+    
+      val sb = new StringBuilder("");
+      sb.append("# QoRTs: Quality Of Rna-seq Tool Set\n" + runner.QORTS_VERSION + "\n\n");
+      sb.append("## General Help\n\n");
+      
+      sb.append("## DESCRIPTION:\n\n");
+      sb.append( DESCRIPTION + "\n\n");
+      sb.append("NOTE: if you run into OutOfMemoryExceptions, try adding the java options: \"-Xmx8G\""+"\n\n");
+      
+      sb.append("## GENERAL SYNTAX:\n\n");
+      sb.append("    java [_java_options_] -jar "+runner.Runner_ThisProgramsExecutableJarFileName +" COMMAND [options]"+"\n\n");
+      
+      sb.append("## COMMANDS:\n");
+      for((arg, cmdMaker) <- runner.utilCommandList){
+        val parser = cmdMaker().parser;
+        
+        sb.append("### ["+arg+"]("+arg+".html)\n\n");
+        sb.append(""+parser.getDescription + "\n\n");
+      }
+      sb.append("## AUTHORS:\n\n");
+      sb.append(lineseq2string(wrapLinesWithIndent(AUTHOR, internalUtils.commandLineUI.CLUI_CONSOLE_LINE_WIDTH, "    ", false)) + "\n");
+      
+      sb.append("## LEGAL:\n\n");
+      sb.append(lineseq2string(wrapLinesWithIndent(LEGAL, internalUtils.commandLineUI.CLUI_CONSOLE_LINE_WIDTH, "    ", false)) + "\n");
+      
+      val indexwriter = openWriter(outdir+"index.md");
+      indexwriter.write(sb.toString);
+      indexwriter.close();
+      
+      for((arg, cmdMaker) <- runner.utilCommandList){
+        val parser = cmdMaker().parser;
+        val writer = openWriter(outdir+arg+".md");
+        writer.write(parser.getMarkdownManual());
+        writer.close();
+      }
   }
 }
 

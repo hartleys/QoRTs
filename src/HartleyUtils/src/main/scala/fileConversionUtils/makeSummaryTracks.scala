@@ -10,6 +10,10 @@ import java.io.File;
 
 object makeSummaryTracks {
 
+  /*
+   * INCOMPLETE! UNTESTED!
+   */
+  
   val DEFAULT_MERGE_FILE_LIST : List[String] = List("UnstrandedWiggleTrack","StrandedWiggleTrack","KnownOnlyJunction","WithNovelJunction");
   
   class summaryTrackMerge extends CommandLineRunUtil {
@@ -69,7 +73,9 @@ object makeSummaryTracks {
              parser.get[String]("infileDirs"),
              parser.get[String]("outfile"),
              parser.get[List[String]]("mergeFiles"),
-             parser.get[Int]("wiggleWindow")
+             parser.get[Int]("wiggleWindow"),
+             "",
+             "Untitled"
            );
          }
      }

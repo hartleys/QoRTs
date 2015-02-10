@@ -1717,8 +1717,8 @@ makePlot.mapping.rates <- function(plotter, plot.mm = NULL, y.counts.in.millions
          rect(4,usr[3] - yrange*0.02,4.5, usr[4] + yrange*0.02, border = "white",col="white", xpd = TRUE,...);
          rect(4,usr[3] - yrange     ,4.5, usr[4] + yrange     , border = "black",col="white", xpd = FALSE,...);
          
-         text(2,usr[4],"Read Count",adj=c(0.5,1.1));
-         text(6,usr[4],"Rates",adj=c(0.5,1.1));
+         text(2,usr[4],"Read Count",adj=c(0.5,1.1), ...);
+         text(6,usr[4],"Rates",adj=c(0.5,1.1), ...);
          par(mar = old.mar);
       } else {
          tryCatch({
@@ -1746,13 +1746,13 @@ makePlot.mapping.rates <- function(plotter, plot.mm = NULL, y.counts.in.millions
          usr <- par("usr");
          yrange <- usr[4] - usr[3];
          rect.y <- c(usr[3] - yrange, usr[4] + yrange);
-         rect(3,rect.y[1],3.5, rect.y[2],col="white");
+         rect(3,rect.y[1],3.5, rect.y[2],col="white", ...);
          rect(3,usr[3] - yrange*0.02,4.5, usr[4] + yrange*0.02, border = "white",col="white", xpd = TRUE,...);
          rect(3,usr[3] - yrange     ,3.5, usr[4] + yrange     , border = "black",col="white", xpd = FALSE,...);
          
          
-         text(1.5,usr[4],"Read Counts",adj=c(0.5,1.1));
-         text(4.5,usr[4],"Rates",adj=c(0.5,1.1));
+         text(1.5,usr[4],"Read Counts",adj=c(0.5,1.1), ...);
+         text(4.5,usr[4],"Rates",adj=c(0.5,1.1), ...);
          
          par(mar = old.mar);
       }
@@ -1761,13 +1761,13 @@ makePlot.mapping.rates <- function(plotter, plot.mm = NULL, y.counts.in.millions
         pretty.y <- pretty(c(usr[3],usr[4]))
         pretty.y.labels <- pretty.y;
         pretty.y.labels <- paste0(pretty.y / 1000000, "M");
-        axis(2,at=pretty.y,labels=pretty.y.labels,las=1);
+        axis(2,at=pretty.y,labels=pretty.y.labels,las=1, ...);
       } else {
-         axis(2)
+         axis(2, ...)
       }
-      abline(h=0,col="grey",lty=3);
-      axis(2, at = (yrange / 2) + usr[3], labels=c("Read Count"),col="transparent", line=1.5);
-      axis(4, at = (yrange / 2) + usr[3], labels=c("Rate"),col="transparent", line=1);     
+      abline(h=0,col="grey",lty=3, ...);
+      axis(2, at = (yrange / 2) + usr[3], labels=c("Read Count"),col="transparent", line=1.5, ...);
+      axis(4, at = (yrange / 2) + usr[3], labels=c("Rate"),col="transparent", line=1, ...);     
       internal.plot.main.title("Mapping Stats", plotter, ...);
       if(debugMode){ message("Finished: ",plot.name," plot.",getTimeAndDiff(ts)); }
 

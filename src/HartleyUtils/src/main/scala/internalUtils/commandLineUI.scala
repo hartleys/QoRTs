@@ -8,8 +8,8 @@ import internalUtils.stdUtils._;
 
 object commandLineUI {
 
-  final val HELP_COMMAND_LIST : List[String] = List("help", "-help", "--help");
-  final val MANUAL_COMMAND_LIST : List[String] = List("?","'?'", "\"?\"","man","-man","--man");
+  final val HELP_COMMAND_LIST : List[String] = List();
+  final val MANUAL_COMMAND_LIST : List[String] = List("?","'?'", "\"?\"","man","-man","--man", "help", "-help", "--help");
   
   var CLUI_CONSOLE_LINE_WIDTH = 68;
   
@@ -200,6 +200,35 @@ List(
       return sb.toString;
     }
     
+    def getMarkdownManual() : String = {
+      val sb = new StringBuilder("");
+      
+      sb.append("# QoRTs: Quality Of Rna-seq Tool Set\nVersion " + runner.runner.QORTS_VERSION + " ([back to index](index.html))\n\n");
+      sb.append("## Help for java command \""+command+"\"\n\n");
+
+      sb.append("## USAGE:\n\n"); 
+      sb.append("    "+getShortHelp()+"\n\n");
+      sb.append("## DESCRIPTION:\n\n");
+      sb.append(description+"\n\n");
+      sb.append("## REQUIRED ARGUMENTS:\n");
+      for(arg <- argList.filter(_.argIsMandatory)){
+        sb.append(arg.getFullDescription+"\n");
+      }
+      sb.append("\n");
+      
+      sb.append("## OPTIONAL ARGUMENTS:\n");
+      for(arg <- argList.filter(! _.argIsMandatory)){
+        sb.append(arg.getFullMarkdownDescription);
+      }
+      sb.append("## AUTHORS:\n\n");
+      sb.append(authors+ "\n\n");
+      
+      sb.append("## LEGAL:\n\n");
+      sb.append(legal+ "\n\n");
+      
+      return sb.toString;
+    }
+    
     private def sectionFormat(s : String) : String = {
       return(s);
     }
@@ -212,7 +241,9 @@ List(
     } 
     def getShortHelp() : String = {
       "java [Java Options] -jar " + runner.runner.Runner_ThisProgramsExecutableJarFileName + " " + command + " [options] " +
-         argList.foldLeft[String]("")((soFar : String, curr : Argument[Any]) => soFar +" "+ curr.getShortSyntax()) +"\n"
+         argList.map(_.getShortSyntax()).filter(_ != "").mkString(" ")+
+         //argList.foldLeft[String]("")((soFar : String, curr : Argument[Any]) => soFar +" "+ curr.getShortSyntax()) +
+         "\n"
          //getForMoreHelp();
     }
     
@@ -320,6 +351,10 @@ List(
     def getFullDescription() : String = {
       "    "+getFullSyntax()+"\n"+wrapLineWithIndent(describe(),CLUI_CONSOLE_LINE_WIDTH,8)+"\n        ("+argType+")";
     }
+    def getFullMarkdownDescription() : String = {
+      "### "+getFullSyntax()+":\n\n"+describe()+"\n\n("+argType+")\n\n";
+    }
+    
     
     def argIsMandatory : Boolean;
   }

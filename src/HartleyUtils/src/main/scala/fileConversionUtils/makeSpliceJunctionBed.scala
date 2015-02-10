@@ -35,14 +35,19 @@ object makeSpliceJunctionBed {
                                          valueName = "r,g,b",  
                                          argDesc = "The rgb color for all the bed file lines."
                                         ) ::
-                    new BinaryOptionArgument[String](
-                                         name = "trackDefLine", 
-                                         arg = List("--trackDefLine"), 
-                                         valueName = "\"track name=mytrackname etc\"",  
-                                         argDesc = "The track definition line of the bed file, if desired. Note this is not necessary if a trackhub is going to be used, but if "+
-                                                   "uploading directly to UCSC / your genome browser of choice this may be required. Note that the entire line must be QUOTED, so that the whitespace "+
-                                                   "doesn't split it into multiple separate parameters. See the UCSC browser documentation (http://genome.ucsc.edu/goldenpath/help/customTrack.html#TRACK) for more information on browser track options."
+                    new BinaryArgument[String](
+                                         name = "trackTitle", 
+                                         arg = List("--trackTitle"), 
+                                         valueName = "title",  
+                                         argDesc = "The title of the track. By default this will be the same as the title parameter.",
+                                         defaultValue = Some("UntitledBed")
                                         ) ::
+                    new BinaryArgument[String](         name = "additionalTrackOptions",
+                                                        arg = List("--additionalTrackOptions"),  
+                                                        valueName = "options", 
+                                                        argDesc = "Additional track definition options, added to the track definition line. See the UCSC documentation for more information.", 
+                                                        defaultValue = Some("")
+                                                        ) ::
                     new UnaryArgument(name = "includeFullSpliceNames",
                               arg = List("--includeFullSpliceNames"), // name of value
                               argDesc = "Flag to indicate that full splice names, including gene ID, should be used." // description
@@ -63,6 +68,20 @@ object makeSpliceJunctionBed {
                               arg = List("--nonflatgtf"), // name of value
                               argDesc = "Flag to indicate that instead of a \"flattened\" gff file, a standard-format gtf file has been specified. If this flag is raised, it will automatically create the standard flattened gtf information, in memory. It will not be written to disk" // description
                               ) :: 
+                    new UnaryArgument(name = "skipAnnotatedJunctions",
+                              arg = List("--skipAnnotatedJunctions"), // name of value
+                              argDesc = "If this option is used, annotated splice junctions will not be included in the output file. "+
+                                        "Note: this only works if there are novel junctions in the input file."+
+                                        ""+
+                                        ""
+                              ) :: 
+                    new UnaryArgument(name = "skipNovelJunctions",
+                              arg = List("--skipNovelJunctions"), // name of value
+                              argDesc = "If this option is used, novel splice junctions will not be included in the output file."+
+                                        ""+
+                                        ""+
+                                        ""
+                              ) ::    
                     new BinaryArgument[Int](   name = "digits",
                                                         arg = List("--digits"),  
                                                         valueName = "num", 
@@ -148,6 +167,7 @@ object makeSpliceJunctionBed {
              parser.get[String]("outfile"),
              parser.get[String]("infilePrefix"),
              parser.get[String]("infileSuffix"),
+             None,
              parser.get[String]("gff"),
              parser.get[Boolean]("stranded"),
              parser.get[Int]("digits"),
@@ -155,7 +175,10 @@ object makeSpliceJunctionBed {
              parser.get[Boolean]("calcMean"),
              parser.get[Boolean]("nonflatgtf"),
              parser.get[Option[String]]("rgb"),
-             parser.get[Option[String]]("trackDefLine")
+             parser.get[String]("trackTitle"),
+             parser.get[String]("additionalTrackOptions"),
+             parser.get[Boolean]("skipAnnotatedJunctions"),
+             parser.get[Boolean]("skipNovelJunctions")
            );
          }
      }
@@ -165,10 +188,15 @@ object makeSpliceJunctionBed {
           filenames : Option[List[String]], sampleList : Option[String],
           title : Option[String],
           ignoreSizeFactors : Boolean,
-          outfile : String, infilePrefix : String, infileSuffix : String, gff  : String, stranded : Boolean,
+          outfile : String, infilePrefix : String, infileSuffix : String, 
+          gffIterator : Option[Iterator[FlatGtfLine]], gff  : String, 
+          stranded : Boolean,
           digits : Int, includeFullSpliceNames : Boolean, calcMean : Boolean,
           nonflatgtf : Boolean, rgb : Option[String],
-          trackDefLine : Option[String]){
+          trackTitle : String,
+          additionalTrackOptions : String,
+          skipAnnotatedJunctions : Boolean,
+          skipNovelJunctions : Boolean){
 
     val samples = getSampleList(sampleList, filenames);
     val sf = getSizeFactors(samples, ignoreSizeFactors, sizeFactorFile, sizeFactors);
@@ -182,7 +210,9 @@ object makeSpliceJunctionBed {
       error("ERROR: filenames length != # samples");
     }
     
-    run_helper(title, infiles, outfile , gff , stranded , sf, rgb , digits , includeFullSpliceNames , calcMean , nonflatgtf, trackDefLine );
+    val rgbline = if(rgb.isEmpty) " " else " itemRgb=\"On\" ";
+    
+    run_helper(title, infiles, outfile , gffIterator, gff , stranded , sf, rgb , digits , includeFullSpliceNames , calcMean , nonflatgtf, Some("track name="+trackTitle+" description="+trackTitle+" "+rgbline+additionalTrackOptions), skipAnnotatedJunctions, skipNovelJunctions);
   }
   
   def getSampleList(sampleList : Option[String], filenames : Option[List[String]]) : Vector[String] = {
@@ -298,9 +328,12 @@ object makeSpliceJunctionBed {
     }*/
   }*/
    
-  def run_helper(opt_title : Option[String], infile : Vector[String], outfile : String, gff : String, stranded : Boolean, 
+  def run_helper(opt_title : Option[String], infile : Vector[String], outfile : String, 
+                 gffIterator : Option[Iterator[FlatGtfLine]], gff : String, stranded : Boolean, 
                  opt_sizeFactor : Option[Vector[Double]], opt_rgb : Option[String], digits : Int, 
-                 includeFullSpliceNames : Boolean, calcSum : Boolean, nonflatgtf : Boolean, trackDefLine : Option[String]) {
+                 includeFullSpliceNames : Boolean, calcSum : Boolean, nonflatgtf : Boolean, trackDefLine : Option[String],
+                 skipAnnotatedJunctions : Boolean,
+                 skipNovelJunctions : Boolean) {
     val rgb = if(opt_rgb.isEmpty) "0,0,0" else opt_rgb.get;
 
     val sizeFactorSimple = if(opt_sizeFactor.isEmpty) repToSeq(1.toDouble,infile.length) else opt_sizeFactor.get;
@@ -310,7 +343,9 @@ object makeSpliceJunctionBed {
     }
     val title = if(opt_title.isEmpty) "" else opt_title.get + ":";
     
-    val gffLines = if(nonflatgtf) {
+    val gffLines = if(! gffIterator.isEmpty){
+      gffIterator.get;
+    } else if(nonflatgtf) {
       fileConversionUtils.prepFlatGtfFile.getFlatGtfLines(gff,stranded).iterator;
     } else {
       GtfReader.getFlatGtfReader(gff, stranded, true, "\\s+");
@@ -344,7 +379,7 @@ object makeSpliceJunctionBed {
     });
     reportln("> makeSpliceJunctionBed: calculated final counts.","note");
 
-    writeBed(title, counts, outfile , rgb, sjmap , includeFullSpliceNames, digits, trackDefLine = trackDefLine);
+    writeBed(title, counts, outfile , rgb, sjmap , includeFullSpliceNames, digits, trackDefLine = trackDefLine, skipAnnotatedJunctions = skipAnnotatedJunctions, skipNovelJunctions = skipNovelJunctions);
     //convert(infile,outfile, rgb, countFilter, scoreFunction, sizeFactor, includeSpliceNames);
   }
   
@@ -359,11 +394,21 @@ object makeSpliceJunctionBed {
     return out;
   }
   
-  def writeBed(title : String, counts : Iterator[(String,Double)], outfile : String, rgb : String, sjmap : scala.collection.GenMap[String,FlatGtfLine], includeFullSpliceNames : Boolean, digits : Int, delim : String = "	", trackDefLine : Option[String]) {
+  def writeBed(title : String, 
+               counts : Iterator[(String,Double)], 
+               outfile : String, 
+               rgb : String, 
+               sjmap : scala.collection.GenMap[String,FlatGtfLine], 
+               includeFullSpliceNames : Boolean, 
+               digits : Int, 
+               delim : String = "	", 
+               trackDefLine : Option[String],
+               skipAnnotatedJunctions : Boolean,
+               skipNovelJunctions : Boolean) {
     
     val lines : Vector[((String,Int),String)] = counts.filter{case(junctionName, ct) =>{ 
       val featureCode = junctionName.split(":")(1).substring(0,1);
-      featureCode == "J" || featureCode == "N";
+      (featureCode == "J" && (! skipAnnotatedJunctions)) || (featureCode == "N" && (! skipNovelJunctions));
     }}.map{case(junctionName, ct) =>{
         val gffLineOption : Option[FlatGtfLine] = sjmap.get(junctionName);
         if(gffLineOption.isEmpty) error("ERROR: gff does not contain splice junction named \""+junctionName+"\"! Are you using the wrong flattened gff file?");

@@ -17,9 +17,11 @@ object mergeQcOutput {
           command = "mergeCounts", 
           quickSynopsis = "", 
           synopsis = "", 
-          description = "This utility merges count data from multiple QoRTs QC runs."+
-                        ""+
-                        ""+
+          description = "This utility merges count, wiggle, and similar data from multiple QoRTs QC runs. "+
+                        "This is intended for use in merging the data from multiple technical replicates of the same sample/library."+
+                        "This tool will then merge all count data (including gene-level, exon-level, and known/novel splice-junction) counts, "+
+                        "as well as wiggle files, assuming all files use the standard naming conventions (for example, the fwd-strand wiggle files must be named: \"QC.wiggle.fwd.wig.gz\", etc)."+
+                        "If any files are missing, they will be skipped."+
                         ""+
                         ""+
                         ""+
@@ -32,17 +34,30 @@ object mergeQcOutput {
                                          argDesc = "The window size of the alternate-size wiggle track, if applicable." ,
                                          defaultValue = Some(100)
                                         ) ::
+                    new BinaryArgument[String](
+                                         name = "additionalTrackOptions", 
+                                         arg = List("--additionalTrackOptions"), 
+                                         valueName = "\"track options\"",  
+                                         argDesc = "More options for the wiggle tracks. For more information refer to the wiggle track definition on the UCSC genome browser website." ,
+                                         defaultValue = Some("")
+                                        ) ::
                     new BinaryArgument[List[String]](
                                          name = "mergeFiles", 
                                          arg = List("--mergeFiles"), 
-                                         valueName = "file1[,file2,...]",  
-                                         argDesc = "A comma-delimited list of strings, indicating which file types to attempt to merge. By default, this utility autodetects the presence of all mergable qc files and merges all standard files. Valid codes are:" + mergeFileList.mkString(",") ,
+                                         valueName = "filetype1[,filetype2,...]",  
+                                         argDesc = "A comma-delimited list of strings, indicating which file types to attempt to merge. By default, this utility autodetects the presence of all mergable qc files and merges all standard files. Valid codes are: " + mergeFileList.mkString(", ") ,
                                          defaultValue = Some(mergeFileList)
                                         ) ::
+                    new BinaryArgument[String](   name = "trackTitlePrefix",
+                                                        arg = List("--trackTitle"),  
+                                                        valueName = "options", 
+                                                        argDesc = "The prefix of the title of the merged wiggle tracks.", 
+                                                        defaultValue = Some("UntitledWig")
+                                                        ) ::
                     new FinalArgument[String](
                                          name = "infileDirs",
                                          valueName = "infileDirs",
-                                         argDesc = "The input files' directories, as a comma-delimited list with no whitespace." // description
+                                         argDesc = "The replicates' QC output directories (the output directory used with the initial 'QC' step), as a comma-delimited list (no whitespace)." // description
                                         ) ::
                     new FinalArgument[String](
                                          name = "outfilePrefix",
@@ -58,7 +73,9 @@ object mergeQcOutput {
              parser.get[String]("infileDirs"),
              parser.get[String]("outfile"),
              parser.get[List[String]]("mergeFiles"),
-             parser.get[Int]("wiggleWindow")
+             parser.get[Int]("wiggleWindow"),
+             parser.get[String]("additionalTrackOptions"),
+             parser.get[String]("trackTitlePrefix")
            );
          }
      }
@@ -70,13 +87,24 @@ object mergeQcOutput {
           command = "mergeAllCounts", 
           quickSynopsis = "", 
           synopsis = "", 
-          description = "",   
+          description = "This tool uses a replicate decoder to merge count/wiggle data of all techical replicates in a dataset, producing sample-wise counts. "+
+                        "You must supply a replicate decoder which indicates which replicates are technical replicates of which samples. "+
+                        "This tool will then merges each sample's technical replicates using the \"mergeCounts\" function.",   
           argList = 
                     new BinaryOptionArgument[String](
                                          name = "sampleID", 
                                          arg = List("--sampleID"), 
                                          valueName = "sampid",  
-                                         argDesc = "Optional: the id of the specific sample that is to be merged. By default, this utility will merge all samples found in the decoder. With this option selected, it will ONLY merge the one sample named here."
+                                         argDesc = "Optional: the id of the specific sample that is to be merged. "+
+                                                   "By default, this utility will merge all samples found in the decoder. "+
+                                                   "With this option selected, it will ONLY merge the one sample named here."
+                                        ) ::
+                    new BinaryArgument[String](
+                                         name = "additionalTrackOptions", 
+                                         arg = List("--additionalTrackOptions"), 
+                                         valueName = "\"track options\"",  
+                                         argDesc = "More options for the wiggle tracks. For more information refer to the wiggle track definition on the UCSC genome browser website." ,
+                                         defaultValue = Some("")
                                         ) ::
                     new BinaryArgument[Int](
                                          name = "wiggleWindow", 
@@ -95,16 +123,16 @@ object mergeQcOutput {
                     new FinalArgument[String](
                                          name = "infileDir",
                                          valueName = "infileDir",
-                                         argDesc = "The top-level directory in which all the QC output can be found." // description
+                                         argDesc = "The top-level directory in which all the QC output can be found. This concatenated with the qc.data.dir column must equal the path to the raw QC output directories" // description
                                         ) ::
                     new FinalArgument[String](
                                          name = "decoderFile",
                                          valueName = "decoderFile",
                                          argDesc = "The decoder file, which must conform to the requirements of the QoRT decoder specification. "+
                                                    "In particular it MUST have two specific columns: \n"+
-                                                   "\"sample.ID\" This utility will merge the count data output from all bamfiles that have the same sample.ID"+
+                                                   "\"sample.ID\": This utility will merge the count data output from all bamfiles that have the same sample.ID"+
                                                    "\nand\n"+
-                                                   "\"qc.data.dir\" This must be the file path to the output data directory, from the infileDir file location." // description
+                                                   "\"qc.data.dir\" (OR \"unique.ID\"): This must be the file path to the output data directory, from the infileDir file location." // description
                                         ) ::
                     new FinalArgument[String](
                                          name = "outfile",
@@ -123,36 +151,43 @@ object mergeQcOutput {
              parser.get[String]("outfile"),
              parser.get[List[String]]("mergeFiles"),
              parser.get[Int]("wiggleWindow"),
-             parser.get[Option[String]]("sampleID")
+             parser.get[Option[String]]("sampleID"),
+             parser.get[String]("additionalTrackOptions")
            );
          }
      }
   }
   
-  def multirun(infileDir : String, decoderFile : String, outfile : String, mergeFiles : List[String], wiggleWindow : Int, sampID : Option[String]){
+  def multirun(infileDir : String, decoderFile : String, outfile : String, mergeFiles : List[String], wiggleWindow : Int, sampID : Option[String], additionalTrackOptions : String){
     val decoder : Map[String,Set[String]] = decode(decoderFile,infileDir);
     
     val initialTimeStamp = TimeStampUtil();
     
     if(sampID.isEmpty){
       for((sampleID, infiles) <- decoder){
-        merge(infiles.toSeq, outfile + "/"+sampleID+"/",  mergeFiles, wiggleWindow);
+        merge(infiles.toSeq, outfile + "/"+sampleID+"/",  mergeFiles, wiggleWindow, additionalTrackOptions, sampleID);
       }
     } else {
       val infiles = decoder(sampID.get);
-      merge(infiles.toSeq, outfile + "/"+sampID.get+"/",  mergeFiles, wiggleWindow);
+      merge(infiles.toSeq, outfile + "/"+sampID.get+"/",  mergeFiles, wiggleWindow, additionalTrackOptions, sampID.get);
     }
     
     standardStatusReport(initialTimeStamp);
   }
+  
+  
   def decode(decoder : String, infileDir : String) : Map[String,Set[String]] = {
     val lines = getLinesSmartUnzip(decoder);
     val header = lines.next.split("\\s+");
-    val qcDirCol = header.indexOf("qc.data.dir");
+    val qcDirCol = if(header.indexOf("qc.data.dir") == -1){
+      header.indexOf("unique.id");
+    } else {
+      header.indexOf("qc.data.dir");
+    }
     val idCol = header.indexOf("sample.ID");
     
     if(idCol == -1) error("Fatal error! Decoder has no column named sample.ID!");
-    if(qcDirCol == -1) error("Fatal error! Decoder has no column named qc.data.dir!");
+    if(qcDirCol == -1) error("Fatal error! Decoder has no column named 'qc.data.dir' or 'unique.id'!");
     
     lines.foldLeft(Map[String,Set[String]]().withDefault(x => Set[String]()))((soFar, line) =>{
       val cells = line.split("\\s+");
@@ -162,12 +197,12 @@ object mergeQcOutput {
     });
   }
    
-   def run(infile : String, outfile : String, mergeFiles : List[String], wiggleWindow : Int){
+   def run(infile : String, outfile : String, mergeFiles : List[String], wiggleWindow : Int, additionalTrackOptions : String, trackTitlePrefix : String){
      val infiles = infile.split(",");
-     merge(infiles.toSeq, outfile, mergeFiles, wiggleWindow);
+     merge(infiles.toSeq, outfile, mergeFiles, wiggleWindow, additionalTrackOptions, trackTitlePrefix);
    }
    
-   def merge(infiles : Seq[String], outfile : String, mergeFiles : List[String], wiggleWindow : Int){
+   def merge(infiles : Seq[String], outfile : String, mergeFiles : List[String], wiggleWindow : Int, additionalTrackOptions : String, trackTitlePrefix : String){
      
      var currTimeStamp = TimeStampUtil();
      
@@ -278,16 +313,16 @@ object mergeQcOutput {
        if((new File(infiles.head + unstranded_wiggle_suffix)).exists()){
          report("Merging unstranded wiggle data...","note");
          val pairlist = infiles.map(infile => (infile + unstranded_wiggle_suffix, 1.0));
-         SumWigglesFast.runHelper2(pairlist, outfile + unstranded_wiggle_suffix, None);
+         SumWigglesFast.runHelper2(pairlist, outfile + unstranded_wiggle_suffix, Some("track type=wiggle_0 name="+trackTitlePrefix+" "+additionalTrackOptions));
          report("done\n","note");
        }
        if((new File(infiles.head + stranded_wiggle_fwd_suffix)).exists()){
          report("Merging stranded wiggle data...","note");
          val fwdpairlist = infiles.map(infile => (infile + stranded_wiggle_fwd_suffix, 1.0));
-         SumWigglesFast.runHelper2(fwdpairlist, outfile + stranded_wiggle_fwd_suffix, None);
+         SumWigglesFast.runHelper2(fwdpairlist, outfile + stranded_wiggle_fwd_suffix,  Some("track type=wiggle_0 name="+trackTitlePrefix+"_FWD "+additionalTrackOptions));
          
          val revpairlist = infiles.map(infile => (infile + stranded_wiggle_rev_suffix, 1.0));
-         SumWigglesFast.runHelper2(revpairlist, outfile + stranded_wiggle_rev_suffix, None);
+         SumWigglesFast.runHelper2(revpairlist, outfile + stranded_wiggle_rev_suffix,  Some("track type=wiggle_0 name="+trackTitlePrefix+"_REV "+additionalTrackOptions));
          report("done\n","note");
        }
         
@@ -310,16 +345,16 @@ object mergeQcOutput {
        if(unstrandedWigExists){
          report("Merging unstranded alt-window wiggle data...","note");
          val pairlist = infiles.map(infile => (infile + unstranded_alt_wiggle_suffix, 1.0));
-         SumWigglesFast.runHelper2(pairlist, outfile + unstranded_alt_wiggle_suffix, None);
+         SumWigglesFast.runHelper2(pairlist, outfile + unstranded_alt_wiggle_suffix, Some("track type=wiggle_0 name="+trackTitlePrefix+" "+additionalTrackOptions));
          report("done\n","note");
        }
        if(strandedWigExists){
          report("Merging stranded alt-window wiggle data...","note");
          val fwdpairlist = infiles.map(infile => (infile + stranded_alt_wiggle_fwd_suffix, 1.0));
-         SumWigglesFast.runHelper2(fwdpairlist, outfile + stranded_alt_wiggle_fwd_suffix, None);
+         SumWigglesFast.runHelper2(fwdpairlist, outfile + stranded_alt_wiggle_fwd_suffix, Some("track type=wiggle_0 name="+trackTitlePrefix+"_FWD "+additionalTrackOptions));
          
          val revpairlist = infiles.map(infile => (infile + stranded_alt_wiggle_rev_suffix, 1.0));
-         SumWigglesFast.runHelper2(revpairlist, outfile + stranded_alt_wiggle_rev_suffix, None);
+         SumWigglesFast.runHelper2(revpairlist, outfile + stranded_alt_wiggle_rev_suffix, Some("track type=wiggle_0 name="+trackTitlePrefix+"_REV "+additionalTrackOptions));
          report("done\n","note");
        }
        //SumWigglesFast.run(filelist , outfile , false , false , false , true , None)
