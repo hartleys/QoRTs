@@ -10,7 +10,6 @@ import scala.collection.parallel.immutable.ParSeq;
 object SumWigglesFast {
   
   class SumWigglesFast_runner extends CommandLineRunUtil {
-    override def priority = 30;
     val parser : CommandLineArgParser = 
       new CommandLineArgParser(
           command = "mergeWig",  

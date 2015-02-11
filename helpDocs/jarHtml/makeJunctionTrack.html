@@ -1,12 +1,12 @@
 <h1>QoRTs: Quality Of Rna-seq Tool Set</h1>
 
-<p>Version 0.1.7 (<a href="index.html">back to index</a>)</p>
+<p>Version 0.1.6 (<a href="index.html">back to index</a>)</p>
 
 <h2>Help for java command "makeJunctionTrack"</h2>
 
 <h2>USAGE:</h2>
 
-<pre><code>java [Java Options] -jar QoRTs.jar makeJunctionTrack [options] flatgff.gff.gz outfile
+<pre><code>java [Java Options] -jar QoRTs.jar makeJunctionTrack [options] _flatgff.gff.gz_ _outfile_
 </code></pre>
 
 <h2>DESCRIPTION:</h2>
@@ -15,144 +15,142 @@
 
 <h2>REQUIRED ARGUMENTS:</h2>
 
-<blockquote>
-  <h3>flatgff.gff.gz:</h3>
-</blockquote>
-
-<p>The flattened gff file. (String)</p>
-
-<blockquote>
-  <h3>outfile:</h3>
-</blockquote>
-
-<p>The output bed file, or '-' to write to stdout. If the filename ends with ".gz" or ".zip" then the file will be compressed using the appropriate method. (String)</p>
+<pre><code>flatgff.gff.gz
+    The flattened gff file.
+    (String)
+outfile
+    The output bed file, or '-' to write to stdout. If the 
+    filename ends with ".gz" or ".zip" then the file will be 
+    compressed using the appropriate method.
+    (String)
+</code></pre>
 
 <h2>OPTIONAL ARGUMENTS:</h2>
 
-<blockquote>
-  <h3>--rgb r,g,b:</h3>
-</blockquote>
+<h3>--rgb r,g,b:</h3>
 
-<p>The rgb color for all the bed file lines. (String)</p>
+<p>The rgb color for all the bed file lines.</p>
 
-<blockquote>
-  <h3>--trackTitle title:</h3>
-</blockquote>
+<p>(String)</p>
 
-<p>The title of the track. By default this will be the same as the title parameter. (String)</p>
+<h3>--trackTitle title:</h3>
 
-<blockquote>
-  <h3>--additionalTrackOptions options:</h3>
-</blockquote>
+<p>The title of the track. By default this will be the same as the title parameter.</p>
 
-<p>Additional track definition options, added to the track definition line. See the UCSC documentation for more information. (String)</p>
+<p>(String)</p>
 
-<blockquote>
-  <h3>--includeFullSpliceNames:</h3>
-</blockquote>
+<h3>--additionalTrackOptions options:</h3>
 
-<p>Flag to indicate that full splice names, including gene ID, should be used. (flag)</p>
+<p>Additional track definition options, added to the track definition line. See the UCSC documentation for more information.</p>
 
-<blockquote>
-  <h3>--calcMean:</h3>
-</blockquote>
+<p>(String)</p>
 
-<p>Flag to indicate that the splice junction counts should be averaged, rather than added up. (flag)</p>
+<h3>--includeFullSpliceNames:</h3>
 
-<blockquote>
-  <h3>--ignoreSizeFactors:</h3>
-</blockquote>
+<p>Flag to indicate that full splice names, including gene ID, should be used.</p>
 
-<p>Flag to indicate that this utility should ignore size factors even if they are found in the input listFile. (flag)</p>
+<p>(flag)</p>
 
-<blockquote>
-  <h3>--stranded:</h3>
-</blockquote>
+<h3>--calcMean:</h3>
 
-<p>Flag to indicate that data is stranded. (flag)</p>
+<p>Flag to indicate that the splice junction counts should be averaged, rather than added up.</p>
 
-<blockquote>
-  <h3>--nonflatgtf:</h3>
-</blockquote>
+<p>(flag)</p>
 
-<p>Flag to indicate that instead of a "flattened" gff file, a standard-format gtf file has been specified. If this flag is raised, it will automatically create the standard flattened gtf information, in memory. It will not be written to disk (flag)</p>
+<h3>--ignoreSizeFactors:</h3>
 
-<blockquote>
-  <h3>--skipAnnotatedJunctions:</h3>
-</blockquote>
+<p>Flag to indicate that this utility should ignore size factors even if they are found in the input listFile.</p>
 
-<p>If this option is used, annotated splice junctions will not be included in the output file. Note: this only works if there are novel junctions in the input file. (flag)</p>
+<p>(flag)</p>
 
-<blockquote>
-  <h3>--skipNovelJunctions:</h3>
-</blockquote>
+<h3>--stranded:</h3>
 
-<p>If this option is used, novel splice junctions will not be included in the output file. (flag)</p>
+<p>Flag to indicate that data is stranded.</p>
 
-<blockquote>
-  <h3>--digits num:</h3>
-</blockquote>
+<p>(flag)</p>
 
-<p>The number of digits after the decimal to include for counts. (Int)</p>
+<h3>--nonflatgtf:</h3>
 
-<blockquote>
-  <h3>--infilePrefix infilePrefix:</h3>
-</blockquote>
+<p>Flag to indicate that instead of a "flattened" gff file, a standard-format gtf file has been specified. If this flag is raised, it will automatically create the standard flattened gtf information, in memory. It will not be written to disk</p>
 
-<p>A file prefix for all input junction count files. By default the full file path should be specified by the infile parameter. (String)</p>
+<p>(flag)</p>
 
-<blockquote>
-  <h3>--infileSuffix infileSuffix:</h3>
-</blockquote>
+<h3>--skipAnnotatedJunctions:</h3>
 
-<p>A file suffix for all input junction count files. By default the full file path should be specified by the infile parameter. (String)</p>
+<p>If this option is used, annotated splice junctions will not be included in the output file. Note: this only works if there are novel junctions in the input file.</p>
 
-<blockquote>
-  <h3>--sizeFactorFile val:</h3>
-</blockquote>
+<p>(flag)</p>
 
-<p>A file containing (at least) two columns: a list of sample ID's and their double-precision floating-point size factors. The first line must include at least two columns: "sample.ID" and "size.factor"If this option is set, all counts will be divided by the given normalization factors. The length must be the same as the length of infiles.If sample.ID's is not specified by the --sampleList or --sampleListFile parameters, then all listed samples will be merged. (String)</p>
+<h3>--skipNovelJunctions:</h3>
 
-<blockquote>
-  <h3>--sizeFactors val:</h3>
-</blockquote>
+<p>If this option is used, novel splice junctions will not be included in the output file.</p>
 
-<p>A list of double-precision floating-point values. If this or any size factor option is set, all counts will be divided by the given normalization factors. The length must be the same as the number of files to merge. (CommaDelimitedListOfDoubles)</p>
+<p>(flag)</p>
 
-<blockquote>
-  <h3>--filenames file1.wig,file2.wig,file3.wig.gz,...:</h3>
-</blockquote>
+<h3>--digits num:</h3>
 
-<p>A comma-delimited list of wiggle files to merge. This is optional, and filenames can be inferred from --infilePrefix, --infileSuffix, and the --sampleList, if those options are specified. (CommaDelimitedListOfStrings)</p>
+<p>The number of digits after the decimal to include for counts.</p>
 
-<blockquote>
-  <h3>--sampleList [sampleList.txt | - | samp1,samp2,samp3,...]:</h3>
-</blockquote>
+<p>(Int)</p>
 
-<p>Either a comma-delimited list of sample id's or a file containing a list of sample id's.The file must either contain no title line, or contain a title line that includes a "sample.ID" column. (String)</p>
+<h3>--infilePrefix infilePrefix:</h3>
 
-<blockquote>
-  <h3>--title title:</h3>
-</blockquote>
+<p>A file prefix for all input junction count files. By default the full file path should be specified by the infile parameter.</p>
 
-<p>A title to be prepended to each splice junction name (String)</p>
+<p>(String)</p>
 
-<blockquote>
-  <h3>--verbose:</h3>
-</blockquote>
+<h3>--infileSuffix infileSuffix:</h3>
 
-<p>Flag to indicate that debugging information and extra progress information should be sent to stderr. (flag)</p>
+<p>A file suffix for all input junction count files. By default the full file path should be specified by the infile parameter.</p>
 
-<blockquote>
-  <h3>--quiet:</h3>
-</blockquote>
+<p>(String)</p>
 
-<p>Flag to indicate that only errors and warnings should be sent to stderr. (flag)</p>
+<h3>--sizeFactorFile val:</h3>
+
+<p>A file containing (at least) two columns: a list of sample ID's and their double-precision floating-point size factors. The first line must include at least two columns: "sample.ID" and "size.factor"If this option is set, all counts will be divided by the given normalization factors. The length must be the same as the length of infiles.If sample.ID's is not specified by the --sampleList or --sampleListFile parameters, then all listed samples will be merged.</p>
+
+<p>(String)</p>
+
+<h3>--sizeFactors val:</h3>
+
+<p>A list of double-precision floating-point values. If this or any size factor option is set, all counts will be divided by the given normalization factors. The length must be the same as the number of files to merge.</p>
+
+<p>(CommaDelimitedListOfDoubles)</p>
+
+<h3>--filenames file1.wig,file2.wig,file3.wig.gz,...:</h3>
+
+<p>A comma-delimited list of wiggle files to merge. This is optional, and filenames can be inferred from --infilePrefix, --infileSuffix, and the --sampleList, if those options are specified.</p>
+
+<p>(CommaDelimitedListOfStrings)</p>
+
+<h3>--sampleList [sampleList.txt | - | samp1,samp2,samp3,...]:</h3>
+
+<p>Either a comma-delimited list of sample id's or a file containing a list of sample id's.The file must either contain no title line, or contain a title line that includes a "sample.ID" column.</p>
+
+<p>(String)</p>
+
+<h3>--title title:</h3>
+
+<p>A title to be prepended to each splice junction name</p>
+
+<p>(String)</p>
+
+<h3>--verbose:</h3>
+
+<p>Flag to indicate that debugging information and extra progress information should be sent to stderr.</p>
+
+<p>(flag)</p>
+
+<h3>--quiet:</h3>
+
+<p>Flag to indicate that only errors and warnings should be sent to stderr.</p>
+
+<p>(flag)</p>
 
 <h2>AUTHORS:</h2>
 
-<p>Stephen W. Hartley, Ph.D. <stephen\.hartley@nih\.gov></p>
+<p>List(Stephen W. Hartley, Ph.D. <a href="&#109;&#x61;&#x69;&#x6C;&#x74;&#x6F;:&#x73;t&#x65;&#x70;&#x68;&#101;&#110;&#46;&#x68;a&#114;&#x74;&#108;&#x65;&#x79;&#64;&#110;&#105;&#104;.&#103;&#111;v">&#x73;t&#x65;&#x70;&#x68;&#101;&#110;&#46;&#x68;a&#114;&#x74;&#108;&#x65;&#x79;&#64;&#110;&#105;&#104;.&#103;&#111;v</a>)</p>
 
 <h2>LEGAL:</h2>
 
-<p>This software is "United States Government Work" under the terms of the United States Copyright  Act.  It was written as part of the authors' official duties for the United States Government and  thus cannot be copyrighted.  This software is freely available to the public for use without a  copyright notice.  Restrictions cannot be placed on its present or future use.  Although all reasonable efforts have been taken to ensure the accuracy and reliability of the  software and data, the National Human Genome Research Institute (NHGRI) and the U.S. Government  does not and cannot warrant the performance or results that may be obtained by using this software  or data.  NHGRI and the U.S. Government disclaims all warranties as to performance, merchantability  or fitness for any particular purpose.  In any work or product derived from this material, proper attribution of the authors as the source  of the software or data should be made, using "NHGRI Genome Technology Branch" as the citation.  NOTE: This package includes (internally) the sam-1.113.jar library from picard tools. That package uses the MIT license, which can be accessed using the command:  java -jar thisjarfile.jar help samjdkinfo</p>
+<p>List( This software is "United States Government Work" under the terms of the United States Copyright  Act.  It was written as part of the authors' official duties for the United States Government and  thus cannot be copyrighted.  This software is freely available to the public for use without a  copyright notice.  Restrictions cannot be placed on its present or future use.,  Although all reasonable efforts have been taken to ensure the accuracy and reliability of the  software and data, the National Human Genome Research Institute (NHGRI) and the U.S. Government  does not and cannot warrant the performance or results that may be obtained by using this software  or data.  NHGRI and the U.S. Government disclaims all warranties as to performance, merchantability  or fitness for any particular purpose.,  In any work or product derived from this material, proper attribution of the authors as the source  of the software or data should be made, using "NHGRI Genome Technology Branch" as the citation.,  NOTE: This package includes (internally) the sam-1.113.jar library from picard tools. That package uses the MIT license, which can be accessed using the command:,  java -jar thisjarfile.jar help samjdkinfo)</p>

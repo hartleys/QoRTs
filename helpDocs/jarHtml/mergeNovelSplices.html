@@ -1,12 +1,12 @@
 <h1>QoRTs: Quality Of Rna-seq Tool Set</h1>
 
-<p>Version 0.1.7 (<a href="index.html">back to index</a>)</p>
+<p>Version 0.1.6 (<a href="index.html">back to index</a>)</p>
 
 <h2>Help for java command "mergeNovelSplices"</h2>
 
 <h2>USAGE:</h2>
 
-<pre><code>java [Java Options] -jar QoRTs.jar mergeNovelSplices [options] infileDir sizeFactorFile annotation.gtf.gz outfileDir
+<pre><code>java [Java Options] -jar QoRTs.jar mergeNovelSplices [options] _infileDir_ _sizeFactorFile_ _annotation.gtf.gz_ _outfileDir_
 </code></pre>
 
 <h2>DESCRIPTION:</h2>
@@ -15,78 +15,68 @@
 
 <h2>REQUIRED ARGUMENTS:</h2>
 
-<blockquote>
-  <h3>infileDir:</h3>
-</blockquote>
+<pre><code>infileDir
+    The input file directory.
+    (String)
+sizeFactorFile
 
-<p>The input file directory. (String)</p>
+    (String)
+annotation.gtf.gz
 
-<blockquote>
-  <h3>sizeFactorFile:</h3>
-</blockquote>
-
-<p>(String)</p>
-
-<blockquote>
-  <h3>annotation.gtf.gz:</h3>
-</blockquote>
-
-<p>(String)</p>
-
-<blockquote>
-  <h3>outfileDir:</h3>
-</blockquote>
-
-<p>The output file directory (String)</p>
+    (String)
+outfileDir
+    The output file directory
+    (String)
+</code></pre>
 
 <h2>OPTIONAL ARGUMENTS:</h2>
 
-<blockquote>
-  <h3>--minCount num:</h3>
-</blockquote>
+<h3>--minCount num:</h3>
 
-<p>The minimum mean normalized read coverage needed for inclusion of a novel splice junction. By default, equal to 10.0. (Double)</p>
+<p>The minimum mean normalized read coverage needed for inclusion of a novel splice junction. By default, equal to 10.0.</p>
 
-<blockquote>
-  <h3>--stranded:</h3>
-</blockquote>
+<p>(Double)</p>
 
-<p>Flag to indicate that data is stranded. (flag)</p>
+<h3>--stranded:</h3>
 
-<blockquote>
-  <h3>--stranded_fr_secondstrand:</h3>
-</blockquote>
+<p>Flag to indicate that data is stranded.</p>
 
-<p>Nonfunctional. (flag)</p>
+<p>(flag)</p>
 
-<blockquote>
-  <h3>--noGzipInput:</h3>
-</blockquote>
+<h3>--stranded<em>fr</em>secondstrand:</h3>
 
-<p>Flag to indicate that input files are NOT be compressed into the gzip format. By default almost all input files are assumed to be compressed. (flag)</p>
+<p>Nonfunctional.</p>
 
-<blockquote>
-  <h3>--noGzipOutput:</h3>
-</blockquote>
+<p>(flag)</p>
 
-<p>Flag to indicate that output files should NOT be compressed into the gzip format. By default almost all output files are compressed to save space. (flag)</p>
+<h3>--noGzipInput:</h3>
 
-<blockquote>
-  <h3>--verbose:</h3>
-</blockquote>
+<p>Flag to indicate that input files are NOT be compressed into the gzip format. By default almost all input files are assumed to be compressed.</p>
 
-<p>Flag to indicate that debugging information and extra progress information should be sent to stderr. (flag)</p>
+<p>(flag)</p>
 
-<blockquote>
-  <h3>--quiet:</h3>
-</blockquote>
+<h3>--noGzipOutput:</h3>
 
-<p>Flag to indicate that only errors and warnings should be sent to stderr. (flag)</p>
+<p>Flag to indicate that output files should NOT be compressed into the gzip format. By default almost all output files are compressed to save space.</p>
+
+<p>(flag)</p>
+
+<h3>--verbose:</h3>
+
+<p>Flag to indicate that debugging information and extra progress information should be sent to stderr.</p>
+
+<p>(flag)</p>
+
+<h3>--quiet:</h3>
+
+<p>Flag to indicate that only errors and warnings should be sent to stderr.</p>
+
+<p>(flag)</p>
 
 <h2>AUTHORS:</h2>
 
-<p>Stephen W. Hartley, Ph.D. <stephen\.hartley@nih\.gov></p>
+<p>List(Stephen W. Hartley, Ph.D. <a href="&#x6D;&#97;&#105;&#x6C;&#116;&#x6F;:&#115;&#x74;&#x65;&#x70;&#x68;e&#x6E;&#x2E;&#104;&#97;&#x72;&#116;&#x6C;&#x65;&#121;&#64;&#110;ih&#x2E;g&#x6F;v">&#115;&#x74;&#x65;&#x70;&#x68;e&#x6E;&#x2E;&#104;&#97;&#x72;&#116;&#x6C;&#x65;&#121;&#64;&#110;ih&#x2E;g&#x6F;v</a>)</p>
 
 <h2>LEGAL:</h2>
 
-<p>This software is "United States Government Work" under the terms of the United States Copyright  Act.  It was written as part of the authors' official duties for the United States Government and  thus cannot be copyrighted.  This software is freely available to the public for use without a  copyright notice.  Restrictions cannot be placed on its present or future use.  Although all reasonable efforts have been taken to ensure the accuracy and reliability of the  software and data, the National Human Genome Research Institute (NHGRI) and the U.S. Government  does not and cannot warrant the performance or results that may be obtained by using this software  or data.  NHGRI and the U.S. Government disclaims all warranties as to performance, merchantability  or fitness for any particular purpose.  In any work or product derived from this material, proper attribution of the authors as the source  of the software or data should be made, using "NHGRI Genome Technology Branch" as the citation.  NOTE: This package includes (internally) the sam-1.113.jar library from picard tools. That package uses the MIT license, which can be accessed using the command:  java -jar thisjarfile.jar help samjdkinfo</p>
+<p>List( This software is "United States Government Work" under the terms of the United States Copyright  Act.  It was written as part of the authors' official duties for the United States Government and  thus cannot be copyrighted.  This software is freely available to the public for use without a  copyright notice.  Restrictions cannot be placed on its present or future use.,  Although all reasonable efforts have been taken to ensure the accuracy and reliability of the  software and data, the National Human Genome Research Institute (NHGRI) and the U.S. Government  does not and cannot warrant the performance or results that may be obtained by using this software  or data.  NHGRI and the U.S. Government disclaims all warranties as to performance, merchantability  or fitness for any particular purpose.,  In any work or product derived from this material, proper attribution of the authors as the source  of the software or data should be made, using "NHGRI Genome Technology Branch" as the citation.,  NOTE: This package includes (internally) the sam-1.113.jar library from picard tools. That package uses the MIT license, which can be accessed using the command:,  java -jar thisjarfile.jar help samjdkinfo)</p>

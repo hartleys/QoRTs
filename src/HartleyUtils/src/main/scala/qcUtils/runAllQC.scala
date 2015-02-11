@@ -72,24 +72,78 @@ object runAllQC {
   //def run(args : Array[String]){
   
   class allQC_runner extends CommandLineRunUtil {
-    override def priority = 1;
+    
     val parser : CommandLineArgParser = 
       new CommandLineArgParser(
           command = "QC", 
           quickSynopsis = "Runs a battery of QC tools", 
           synopsis = "", 
-          description = "This utility runs a large battery of QC / data processing tools on a single given sam or bam file."+
-                        "This is the primary function of the QoRT utility."+
+          description = "This utility runs a large battery of QC tools on a single given sam or bam file."+
+                        "This is the primary function of the QoRT utility. "+
                         ""+
                         ""+
                         ""+
                         "",
           argList = 
-
-
+                    new BinaryArgument[Int](name = "minMAPQ",
+                                           arg = List("--minMAPQ"),  
+                                           valueName = "num", 
+                                           argDesc = "Filter reads for the given minimum MAPQ. Set to 0 to turn off mapq filtering.", 
+                                           defaultValue = Some(255)
+                                           ) :: 
+                    new BinaryOptionArgument[String](
+                                         name = "flatgfffile", 
+                                         arg = List("--flatgff"), 
+                                         valueName = "flattenedGffFile.gff.gz",  
+                                         argDesc = "A \"flattened\" gtf file that matches the standard gtf file. Optional."+
+                                                   "It may also be useful for downstream analyses, as it assigns unique identifiers to all exons and splice "+
+                                                   "junctions. The flattened gtf file can be generated using "+
+                                                   "the \"makeFlatGff\" command. Note that the command must be run with the same strandedness code.\n"+
+                                                   "If the filename ends with \".gz\" or \".zip\", the file will be parsed using the appropriate decompression method."
+                                        ) ::
                     new UnaryArgument(   name = "singleEnded", 
                                          arg = List("--singleEnded","-e"), // name of value
-                                         argDesc = "Flag to indicate that reads are single end." // description
+                                         argDesc = "Flag to indicate that reads are single end. WARNING: UNIMPLEMENTED and UNSUPPORTED AT THIS TIME! This utility is not designed for, and will not function properly on single-strand data!" // description
+                                       ) ::
+                    new UnaryArgument( name = "stranded",
+                                         arg = List("--stranded","-s"), // name of value
+                                         argDesc = "Flag to indicate that data is stranded." // description
+                                       ) ::
+                    new BinaryOptionArgument[Int](
+                                         name = "maxReadLength", 
+                                         arg = List("--maxReadLength"), 
+                                         valueName = "len",
+                                         argDesc =  "Sets the maximum read length. For unclipped datasets this option is OPTIONAL since the read length can be determined from the data. "+
+                                                    "By default, QoRTs will attempt to determine the max read length by examining the first 1000 reads. "+
+                                                    "If your data is hard-clipped prior to alignment, then it is STRONGLY recommended that this option be included, or else an error may occur. "+
+                                                    "Note that using data that is hard-clipped prior to alignment is NOT recommended, because this makes it difficult (or impossible) "+
+                                                    "to determine the sequencer read-cycle of each nucleotide base. This may obfuscate cycle-specific artifacts, trends, or errors, the detection of which is one of the primary purposes of QoRTs!"+
+                                                    "In addition, hard clipping (whether before or after alignment) removes quality score data, and thus quality score metrics may be misleadingly optimistic. "+
+                                                    "A MUCH preferable method of removing undesired sequence is to replace such sequence with N's, which preserves the quality score and the sequencer cycle information. "+
+                                                    ""+
+                                                    ""
+                                        ) ::
+                    new UnaryArgument( name = "fr_secondStrand",
+                                         arg = List("--stranded_fr_secondstrand","-a"), // name of value
+                                         argDesc = "Flag to indicate that reads are from a fr_secondstrand type of stranded library (equivalent to the \"stranded = yes\" option in HTSeq or the \"fr_secondStrand\" library-type option in TopHat/CuffLinks). "+
+                                                   "If your data is stranded, you must know the library type in order to analyze it properly. This utility uses the same "+
+                                                   "definitions as cufflinks to define strandedness type. By default, the fr_firststrand "+
+                                                   "library type is assumed for all stranded data (equivalent to the \"stranded = reverse\" option in HTSeq)." // description
+                                       ) ::
+                    new UnaryArgument(    name = "testRun",
+                                         arg = List("--testRun","-t"), // name of value
+                                         argDesc = "Flag to indicate that only the first 100k reads should be read in. Used for testing." // description
+                                       ) ::
+                    new UnaryArgument( name = "noMultiMapped",
+                                         arg = List("--fileContainsNoMultiMappedReads"), // name of value
+                                         argDesc = "Flag to indicate that the input sam/bam file contains only primary alignments (ie, no multi-mapped reads). This flag is ALWAYS OPTIONAL, but when applicable this utility will run (slightly) faster when using this argument. (DEPRECIATED! The performance improvement was marginal)" // description
+                                       ) ::
+                    new UnaryArgument( name = "keepMultiMapped",
+                                         arg = List("--keepMultiMapped"), // name of value
+                                         argDesc = "Flag to indicate that the tool should NOT filter out multi-mapped reads. Note that even with this flag raised this utility will still only "+
+                                                    "use the 'primary' alignment location for each read. By default any reads that are marked as multi-mapped will be ignored entirely."+
+                                                    " Most aligners use the MAPQ value to mark multi-mapped reads. Any read with MAPQ < 255 is assumed to be non-uniquely mapped. "+
+                                                    " Thus: this option is equivalent to setting --minMAPQ to 0."// description
                                        ) ::
                     new UnaryArgument( name = "coordSorted",
                                          arg = List("--coordSorted"), // name of value
@@ -99,45 +153,6 @@ object runAllQC {
                                                    "mapped to extremely distant loci (or different chromosomes), then memory issues may arise. However, this should not be a problem with most datasets. "+
                                                    "Technically this function will also allow QoRTs to work on unsorted bam files, but this is STRONGLY not recommended, as memory usage will by greatly increased." // description
                                        ) ::
-                    new UnaryArgument( name = "stranded",
-                                         arg = List("--stranded","-s"), // name of value
-                                         argDesc = "Flag to indicate that data is stranded." // description
-                                       ) ::
-                    new UnaryArgument( name = "fr_secondStrand",
-                                         arg = List("--stranded_fr_secondstrand","-a"), // name of value
-                                         argDesc = "Flag to indicate that reads are from a fr_secondstrand type of stranded library (equivalent to the \"stranded = yes\" option in HTSeq or the \"fr_secondStrand\" library-type option in TopHat/CuffLinks). "+
-                                                   "If your data is stranded, you must know the library type in order to analyze it properly. This utility uses the same "+
-                                                   "definitions as cufflinks to define strandedness type. By default, the fr_firststrand "+
-                                                   "library type is assumed for all stranded data (equivalent to the \"stranded = reverse\" option in HTSeq)." // description
-                                       ) ::
-                    new BinaryOptionArgument[Int](
-                                         name = "maxReadLength", 
-                                         arg = List("--maxReadLength"), 
-                                         valueName = "len",
-                                         argDesc =  "Sets the maximum read length. For unclipped datasets this option is not necessary since the read length can be determined from the data. "+
-                                                    "By default, QoRTs will attempt to determine the max read length by examining the first 1000 reads. "+
-                                                    "If your data is hard-clipped prior to alignment, then it is strongly recommended that this option be included, or else an error may occur. "+
-                                                    "Note that hard-clipping data prior to alignment is generally not recommended, because this makes it difficult (or impossible) "+
-                                                    "to determine the sequencer read-cycle of each nucleotide base. This may obfuscate cycle-specific artifacts, trends, or errors, the detection of which is one of the primary purposes of QoRTs! "+
-                                                    "In addition, hard clipping (whether before or after alignment) removes quality score data, and thus quality score metrics may be misleadingly optimistic. "+
-                                                    "A MUCH preferable method of removing undesired sequence is to replace such sequence with N's, which preserves the quality score and the sequencer cycle information while still removing undesired sequence. "+
-                                                    ""+
-                                                    ""
-                                        ) ::
-
-                    new UnaryArgument(    name = "testRun",
-                                         arg = List("--testRun","-t"), // name of value
-                                         argDesc = "Flag to indicate that only the first 100k reads should be read in. Used for testing." // description
-                                       ) ::
-
-                    new UnaryArgument( name = "keepMultiMapped",
-                                         arg = List("--keepMultiMapped"), // name of value
-                                         argDesc = "Flag to indicate that the tool should NOT filter out multi-mapped reads. Note that even with this flag raised this utility will still only "+
-                                                    "use the 'primary' alignment location for each read. By default any reads that are marked as multi-mapped will be ignored entirely."+
-                                                    " Most aligners use the MAPQ value to mark multi-mapped reads. Any read with MAPQ < 255 is assumed to be non-uniquely mapped. "+
-                                                    " Thus: this option is equivalent to setting --minMAPQ to 0."// description
-                                       ) ::
-
                     //new UnaryArgument( name = "neverPartiallyUnpaired",
                     //                     arg = List("--neverPartiallyUnpaired"), // name of value
                     //                     argDesc = "Flag to indicate that when a read's mate is unmapped, it always appears in the input file. This option is always optional, but will improve performance." // description
@@ -146,7 +161,10 @@ object runAllQC {
                                          arg = List("--noGzipOutput"), // name of value
                                          argDesc = "Flag to indicate that output files should NOT be compressed into the gzip format. By default almost all output files are compressed to save space." // description
                                        ) ::
-
+                    new UnaryArgument( name = "parallelFileRead",
+                                         arg = List("--parallelFileRead"), // name of value
+                                         argDesc = "DEPRECIATED: DO NOT USE. Flag to indicate that bam file reading should be run in paralell for increased speed. Note that in this mode you CANNOT read from stdin. Also note that for this to do anything useful, the numThreads option must be set to some number greater than 1. Also note that additional threads above 9 will have no appreciable affect on speed." // description
+                                       ) ::
                     new BinaryOptionArgument[String](
                                          name = "readGroup", 
                                          arg = List("--readGroup"), 
@@ -155,14 +173,40 @@ object runAllQC {
                                                     "readGroupName (using an RG tag). This can be used if multiple read-groups have already been combined "+
                                                     "into a single bam file, but you want to summarize each read-group separately."
                                         ) ::
-
-                    new BinaryArgument[Int](name = "minMAPQ",
-                                           arg = List("--minMAPQ"),  
-                                           valueName = "num", 
-                                           argDesc = "Filter out reads with less than the given MAPQ. Set to 0 to turn off mapq filtering.", 
-                                           defaultValue = Some(255)
-                                           ) :: 
-
+                    new BinaryOptionArgument[String](
+                                         name = "restrictToGeneList", 
+                                         arg = List("--restrictToGeneList"), 
+                                         valueName = "geneList.txt",  
+                                         argDesc =  "If this option is set, almost all analyses will be restricted to reads that are found on genes named in the "+
+                                                    "supplied gene list file. The file should contain a gene ID on each line and nothing else. "+
+                                                    "The only functions that will be run on the full set of all reads will be the functions that calculate "+
+                                                    "the gene mapping itself. NOTE: if you want to include ambiguous reads, include a line with the text: '_ambiguous'. "+
+                                                    "If you want to include reads that do not map to any known feature, include a line with the text: '_no_feature'. "+
+                                                    "WARNING: this is not intended for default use. It is intended to be used when re-running QoRTs, with the intention of "+
+                                                    "examining artifacts that can be caused in various plots by a small number of genes with extremely high coverage. For example, "+
+                                                    "GC content plots sometimes contain visible spikes caused by small mitochondrial genes with extremely high expression."+
+                                                    "ADDITIONAL WARNING: This feature is in BETA, and is not yet fully tested."
+                                        ) ::
+                    new BinaryOptionArgument[String](
+                                         name = "dropGeneList", 
+                                         arg = List("--dropGeneList"), 
+                                         valueName = "geneList.txt",  
+                                         argDesc =  "If this option is set, almost all analyses will be restricted to reads that are NOT found on genes named in the "+
+                                                    "supplied gene list file. The file should contain a gene ID on each line and nothing else. "+
+                                                    "The only functions that will be run on the full set of all reads will be the functions that calculate "+
+                                                    "the gene mapping itself. NOTE: if you want to EXCLUDE ambiguous reads, include a line with the text: '_ambiguous'. "+
+                                                    "If you want to EXCLUDE reads that do not map to any known feature, include a line with the text: '_no_feature'. "+
+                                                    "WARNING: this is not intended for default use. It is intended to be used when re-running QoRTs, with the intention of "+
+                                                    "examining artifacts that can be caused by certain individual 'problem genes'. For example, "+
+                                                    "GC content plots sometimes contain visible spikes caused by small transcripts / RNA's with extremely high expression levels."+
+                                                    "ADDITIONAL WARNING: This feature is in BETA, and is not yet fully tested."
+                                        ) ::
+                    new BinaryArgument[Int](name = "numThreads",
+                                                        arg = List("--numThreads"),  
+                                                        valueName = "num", 
+                                                        argDesc = "DEPRECIATED: DO NOT USE. The number of threads to allow. By default this utility will only allow one thread to be used.", 
+                                                        defaultValue = Some(1)
+                                                        ) :: 
                     new BinaryArgument[List[String]](   name = "dropChromList",
                                                         arg = List("--dropChrom"),  
                                                         valueName = "dropChromosomes", 
@@ -223,61 +267,6 @@ object runAllQC {
                                                      "Note that no browser tracks will be created by default, unless the '--chromSizes' option is set. Bed files can also be generated using the option '--addFunction makeJunctionBed'", 
                                            defaultValue = Some("UntitledTrack")
                                            ) :: 
-                    new BinaryOptionArgument[String](
-                                         name = "flatgfffile", 
-                                         arg = List("--flatgff"), 
-                                         valueName = "flattenedGffFile.gff.gz",  
-                                         argDesc = "A \"flattened\" gtf file that matches the standard gtf file. Optional."+
-                                                   "It may also be useful for downstream analyses, as it assigns unique identifiers to all exons and splice "+
-                                                   "junctions. The flattened gtf file can be generated using "+
-                                                   "the \"makeFlatGff\" command. Note that the command must be run with the same strandedness code.\n"+
-                                                   "If the filename ends with \".gz\" or \".zip\", the file will be parsed using the appropriate decompression method."
-                                        ) ::
-
-                      new BinaryOptionArgument[String](
-                                         name = "restrictToGeneList", 
-                                         arg = List("--restrictToGeneList"), 
-                                         valueName = "geneList.txt",  
-                                         argDesc =  "If this option is set, almost all analyses will be restricted to reads that are found on genes named in the "+
-                                                    "supplied gene list file. The file should contain a gene ID on each line and nothing else. "+
-                                                    "The only functions that will be run on the full set of all reads will be the functions that calculate "+
-                                                    "the gene mapping itself. NOTE: if you want to include ambiguous reads, include a line with the text: '_ambiguous'. "+
-                                                    "If you want to include reads that do not map to any known feature, include a line with the text: '_no_feature'. "+
-                                                    "WARNING: this is not intended for default use. It is intended to be used when re-running QoRTs, with the intention of "+
-                                                    "examining artifacts that can be caused in various plots by a small number of genes with extremely high coverage. For example, "+
-                                                    "GC content plots sometimes contain visible spikes caused by small mitochondrial genes with extremely high expression."+
-                                                    "ADDITIONAL WARNING: This feature is in BETA, and is not yet fully tested."
-                                        ) ::
-                    new BinaryOptionArgument[String](
-                                         name = "dropGeneList", 
-                                         arg = List("--dropGeneList"), 
-                                         valueName = "geneList.txt",  
-                                         argDesc =  "If this option is set, almost all analyses will be restricted to reads that are NOT found on genes named in the "+
-                                                    "supplied gene list file. The file should contain a gene ID on each line and nothing else. "+
-                                                    "The only functions that will be run on the full set of all reads will be the functions that calculate "+
-                                                    "the gene mapping itself. NOTE: if you want to EXCLUDE ambiguous reads, include a line with the text: '_ambiguous'. "+
-                                                    "If you want to EXCLUDE reads that do not map to any known feature, include a line with the text: '_no_feature'. "+
-                                                    "WARNING: this is not intended for default use. It is intended to be used when re-running QoRTs, with the intention of "+
-                                                    "examining artifacts that can be caused by certain individual 'problem genes'. For example, "+
-                                                    "GC content plots sometimes contain visible spikes caused by small transcripts / RNA's with extremely high expression levels."+
-                                                    "ADDITIONAL WARNING: This feature is in BETA, and is not yet fully tested."
-                                        ) ::                                      
-                                        //DEPRECIATED OPTIONS:
-                    new UnaryArgument( name = "noMultiMapped",
-                                         arg = List("--fileContainsNoMultiMappedReads"), // name of value
-                                         argDesc = "Flag to indicate that the input sam/bam file contains only primary alignments (ie, no multi-mapped reads). This flag is ALWAYS OPTIONAL, but when applicable this utility will run (slightly) faster when using this argument. (DEPRECIATED! The performance improvement was marginal)" // description
-                                       ) ::
-                    new UnaryArgument( name = "parallelFileRead",
-                                         arg = List("--parallelFileRead"), // name of value
-                                         argDesc = "DEPRECIATED: DO NOT USE. Flag to indicate that bam file reading should be run in paralell for increased speed. Note that in this mode you CANNOT read from stdin. Also note that for this to do anything useful, the numThreads option must be set to some number greater than 1. Also note that additional threads above 9 will have no appreciable affect on speed." // description
-                                       ) ::    
-                    new BinaryArgument[Int](name = "numThreads",
-                                                        arg = List("--numThreads"),  
-                                                        valueName = "num", 
-                                                        argDesc = "DEPRECIATED, nonfunctional.", 
-                                                        defaultValue = Some(1)
-                                                        ) :: 
-//MANDATORY OPTIONS:
                     new FinalArgument[String]( 
                                          name = "infile",
                                          valueName = "infile",

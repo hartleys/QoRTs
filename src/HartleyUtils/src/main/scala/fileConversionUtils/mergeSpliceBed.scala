@@ -9,7 +9,6 @@ import internalUtils.optionHolder._;
 
 object mergeSpliceBed {
   class merger extends CommandLineRunUtil {
-     
      val parser : CommandLineArgParser = 
        new CommandLineArgParser(
           command = "mergeSpliceBed", 

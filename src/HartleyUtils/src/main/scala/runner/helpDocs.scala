@@ -112,7 +112,7 @@ object helpDocs {
       sb.append("\n");
       
       sb.append("COMMANDS:\n");
-      for((arg, cmdMaker) <- runner.sortedCommandList){
+      for((arg, cmdMaker) <- runner.utilCommandList){
         
         val parser = cmdMaker().parser;
         //Note: Hack! the line below must be at least as long as COMMAND_MAX_LENGTH!
@@ -137,21 +137,21 @@ object helpDocs {
       sb.append("## General Help\n\n");
       
       sb.append("## DESCRIPTION:\n\n");
-      sb.append( escapeToMarkdown(DESCRIPTION.mkString(" ")) + "\n\n");
+      sb.append( DESCRIPTION + "\n\n");
       sb.append("NOTE: if you run into OutOfMemoryExceptions, try adding the java options: \"-Xmx8G\""+"\n\n");
       
       sb.append("## GENERAL SYNTAX:\n\n");
       sb.append("    java [_java_options_] -jar "+runner.Runner_ThisProgramsExecutableJarFileName +" COMMAND [options]"+"\n\n");
       
       sb.append("## COMMANDS:\n");
-      for((arg, cmdMaker) <- runner.sortedCommandList){
+      for((arg, cmdMaker) <- runner.utilCommandList){
         val parser = cmdMaker().parser;
         
         sb.append("### ["+arg+"]("+arg+".html)\n\n");
-        sb.append("> "+escapeToMarkdown(parser.getDescription) + "\n\n");
+        sb.append(""+parser.getDescription + "\n\n");
       }
       sb.append("## AUTHORS:\n\n");
-      sb.append(escapeToMarkdown(AUTHOR.mkString(", ")) + "\n");
+      sb.append(lineseq2string(wrapLinesWithIndent(AUTHOR, internalUtils.commandLineUI.CLUI_CONSOLE_LINE_WIDTH, "    ", false)) + "\n");
       
       sb.append("## LEGAL:\n\n");
       sb.append(lineseq2string(wrapLinesWithIndent(LEGAL, internalUtils.commandLineUI.CLUI_CONSOLE_LINE_WIDTH, "    ", false)) + "\n");
@@ -160,7 +160,7 @@ object helpDocs {
       indexwriter.write(sb.toString);
       indexwriter.close();
       
-      for((arg, cmdMaker) <- runner.sortedCommandList){
+      for((arg, cmdMaker) <- runner.utilCommandList){
         val parser = cmdMaker().parser;
         val writer = openWriter(outdir+arg+".md");
         writer.write(parser.getMarkdownManual());

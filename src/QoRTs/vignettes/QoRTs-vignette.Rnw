@@ -63,9 +63,9 @@ BiocStyle::latex()
 National Human Genome Research Institute\\
 National Institutes of Health}
 \date{August 8 2014\\
-February 11, 2015 %REPLACE_THIS_LINE_WITH_REVISION_DATE
+February 10, 2015 %REPLACE_THIS_LINE_WITH_REVISION_DATE
 \\
-v0.1.7 %REPLACE_THIS_LINE_WITH_VERSION_NUMBER
+v0.1.6 %REPLACE_THIS_LINE_WITH_VERSION_NUMBER
 }
 
 \begin{document}
@@ -100,9 +100,7 @@ In its primary role as a QC tool it can produce a wide variety of graphs, plots,
 
 The QoRTs package is composed of two parts: a java jar-file (for data processing) and a companion R package (for generating tables, figures, and plots). The java utility is written in the Scala programming language (v2.11.1), however, it has been compiled to java byte-code and does not require an installation of Scala (or any other external libraries) in order to function. The entire QoRTs toolkit can be used in almost any operating system that supports java and R.
 
-This vignette primarily covers the quality control functionality of QoRTs, and briefly covers the other functions and capabilities.
-
-The most recent release of QoRTs is available on the QoRTs github page (\url{http://github.com/hartleys/QoRTs}). Additional help and documentation is available online (\url{https://dl.dropboxusercontent.com/u/103621176/QoRTs/helpDocs/index.html}). A comprehensive walkthrough covering the entire process from post-alignment all the way to differential expression analysis, along with a full example dataset and example output can be found online (\url{https://dl.dropboxusercontent.com/u/103621176/qorts/exData/QoRTsFullExampleData.zip}).
+This vignette primarily covers the quality control functionality of QoRTs, and only briefly covers the other functions and capabilities. A comprehensive walkthrough covering the entire process from post-alignment all the way to differential expression analysis, along with a full example dataset and example output, can be found online: \url{ftp://nhgriftp.nhgri.nih.gov/pub/outgoing/mullikin/example_data/QoRTsFullExampleData.zip}.
 
 %-----------------------------------------------------------
 \section{Requirements}  \label{sec:reqs}

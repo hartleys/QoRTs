@@ -1,5 +1,5 @@
-# QoRTs v0.1.7
-(Compiled Wed Feb 11 14:09:01 EST 2015)
+# QoRTs v0.1.6
+(Compiled Tue Feb 10 17:41:21 EST 2015)
 
 The QoRTs software package is a fast, efficient, and portable multifunction toolkit designed to assist in
 the analysis, quality control, and data management of RNA-Seq datasets. Its primary function is to aid
@@ -10,16 +10,14 @@ files suitable for use with the UCSC genome browser (or any compatible browser).
 
 The entire QoRTs toolkit can be used in almost any operating system that supports java and R.
 
-The most recent release of QoRTs is available on the [QoRTs github page](github.com/hartleys/QoRTs). Additional help and documentation is available online [here](dl.dropboxusercontent.com/u/103621176/QoRTs/helpDocs/index.html).
-
 ##INSTALLATION:
 The R package can be installed in R using the command:
 
-    > install.packages("QoRTs_0.1.7.tar.gz", repos = NULL, type="source")
+    > install.packages("QoRTs_0.1.6.tar.gz", repos = NULL, type="source")
 
 or using the command-line:
     
-    R CMD INSTALL QoRTs_0.1.7.tar.gz
+    R CMD INSTALL QoRTs_0.1.6.tar.gz
 
 The java jar file does not need to be installed. 
 Just execute it using the java command:
@@ -30,16 +28,16 @@ Just execute it using the java command:
 The example QC output can be found on the github main page, and installed
 with the command:
     
-    install.packages("QoRTsExampleData_0.1.7.tar.gz", repos = NULL, type="source")
+    install.packages("QoRTsExampleData_0.1.6.tar.gz", repos = NULL, type="source")
 
 The original bam files are too large to upload to github. 
 These files, along with a comprehensive walkthrough demonstrating 
-how all analysis can be run on them, can be found [here](
-https://dl.dropboxusercontent.com/u/103621176/qorts/exData/QoRTsFullExampleData.zip). 
+how all analysis can be run on them, can be found here: 
+ftp://nhgriftp.nhgri.nih.gov/pub/outgoing/mullikin/example_data/QoRTsFullExampleData.zip. 
 (File is ~1.5gb)
 
 ##MORE INFORMATION:
-For more information, see the QoRTs vignette or the [QoRTs help and documentation page](dl.dropboxusercontent.com/u/103621176/QoRTs/helpDocs/index.html).
+For more information, see the QoRTs vignette, QoRTs-vignette.pdf
 
 Additional options and syntax information for the main QC java utility 
 can be found using the command:

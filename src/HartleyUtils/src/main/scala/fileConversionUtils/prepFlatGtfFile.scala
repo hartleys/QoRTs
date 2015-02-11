@@ -30,7 +30,6 @@ import scala.collection.JavaConversions._
 object prepFlatGtfFile {
 
   class prepFlatGtfFile_runner extends CommandLineRunUtil {
-    override def priority = 50;
     val parser : CommandLineArgParser = 
       new CommandLineArgParser(
           command = "makeFlatGff", 

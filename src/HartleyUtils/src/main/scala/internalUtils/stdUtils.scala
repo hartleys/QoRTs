@@ -268,15 +268,6 @@ object stdUtils {
    * String conversion:
    **************************************************************************************************************************/
   
-  def escapeToMarkdown(s : String) : String = {
-    escapifyString(s, List("`","\\*","_","\\{","\\}","\\[","\\]","\\(","\\)","\\#","\\+","-","\\.","!"));
-  }
-  def escapifyString(s : String, escapifyStrings : Seq[String], escapeString : String = "\\\\") : String = {
-    escapifyStrings.foldLeft[String](s)((soFar, curr) => {
-      soFar.replaceAll(curr,escapeString+curr);
-    });
-  }
-  
   def string2float(s : String) : Float = {
     augmentString(s).toFloat
   }

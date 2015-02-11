@@ -7,15 +7,9 @@ abstract class QCUtility[+B <: Any] {
    def runOnReadPair(r1 : SAMRecord, r2 : SAMRecord, readNum : Int) : B;
    def writeOutput(outfile : String, summaryWriter : WriterUtil);
    def getUtilityName : String;
-   def priority : Int = 255;
 }
 
 object QCUtility {
-  trait QCU_Ordering extends Ordering[QCUtility[Any]] {
-    def compare(a : QCUtility[Any], b : QCUtility[Any]) = implicitly[Ordering[Int]].compare(a.priority,b.priority);
-  }
-  implicit object QCUtility extends QCU_Ordering;
-  
   def getBlankStringUtil : QCUtility[String] = {
     new blankStringQCUtility;
   }

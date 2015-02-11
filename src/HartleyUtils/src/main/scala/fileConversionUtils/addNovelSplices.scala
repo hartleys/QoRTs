@@ -18,7 +18,6 @@ import internalUtils.optionHolder._;
 object addNovelSplices {
 
   class mergeNovelSplices extends CommandLineRunUtil {
-     override def priority = 29;
      val parser : CommandLineArgParser = 
        new CommandLineArgParser(
           command = "mergeNovelSplices", 
