@@ -10,6 +10,8 @@ files suitable for use with the UCSC genome browser (or any compatible browser).
 
 The entire QoRTs toolkit can be used in almost any operating system that supports java and R.
 
+Help and documentation can be found [here](https://dl.dropboxusercontent.com/u/103621176/QoRTs/helpDoc_v0.1.6/index.html)
+
 ##INSTALLATION:
 The R package can be installed in R using the command:
 
@@ -63,7 +65,7 @@ For a full listing of all help topics for the R utility, use the R command:
 
 ##LEGAL:
 This software is "United States Government Work" under the terms of the United 
-States Copyright Act. It was written as part of the authors’ official duties 
+States Copyright Act. It was written as part of the authorsâ€™ official duties 
 for the United States Government and thus QoRT Package User Manual cannot be 
 copyrighted. This software is freely available to the public for use without a 
 copyright notice. Restrictions cannot be placed on its present or future use.
