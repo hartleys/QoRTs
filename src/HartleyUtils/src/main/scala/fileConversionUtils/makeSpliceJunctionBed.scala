@@ -11,6 +11,7 @@ import internalUtils.GtfTool._;
 object makeSpliceJunctionBed {
 
   class converter extends CommandLineRunUtil { 
+     override def priority = 25;
      val parser : CommandLineArgParser = 
        new CommandLineArgParser(
           command = "makeJunctionTrack", 

@@ -3,6 +3,6 @@
 	<classpathentry kind="src" path="src/main/scala"/>
 	<classpathentry kind="con" path="org.scala-ide.sdt.launching.SCALA_CONTAINER"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.6"/>
-	<classpathentry kind="lib" path="C:/Users/hartleys/Dropbox/nihwork/ScalaProjects/sam-1.113.jar"/>
+	<classpathentry kind="lib" path="C:/Users/hartleys/Work/nihwork/ScalaProjects/sam-1.113.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

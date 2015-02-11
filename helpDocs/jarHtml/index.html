@@ -1,12 +1,12 @@
 <h1>QoRTs: Quality Of Rna-seq Tool Set</h1>
 
-<p>0.1.6</p>
+<p>0.1.7</p>
 
 <h2>General Help</h2>
 
 <h2>DESCRIPTION:</h2>
 
-<p>List(This jar-file contains the data processing module of the software package QoRTs, which is intended for use with Paired-End or Single-End High-Throughput RNA-Seq data., This tool can perform a number of different functions to assist in assessing the data quality, detecting errors or biases, performing analyses, data cleaning, data visualization, and data formatting.)</p>
+<p>This jar-file contains the data processing module of the software package QoRTs, which is intended for use with Paired-End or Single-End High-Throughput RNA-Seq data. This tool can perform a number of different functions to assist in assessing the data quality, detecting errors or biases, performing analyses, data cleaning, data visualization, and data formatting.</p>
 
 <p>NOTE: if you run into OutOfMemoryExceptions, try adding the java options: "-Xmx8G"</p>
 
@@ -17,43 +17,58 @@
 
 <h2>COMMANDS:</h2>
 
-<h3><a href="makeJunctionTrack.html">makeJunctionTrack</a></h3>
+<h3><a href="QC.html">QC</a></h3>
 
-<p>This utility takes the splice junction count files created by the QoRTs QC utility across multiple samples and creates a single merged splice junction 'bed' file that lists each splice junction along with the mean read-pair coverage counts (optionally, the mean normalized counts).This splice junction bed file can be used to visualize splice junction counts using the UCSC genome browser and other similar utilities.</p>
-
-<h3><a href="bamToWiggle.html">bamToWiggle</a></h3>
-
-<p>Generates '.wig' wiggle files, suitable for use with the UCSC genome browser or similar tools. Wiggle files contain depth-of-coverage counts for all equally-sized windows across the entire genome. These depth-of-coverage counts can be either be by read (the default) or by read-pair.</p>
+<blockquote>
+  <p>This utility runs a large battery of QC / data processing tools on a single given sam or bam file.This is the primary function of the QoRT utility.</p>
+</blockquote>
 
 <h3><a href="mergeCounts.html">mergeCounts</a></h3>
 
-<p>This utility merges count, wiggle, and similar data from multiple QoRTs QC runs. This is intended for use in merging the data from multiple technical replicates of the same sample/library.This tool will then merge all count data (including gene-level, exon-level, and known/novel splice-junction) counts, as well as wiggle files, assuming all files use the standard naming conventions (for example, the fwd-strand wiggle files must be named: "QC.wiggle.fwd.wig.gz", etc).If any files are missing, they will be skipped.</p>
-
-<h3><a href="mergeNovelSplices.html">mergeNovelSplices</a></h3>
-
-<p>This utility takes the QC output from the standard QC utility run on a series of samples and performs two functions: first, it compiles all splice junctions across all samples and filters low-coverage novel splice junctions by mean coverage across all samples (optionally normalized with user-supplied size factors). It then assigns unique identifiers to each novel splice junction that passed this filter, and outputs a special flat gff file listing all exons, annotated splice junctions and passed-filter novel splice junctions with assigned unique identifiers for all features. Next, it uses these unique identifiers to create a new set of JunctionSeq-formatted count files, one for each input sample. This new count file will include counts for the passed-filter novel splice junctions in addition to the usual counts for annotated splice junctions, exons, and aggregated-genes, all listed by the assigned unique identifiers.</p>
-
-<h3><a href="makeFlatGff.html">makeFlatGff</a></h3>
-
-<p>When running the QC command, QoRT first generates a set of non-overlapping exonic fragments out of all the exons in the genome annotation gtf file. It then assigns each exonic fragment a unique identifier. Similarly, it assigns every splice junction its own unique identifier. This command can be used to write that data to file.
-It can also be used to produce a flattened gff file that adheres to the specifications used by DEXSeq.</p>
-
-<h3><a href="QC.html">QC</a></h3>
-
-<p>This utility runs a large battery of QC tools on a single given sam or bam file.This is the primary function of the QoRT utility. </p>
+<blockquote>
+  <p>This utility merges count, wiggle, and similar data from multiple QoRTs QC runs. This is intended for use in merging the data from multiple technical replicates of the same sample/library.This tool will then merge all count data (including gene-level, exon-level, and known/novel splice-junction) counts, as well as wiggle files, assuming all files use the standard naming conventions (for example, the fwd-strand wiggle files must be named: "QC.wiggle.fwd.wig.gz", etc).If any files are missing, they will be skipped.</p>
+</blockquote>
 
 <h3><a href="mergeAllCounts.html">mergeAllCounts</a></h3>
 
-<p>This tool uses a replicate decoder to merge count/wiggle data of all techical replicates in a dataset, producing sample-wise counts. You must supply a replicate decoder which indicates which replicates are technical replicates of which samples. This tool will then merges each sample's technical replicates using the "mergeCounts" function.</p>
+<blockquote>
+  <p>This tool uses a replicate decoder to merge count/wiggle data of all techical replicates in a dataset, producing sample-wise counts. You must supply a replicate decoder which indicates which replicates are technical replicates of which samples. This tool will then merges each sample's technical replicates using the "mergeCounts" function.</p>
+</blockquote>
+
+<h3><a href="bamToWiggle.html">bamToWiggle</a></h3>
+
+<blockquote>
+  <p>Generates '.wig' wiggle files, suitable for use with the UCSC genome browser or similar tools. Wiggle files contain depth-of-coverage counts for all equally-sized windows across the entire genome. These depth-of-coverage counts can be either be by read (the default) or by read-pair.</p>
+</blockquote>
+
+<h3><a href="makeJunctionTrack.html">makeJunctionTrack</a></h3>
+
+<blockquote>
+  <p>This utility takes the splice junction count files created by the QoRTs QC utility across multiple samples and creates a single merged splice junction 'bed' file that lists each splice junction along with the mean read-pair coverage counts (optionally, the mean normalized counts).This splice junction bed file can be used to visualize splice junction counts using the UCSC genome browser and other similar utilities.</p>
+</blockquote>
+
+<h3><a href="mergeNovelSplices.html">mergeNovelSplices</a></h3>
+
+<blockquote>
+  <p>This utility takes the QC output from the standard QC utility run on a series of samples and performs two functions: first, it compiles all splice junctions across all samples and filters low-coverage novel splice junctions by mean coverage across all samples (optionally normalized with user-supplied size factors). It then assigns unique identifiers to each novel splice junction that passed this filter, and outputs a special flat gff file listing all exons, annotated splice junctions and passed-filter novel splice junctions with assigned unique identifiers for all features. Next, it uses these unique identifiers to create a new set of JunctionSeq-formatted count files, one for each input sample. This new count file will include counts for the passed-filter novel splice junctions in addition to the usual counts for annotated splice junctions, exons, and aggregated-genes, all listed by the assigned unique identifiers.</p>
+</blockquote>
 
 <h3><a href="mergeWig.html">mergeWig</a></h3>
 
-<p>This utility merges multiple '.wig' wiggle files into a single summary '.wig' wiggle file. Optionally it can be used to display the mean read-pair coverage of each window across all input wiggle files rather than the sum. Also optionally, the mean/sum can be weighted by a set of user-supplied normalization factors.</p>
+<blockquote>
+  <p>This utility merges multiple '.wig' wiggle files into a single summary '.wig' wiggle file. Optionally it can be used to display the mean read-pair coverage of each window across all input wiggle files rather than the sum. Also optionally, the mean/sum can be weighted by a set of user-supplied normalization factors.</p>
+</blockquote>
+
+<h3><a href="makeFlatGff.html">makeFlatGff</a></h3>
+
+<blockquote>
+  <p>When running the QC command, QoRT first generates a set of non-overlapping exonic fragments out of all the exons in the genome annotation gtf file. It then assigns each exonic fragment a unique identifier. Similarly, it assigns every splice junction its own unique identifier. This command can be used to write that data to file.
+It can also be used to produce a flattened gff file that adheres to the specifications used by DEXSeq.</p>
+</blockquote>
 
 <h2>AUTHORS:</h2>
 
-<pre><code>Stephen W. Hartley, Ph.D. &lt;stephen.hartley@nih.gov&gt;
-</code></pre>
+<p>Stephen W. Hartley, Ph.D. <stephen\.hartley@nih\.gov></p>
 
 <h2>LEGAL:</h2>
 

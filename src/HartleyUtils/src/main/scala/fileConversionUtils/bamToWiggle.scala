@@ -29,6 +29,7 @@ import qcUtils.QCUtility;
 object bamToWiggle { 
   
   class wiggleMaker extends CommandLineRunUtil {
+     override def priority = 24;
      val parser : CommandLineArgParser = 
        new CommandLineArgParser(
           command = "bamToWiggle", 
