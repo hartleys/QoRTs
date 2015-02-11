@@ -1,63 +1,52 @@
 # QoRTs: Quality Of Rna-seq Tool Set
-Version 0.1.6 ([back to index](index.html))
+Version 0.1.7 ([back to index](index.html))
 
 ## Help for java command "makeFlatGff"
 
 ## USAGE:
 
-    java [Java Options] -jar QoRTs.jar makeFlatGff [options] _gtffile_ _flatgfffile_
+    java [Java Options] -jar QoRTs.jar makeFlatGff [options] gtffile flatgfffile
 
 
 ## DESCRIPTION:
 
-When running the QC command, QoRT first generates a set of non-overlapping exonic fragments out of all the exons in the genome annotation gtf file. It then assigns each exonic fragment a unique identifier. Similarly, it assigns every splice junction its own unique identifier. This command can be used to write that data to file.
-It can also be used to produce a flattened gff file that adheres to the specifications used by DEXSeq.
+When running the QC command, QoRT first generates a set of non\-overlapping exonic fragments out of all the exons in the genome annotation gtf file\. It then assigns each exonic fragment a unique identifier\. Similarly, it assigns every splice junction its own unique identifier\. This command can be used to write that data to file\.
+It can also be used to produce a flattened gff file that adheres to the specifications used by DEXSeq\.
 
 ## REQUIRED ARGUMENTS:
-    gtffile
-        The gtf annotation file. This tool was designed to use the 
-        standard gtf annotations provided by Ensembl, but other 
-        annotations can be used as well. Note: if the file ends in 
-        .zip or .gz the compression method will be auto-detected and 
-        read accordingly.
-        (String)
-    flatgfffile
-        The output destination for the "flattened" gff annotation 
-        file to be created, or '-' to write to stdout. Note: if the 
-        filename ends in ".zip" or ".gz" the corresponding 
-        compression method will be applied.
-        (String)
+> ### gtffile:
+
+The gtf annotation file\. This tool was designed to use the standard gtf annotations provided by Ensembl, but other annotations can be used as well\. Note: if the file ends in \.zip or \.gz the compression method will be auto\-detected and read accordingly\. \(String\)
+
+
+> ### flatgfffile:
+
+The output destination for the "flattened" gff annotation file to be created, or '\-' to write to stdout\. Note: if the filename ends in "\.zip" or "\.gz" the corresponding compression method will be applied\. \(String\)
+
+
 
 ## OPTIONAL ARGUMENTS:
-### --stranded:
+> ### \-\-stranded:
 
-Flag to indicate that reads are stranded.
+Flag to indicate that reads are stranded\. \(flag\)
 
-(flag)
+> ### \-\-DEXSeqFmt:
 
-### --DEXSeqFmt:
+Flag to indicate that the output gff file should be formatted for use with DEXSeq\. \(flag\)
 
-Flag to indicate that the output gff file should be formatted for use with DEXSeq.
+> ### \-\-verbose:
 
-(flag)
+Flag to indicate that debugging information and extra progress information should be sent to stderr\. \(flag\)
 
-### --verbose:
+> ### \-\-quiet:
 
-Flag to indicate that debugging information and extra progress information should be sent to stderr.
-
-(flag)
-
-### --quiet:
-
-Flag to indicate that only errors and warnings should be sent to stderr.
-
-(flag)
+Flag to indicate that only errors and warnings should be sent to stderr\. \(flag\)
 
 ## AUTHORS:
 
-List(Stephen W. Hartley, Ph.D. <stephen.hartley@nih.gov>)
+Stephen W\. Hartley, Ph\.D\. <stephen\.hartley@nih\.gov>
 
 ## LEGAL:
 
-List( This software is "United States Government Work" under the terms of the United States Copyright  Act.  It was written as part of the authors' official duties for the United States Government and  thus cannot be copyrighted.  This software is freely available to the public for use without a  copyright notice.  Restrictions cannot be placed on its present or future use.,  Although all reasonable efforts have been taken to ensure the accuracy and reliability of the  software and data, the National Human Genome Research Institute (NHGRI) and the U.S. Government  does not and cannot warrant the performance or results that may be obtained by using this software  or data.  NHGRI and the U.S. Government disclaims all warranties as to performance, merchantability  or fitness for any particular purpose.,  In any work or product derived from this material, proper attribution of the authors as the source  of the software or data should be made, using "NHGRI Genome Technology Branch" as the citation.,  NOTE: This package includes (internally) the sam-1.113.jar library from picard tools. That package uses the MIT license, which can be accessed using the command:,  java -jar thisjarfile.jar help samjdkinfo)
+ This software is "United States Government Work" under the terms of the United States Copyright  Act\.  It was written as part of the authors' official duties for the United States Government and  thus cannot be copyrighted\.  This software is freely available to the public for use without a  copyright notice\.  Restrictions cannot be placed on its present or future use\.  Although all reasonable efforts have been taken to ensure the accuracy and reliability of the  software and data, the National Human Genome Research Institute \(NHGRI\) and the U\.S\. Government  does not and cannot warrant the performance or results that may be obtained by using this software  or data\.  NHGRI and the U\.S\. Government disclaims all warranties as to performance, merchantability  or fitness for any particular purpose\.  In any work or product derived from this material, proper attribution of the authors as the source  of the software or data should be made, using "NHGRI Genome Technology Branch" as the citation\.  NOTE: This package includes \(internally\) the sam\-1\.113\.jar library from picard tools\. That package uses the MIT license, which can be accessed using the command:  java \-jar thisjarfile\.jar help samjdkinfo
 

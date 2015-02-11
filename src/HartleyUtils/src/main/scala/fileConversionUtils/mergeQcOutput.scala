@@ -12,6 +12,7 @@ object mergeQcOutput {
   val mergeFileList : List[String] = List("DESeq","DEXSeq","JunctionSeq","NovelSplice","KnownSplice","WiggleTrack","WiggleTrackAltWin");
   
   class merger extends CommandLineRunUtil {
+     override def priority = 19;
      val parser : CommandLineArgParser = 
        new CommandLineArgParser(
           command = "mergeCounts", 
@@ -82,6 +83,7 @@ object mergeQcOutput {
    }
   
   class multiMerger extends CommandLineRunUtil {
+     override def priority = 20;
      val parser : CommandLineArgParser = 
        new CommandLineArgParser(
           command = "mergeAllCounts", 

@@ -47,7 +47,7 @@ List(
   
   abstract class CommandLineRunUtil {
     val parser : CommandLineArgParser;
-    
+    def priority : Int = 255;
     def run(args : Array[String]);
   }
   
@@ -204,27 +204,27 @@ List(
       val sb = new StringBuilder("");
       
       sb.append("# QoRTs: Quality Of Rna-seq Tool Set\nVersion " + runner.runner.QORTS_VERSION + " ([back to index](index.html))\n\n");
-      sb.append("## Help for java command \""+command+"\"\n\n");
-
+      sb.append("## Help for java command \""+escapeToMarkdown(command)+"\"\n\n");
+ 
       sb.append("## USAGE:\n\n"); 
       sb.append("    "+getShortHelp()+"\n\n");
       sb.append("## DESCRIPTION:\n\n");
-      sb.append(description+"\n\n");
+      sb.append(escapeToMarkdown(description)+"\n\n");
       sb.append("## REQUIRED ARGUMENTS:\n");
       for(arg <- argList.filter(_.argIsMandatory)){
-        sb.append(arg.getFullDescription+"\n");
+        sb.append("> " + arg.getFullMarkdownDescription+"\n");
       }
       sb.append("\n");
       
       sb.append("## OPTIONAL ARGUMENTS:\n");
       for(arg <- argList.filter(! _.argIsMandatory)){
-        sb.append(arg.getFullMarkdownDescription);
+        sb.append("> " + arg.getFullMarkdownDescription);
       }
       sb.append("## AUTHORS:\n\n");
-      sb.append(authors+ "\n\n");
+      sb.append(escapeToMarkdown(authors.mkString(", "))+ "\n\n");
       
       sb.append("## LEGAL:\n\n");
-      sb.append(legal+ "\n\n");
+      sb.append(escapeToMarkdown(legal.mkString(" "))+ "\n\n");
       
       return sb.toString;
     }
@@ -250,7 +250,7 @@ List(
     def getForMoreHelp() : String = {
       "For more info, use:\njava -jar " + runner.runner.Runner_ThisProgramsExecutableJarFileName + " --man " + command + ""
     }
-    
+     
     def getMandatoryArgumentsHelp() : String = {
       val sb = new StringBuilder("");
       for(arg <- argList){
@@ -352,9 +352,8 @@ List(
       "    "+getFullSyntax()+"\n"+wrapLineWithIndent(describe(),CLUI_CONSOLE_LINE_WIDTH,8)+"\n        ("+argType+")";
     }
     def getFullMarkdownDescription() : String = {
-      "### "+getFullSyntax()+":\n\n"+describe()+"\n\n("+argType+")\n\n";
+      "### "+escapeToMarkdown(getFullSyntax())+":\n\n"+escapeToMarkdown(describe())+ escapeToMarkdown(" ("+argType+")\n\n");
     }
-    
     
     def argIsMandatory : Boolean;
   }
@@ -421,7 +420,7 @@ List(
     var value : Option[T] = defaultValue;
     
     def getShortSyntax() : String = {
-      if(isMandatory) "<"+arg(0)+" "+valueName+">";
+      if(isMandatory) ""+arg(0)+" "+valueName+"";
       else if(isImportant) "["+arg(0)+" "+valueName+"]";
       else "";
     }
@@ -462,7 +461,7 @@ List(
     }
     
     def getShortSyntax() : String = {
-      if(isMandatory) "<"+arg(0)+" "+valueName+">";
+      if(isMandatory) ""+arg(0)+" "+valueName+"";
       else if(isImportant) "["+arg(0)+" "+valueName+"]";
       else "";
     }
@@ -502,13 +501,13 @@ List(
     }
     
     def getShortSyntax() : String = {
-      if(isMandatory) "<"+arg(0)+" "+valueName+" ..."+">";
+      if(isMandatory) ""+arg(0)+" "+valueName+"";
       else if(isImportant) "["+arg(0)+" "+valueName+" ..."+"]";
       else "";
     }
     def getFullSyntax() : String = {
-      if(isMandatory) "<"+arg(0)+" "+valueName+" ..."+">";
-      else "["+arg(0)+" "+valueName+" ..."+"]";
+      if(isMandatory) ""+arg(0)+" "+valueName+"";
+      else "["+arg(0)+" "+valueName+"]";
     }
     def argMasterType() : String = "WhiteSpaceDelimitedList";
     def argSubType() : String = stringParser.argType;
@@ -549,7 +548,7 @@ List(
     var value : T = stringParser.unsetValue;
     
     def getShortSyntax() : String = {
-      "_"+valueName+"_";
+      ""+valueName+"";
     }
     def getFullSyntax() : String = {
       ""+valueName+"";
