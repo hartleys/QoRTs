@@ -133,25 +133,27 @@ object helpDocs {
   def writeMarkdownHelp(outdir : String) {
     
       val sb = new StringBuilder("");
-      sb.append("# QoRTs: Quality Of Rna-seq Tool Set\n" + runner.QORTS_VERSION + "\n\n");
+      sb.append("# QoRTs: Quality Of Rna-seq Tool Set\n");
+      sb.append("Version" + runner.QORTS_VERSION + "\n\n");
+      sb.append("([back to help base](../index.html))");
       sb.append("## General Help\n\n");
       
       sb.append("## DESCRIPTION:\n\n");
-      sb.append( escapeToMarkdown(DESCRIPTION.mkString(" ")) + "\n\n");
+      sb.append( (DESCRIPTION.mkString(" ")).replaceAll("_","\\\\_") + "\n\n");
       sb.append("NOTE: if you run into OutOfMemoryExceptions, try adding the java options: \"-Xmx8G\""+"\n\n");
       
       sb.append("## GENERAL SYNTAX:\n\n");
-      sb.append("    java [_java_options_] -jar "+runner.Runner_ThisProgramsExecutableJarFileName +" COMMAND [options]"+"\n\n");
+      sb.append("    java [java\\_options] -jar "+runner.Runner_ThisProgramsExecutableJarFileName +" COMMAND [options]"+"\n\n");
       
       sb.append("## COMMANDS:\n");
       for((arg, cmdMaker) <- runner.sortedCommandList){
         val parser = cmdMaker().parser;
         
         sb.append("### ["+arg+"]("+arg+".html)\n\n");
-        sb.append("> "+escapeToMarkdown(parser.getDescription) + "\n\n");
+        sb.append("> "+(parser.getDescription).replaceAll("_","\\\\_") + "\n\n");
       }
       sb.append("## AUTHORS:\n\n");
-      sb.append(escapeToMarkdown(AUTHOR.mkString(", ")) + "\n");
+      sb.append((AUTHOR.mkString(", ")).replaceAll("_","\\\\_") + "\n");
       
       sb.append("## LEGAL:\n\n");
       sb.append(lineseq2string(wrapLinesWithIndent(LEGAL, internalUtils.commandLineUI.CLUI_CONSOLE_LINE_WIDTH, "    ", false)) + "\n");

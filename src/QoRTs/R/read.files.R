@@ -66,17 +66,26 @@ completeAndCheckDecoder <- function(decoder = NULL, decoder.files = NULL){
 expandAndCheckDecoder <- function(decoder) {
   #Simplest decoder possible: just a list of sample ID's:
   if(class(decoder) == "character"){
-    decoder <- data.frame(unique.ID = decoder);
+    decoder <- data.frame(unique.ID = decoder, stringsAsFactors = FALSE);
     message("Simple decoder found, list of sample/unique ID's. Building complete decoder.");
   }
   if(class(decoder) == "matrix"){
-    decoder <- data.frame(decoder);
+    decoder <- data.frame(decoder, stringsAsFactors = FALSE);
   }
   if(class(decoder) != "data.frame"){
     message("Decoder must be either a matrix, a character vector (of unique ID's), or a data.frame. Decoder follows:");
     print(decoder);
     stop("ERROR: Decoder must be either a matrix, a character vector (of unique ID's), or a data.frame.");
   }
+  #Convert strings to characters:
+     decoder <- data.frame(decoder,stringsAsFactors=F);
+     for(i in 1:length(names(decoder))){
+        if(class(decoder[[i]]) == "factor"){
+          message("Converting column ",names(decoder)[i]," to character vector.");
+          decoder[[i]] <- as.character(decoder[[i]]);
+        }
+     }
+  
   if(is.null(names(decoder))){
     message("Decoder must have column names! Decoder follows:");
     print(decoder);
@@ -607,153 +616,174 @@ calc.samplewise.norm.factors <- function(res, calc.DESeq2 , calc.edgeR ){
     if(calc.DESeq2){
        if(! "DESeq2" %in% rownames(installed.packages())){
          message("Warning: DESeq2 installation not found. Skipping calculation of DESeq2 normalization factors.");
+         calc.DESeq2 <- FALSE;
        }
+       
     }
     if(calc.edgeR){
        if(! "edgeR" %in% rownames(installed.packages())){
          message("Warning: DESeq2 installation not found. Skipping calculation of DESeq2 normalization factors.");
+         calc.edgeR <- FALSE;
        }
-    }
-   
-    mapped.reads <- lapply( res@qc.data[["summary"]], function(df){
-       df$COUNT[df$FIELD == "READ_PAIR_OK"];
-    });
-    
-    mapped.reads.by.sample <- sapply( samples, function(s){
-      bamfiles.for.sample <- res@decoder$unique.ID[res@decoder$sample.ID == s];
-      sum(unlist( mapped.reads[bamfiles.for.sample] ));
-    })
-    norm.factors <- data.frame(sample.ID = samples, M = mapped.reads.by.sample / 1000000);
-    
-    norm.factors$Norm_TC <- norm.factors$M / mean(norm.factors$M);
-    
-    if(calc.DESeq2 | calc.edgeR){
-      count.matrix <- do.call(cbind.data.frame, res@calc.data[["SAMPLE_GENE_COUNTS"]]);
+       
     }
     
-    if(calc.DESeq2 & "DESeq2" %in% rownames(installed.packages())){
-      message("Calculating DESeq2 Normalization Factors (Geometric normalization)...");
-      suppressPackageStartupMessages(require("DESeq2"));
-      
-      tryCatch({
-        norm.factors$Norm_Geo <- estimateSizeFactorsForMatrix(count.matrix);
-      }, warning = function(w){
-        message("WARNING: DESeq2::estimateSizeFactorsForMatrix threw warnings: ");
-        message(w);
-      }, error = function(e){
-        message("WARNING: DESeq2::estimateSizeFactorsForMatrix failed. Skipping DESeq2 normalization.",e);
-        #norm.factors[,Norm_Geo:=NULL];
+    if(calc.edgeR | calc.DESeq2){
+      mapped.reads <- lapply( res@qc.data[["summary"]], function(df){
+         df$COUNT[df$FIELD == "READ_PAIR_OK"];
       });
-    }
-    
-    if(calc.edgeR & "edgeR" %in% rownames(installed.packages())){
-      message("Calculating edgeR Normalization Factors (all edgeR normalizations)...");
-      suppressPackageStartupMessages(require("edgeR"));
-      
-      tryCatch({
-        norm.factors$Norm_TMM <- calcNormFactors(count.matrix, method="TMM");
-      }, error = function(e){
-        message("WARNING: edgeR::calcNormFactors(method=TMM) failed. Skipping edgeR TMM normalizations.",e);
-        #norm.factors[,Norm_TMM:=NULL];
-      });
-       tryCatch({
-         norm.factors$Norm_UQ <- calcNormFactors(count.matrix, method="upperquartile");
-       }, error = function(e){
-         message("WARNING: edgeR::calcNormFactors(method=upperquartile) failed. Skipping edgeR upperquartile normalizations.",e);
-         #norm.factors[,Norm_UQ:=NULL];
-      });
-      tryCatch({
-        norm.factors$Norm_RLE <- calcNormFactors(count.matrix, method="RLE");
-      }, error = function(e){
-        message("WARNING: edgeR::calcNormFactors(method=RLE) failed. Skipping edgeR RLE normalizations.",e);
-        #norm.factors[,Norm_RLE:=NULL];
-      });
-    }
-    
-    res@calc.data[["norm.factors.bySample"]] <- norm.factors;
-    return(res);
 
+      mapped.reads.by.sample <- sapply( samples, function(s){
+        bamfiles.for.sample <- res@decoder$unique.ID[res@decoder$sample.ID == s];
+        sum(unlist( mapped.reads[bamfiles.for.sample] ));
+      })
+      norm.factors <- data.frame(sample.ID = samples, M = mapped.reads.by.sample / 1000000, stringsAsFactors = FALSE);
+
+      norm.factors$Norm_TC <- norm.factors$M / mean(norm.factors$M);
+
+      if(calc.DESeq2 | calc.edgeR){
+        count.matrix <- do.call(cbind.data.frame, res@calc.data[["SAMPLE_GENE_COUNTS"]]);
+      }
+
+      if(calc.DESeq2 & "DESeq2" %in% rownames(installed.packages())){
+        message("Calculating DESeq2 Normalization Factors (Geometric normalization)...");
+        suppressPackageStartupMessages(require("DESeq2"));
+
+        tryCatch({
+          norm.factors$Norm_Geo <- estimateSizeFactorsForMatrix(count.matrix);
+        }, warning = function(w){
+          message("WARNING: DESeq2::estimateSizeFactorsForMatrix threw warnings: ");
+          message(w);
+        }, error = function(e){
+          message("WARNING: DESeq2::estimateSizeFactorsForMatrix failed. Skipping DESeq2 normalization.",e);
+          #norm.factors[,Norm_Geo:=NULL];
+        });
+      }
+
+      if(calc.edgeR & "edgeR" %in% rownames(installed.packages())){
+        message("Calculating edgeR Normalization Factors (all edgeR normalizations)...");
+        suppressPackageStartupMessages(require("edgeR"));
+
+        tryCatch({
+          norm.factors$Norm_TMM <- calcNormFactors(count.matrix, method="TMM");
+        }, error = function(e){
+          message("WARNING: edgeR::calcNormFactors(method=TMM) failed. Skipping edgeR TMM normalizations.",e);
+          #norm.factors[,Norm_TMM:=NULL];
+        });
+         tryCatch({
+           norm.factors$Norm_UQ <- calcNormFactors(count.matrix, method="upperquartile");
+         }, error = function(e){
+           message("WARNING: edgeR::calcNormFactors(method=upperquartile) failed. Skipping edgeR upperquartile normalizations.",e);
+           #norm.factors[,Norm_UQ:=NULL];
+        });
+        tryCatch({
+          norm.factors$Norm_RLE <- calcNormFactors(count.matrix, method="RLE");
+        }, error = function(e){
+          message("WARNING: edgeR::calcNormFactors(method=RLE) failed. Skipping edgeR RLE normalizations.",e);
+          #norm.factors[,Norm_RLE:=NULL];
+        });
+      }
+
+      res@calc.data[["norm.factors.bySample"]] <- norm.factors;
+      return(res);
+    } else {
+      return(res);
+    }
 }
 
 calc.lanebamwise.norm.factors <- function(res, calc.DESeq2 , calc.edgeR){
     if(calc.DESeq2){
        if(! "DESeq2" %in% rownames(installed.packages())){
          message("Warning: DESeq2 installation not found. Skipping calculation of DESeq2 normalization factors.");
+         calc.DESeq2 <- FALSE;
        }
+       
     }
     if(calc.edgeR){
        if(! "edgeR" %in% rownames(installed.packages())){
          message("Warning: DESeq2 installation not found. Skipping calculation of DESeq2 normalization factors.");
+         calc.edgeR <- FALSE;
        }
-    }
-    mapped.reads <- sapply( res@qc.data[["summary"]], function(df){
-       as.numeric(df$COUNT[df$FIELD == "READ_PAIR_OK"]);
-    });
-    norm.factors <- data.frame(unique.ID = names(mapped.reads), M = unlist(mapped.reads) / 1000000);
-    
-    norm.factors$Norm_TC <- norm.factors$M / mean(norm.factors$M);
-
-
-
-    if(calc.DESeq2 | calc.edgeR){
-       df <- res@qc.data[["geneCounts"]][[1]];
-       is.gene <- substr(df$GENEID,1,1) != "_";
-
-       count.matrix <- do.call(cbind.data.frame, lapply(res@qc.data[["geneCounts"]], function(X){ X$COUNT } ));
-       count.matrix <- count.matrix[is.gene,, drop = F];
+       
     }
     
-    if(calc.DESeq2 & "DESeq2" %in% rownames(installed.packages())){
-      message("Calculating DESeq2 Normalization Factors (Geometric normalization)...");
-      suppressPackageStartupMessages(require("DESeq2"));
-      
-      norm.factors$Norm_Geo <- estimateSizeFactorsForMatrix(count.matrix);
+    if(calc.edgeR | calc.DESeq2){
+      mapped.reads <- sapply( res@qc.data[["summary"]], function(df){
+         as.numeric(df$COUNT[df$FIELD == "READ_PAIR_OK"]);
+      });
+      norm.factors <- data.frame(unique.ID = names(mapped.reads), M = unlist(mapped.reads) / 1000000, stringsAsFactors = FALSE);
+
+      norm.factors$Norm_TC <- norm.factors$M / mean(norm.factors$M);
+
+
+
+      if(calc.DESeq2 | calc.edgeR){
+         df <- res@qc.data[["geneCounts"]][[1]];
+         is.gene <- substr(df$GENEID,1,1) != "_";
+
+         count.matrix <- do.call(cbind.data.frame, lapply(res@qc.data[["geneCounts"]], function(X){ X$COUNT } ));
+         count.matrix <- count.matrix[is.gene,, drop = F];
+      }
+
+      if(calc.DESeq2 & "DESeq2" %in% rownames(installed.packages())){
+        message("Calculating DESeq2 Normalization Factors (Geometric normalization)...");
+        suppressPackageStartupMessages(require("DESeq2"));
+
+        norm.factors$Norm_Geo <- estimateSizeFactorsForMatrix(count.matrix);
+      }
+
+      if(calc.edgeR & "edgeR" %in% rownames(installed.packages())){
+        message("Calculating edgeR Normalization Factors (all edgeR normalizations)...");
+        suppressPackageStartupMessages(require("edgeR"));
+        norm.factors$Norm_TMM <- calcNormFactors(count.matrix, method="TMM");
+        norm.factors$Norm_UQ <- calcNormFactors(count.matrix, method="upperquartile");
+        norm.factors$Norm_RLE <- calcNormFactors(count.matrix, method="RLE");
+      }
+      res@calc.data[["norm.factors.byLaneBam"]] <- norm.factors;
+      return(res);
+    } else {
+      return(res);
     }
-    
-    if(calc.edgeR & "edgeR" %in% rownames(installed.packages())){
-      message("Calculating edgeR Normalization Factors (all edgeR normalizations)...");
-      suppressPackageStartupMessages(require("edgeR"));
-      norm.factors$Norm_TMM <- calcNormFactors(count.matrix, method="TMM");
-      norm.factors$Norm_UQ <- calcNormFactors(count.matrix, method="upperquartile");
-      norm.factors$Norm_RLE <- calcNormFactors(count.matrix, method="RLE");
-    }
-    res@calc.data[["norm.factors.byLaneBam"]] <- norm.factors;
-    return(res);
 }
 
 
 calc.lanebamwise.bysample.norm.factors <- function(res){
-    samples <- res@sample.list;
-    mapped.reads <- lapply( res@qc.data[["summary"]], function(df){
-       df$COUNT[df$FIELD == "READ_PAIR_OK"];
-    });
 
-    norm.factors.bySample <- res@calc.data[["norm.factors.bySample"]];
-    #norm.factors <- data.frame(unique.ID = res@decoder$unique.ID, sample.ID = res@decoder$sample.ID, lanebam.norm = rep(1,length(res@decoder$sample.ID)));
-    
-    bySample.list <- lapply(1:length(samples), function(i){
-      s <- samples[i];
-      in.df <- norm.factors.bySample[norm.factors.bySample$sample.ID == s,];
-      bamfiles.for.sample <- res@decoder$unique.ID[res@decoder$sample.ID == s];
-      curr.mapped.reads <- unlist(mapped.reads[bamfiles.for.sample]);
-      lanebam.norm.factor <- curr.mapped.reads / mean(curr.mapped.reads);
-      all.sample.norm.factors <- data.frame(t(sapply(1:length(bamfiles.for.sample),function(j){
-        as.numeric(c(in.df[-1] * lanebam.norm.factor[j]));
-      })));
-      all.sample.norm.factors <- cbind(unique.ID = bamfiles.for.sample,all.sample.norm.factors);
-      names(all.sample.norm.factors) <- c("unique.ID",names(in.df[-1]));
-      all.sample.norm.factors;
-    });
 
-    norm.factors.byLaneBam <- do.call(rbind.data.frame, bySample.list);
-    
-    norm.factors.byLaneBam.reordering <- sapply(res@decoder$unique.ID, function(uid){
-       which(norm.factors.byLaneBam$unique.ID == uid);
-    });
-    norm.factors.byLaneBam <- norm.factors.byLaneBam[norm.factors.byLaneBam.reordering,];
-    
-    res@calc.data[["norm.factors.bySample.splitToLaneBam"]] <- norm.factors.byLaneBam;
-    return(res);
+    if(is.null(res@calc.data[["norm.factors.bySample"]])){
+      return(res);
+    } else {
+      samples <- res@sample.list;
+      mapped.reads <- lapply( res@qc.data[["summary"]], function(df){
+         df$COUNT[df$FIELD == "READ_PAIR_OK"];
+      });
+      norm.factors.bySample <- res@calc.data[["norm.factors.bySample"]];
+      #norm.factors <- data.frame(unique.ID = res@decoder$unique.ID, sample.ID = res@decoder$sample.ID, lanebam.norm = rep(1,length(res@decoder$sample.ID)));
+
+      bySample.list <- lapply(1:length(samples), function(i){
+        s <- samples[i];
+        in.df <- norm.factors.bySample[norm.factors.bySample$sample.ID == s,];
+        bamfiles.for.sample <- res@decoder$unique.ID[res@decoder$sample.ID == s];
+        curr.mapped.reads <- unlist(mapped.reads[bamfiles.for.sample]);
+        lanebam.norm.factor <- curr.mapped.reads / mean(curr.mapped.reads);
+        all.sample.norm.factors <- data.frame(t(sapply(1:length(bamfiles.for.sample),function(j){
+          as.numeric(c(in.df[-1] * lanebam.norm.factor[j]));
+        })));
+        all.sample.norm.factors <- cbind(unique.ID = bamfiles.for.sample,all.sample.norm.factors);
+        names(all.sample.norm.factors) <- c("unique.ID",names(in.df[-1]));
+        all.sample.norm.factors;
+      });
+
+      norm.factors.byLaneBam <- do.call(rbind.data.frame, bySample.list);
+
+      norm.factors.byLaneBam.reordering <- sapply(res@decoder$unique.ID, function(uid){
+         which(norm.factors.byLaneBam$unique.ID == uid);
+      });
+      norm.factors.byLaneBam <- norm.factors.byLaneBam[norm.factors.byLaneBam.reordering,];
+
+      res@calc.data[["norm.factors.bySample.splitToLaneBam"]] <- norm.factors.byLaneBam;
+      return(res);
+    }
 }
 
 
@@ -787,9 +817,9 @@ calc.mapping.rates <- function(res){
     
     out.list <- lapply(1:length(res@decoder$unique.ID),function(i){
        if(is.null(mm.reads)){
-         data.frame(FIELD = c("total.reads","mapped.reads","mapping.rate"), COUNT = c(total.reads[i], mapped.reads[i], mapping.rate[i]));
+         data.frame(FIELD = c("total.reads","mapped.reads","mapping.rate"), COUNT = c(total.reads[i], mapped.reads[i], mapping.rate[i]), stringsAsFactors = FALSE);
        } else {
-         data.frame(FIELD = c("total.reads","mapped.reads","mapping.rate","mm.reads","mm.rate"), COUNT = c(total.reads[i], mapped.reads[i], mapping.rate[i],mm.reads[i], mm.rate[i]));
+         data.frame(FIELD = c("total.reads","mapped.reads","mapping.rate","mm.reads","mm.rate"), COUNT = c(total.reads[i], mapped.reads[i], mapping.rate[i],mm.reads[i], mm.rate[i]), stringsAsFactors = FALSE);
        }
     });
     names(out.list) <-  res@decoder$unique.ID;
@@ -800,9 +830,12 @@ calc.mapping.rates <- function(res){
 }
 
 calc.quals <- function(res){
-   if(! is.null(res@qc.data[["quals.r1"]])){
-      res@decoder$cycle.CT <- get.cycleCt(res@qc.data[["quals.r1"]], res@decoder$unique.ID);
-   }
+   #if(! is.null(res@qc.data[["quals.r1"]])){
+   #   res@decoder$cycle.CT <- get.cycleCt(res@qc.data[["quals.r1"]], res@decoder$unique.ID);
+   #}
+   res@decoder$cycle.CT <- sapply(res@qc.data[["summary"]], function(dl){
+       dl$COUNT[dl$FIELD == "READ_LENGTH"];
+   })
    return(res);
 }
 

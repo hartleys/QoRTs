@@ -107,7 +107,7 @@ object qcNVC {
     val writer =  openWriterSmart_viaGlobalParam(outfile + ".NVC.lead.clip."+readName+".txt");
     
     writer.write("readPos	leadClipLen	readLen	base	CT_Aligned_to_Fwd	CT_Aligned_to_Rev	CT\n");
-    for(leadClipLen <- 1 to maxLeadClip){
+    for(leadClipLen <- 1 to math.min(readLen,math.max(15,maxLeadClip))){
       for(pos <- 0 until leadClipLen){
         //for(readLen <- readLengthList){
           for(base <- ALL_BASE_BYTES){
@@ -127,7 +127,7 @@ object qcNVC {
     val writer =  openWriterSmart_viaGlobalParam(outfile + ".NVC.tail.clip."+readName+".txt");
     
     writer.write("readPos	tailClipLen	base	CT_Aligned_to_Fwd	CT_Aligned_to_Rev	CT\n");
-    for(tailClipLen <- 1 to maxTailClip){
+    for(tailClipLen <- 1 to math.min(readLen,math.max(15,maxTailClip))){
       //for(readLen <- readLengthList){
         for(pos <- (readLen - tailClipLen) until readLen){
           for(base <- ALL_BASE_BYTES){

@@ -1,5 +1,7 @@
 
-
+f.na <- function(x){
+  ifelse(is.na(x),FALSE,x);
+}
 check.rasterize.or.warn <- function(varname = "rasterize.plotting.area"){
     if(! can.plot.raster()){
        message(paste0("cannot open raster images, because package \"png\" not found. Install package png (with command install.packages(\"png\")) or set ",varname," to FALSE!"));

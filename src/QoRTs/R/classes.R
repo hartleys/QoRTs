@@ -134,19 +134,29 @@ setClass("QoRTs_Compiled_Plotting_Params", representation(
                        nvc.colors  = "list",
                        nvc.colors.light = "list",
                        
+                       highlight.color = "character",
                        highlight.lines.lty = "numeric",
                        highlight.lines.lwd = "numeric",
                        highlight.lines.alpha = "numeric",
-                       highlight.lines.color = "character",
                        highlight.points.pch = "numeric",
-                       highlight.points.alpha = "numeric",
-                       highlight.points.color = "character"
+                       highlight.points.alpha = "numeric"
                        
                        ));
 
 setMethod("show","QoRTs_Compiled_Plotting_Params",
    function(object){
       cat("Master plotting parameters object for QoRTs:\n");
+      cat("by.colors:            [",paste0(object@by.colors,collapse=","),"]\n");
+      cat("by.pch:            [",paste0(object@by.pch,collapse=","),"]\n");
+      cat("showLegend:            [",object@showLegend,"]\n");
+      cat("nvc.colors:            [",paste0(object@nvc.colors,collapse=","),"]\n");
+      cat("nvc.colors.light:            [",paste0(object@nvc.colors.light,collapse=","),"]\n");
+      cat("highlight.color:            [",paste0(object@highlight.color,collapse=","),"]\n");
+      cat("highlight.lines.lty:            [",paste0(object@highlight.lines.lty,collapse=","),"]\n");
+      cat("highlight.lines.lwd:            [",paste0(object@highlight.lines.lwd,collapse=","),"]\n");
+      cat("highlight.lines.alpha:            [",paste0(object@highlight.lines.alpha,collapse=","),"]\n");
+      cat("highlight.points.pch:            [",paste0(object@highlight.points.pch,collapse=","),"]\n");
+      cat("highlight.points.alpha:            [",paste0(object@highlight.points.alpha,collapse=","),"]\n");
    }
 );
 
@@ -160,10 +170,10 @@ setMethod("show","QoRTs_Compiled_Plotting_Params",
 #default.plot.master.params@highlight.lines.lty <- c(1,3);
 #default.plot.master.params@highlight.lines.lwd <- c(2,1);
 #default.plot.master.params@highlight.lines.alpha <- c(255,200);
-#default.plot.master.params@highlight.lines.color <- c("red","grey");
+#default.plot.master.params@highlight.color <- c("red","grey");
 #default.plot.master.params@highlight.points.pch <- c(4,1);
 #default.plot.master.params@highlight.points.alpha <- c(255,200);
-#default.plot.master.params@highlight.points.color <- c("red","grey");
+#default.plot.master.params@highlight.color <- c("red","grey");
 
 ##default.plot.master.params@nvc.colors <- list(A = "darkgreen",T = "red", G = "black", C = "blue");
 ##default.plot.master.params@nvc.colors.light <- list(A = "palegreen",T = "maroon3", G = "grey", C = "deepskyblue");
@@ -180,10 +190,9 @@ setMethod("show","QoRTs_Compiled_Plotting_Params",
   DEFAULT.PLOT.MASTER.PARAMS_highlight.lines.lty    <-  c(1,3);
   DEFAULT.PLOT.MASTER.PARAMS_highlight.lines.lwd    <-  c(2,1);
   DEFAULT.PLOT.MASTER.PARAMS_highlight.lines.alpha  <-  c(255,200);
-  DEFAULT.PLOT.MASTER.PARAMS_highlight.lines.color  <-  c("red","grey");
+  DEFAULT.PLOT.MASTER.PARAMS_highlight.color  <-  c("red","grey");
   DEFAULT.PLOT.MASTER.PARAMS_highlight.points.pch   <-  c(4,1);
   DEFAULT.PLOT.MASTER.PARAMS_highlight.points.alpha <-  c(255,200);
-  DEFAULT.PLOT.MASTER.PARAMS_highlight.points.color <-  c("red","grey");
   DEFAULT.PLOT.MASTER.PARAMS_nvc.colors             <-  list(A = "green3",T = "red", G = "orange", C = "blue");
   DEFAULT.PLOT.MASTER.PARAMS_nvc.colors.light       <-  list(A = "olivedrab1",T = "lightpink", G = "lightgoldenrod1", C = "deepskyblue");
 
@@ -237,18 +246,16 @@ QoRTs.default.plotting.params <- list(           contrasting.colors = DEFAULT.PL
                                                  std.lines.lty    = DEFAULT.PLOT.MASTER.PARAMS_highlight.lines.lty[1],
                                                  std.lines.lwd    = DEFAULT.PLOT.MASTER.PARAMS_highlight.lines.lwd[1],
                                                  std.lines.alpha  = DEFAULT.PLOT.MASTER.PARAMS_highlight.lines.alpha[1],
-                                                 std.lines.color  = DEFAULT.PLOT.MASTER.PARAMS_highlight.lines.color[1],
+                                                 std.color  = DEFAULT.PLOT.MASTER.PARAMS_highlight.color[1],
                                                  std.points.pch   = DEFAULT.PLOT.MASTER.PARAMS_highlight.points.pch[1],
                                                  std.points.alpha = DEFAULT.PLOT.MASTER.PARAMS_highlight.points.alpha[1],
-                                                 std.points.color = DEFAULT.PLOT.MASTER.PARAMS_highlight.points.color[1],
                                                  std.NVC.colors   = DEFAULT.PLOT.MASTER.PARAMS_nvc.colors,
                                                  alt.lines.lty    = DEFAULT.PLOT.MASTER.PARAMS_highlight.lines.lty[2],
                                                  alt.lines.lwd    = DEFAULT.PLOT.MASTER.PARAMS_highlight.lines.lwd[2],
                                                  alt.lines.alpha  = DEFAULT.PLOT.MASTER.PARAMS_highlight.lines.alpha[2],
-                                                 alt.lines.color  = DEFAULT.PLOT.MASTER.PARAMS_highlight.lines.color[2],
+                                                 alt.color  = DEFAULT.PLOT.MASTER.PARAMS_highlight.color[2],
                                                  alt.points.pch   = DEFAULT.PLOT.MASTER.PARAMS_highlight.points.pch[2],
                                                  alt.points.alpha = DEFAULT.PLOT.MASTER.PARAMS_highlight.points.alpha[2],
-                                                 alt.points.color = DEFAULT.PLOT.MASTER.PARAMS_highlight.points.color[2],
                                                  alt.NVC.colors   = DEFAULT.PLOT.MASTER.PARAMS_nvc.colors.light);
 
 
@@ -272,10 +279,9 @@ compile.plotting.params <- function(params){
   master.params@highlight.lines.lty    <- c(params[["std.lines.lty"]],params[["alt.lines.lty"]]);
   master.params@highlight.lines.lwd    <- c(params[["std.lines.lwd"]],params[["alt.lines.lwd"]]);
   master.params@highlight.lines.alpha  <- c(params[["std.lines.alpha"]],params[["alt.lines.alpha"]]);
-  master.params@highlight.lines.color  <- c(params[["std.lines.color"]],params[["alt.lines.color"]]);
+  master.params@highlight.color  <- c(params[["std.color"]],params[["alt.color"]]);
   master.params@highlight.points.pch   <- c(params[["std.points.pch"]],params[["alt.points.pch"]]);
   master.params@highlight.points.alpha <- c(params[["std.points.alpha"]],params[["alt.points.alpha"]]);
-  master.params@highlight.points.color <- c(params[["std.points.color"]],params[["alt.points.color"]]);
   master.params@nvc.colors       <- params[["std.NVC.colors"]];
   master.params@nvc.colors.light <- params[["alt.NVC.colors"]];
   return(master.params);
@@ -289,18 +295,16 @@ decompile.plotting.params <- function(compiled.params){
      std.lines.lty    = compiled.params@highlight.lines.lty[1],
      std.lines.lwd    = compiled.params@highlight.lines.lwd[1],
      std.lines.alpha  = compiled.params@highlight.lines.alpha[1],
-     std.lines.color  = compiled.params@highlight.lines.color[1],
+     std.color  = compiled.params@highlight.color[1],
      std.points.pch   = compiled.params@highlight.points.pch[1],
      std.points.alpha = compiled.params@highlight.points.alpha[1],
-     std.points.color = compiled.params@highlight.points.color[1],
      std.NVC.colors   = compiled.params@nvc.colors,
      alt.lines.lty    = compiled.params@highlight.lines.lty[2],
      alt.lines.lwd    = compiled.params@highlight.lines.lwd[2],
      alt.lines.alpha  = compiled.params@highlight.lines.alpha[2],
-     alt.lines.color  = compiled.params@highlight.lines.color[2],
+     alt.color  = compiled.params@highlight.color[2],
      alt.points.pch   = compiled.params@highlight.points.pch[2],
      alt.points.alpha = compiled.params@highlight.points.alpha[2],
-     alt.points.color = compiled.params@highlight.points.color[2],
      alt.NVC.colors   = compiled.params@nvc.colors.light
   ));
 }

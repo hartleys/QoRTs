@@ -1,7 +1,7 @@
 # QoRTs: Quality Of Rna-seq Tool Set
-Version 0.1.7 ([back to index](index.html))
+Version 0.1.11 ([back to index](index.html))
 
-## Help for java command "mergeCounts"
+([back to main](../index.html)) ([back to java-utility help](index.html))## Help for java command "mergeCounts"
 
 ## USAGE:
 
@@ -13,41 +13,41 @@ Version 0.1.7 ([back to index](index.html))
 This utility merges count, wiggle, and similar data from multiple QoRTs QC runs\. This is intended for use in merging the data from multiple technical replicates of the same sample/library\.This tool will then merge all count data \(including gene\-level, exon\-level, and known/novel splice\-junction\) counts, as well as wiggle files, assuming all files use the standard naming conventions \(for example, the fwd\-strand wiggle files must be named: "QC\.wiggle\.fwd\.wig\.gz", etc\)\.If any files are missing, they will be skipped\.
 
 ## REQUIRED ARGUMENTS:
-> ### infileDirs:
+### infileDirs:
 
-The replicates' QC output directories \(the output directory used with the initial 'QC' step\), as a comma\-delimited list \(no whitespace\)\. \(String\)
+> The replicates' QC output directories (the output directory used with the initial 'QC' step), as a comma-delimited list (no whitespace). (String)
 
 
-> ### outfilePrefix:
+### outfilePrefix:
 
-The output file prefix \(or directory\) \(String\)
+> The output file prefix (or directory) (String)
 
 
 
 ## OPTIONAL ARGUMENTS:
-> ### \-\-wiggleWindow val:
+### --wiggleWindow val:
 
-The window size of the alternate\-size wiggle track, if applicable\. \(Int\)
+> The window size of the alternate-size wiggle track, if applicable. (Int)
 
-> ### \-\-additionalTrackOptions "track options":
+### --additionalTrackOptions "track options":
 
-More options for the wiggle tracks\. For more information refer to the wiggle track definition on the UCSC genome browser website\. \(String\)
+> More options for the wiggle tracks. For more information refer to the wiggle track definition on the UCSC genome browser website. (String)
 
-> ### \-\-mergeFiles filetype1\[,filetype2,\.\.\.\]:
+### --mergeFiles filetype1[,filetype2,...]:
 
-A comma\-delimited list of strings, indicating which file types to attempt to merge\. By default, this utility autodetects the presence of all mergable qc files and merges all standard files\. Valid codes are: DESeq, DEXSeq, JunctionSeq, NovelSplice, KnownSplice, WiggleTrack, WiggleTrackAltWin \(CommaDelimitedListOfStrings\)
+> A comma-delimited list of strings, indicating which file types to attempt to merge. By default, this utility autodetects the presence of all mergable qc files and merges all standard files. Valid codes are: DESeq, DEXSeq, JunctionSeq, NovelSplice, KnownSplice, WiggleTrack, WiggleTrackAltWin (CommaDelimitedListOfStrings)
 
-> ### \-\-trackTitle options:
+### --trackTitle options:
 
-The prefix of the title of the merged wiggle tracks\. \(String\)
+> The prefix of the title of the merged wiggle tracks. (String)
 
-> ### \-\-verbose:
+### --verbose:
 
-Flag to indicate that debugging information and extra progress information should be sent to stderr\. \(flag\)
+> Flag to indicate that debugging information and extra progress information should be sent to stderr. (flag)
 
-> ### \-\-quiet:
+### --quiet:
 
-Flag to indicate that only errors and warnings should be sent to stderr\. \(flag\)
+> Flag to indicate that only errors and warnings should be sent to stderr. (flag)
 
 ## AUTHORS:
 

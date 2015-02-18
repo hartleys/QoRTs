@@ -203,7 +203,9 @@ List(
     def getMarkdownManual() : String = {
       val sb = new StringBuilder("");
       
-      sb.append("# QoRTs: Quality Of Rna-seq Tool Set\nVersion " + runner.runner.QORTS_VERSION + " ([back to index](index.html))\n\n");
+      sb.append("# QoRTs: Quality Of Rna-seq Tool Set\n");
+      sb.append("Version " + runner.runner.QORTS_VERSION + " ([back to index](index.html))\n\n");
+      sb.append("([back to main](../index.html)) ([back to java-utility help](index.html))");
       sb.append("## Help for java command \""+escapeToMarkdown(command)+"\"\n\n");
  
       sb.append("## USAGE:\n\n"); 
@@ -212,13 +214,13 @@ List(
       sb.append(escapeToMarkdown(description)+"\n\n");
       sb.append("## REQUIRED ARGUMENTS:\n");
       for(arg <- argList.filter(_.argIsMandatory)){
-        sb.append("> " + arg.getFullMarkdownDescription+"\n");
+        sb.append(arg.getFullMarkdownDescription+"\n");
       }
       sb.append("\n");
       
       sb.append("## OPTIONAL ARGUMENTS:\n");
       for(arg <- argList.filter(! _.argIsMandatory)){
-        sb.append("> " + arg.getFullMarkdownDescription);
+        sb.append( arg.getFullMarkdownDescription);
       }
       sb.append("## AUTHORS:\n\n");
       sb.append(escapeToMarkdown(authors.mkString(", "))+ "\n\n");
@@ -352,7 +354,8 @@ List(
       "    "+getFullSyntax()+"\n"+wrapLineWithIndent(describe(),CLUI_CONSOLE_LINE_WIDTH,8)+"\n        ("+argType+")";
     }
     def getFullMarkdownDescription() : String = {
-      "### "+escapeToMarkdown(getFullSyntax())+":\n\n"+escapeToMarkdown(describe())+ escapeToMarkdown(" ("+argType+")\n\n");
+      //"### "+escapeToMarkdown(getFullSyntax())+":\n\n"+escapeToMarkdown(describe())+ escapeToMarkdown(" ("+argType+")\n\n");
+      "### "+(getFullSyntax()).replaceAll("_","\\\\_")+":\n\n> "+(describe()).replaceAll("_","\\\\_")+ (" ("+argType+")\n\n").replaceAll("_","\\\\_");
     }
     
     def argIsMandatory : Boolean;

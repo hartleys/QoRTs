@@ -41,7 +41,7 @@ object qcCigarDistribution {
     }
     writer.write("\n");
     for(i <- 0 until pod.length){
-      writer.write(i + "");
+      writer.write((i) + "");
       for(op <- cigarOpList){
         writer.write( "	"+pod(i)((op,0)) + "	"+pod(i)((op,1)) + "	"+pod(i)((op,2))+ "	"+pod(i)((op,3))  );
       }
@@ -55,7 +55,7 @@ object qcCigarDistribution {
     
     writer.write("OP	LEN	CT\n");
     for(op <- cigarOpList){
-       val keys = old.keys.toSeq.filter((x) => x._1 == op).sorted;
+       val keys = ((old.keys.toSeq.filter((x) => x._1 == op)).toSet ++ Set((op,1))).toSeq.sorted;
        
        for( (o,len) <- keys ){
          val ct = old( (o,len) );

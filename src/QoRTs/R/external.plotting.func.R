@@ -38,6 +38,7 @@ makePlot.qual.pair <- function(plotter, y.name, r2.buffer = NULL, debugMode = DE
                                vert.offset=1, 
                                draw.horiz.lines = TRUE,
                                override.lty = 1,
+                               zeroBaseX = TRUE,
                                ...);
        } else {
          makePlot.generic.pair(plot.name, plotter$res@qc.data[["quals.r1"]], 
@@ -53,6 +54,7 @@ makePlot.qual.pair <- function(plotter, y.name, r2.buffer = NULL, debugMode = DE
                                draw.horiz.lines = TRUE,
                                override.lty = 1,
                                r2.buffer =  r2.buffer,
+                               zeroBaseX = TRUE,
                                ...);
        }
        
@@ -190,7 +192,7 @@ makePlot.cigarOp.byCycle <- function(plotter,op, r2.buffer = NULL, rate.per.mill
               readCt <- sum(df[1,c(M.FIELD.IDS,H.FIELD.IDS,S.FIELD.IDS,I.FIELD.IDS)]);
               if(rate.per.million){ cigarRate <- ((apply( df[,op.field.list], 1,sum)) * 1000000) / readCt;
               } else { cigarRate <- (apply( df[,op.field.list], 1,sum)) / readCt; }
-              data.frame(CYCLE = df$CYCLE, cigarRate = cigarRate );
+              data.frame(CYCLE = df$CYCLE + 1, cigarRate = cigarRate );
           });
         }
         cigarOpRate.list.r1 <- get.cigarOpRate.from.dl(plotter$res@qc.data[["cigarOpDistribution.byReadCycle.R1"]]);
@@ -233,7 +235,7 @@ makePlot.cigarOp.byCycle <- function(plotter,op, r2.buffer = NULL, rate.per.mill
               readCt <- sum(df[1,c(M.FIELD.IDS,H.FIELD.IDS,S.FIELD.IDS,I.FIELD.IDS)]);
               if(rate.per.million){ cigarRate <- ((apply( df[,op.field.list], 1,sum)) * 1000000) / readCt;
               } else { cigarRate <- (apply( df[,op.field.list], 1,sum)) / readCt; }
-              data.frame(CYCLE = df$CYCLE, cigarRate = cigarRate );
+              data.frame(CYCLE = df$CYCLE + 1, cigarRate = cigarRate );
           });
         }
         cigarOpRate.list.r1 <- get.cigarOpRate.from.dl(plotter$res@qc.data[["cigarOpDistribution.byReadCycle.R1"]]);
@@ -347,7 +349,7 @@ makePlot.genebody.coverage <- function(plotter, plot.medians = NULL, plot.means 
           data.frame(Quantile = df$QUANTILE - (step.size / 2), GeneBodyCoverage = apply(df[,c("X1.bottomHalf","X2.upperMidQuartile","X3.75to90","X4.high")],1,sum));
         });
       }, error = function(e){ errorPlot(plot.name,e, code = 0); stop(e);});
-  
+
       makePlot.generic(plot.name, data.list, plotter, 
                x.name = "Quantile",y.name = "GeneBodyCoverage", 
                norm.x = TRUE, avg.y = TRUE,
@@ -550,7 +552,7 @@ makePlot.cigarLength.distribution <- function(plotter,op, r2.buffer = NULL, perM
   } else {
     stop("Fatal error: cigarOp Code not recognized! Must be one of: SoftClip,HardClip,Del,Ins,Pad,Splice");
   }
-  plot.name <- paste0(op.title," Distribution", ", by read cycle");
+  plot.name <- paste0(op.title," Distribution", "");
   if(debugMode){ message("Starting: ",plot.name," plot."); }
   plotter.error.wrapper(plot.name, plotterFcn = function(){ 
     res <- plotter$res;
@@ -565,7 +567,7 @@ makePlot.cigarLength.distribution <- function(plotter,op, r2.buffer = NULL, perM
             df <- dl[[i]];
             curr.lanebam <- names(dl)[i];
             readCt <- as.numeric(plotter$res@qc.data[["summary"]][[curr.lanebam]]$COUNT[plotter$res@qc.data[["summary"]][[curr.lanebam]]$FIELD == "READ_PAIR_OK"]);
-            opDf <- df[df[["OP"]] == op.field,];
+            opDf <- df[df[["OP"]] == op.field,,drop = FALSE];
             opDf$RATE <- (opDf$CT ) / readCt;
             if(perMillion) opDf$RATE <- (opDf$CT * 1000000) / readCt;
             if(log.x) opDf$LEN <- log10(opDf$LEN);
@@ -579,7 +581,10 @@ makePlot.cigarLength.distribution <- function(plotter,op, r2.buffer = NULL, perM
 
         xlim.max <- max(sapply(cigarLenData.list.r1, function(df){max(df$LEN)}))
         xlim.min <- min(sapply(cigarLenData.list.r1, function(df){min(df$LEN)}))
-
+        if(xlim.max == xlim.min){
+          xlim.max <- xlim.max + 0.0001;
+        }
+        
         xlim <- c(xlim.min,xlim.max)
       }, error = function(e){ errorPlot(plot.name,e, code = 0); stop(e);});
       makePlot.generic(plot.name,cigarLenData.list.r1, 
@@ -880,6 +885,7 @@ makePlot.NVC.lead.clip <- function(plotter, clip.amt = 10,  r2.buffer = clip.amt
                               rasterize.plotting.area = FALSE, raster.height = 1000, raster.width = 1000,
                               show.base.legend = TRUE, debugMode = DEFAULTDEBUGMODE, singleEndMode = plotter$res@singleEnd, ...){
   plot.name <- "Lead Clipping NVC";
+  clip.amt <- min(c(clip.amt, plotter$res@decoder$cycle.CT));
   if(debugMode){ message("Starting: ",plot.name," plot."); }
   plotter.error.wrapper(plot.name, plotterFcn = function(){
     if(rasterize.plotting.area){
@@ -895,7 +901,7 @@ makePlot.NVC.lead.clip <- function(plotter, clip.amt = 10,  r2.buffer = clip.amt
       xlim <- c(1,clip.amt)
       ylim <- c(0,1);
       data.list.r1 <- lapply(plotter$res@qc.data[["NVC.lead.clip.R1"]], function(df){
-        df[df$leadClipLen == clip.amt,];
+        df[df$leadClipLen == clip.amt,,drop = F];
       });
       makePlot.generic.NVC.single(plot.name,    data.list.r1, 
                                plotter = plotter, 
@@ -948,6 +954,8 @@ makePlot.NVC.tail.clip <- function(plotter, clip.amt = 10,  r2.buffer = clip.amt
                                rasterize.plotting.area = FALSE, raster.height = 1000, raster.width = 1000,
                                show.base.legend = TRUE, debugMode = DEFAULTDEBUGMODE, singleEndMode = plotter$res@singleEnd, ...){
   plot.name <- "Tail Clipping NVC";
+  clip.amt <- min(c(clip.amt, plotter$res@decoder$cycle.CT));
+  
   if(debugMode){ message("Starting: ",plot.name," plot."); }
   plotter.error.wrapper(plot.name, plotterFcn = function(){
     if(rasterize.plotting.area){
@@ -963,7 +971,7 @@ makePlot.NVC.tail.clip <- function(plotter, clip.amt = 10,  r2.buffer = clip.amt
       xlim <- c(1,clip.amt)
       ylim <- c(0,1);
       data.list.r1 <- lapply(plotter$res@qc.data[["NVC.tail.clip.R1"]], function(df){
-        df[df$tailClipLen == clip.amt,];
+        df[df$tailClipLen == clip.amt,,drop = F];
       })
       makePlot.generic.NVC.single(plot.name,    data.list.r1, 
                                plotter = plotter, 
@@ -1047,8 +1055,8 @@ makePlot.NVC.lead.clip.matchByClipPosition <- function(plotter, clip.amt = 10,  
                                       sapply(bases, function(b){
                                          sum( df$CT[ df$base == b & df$leadClipLen <= clip.amt & (df$leadClipLen - df$readPos == i)] );
                                       });
-                                   }))
-                              );
+                                   })),
+                              stringsAsFactors = FALSE);
             #names(out) <- c("base","CT");
             return(out);
          })
@@ -1090,8 +1098,8 @@ makePlot.NVC.lead.clip.matchByClipPosition <- function(plotter, clip.amt = 10,  
                                       sapply(bases, function(b){
                                          sum( df$CT[ df$base == b & df$leadClipLen <= clip.amt & (df$leadClipLen - df$readPos == i)] );
                                       });
-                                   }))
-                              );
+                                   })),
+                              stringsAsFactors = FALSE);
             #names(out) <- c("base","CT");
             return(out);
          })
@@ -1165,8 +1173,8 @@ makePlot.NVC.tail.clip.matchByClipPosition <- function(plotter, clip.amt = 10,  
                                       sapply(bases, function(b){
                                          sum( df$CT[ df$base == b & df$tailClipLen <= clip.amt & ((df$tailClipLen) - (df$readLen - df$readPos - 1) == i)] );
                                       });
-                                   }))
-                              );
+                                   })),
+                              stringsAsFactors = FALSE);
             #names(out) <- c("base","CT");
             return(out);
          })
@@ -1198,8 +1206,8 @@ makePlot.NVC.tail.clip.matchByClipPosition <- function(plotter, clip.amt = 10,  
                                       sapply(bases, function(b){
                                          sum( df$CT[ df$base == b & df$tailClipLen <= clip.amt & ((df$tailClipLen) - (df$readLen - df$readPos - 1) == i)] );
                                       });
-                                   }))
-                              );
+                                   })),
+                              stringsAsFactors = FALSE);
             #names(out) <- c("base","CT");
             return(out);
          })

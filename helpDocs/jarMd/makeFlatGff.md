@@ -1,7 +1,7 @@
 # QoRTs: Quality Of Rna-seq Tool Set
-Version 0.1.7 ([back to index](index.html))
+Version 0.1.11 ([back to index](index.html))
 
-## Help for java command "makeFlatGff"
+([back to main](../index.html)) ([back to java-utility help](index.html))## Help for java command "makeFlatGff"
 
 ## USAGE:
 
@@ -14,33 +14,33 @@ When running the QC command, QoRT first generates a set of non\-overlapping exon
 It can also be used to produce a flattened gff file that adheres to the specifications used by DEXSeq\.
 
 ## REQUIRED ARGUMENTS:
-> ### gtffile:
+### gtffile:
 
-The gtf annotation file\. This tool was designed to use the standard gtf annotations provided by Ensembl, but other annotations can be used as well\. Note: if the file ends in \.zip or \.gz the compression method will be auto\-detected and read accordingly\. \(String\)
+> The gtf annotation file. This tool was designed to use the standard gtf annotations provided by Ensembl, but other annotations can be used as well. Note: if the file ends in .zip or .gz the compression method will be auto-detected and read accordingly. (String)
 
 
-> ### flatgfffile:
+### flatgfffile:
 
-The output destination for the "flattened" gff annotation file to be created, or '\-' to write to stdout\. Note: if the filename ends in "\.zip" or "\.gz" the corresponding compression method will be applied\. \(String\)
+> The output destination for the "flattened" gff annotation file to be created, or '-' to write to stdout. Note: if the filename ends in ".zip" or ".gz" the corresponding compression method will be applied. (String)
 
 
 
 ## OPTIONAL ARGUMENTS:
-> ### \-\-stranded:
+### --stranded:
 
-Flag to indicate that reads are stranded\. \(flag\)
+> Flag to indicate that reads are stranded. (flag)
 
-> ### \-\-DEXSeqFmt:
+### --DEXSeqFmt:
 
-Flag to indicate that the output gff file should be formatted for use with DEXSeq\. \(flag\)
+> Flag to indicate that the output gff file should be formatted for use with DEXSeq. (flag)
 
-> ### \-\-verbose:
+### --verbose:
 
-Flag to indicate that debugging information and extra progress information should be sent to stderr\. \(flag\)
+> Flag to indicate that debugging information and extra progress information should be sent to stderr. (flag)
 
-> ### \-\-quiet:
+### --quiet:
 
-Flag to indicate that only errors and warnings should be sent to stderr\. \(flag\)
+> Flag to indicate that only errors and warnings should be sent to stderr. (flag)
 
 ## AUTHORS:
 

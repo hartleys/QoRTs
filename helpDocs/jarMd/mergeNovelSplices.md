@@ -1,7 +1,7 @@
 # QoRTs: Quality Of Rna-seq Tool Set
-Version 0.1.7 ([back to index](index.html))
+Version 0.1.11 ([back to index](index.html))
 
-## Help for java command "mergeNovelSplices"
+([back to main](../index.html)) ([back to java-utility help](index.html))## Help for java command "mergeNovelSplices"
 
 ## USAGE:
 
@@ -13,55 +13,55 @@ Version 0.1.7 ([back to index](index.html))
 This utility takes the QC output from the standard QC utility run on a series of samples and performs two functions: first, it compiles all splice junctions across all samples and filters low\-coverage novel splice junctions by mean coverage across all samples \(optionally normalized with user\-supplied size factors\)\. It then assigns unique identifiers to each novel splice junction that passed this filter, and outputs a special flat gff file listing all exons, annotated splice junctions and passed\-filter novel splice junctions with assigned unique identifiers for all features\. Next, it uses these unique identifiers to create a new set of JunctionSeq\-formatted count files, one for each input sample\. This new count file will include counts for the passed\-filter novel splice junctions in addition to the usual counts for annotated splice junctions, exons, and aggregated\-genes, all listed by the assigned unique identifiers\.
 
 ## REQUIRED ARGUMENTS:
-> ### infileDir:
+### infileDir:
 
-The input file directory\. \(String\)
-
-
-> ### sizeFactorFile:
-
- \(String\)
+> The input file directory. (String)
 
 
-> ### annotation\.gtf\.gz:
+### sizeFactorFile:
 
- \(String\)
+>  (String)
 
 
-> ### outfileDir:
+### annotation.gtf.gz:
 
-The output file directory \(String\)
+>  (String)
+
+
+### outfileDir:
+
+> The output file directory (String)
 
 
 
 ## OPTIONAL ARGUMENTS:
-> ### \-\-minCount num:
+### --minCount num:
 
-The minimum mean normalized read coverage needed for inclusion of a novel splice junction\. By default, equal to 10\.0\. \(Double\)
+> The minimum mean normalized read coverage needed for inclusion of a novel splice junction. By default, equal to 10.0. (Double)
 
-> ### \-\-stranded:
+### --stranded:
 
-Flag to indicate that data is stranded\. \(flag\)
+> Flag to indicate that data is stranded. (flag)
 
-> ### \-\-stranded\_fr\_secondstrand:
+### --stranded\_fr\_secondstrand:
 
-Nonfunctional\. \(flag\)
+> Nonfunctional. (flag)
 
-> ### \-\-noGzipInput:
+### --noGzipInput:
 
-Flag to indicate that input files are NOT be compressed into the gzip format\. By default almost all input files are assumed to be compressed\. \(flag\)
+> Flag to indicate that input files are NOT be compressed into the gzip format. By default almost all input files are assumed to be compressed. (flag)
 
-> ### \-\-noGzipOutput:
+### --noGzipOutput:
 
-Flag to indicate that output files should NOT be compressed into the gzip format\. By default almost all output files are compressed to save space\. \(flag\)
+> Flag to indicate that output files should NOT be compressed into the gzip format. By default almost all output files are compressed to save space. (flag)
 
-> ### \-\-verbose:
+### --verbose:
 
-Flag to indicate that debugging information and extra progress information should be sent to stderr\. \(flag\)
+> Flag to indicate that debugging information and extra progress information should be sent to stderr. (flag)
 
-> ### \-\-quiet:
+### --quiet:
 
-Flag to indicate that only errors and warnings should be sent to stderr\. \(flag\)
+> Flag to indicate that only errors and warnings should be sent to stderr. (flag)
 
 ## AUTHORS:
 

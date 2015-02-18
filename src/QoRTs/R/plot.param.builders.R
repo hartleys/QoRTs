@@ -183,13 +183,13 @@ build.plotter.basic.helper <- function(res, offset.by, compiled.params, plot.typ
 
   lanebam.params <- data.frame( plot.priority = rep(2,lanebam.ct),
                                            unique.ID = res@decoder$unique.ID,
-                                           lines.col = rep(compiled.params@highlight.points.color[2], lanebam.ct),
-                                           points.col = rep(compiled.params@highlight.points.color[2], lanebam.ct),
-                                           points.pch = rep(compiled.params@highlight.points.pch[2], lanebam.ct),
-                                           lines.lty = rep(compiled.params@highlight.lines.lty[2], lanebam.ct),
-                                           lines.lwd = rep(compiled.params@highlight.lines.lwd[2], lanebam.ct),
-                                           lines.alpha = rep(compiled.params@highlight.lines.alpha[2], lanebam.ct),
-                                           points.alpha = rep(compiled.params@highlight.points.alpha[2], lanebam.ct),
+                                           lines.col = rep(compiled.params@highlight.color[1], lanebam.ct),
+                                           points.col = rep(compiled.params@highlight.color[1], lanebam.ct),
+                                           points.pch = rep(compiled.params@highlight.points.pch[1], lanebam.ct),
+                                           lines.lty = rep(compiled.params@highlight.lines.lty[1], lanebam.ct),
+                                           lines.lwd = rep(compiled.params@highlight.lines.lwd[1], lanebam.ct),
+                                           lines.alpha = rep(compiled.params@highlight.lines.alpha[1], lanebam.ct),
+                                           points.alpha = rep(compiled.params@highlight.points.alpha[1], lanebam.ct),
                                            horiz.offsets = lanebam.offsets,
                                            vert.offsets = lanebam.offsets,
                                            stringsAsFactors=F
@@ -242,19 +242,19 @@ build.plotter.highlight.and.color <- function(curr.highlight, res, compiled.para
   }
 
   legend.params <- data.frame(name = c(hl.by.factor.levels, paste0("Other ",highlighted.by.name)),
-                                         lines.col = c(compiled.params@by.colors[1:length(hl.by.factor.levels)], compiled.params@highlight.lines.color[2]),
+                                         lines.col = c(compiled.params@by.colors[1:length(hl.by.factor.levels)], compiled.params@highlight.color[2]),
                                          lines.lty = c(rep(compiled.params@highlight.lines.lty[1],length(hl.by.factor.levels)), compiled.params@highlight.lines.lty[2]),
                                          points.pch = c(legend.points.pch, compiled.params@highlight.points.pch[2]),
-                                         points.col = c(compiled.params@by.colors[1:length(hl.by.factor.levels)], compiled.params@highlight.points.color[2]),
+                                         points.col = c(compiled.params@by.colors[1:length(hl.by.factor.levels)], compiled.params@highlight.color[2]),
                                          stringsAsFactors=F
   );
   
   lines.col <- sapply(1:lanebam.ct, FUN=function(i){
-    if(! is.highlighted[i]){ return(compiled.params@highlight.lines.color[2]);
+    if(! is.highlighted[i]){ return(compiled.params@highlight.color[2]);
     } else {return( legend.params$lines.col[ legend.params$name == color.highlighted.by[i] ] );}
   });
   points.col <- sapply(1:lanebam.ct, FUN=function(i){
-    if(! is.highlighted[i]){ return(compiled.params@highlight.points.color[2]);
+    if(! is.highlighted[i]){ return(compiled.params@highlight.color[2]);
     } else {return( legend.params$points.col[ legend.params$name == color.highlighted.by[i] ] );}
   });
 
@@ -374,11 +374,11 @@ build.plotter.color <- function(res, compiled.params, color.by, plot.type, offse
   );
   
   lines.col <- sapply(1:lanebam.ct, FUN=function(i){
-    if(! is.highlighted[i]){ return(compiled.params@highlight.lines.color[2]);
+    if(! is.highlighted[i]){ return(compiled.params@highlight.color[2]);
     } else {return( legend.params$lines.col[ legend.params$name == color.by[i] ] );}
   });
   points.col <- sapply(1:lanebam.ct, FUN=function(i){
-    if(! is.highlighted[i]){ return(compiled.params@highlight.points.color[2]);
+    if(! is.highlighted[i]){ return(compiled.params@highlight.color[2]);
     } else {return( legend.params$points.col[ legend.params$name == color.by[i] ] );}
   });
 
@@ -456,7 +456,7 @@ build.plotter.highlight <- function(curr.highlight, res, compiled.params, highli
       stop("FATAL ERROR! ","Cannot find highlighted element ", curr.highlight," in the highlight list!");
    }
   
-  #hl.color <- compiled.params@highlight.points.color;
+  #hl.color <- compiled.params@highlight.color;
 
   #plotParams <- new("QoRT_Plotter");
   #plotParams@res <- res;
@@ -470,10 +470,10 @@ build.plotter.highlight <- function(curr.highlight, res, compiled.params, highli
   lanebam.ct <- length(highlight.by);
   
   legend.params <- data.frame(name = c(curr.highlight,"Other Samples"),
-                                         lines.col = compiled.params@highlight.points.color,
+                                         lines.col = compiled.params@highlight.color,
                                          lines.lty = compiled.params@highlight.lines.lty,
                                          points.pch = compiled.params@highlight.points.pch,
-                                         points.col = compiled.params@highlight.points.color,
+                                         points.col = compiled.params@highlight.color,
                                          stringsAsFactors=F
   );
   if(merge.offset.outgroup){
@@ -506,8 +506,8 @@ build.plotter.highlight <- function(curr.highlight, res, compiled.params, highli
 
   lanebam.params <- data.frame( plot.priority = ifelse(is.highlighted, 2,1),
                                            unique.ID = res@decoder$unique.ID,
-                                           lines.col = ifelse(is.highlighted, compiled.params@highlight.lines.color[1], compiled.params@highlight.lines.color[2]),
-                                           points.col = ifelse(is.highlighted, compiled.params@highlight.points.color[1], compiled.params@highlight.points.color[2]),
+                                           lines.col = ifelse(is.highlighted, compiled.params@highlight.color[1], compiled.params@highlight.color[2]),
+                                           points.col = ifelse(is.highlighted, compiled.params@highlight.color[1], compiled.params@highlight.color[2]),
                                            points.pch = ifelse(is.highlighted, compiled.params@highlight.points.pch[1], compiled.params@highlight.points.pch[2]),
                                            lines.lty = ifelse(is.highlighted, compiled.params@highlight.lines.lty[1], compiled.params@highlight.lines.lty[2]),
                                            lines.lwd = ifelse(is.highlighted, compiled.params@highlight.lines.lwd[1], compiled.params@highlight.lines.lwd[2]),

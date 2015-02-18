@@ -9,8 +9,8 @@ import internalUtils.commandLineUI._;
 
 object runner {
   
-  final val QORTS_VERSION = "0.1.7"; // REPLACE_THIS_QORTS_VERSION_VARIABLE_WITH_VERSION_NUMBER          (note this exact text is used in a search-and-replace. Do not change it.)
-  final val QORTS_COMPILE_DATE = "Wed Feb 11 14:09:01 EST 2015"; // REPLACE_THIS_QORTS_DATE_VARIABLE_WITH_DATE          (note this exact text is used in a search-and-replace. Do not change it.)
+  final val QORTS_VERSION = "0.1.11"; // REPLACE_THIS_QORTS_VERSION_VARIABLE_WITH_VERSION_NUMBER          (note this exact text is used in a search-and-replace. Do not change it.)
+  final val QORTS_COMPILE_DATE = "Wed Feb 18 15:21:00 EST 2015"; // REPLACE_THIS_QORTS_DATE_VARIABLE_WITH_DATE          (note this exact text is used in a search-and-replace. Do not change it.)
   
   //final val FOR_HELP_STRING = "For help, use command: "
   
@@ -29,7 +29,8 @@ object runner {
            ("bamToWiggle" ->  (() => new fileConversionUtils.bamToWiggle.wiggleMaker)),
            //("makeSpliceBed" ->  (() => new fileConversionUtils.convertSpliceCountsToBed.converter)),
            ("mergeNovelSplices" -> (() => new fileConversionUtils.addNovelSplices.mergeNovelSplices)),
-           ("makeJunctionTrack" -> (() => new fileConversionUtils.makeSpliceJunctionBed.converter))
+           ("makeJunctionTrack" -> (() => new fileConversionUtils.makeSpliceJunctionBed.converter)),
+           ("generateSamplePlots" -> (() => new fileConversionUtils.generatePlotsWithR.genSimplePlots))
            
            
 

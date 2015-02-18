@@ -39,18 +39,24 @@ errorPlot <- function(plot.name, e, code = "UNKNOWN", newPlot = TRUE, cex = NULL
 
 #makePlot.generic.pair <- function(plot.name, data.list.r1, data.list.r2, 
 #                                                  plotter, x.name, y.name, norm.x, avg.y, xlim , ylim = NULL, vert.offset = 0, horiz.offset = 0, draw.horiz.lines = FALSE, plot.type = "lines", r2.buffer = 10, override.lty = -1, x.is.log = FALSE, y.is.log = FALSE, pre.plot.func = NULL, y.axis.las = 1, ...){
-makePlot.generic <- function(plot.name, data.list, plotter, x.name, y.name, norm.x, avg.y, plot.type = "lines", xlim = NULL, ylim = NULL, plot.means = FALSE, plot.medians = FALSE, vert.offset = 0, pre.plot.func = NULL, 
-                             draw.horiz.lines = FALSE, x.is.log = FALSE, y.is.log = FALSE, y.axis.las = 1, ...){
+makePlot.generic <- function(plot.name, data.list, plotter, x.name, y.name, norm.x, avg.y, plot.type = "lines", xlim = NULL, ylim = NULL, 
+                              plot.means = FALSE, plot.medians = FALSE, vert.offset = 0, pre.plot.func = NULL, override.lty = -1, 
+                             draw.horiz.lines = FALSE, x.is.log = FALSE, y.is.log = FALSE, y.axis.las = 1, zeroBaseX = FALSE, ...){
   tryCatch({
     priorities <- sort(unique(plotter$lanebam.params$plot.priority));
     tf.xy <- function(dl, i){
       curr.lanebam <- plotter$lanebam.params$unique.ID[i];
       curr.x <- dl[[curr.lanebam]][[x.name]];
       curr.y <- dl[[curr.lanebam]][[y.name]];
+      if(zeroBaseX) curr.x <- curr.x + 1;
       if(norm.x) curr.x <- curr.x / max(curr.x) * 100;
-      if(avg.y)  curr.y <- curr.y / sum(curr.y);
+      if(avg.y) {
+        if(! all(curr.y == 0)){
+          curr.y <- curr.y / sum(curr.y);
+        }
+      } 
       if(vert.offset != 0) curr.y <- curr.y + plotter$lanebam.params$vert.offsets[i] * vert.offset;
-      df <- data.frame(curr.x,curr.y);
+      df <- data.frame(curr.x,curr.y, stringsAsFactors = FALSE);
       names(df) <- c(x.name,y.name);
       df;
     }
@@ -60,8 +66,8 @@ makePlot.generic <- function(plot.name, data.list, plotter, x.name, y.name, norm
       tf.list[[curr.lanebam]] <- tf.xy(data.list,i);
     }
     if(is.null(xlim)){
-      xlim.max <- max(sapply(tf.list,function(dl){ max(dl[[x.name]]) }));
-      xlim.min <- min(sapply(tf.list,function(dl){ min(dl[[x.name]]) }));
+      xlim.max <- max(sapply(tf.list,function(dl){ max(dl[[x.name]], na.rm = TRUE) }), na.rm = TRUE);
+      xlim.min <- min(sapply(tf.list,function(dl){ min(dl[[x.name]], na.rm = TRUE) }), na.rm = TRUE);
       if(norm.x){
         xlim.max <- 100;
         xlim.min <- 0;
@@ -69,8 +75,19 @@ makePlot.generic <- function(plot.name, data.list, plotter, x.name, y.name, norm
       xlim <- c(xlim.min,xlim.max);
     }
     if(is.null(ylim)){
-      ylim.max <- max(sapply(tf.list,function(dl){ max(dl[[y.name]]) }));
-      ylim.min <- min(sapply(tf.list,function(dl){ min(dl[[y.name]]) }));
+      ylim.max <- max(sapply(tf.list,function(dl){ max(dl[[y.name]], na.rm = TRUE) }), na.rm = TRUE);
+      ylim.min <- min(sapply(tf.list,function(dl){ min(dl[[y.name]], na.rm = TRUE) }), na.rm = TRUE);
+      if((! is.simple.number(ylim.max)) | (! is.simple.number(ylim.min) )){
+        ylim.max <- max(sapply(tf.list,function(dl){ max(  nonsimple.replace(as.numeric(dl[[y.name]]),-Inf), na.rm = TRUE) }), na.rm = TRUE);
+        ylim.min <- min(sapply(tf.list,function(dl){ min(  nonsimple.replace(as.numeric(dl[[y.name]]), Inf), na.rm = TRUE) }), na.rm = TRUE);
+      }
+      if(is.infinite(ylim.max) & is.infinite(ylim.min)){
+        ylim.min <- 0;
+        ylim.max <- 0;
+      }
+      if(ylim.max == ylim.min){
+        ylim.max <- ylim.max + 0.0001;
+      }
       ylim <- c(ylim.min,ylim.max);
     }
     xlim.max <- xlim[2];
@@ -126,10 +143,14 @@ makePlot.generic <- function(plot.name, data.list, plotter, x.name, y.name, norm
         curr.y <- curr.data[[y.name]]
         curr.x <- curr.data[[x.name]]
         if(plot.type == "lines"){
-          lines(curr.x, curr.y, lty = p.params$lines.lty[j], col = color2transparent(p.params$lines.col[j],p.params$lines.alpha[j]));
+          lines(curr.x, curr.y, lty = ifelse(override.lty == -1, p.params$lines.lty[j], override.lty), 
+                col = color2transparent(p.params$lines.col[j],p.params$lines.alpha[j]),
+                lwd = p.params$lines.lwd[j]);
         }
         if(plot.medians | plot.means){
-          points(avg[[p.params$unique.ID[j]]], avg.plot.center + p.params$vert.offsets[j] * margin.sz * 2,pch = p.params$points.pch[j], col = color2transparent(p.params$points.col[j], p.params$points.alpha[j]));
+          points(avg[[p.params$unique.ID[j]]], avg.plot.center + p.params$vert.offsets[j] * margin.sz * 2,pch = p.params$points.pch[j], 
+                 col = color2transparent(p.params$points.col[j], p.params$points.alpha[j]),
+                 lwd = p.params$lines.lwd[j]);
         }
       }
     }
@@ -176,7 +197,7 @@ makePlot.generic <- function(plot.name, data.list, plotter, x.name, y.name, norm
 
 makePlot.generic.pair <- function(plot.name, data.list.r1, data.list.r2, plotter, x.name, y.name, norm.x, avg.y, xlim , ylim = NULL, vert.offset = 0, horiz.offset = 0, 
                                   draw.horiz.lines = FALSE, plot.type = "lines", r2.buffer = 10, override.lty = -1, 
-                                  x.is.log = FALSE, y.is.log = FALSE, pre.plot.func = NULL, y.axis.las = 1, ...){
+                                  x.is.log = FALSE, y.is.log = FALSE, pre.plot.func = NULL, y.axis.las = 1, zeroBaseX = FALSE, ...){
 
   tryCatch({
 
@@ -186,10 +207,11 @@ makePlot.generic.pair <- function(plot.name, data.list.r1, data.list.r2, plotter
       curr.lanebam <- plotter$lanebam.params$unique.ID[i];
       curr.x <- dl[[curr.lanebam]][[x.name]];
       curr.y <- dl[[curr.lanebam]][[y.name]];
+      if(zeroBaseX) curr.x <- curr.x + 1;
       if(norm.x) curr.x <- curr.x / max(curr.x) * 100;
       if(avg.y)  curr.y <- curr.y / sum(curr.y);
       if(vert.offset != 0) curr.y <- curr.y + plotter$lanebam.params$vert.offsets[i] * vert.offset;
-      df <- data.frame(curr.x,curr.y);
+      df <- data.frame(curr.x,curr.y, stringsAsFactors = FALSE);
       names(df) <- c(x.name,y.name);
       df;
     }
@@ -203,8 +225,19 @@ makePlot.generic.pair <- function(plot.name, data.list.r1, data.list.r2, plotter
     }
 
     if(is.null(ylim)){
-      ylim.min <- min(sapply(c(tf.list.r1,tf.list.r2),function(dl){ min(dl[[y.name]]) }));
-      ylim.max <- max(sapply(c(tf.list.r1,tf.list.r2),function(dl){ max(dl[[y.name]]) }));
+      ylim.min <- min(sapply(c(tf.list.r1,tf.list.r2),function(dl){ min(dl[[y.name]], na.rm = TRUE) }), na.rm = TRUE);
+      ylim.max <- max(sapply(c(tf.list.r1,tf.list.r2),function(dl){ max(dl[[y.name]], na.rm = TRUE) }), na.rm = TRUE);
+      if((! is.simple.number(ylim.max)) | (! is.simple.number(ylim.min) )){
+        ylim.max <- max(sapply(tf.list,function(dl){ max(  nonsimple.replace(as.numeric(dl[[y.name]]),-Inf), na.rm = TRUE) }), na.rm = TRUE);
+        ylim.min <- min(sapply(tf.list,function(dl){ min(  nonsimple.replace(as.numeric(dl[[y.name]]), Inf), na.rm = TRUE) }), na.rm = TRUE);
+      }
+      if(is.infinite(ylim.max) & is.infinite(ylim.min)){
+        ylim.min <- 0;
+        ylim.max <- 0;
+      }
+      if(ylim.max == ylim.min){
+        ylim.max <- ylim.max + 0.0001;
+      }
       ylim <- c(ylim.min, ylim.max);
     }
     xlim.max <- xlim[2];
@@ -239,14 +272,14 @@ makePlot.generic.pair <- function(plot.name, data.list.r1, data.list.r2, plotter
         curr.x <- curr.data[[x.name]];
         curr.y <- curr.data[[y.name]];
         if(plot.type == "lines"){
-          lines(curr.x, curr.y, lty = ifelse(override.lty == -1, p.params$lines.lty[j], override.lty), col = color2transparent(p.params$lines.col[j],p.params$lines.alpha[j]));
+          lines(curr.x, curr.y, lty = ifelse(override.lty == -1, p.params$lines.lty[j], override.lty), col = color2transparent(p.params$lines.col[j],p.params$lines.alpha[j]), lwd = p.params$lines.lwd[j]);
         }
         curr.data <- tf.list.r2[[ p.params$unique.ID[j] ]];
         curr.x <- curr.data[[x.name]];
         curr.y <- curr.data[[y.name]];
         curr.x <- curr.x + r2.offset;
         if(plot.type == "lines"){
-          lines(curr.x, curr.y, lty = ifelse(override.lty == -1, p.params$lines.lty[j], override.lty), col = color2transparent(p.params$lines.col[j],p.params$lines.alpha[j]));
+          lines(curr.x, curr.y, lty = ifelse(override.lty == -1, p.params$lines.lty[j], override.lty), col = color2transparent(p.params$lines.col[j],p.params$lines.alpha[j]), lwd = p.params$lines.lwd[j]);
         }
       }
     }
@@ -334,7 +367,7 @@ makePlot.gene.cdf.helper <- function(plot.name, data.list, plotter,plot.intercep
       p.params <- plotter$lanebam.params[plotter$lanebam.params$plot.priority == p,];
       for(j in 1:length(p.params$unique.ID)){
         curr.y <- tf.list[[ p.params$unique.ID[j] ]];
-        lines(curr.x,curr.y, lty = ifelse(override.lty == -1, p.params$lines.lty[j], override.lty), col = p.params$lines.col[j]);
+        lines(curr.x,curr.y, lty = ifelse(override.lty == -1, p.params$lines.lty[j], override.lty), col = p.params$lines.col[j], lwd = p.params$lines.lwd[j]);
       }
    }
 
@@ -363,12 +396,12 @@ makePlot.gene.cdf.helper <- function(plot.name, data.list, plotter,plot.intercep
            xs.1 = j;
            ye.1 = curr.pct;
            xe.1 = j;
-           lines(c(xs.1,xe.1),c(ys.1,ye.1),lty = 3, col = p.params$lines.col[i]);
+           lines(c(xs.1,xe.1),c(ys.1,ye.1),lty = 3, col = p.params$lines.col[i], lwd = p.params$lines.lwd[j]);
            ys.2 = curr.pct;
            #xs.2 = 0.9;
            ye.2 = curr.pct;
            xe.2 = xe.1;
-           lines(c(xs.2,xe.2),c(ys.2,ye.2),lty = 3, col = p.params$lines.col[i]);
+           lines(c(xs.2,xe.2),c(ys.2,ye.2),lty = 3, col = p.params$lines.col[i], lwd = p.params$lines.lwd[j]);
      }
 
      for(i in 1:length(p.params$unique.ID)){
@@ -593,7 +626,7 @@ makePlot.generic.NVC.single.DEFAULT <- function(plot.name, data.list.r1, plotter
          for(k in 1:length(bases)){
            curr.y <- dl[[curr.lanebam]][[bases[k]]];
            for(m in 1:length(curr.y)){
-             if(curr.y[m] > maxRate[m]){
+             if(f.na(curr.y[m] > maxRate[m])){
                ML[m] <- bases[k];
                maxRate[m] <- curr.y[m];
              }
@@ -606,7 +639,7 @@ makePlot.generic.NVC.single.DEFAULT <- function(plot.name, data.list.r1, plotter
          ML.final <- rep(blank.label.char, xlim.max);
          for(m in 1:xlim.max){
            ML.curr <- sapply(ML.list,function(ml){ ml[m] });
-           if(all(ML.curr == ML.curr[1])){
+           if(f.na(all(ML.curr == ML.curr[1]))){
              ML.final[m] <- ML.curr[1];
            }
          }
@@ -776,7 +809,7 @@ makePlot.generic.NVC.single.RASTERIZED <- function(plot.name, data.list.r1,plott
          for(k in 1:length(bases)){
            curr.y <- dl[[curr.lanebam]][[bases[k]]];
            for(m in 1:length(curr.y)){
-             if(curr.y[m] > maxRate[m]){
+             if(f.na(curr.y[m] > maxRate[m])){
                ML[m] <- bases[k];
                maxRate[m] <- curr.y[m];
              }
@@ -789,7 +822,7 @@ makePlot.generic.NVC.single.RASTERIZED <- function(plot.name, data.list.r1,plott
          ML.final <- rep(blank.label.char, xlim.max);
          for(m in 1:xlim.max){
            ML.curr <- sapply(ML.list,function(ml){ ml[m] });
-           if(all(ML.curr == ML.curr[1])){
+           if(f.na(all(ML.curr == ML.curr[1]))){
              ML.final[m] <- ML.curr[1];
            }
          }
@@ -978,7 +1011,7 @@ makePlot.generic.NVC.pair.DEFAULT <- function(plot.name, data.list.r1, data.list
          for(k in 1:length(bases)){
            curr.y <- dl[[curr.lanebam]][[bases[k]]];
            for(m in 1:length(curr.y)){
-             if(curr.y[m] > maxRate[m]){
+             if(f.na(curr.y[m] > maxRate[m])){
                ML[m] <- bases[k];
                maxRate[m] <- curr.y[m];
              }
@@ -991,7 +1024,7 @@ makePlot.generic.NVC.pair.DEFAULT <- function(plot.name, data.list.r1, data.list
          ML.final <- rep(blank.label.char, xlim.max);
          for(m in 1:xlim.max){
            ML.curr <- sapply(ML.list,function(ml){ ml[m] });
-           if(all(ML.curr == ML.curr[1])){
+           if(f.na(all(ML.curr == ML.curr[1]))){
              ML.final[m] <- ML.curr[1];
            }
          }
@@ -1182,7 +1215,7 @@ makePlot.generic.NVC.pair.RASTERIZED <- function(plot.name, data.list.r1, data.l
          for(k in 1:length(bases)){
            curr.y <- dl[[curr.lanebam]][[bases[k]]];
            for(m in 1:length(curr.y)){
-             if(curr.y[m] > maxRate[m]){
+             if(f.na(curr.y[m] > maxRate[m])){
                ML[m] <- bases[k];
                maxRate[m] <- curr.y[m];
              }
@@ -1195,7 +1228,7 @@ makePlot.generic.NVC.pair.RASTERIZED <- function(plot.name, data.list.r1, data.l
          ML.final <- rep(blank.label.char, xlim.max);
          for(m in 1:xlim.max){
            ML.curr <- sapply(ML.list,function(ml){ ml[m] });
-           if(all(ML.curr == ML.curr[1])){
+           if(f.na(all(ML.curr == ML.curr[1]))){
              ML.final[m] <- ML.curr[1];
            }
          }
@@ -1350,7 +1383,9 @@ merge.points.tf <- function(tf.list.1,tf.list.2){
 
 
 
-makePlot.generic.points <- function(plot.name, tf.list, plotter, plot.type = "points", ylim = NULL, leave.blank.cols = 0, label.y = TRUE, cex.x.axis = NULL, pre.plot.func = NULL, draw.lines = FALSE, ...){
+makePlot.generic.points <- function(plot.name, tf.list, plotter, plot.type = "points", 
+                                    ylim = NULL, leave.blank.cols = 0, label.y = TRUE, 
+                                    cex.x.axis = NULL, pre.plot.func = NULL, draw.lines = FALSE, ...){
 
   tryCatch({
 
@@ -1368,8 +1403,12 @@ makePlot.generic.points <- function(plot.name, tf.list, plotter, plot.type = "po
       ylim.max <- max(sapply(tf.list,function(dl){ max(as.numeric(dl$y)) }));
       ylim.min <- min(sapply(tf.list,function(dl){ min(as.numeric(dl$y)) }));
       if((! is.simple.number(ylim.max)) | (! is.simple.number(ylim.min) )){
-        ylim.max <- max(sapply(tf.list,function(dl){ max(  nonsimple.replace(as.numeric(dl$y),-Inf)) }));
-        ylim.min <- min(sapply(tf.list,function(dl){ min(  nonsimple.replace(as.numeric(dl$y), Inf)) }));
+        ylim.max <- max(sapply(tf.list,function(dl){ max(  nonsimple.replace(as.numeric(dl$y),-Inf), na.rm = TRUE) }), na.rm = TRUE);
+        ylim.min <- min(sapply(tf.list,function(dl){ min(  nonsimple.replace(as.numeric(dl$y), Inf), na.rm = TRUE) }), na.rm = TRUE);
+      }
+      if(is.infinite(ylim.max) & is.infinite(ylim.min)){
+        ylim.min <- 0;
+        ylim.max <- 0;
       }
       ylim <- c(ylim.min,ylim.max);    
     } else {
@@ -1425,7 +1464,8 @@ makePlot.generic.points <- function(plot.name, tf.list, plotter, plot.type = "po
   }, error = function(e){ errorPlot(plot.name, e, code = 2, newPlot = FALSE); stop();});
 }
 
-makePlot.generic.points.right <- function(plot.name, tf.list, plotter, plot.type = "points", section.offset = 0, ylim.plot = NULL, ylim.data = NULL, label.y = TRUE, cex.x.axis = NULL, ...){
+makePlot.generic.points.right <- function(plot.name, tf.list, plotter, plot.type = "points", section.offset = 0, 
+                                          ylim.plot = NULL, ylim.data = NULL, label.y = TRUE, cex.x.axis = NULL, ...){
   tryCatch({
 
     priorities <- sort(unique(plotter$lanebam.params$plot.priority));
@@ -1439,14 +1479,27 @@ makePlot.generic.points.right <- function(plot.name, tf.list, plotter, plot.type
       ylim.mar <- (ylim.range.full - ylim.range) / 2;
       ylim.plot <- c(ylim.plot.full[1] + ylim.mar, ylim.plot.full[2] - ylim.mar);
     }
+    
+    #set Y-axis limits:
     if(is.null(ylim.data)){
-      ylim.max <- max(sapply(tf.list,function(dl){ max(dl$y) }));
-      ylim.min <- min(sapply(tf.list,function(dl){ min(dl$y) }));
-      ylim.data <- c(ylim.min,ylim.max);
+      ylim.max <- max(sapply(tf.list,function(dl){ max(as.numeric(dl$y)) }));
+      ylim.min <- min(sapply(tf.list,function(dl){ min(as.numeric(dl$y)) }));
+      if((! is.simple.number(ylim.max)) | (! is.simple.number(ylim.min) )){
+        ylim.max <- max(sapply(tf.list,function(dl){ max(  nonsimple.replace(as.numeric(dl$y),-Inf), na.rm = TRUE) }), na.rm = TRUE);
+        ylim.min <- min(sapply(tf.list,function(dl){ min(  nonsimple.replace(as.numeric(dl$y), Inf), na.rm = TRUE) }), na.rm = TRUE);
+      }
+      if(is.infinite(ylim.max) & is.infinite(ylim.min)){
+        ylim.min <- 0;
+        ylim.max <- 0;
+      }
     } else {
       ylim.max <- ylim.data[2];
       ylim.min <- ylim.data[1];
     }
+    if(ylim.max == ylim.min){
+      ylim.max = ylim.min + 0.0001;
+    }
+    ylim.data <- c(ylim.min,ylim.max);
     ylim.plot.range <- ylim.plot[2] - ylim.plot[1];
     ylim.data.range <- ylim.data[2] - ylim.data[1];
     tf.y <- function(y){

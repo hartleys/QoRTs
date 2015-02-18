@@ -63,9 +63,9 @@ BiocStyle::latex()
 National Human Genome Research Institute\\
 National Institutes of Health}
 \date{August 8 2014\\
-February 11, 2015 %REPLACE_THIS_LINE_WITH_REVISION_DATE
+February 18, 2015 %REPLACE_THIS_LINE_WITH_REVISION_DATE
 \\
-v0.1.7 %REPLACE_THIS_LINE_WITH_VERSION_NUMBER
+v0.1.11 %REPLACE_THIS_LINE_WITH_VERSION_NUMBER
 }
 
 \begin{document}
@@ -158,11 +158,27 @@ novosort -n unsorted.bam > sortedByName.bam
 
 Technically, unsorted bam files can be run through QoRTs using the \verb|--coordSorted| option. However, this is NOT RECOMMENDED, as the memory footprint may grow very large. As QoRTs iterates through the bam file it generates a (hash-table based) ref-map of unpaired reads. Thus, if too many read pairs are too far apart in the bam file then out-of-memory errors may occur. Similarly, certain unusual datasets containing large quantities of chimeric read-pairs (in which many read pairs are mapped to distant loci) may use unacceptable quantities of memory. QoRTs will print several warnings if the number of unpaired reads grows too high. In this case, it is recommended that the bam file be sorted by name.
 
-%----------
-\subsection{Replicate decoder} \label{sec:decoder}
-%----------
+%-----------------------------------------------------------
+\section{Quick Start}  \label{sec:quickstart}
+%-----------------------------------------------------------
 
-Several QoRTs functions will require a "decoder" (either a file or data frame), which describes each sample and all of its technical replicates (if any). All of the columns are optional except for unique.ID, however if group, lane, and/or technical replicate information is not supplied then QoRTs obviously will not be able to produce plots that grouped and/or colored by these factors.
+In order to produce quality control metrics, plots, and pdf reports on a single replicate, simply use the command:
+
+\begin{verbatim}
+java -Xmx4G -jar /path/to/jarfile/QoRTs.jar QC
+                   --generatePlots 
+                   mybamfile.bam 
+                   transcriptAnnotationFile.gtf.gz 
+                   /qc/data/dir/path/
+\end{verbatim}
+
+Note: This command must be executed as a single line. Additional options may be required depending on the nature of the dataset. For single-ended data, the \verb|--singleEnded| option should be included. For strand-specific data, the \verb|--stranded| option should be included, and possibly also the \verb|--fr_secondStrand| option depending on the stranded library type. For position-sorted data, the \verb|--coordSorted| option should be used. See \ref{sec:initialProcessing}, or the QC utility documentation\footnote{Found here: \url{https://dl.dropboxusercontent.com/u/103621176/QoRTs/helpDocs/jarHtml/QC.html}} for more information on the available options.
+
+%-----------------------------------------------------------
+\section{Dataset Organization}  \label{sec:dataset}
+%-----------------------------------------------------------
+
+Several QoRTs functions will require "decoder" information in some form, which describes each sample and all of its technical replicates (if any). The simplest method is to provide a decoder file. All of the columns are optional except for unique.ID, however if group, lane, and/or technical replicate information is not supplied then QoRTs obviously will not be able to produce plots that organized and/or grouped by these factors.
 
 \noindent \emph{Fields}:
   \begin{itemize}
@@ -231,7 +247,7 @@ java -jar /path/to/jarfile/QoRTs.jar QC
 
 In the above command (which must be entered as a single line), you must replace \verb|/path/to/jarfile/| with the file-path to the directory in which the jar file is kept. The path \verb|/qc/data/dir/path/| should be replaced with the path you want the QC data to be written. This should match the path located in the decoder in the qc.data.dir column for this sample-run.
 
-The bam processing tool includes numerous options. A full description of these options can be found by entering the command:
+The bam processing tool includes numerous options. A full description of these options can be found in the online documentation of the jar utility\footnote{Found here: \url{https://dl.dropboxusercontent.com/u/103621176/QoRTs/helpDocs/jarHtml/index.html}}, or by entering the command:
 \begin{verbatim}
 java -jar /path/to/jarfile/QoRTs.jar QC --man
 \end{verbatim}
@@ -319,7 +335,13 @@ makeMultiPlot.all(res, outfile.dir = "./", plot.device.name = "pdf");
 makeMultiPlot.all(res, outfile.dir = "./", plot.device.name = "svg");
 @
 
-Note: The R PDF device primarily uses vector drawings, however, some of the plots are too large to be efficiently stored as vectors. QoRTs will automatically rasterize the plotting areas of certain large plots (in particular: the gene diversity plots and the various NVC plots). Setting the \verb|rasterize.large.plots| parameter to \verb|FALSE| will deactivate this behavior. The \verb|raster.height| and \verb|raster.width| parameters can be used to increase the pixel resolution of the rasterized plotting regions, if desired.
+Note: The R PDF device primarily uses vector drawings, however, some of the plots are too large to be efficiently stored as vectors. If pdf reports are desired, we recommend installing the \Rpackage{png} package. If this package is installed, then QoRTs will automatically rasterize the plotting areas of certain large plots (in particular: the gene diversity plots and the various NVC plots). Setting the \verb|rasterize.large.plots| parameter to \verb|FALSE| will deactivate this behavior. The \verb|raster.height| and \verb|raster.width| parameters can be used to increase the pixel resolution of the rasterized plotting regions, if desired.
+
+The \Rpackage{png} package can be installed with the R command:
+<<compileAllPlots2b, eval = FALSE>>=
+install.packages("png");
+@
+
 
 %----------
 \subsection{Plotting by sample, lane, or group} \label{subsec:plotterDesc}
@@ -1095,7 +1117,7 @@ java -jar /path/to/jarfile/QoRTs.jar mergeCounts
 
 The list of QC data directories must be separated by commas and contain no whitespace.
 
-For more information and a full accounting of all parameters and options, use the command:
+More information and a full accounting of all parameters and options can be found in the online documentation\footnote{Found here: \url{https://dl.dropboxusercontent.com/u/103621176/QoRTs/helpDocs/jarHtml/index.html}}, or by using the commands:
 \begin{verbatim}
 java -jar /path/to/jarfile/QoRTs.jar mergeAllCounts--man
 and
@@ -1137,7 +1159,7 @@ The chromLengthFile is a simple tab-delimited text file that includes each chrom
   \end{itemize}
 Many of the other parameters are identical to those used by the QC tool: \verb|--singleEnded|, \verb|--coordSorted|, etc. 
 
-For more information and a full accounting of all parameters and options, use the command:
+More information and a full accounting of all parameters and options can be found in the online documentation\footnote{Found here: \url{https://dl.dropboxusercontent.com/u/103621176/QoRTs/helpDocs/jarHtml/index.html}}, or by using the command:
 \begin{verbatim}
 java -jar /path/to/jarfile/QoRTs.jar bamToWiggle --man
 \end{verbatim}
@@ -1166,7 +1188,7 @@ There are a number of other allowed parameterizations. The \verb|--sampleList| p
     \item \verb|--sizeFactorFile|: A file containing at least two columns, the sample.ID and the size.factor. This file must include all samples in the sample list, but can include other samples that are not included in the sample list.
   \end{itemize}
 
-For more information and a full accounting of all parameters and options, use the command:
+More information and a full accounting of all parameters and options can be found in the online documentation\footnote{Found here: \url{https://dl.dropboxusercontent.com/u/103621176/QoRTs/helpDocs/jarHtml/index.html}}, or by using the command:
 \begin{verbatim}
 java -jar /path/to/jarfile/QoRTs.jar mergeWig --man
 \end{verbatim}
@@ -1191,7 +1213,7 @@ java -jar /path/to/jarfile/QoRTs.jar makeJunctionTrack
 
 \subsubsection{Merging splice-junction tracks}
 
-For more information and a full accounting of all parameters and options, use the command:
+More information and a full accounting of all parameters and options can be found in the online documentation\footnote{Found here: \url{https://dl.dropboxusercontent.com/u/103621176/QoRTs/helpDocs/jarHtml/index.html}}, or by using the command:
 \begin{verbatim}
 java -jar /path/to/jarfile/QoRTs.jar makeSpliceBed --man
 \end{verbatim}
@@ -1218,7 +1240,7 @@ java -jar /path/to/jarfile/QoRTs.jar makeJunctionTrack
 
 \subsubsection{Merging splice-junction tracks}
 
-For more information and a full accounting of all parameters and options, use the command:
+More information and a full accounting of all parameters and options can be found in the online documentation\footnote{Found here: \url{https://dl.dropboxusercontent.com/u/103621176/QoRTs/helpDocs/jarHtml/index.html}}, or by using the command:
 \begin{verbatim}
 java -jar /path/to/jarfile/QoRTs.jar makeSpliceBed --man
 \end{verbatim}

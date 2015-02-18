@@ -1,8 +1,8 @@
 <h1>QoRTs: Quality Of Rna-seq Tool Set</h1>
 
-<p>Version 0.1.7 (<a href="index.html">back to index</a>)</p>
+<p>Version 0.1.11 (<a href="index.html">back to index</a>)</p>
 
-<h2>Help for java command "bamToWiggle"</h2>
+<p>(<a href="../index.html">back to main</a>) (<a href="index.html">back to java-utility help</a>)## Help for java command "bamToWiggle"</p>
 
 <h2>USAGE:</h2>
 
@@ -15,157 +15,157 @@
 
 <h2>REQUIRED ARGUMENTS:</h2>
 
-<blockquote>
-  <h3>infile.bam[,infile2.bam,...]:</h3>
-</blockquote>
-
-<p>The input sam or bam file or files, or '-' to read from stdin. Note: if you include more than one bam file, the list must be comma delimited with no whitespace! (CommaDelimitedListOfStrings)</p>
+<h3>infile.bam[,infile2.bam,...]:</h3>
 
 <blockquote>
-  <h3>trackTitlePrefix:</h3>
+  <p>The input sam or bam file or files, or '-' to read from stdin. Note: if you include more than one bam file, the list must be comma delimited with no whitespace! (CommaDelimitedListOfStrings)</p>
 </blockquote>
 
-<p>The prefix for the title for the wiggle track. Track titles will be  (String)</p>
+<h3>trackTitlePrefix:</h3>
 
 <blockquote>
-  <h3>chromLengthFile:</h3>
+  <p>The prefix for the title for the wiggle track. Track titles will be  (String)</p>
 </blockquote>
 
-<p>The chrom length file. This should be a simple tab-delimited text file that includes each chromosome in the first column and the chromosome's length (in base-pairs) in the second column. If the wiggle file is intended for use with a standard genome on the UCSC genome browser, then the UCSC utility "fetchChromSizes" should be used to generate this file, as the UCSC genome browser and related utilities may have difficulties if the chrom lengths do not match the expected values. (String)</p>
+<h3>chromLengthFile:</h3>
 
 <blockquote>
-  <h3>outfilePrefix:</h3>
+  <p>The chrom length file. This should be a simple tab-delimited text file that includes each chromosome in the first column and the chromosome's length (in base-pairs) in the second column. If the wiggle file is intended for use with a standard genome on the UCSC genome browser, then the UCSC utility "fetchChromSizes" should be used to generate this file, as the UCSC genome browser and related utilities may have difficulties if the chrom lengths do not match the expected values. (String)</p>
 </blockquote>
 
-<p>The output file prefix. If unstranded, this will produce one file named "outfilePrefix.unstranded.wig.gz". If stranded, this will produce two files: "outfilePrefix.fwd.wig.gz" and "outfilePrefix.rev.wig.gz". If the "--noGzipOutput" flag is raised then the output files will not have the ".gz" extension at the end. IMPORTANT NOTE: if the window size is set to any size other than the default of 100, the window size will be added to the filename. The filename will be  "outfilePrefix.win50.unstranded.wig.gz" for unstranded wiggles with a 50bp window, and so on. (String)</p>
+<h3>outfilePrefix:</h3>
+
+<blockquote>
+  <p>The output file prefix. If unstranded, this will produce one file named "outfilePrefix.unstranded.wig.gz". If stranded, this will produce two files: "outfilePrefix.fwd.wig.gz" and "outfilePrefix.rev.wig.gz". If the "--noGzipOutput" flag is raised then the output files will not have the ".gz" extension at the end. IMPORTANT NOTE: if the window size is set to any size other than the default of 100, the window size will be added to the filename. The filename will be  "outfilePrefix.win50.unstranded.wig.gz" for unstranded wiggles with a 50bp window, and so on. (String)</p>
+</blockquote>
 
 <h2>OPTIONAL ARGUMENTS:</h2>
 
-<blockquote>
-  <h3>--sizefactor float:</h3>
-</blockquote>
-
-<p>The size factor, for normalization. Defaults to 1. If set, then the count of every cell will be divided by the given value. (Double)</p>
+<h3>--sizefactor float:</h3>
 
 <blockquote>
-  <h3>--coordSorted:</h3>
+  <p>The size factor, for normalization. Defaults to 1. If set, then the count of every cell will be divided by the given value. (Double)</p>
 </blockquote>
 
-<p>Flag to indicate that input bam file is coordinate-sorted, rather than name-sorted. Note that QoRTs will take longer to run and use more memory in this mode. To improve performance, sort the data by name prior to using of QoRTs. In addition, if an (extremely) large fraction of the read-pairs are mapped to extremely distant loci (or different chromosomes), then memory issues may arise. However, this should not be a problem with most datasets. Technically this function will also allow QoRTs to work on unsorted bam files, but this is STRONGLY not recommended, as memory usage will by greatly increased. (flag)</p>
+<h3>--coordSorted:</h3>
 
 <blockquote>
-  <h3>--minMAPQ num:</h3>
+  <p>Flag to indicate that input bam file is coordinate-sorted, rather than name-sorted. Note that QoRTs will take longer to run and use more memory in this mode. To improve performance, sort the data by name prior to using of QoRTs. In addition, if an (extremely) large fraction of the read-pairs are mapped to extremely distant loci (or different chromosomes), then memory issues may arise. However, this should not be a problem with most datasets. Technically this function will also allow QoRTs to work on unsorted bam files, but this is STRONGLY not recommended, as memory usage will by greatly increased. (flag)</p>
 </blockquote>
 
-<p>Filter reads for the given minimum MAPQ. Set to 0 to turn off mapq filtering. (Int)</p>
+<h3>--minMAPQ num:</h3>
 
 <blockquote>
-  <h3>--noGzipOutput:</h3>
+  <p>Filter reads for the given minimum MAPQ. Set to 0 to turn off mapq filtering. (Int)</p>
 </blockquote>
 
-<p>Flag to indicate that output should NOT be gzipped. (flag)</p>
+<h3>--noGzipOutput:</h3>
 
 <blockquote>
-  <h3>--negativeReverseStrand:</h3>
+  <p>Flag to indicate that output should NOT be gzipped. (flag)</p>
 </blockquote>
 
-<p>Flag to indicate that the reverse strand should be counted in negative values. Can be useful for plotting stranded data on a single multiwig track, via trackhubs. (flag)</p>
+<h3>--negativeReverseStrand:</h3>
 
 <blockquote>
-  <h3>--countByReadPair:</h3>
+  <p>Flag to indicate that the reverse strand should be counted in negative values. Can be useful for plotting stranded data on a single multiwig track, via trackhubs. (flag)</p>
 </blockquote>
 
-<p>DEPRECIATED, nonfunctional. (flag)</p>
+<h3>--countByReadPair:</h3>
 
 <blockquote>
-  <h3>--simpleCountByRead:</h3>
+  <p>DEPRECIATED, nonfunctional. (flag)</p>
 </blockquote>
 
-<p>Flag to indicate that this utility should count 'read coverage' rather than 'read-pair coverage'. If this flag is raised, then regions where a read-pair overlaps will be counted TWICE, one for each read. By default each read is counted separately, so a read-pair where the reads overlap will be double-counted. By default, overlapping regions of read-pairs are counted only once. (flag)</p>
+<h3>--simpleCountByRead:</h3>
 
 <blockquote>
-  <h3>--testRun:</h3>
+  <p>Flag to indicate that this utility should count 'read coverage' rather than 'read-pair coverage'. If this flag is raised, then regions where a read-pair overlaps will be counted TWICE, one for each read. By default each read is counted separately, so a read-pair where the reads overlap will be double-counted. By default, overlapping regions of read-pairs are counted only once. (flag)</p>
 </blockquote>
 
-<p>Flag to indicate that only the first 100k reads should be read in, used for test runs. (flag)</p>
+<h3>--testRun:</h3>
 
 <blockquote>
-  <h3>--stranded:</h3>
+  <p>Flag to indicate that only the first 100k reads should be read in, used for test runs. (flag)</p>
 </blockquote>
 
-<p>The stranded flag, used for strand-specific data. If this is set, then two wiggle files are created, one for each strand. (flag)</p>
+<h3>--stranded:</h3>
 
 <blockquote>
-  <h3>--stranded_fr_secondstrand:</h3>
+  <p>The stranded flag, used for strand-specific data. If this is set, then two wiggle files are created, one for each strand. (flag)</p>
 </blockquote>
 
-<p>If this option is set, the data is assumed to be a fr_secondstrand type stranded library. By default the assumed library type for stranded data is fr_firststrand. (flag)</p>
+<h3>--stranded_fr_secondstrand:</h3>
 
 <blockquote>
-  <h3>--singleEnded:</h3>
+  <p>If this option is set, the data is assumed to be a fr_secondstrand type stranded library. By default the assumed library type for stranded data is fr_firststrand. (flag)</p>
 </blockquote>
 
-<p>Flag for single-end data. Note that many other options do not apply in this case (for example: option --countPairsTogether does nothing in single-end mode) (flag)</p>
+<h3>--singleEnded:</h3>
 
 <blockquote>
-  <h3>--keepMultiMapped:</h3>
+  <p>Flag for single-end data. Note that many other options do not apply in this case (for example: option --countPairsTogether does nothing in single-end mode) (flag)</p>
 </blockquote>
 
-<p>Flag to indicate that the tool should NOT filter out multi-mapped reads. Note that even with this flag raised this utility will still only use the 'primary' alignment location for each read. By default any reads that are marked as multi-mapped will be ignored entirely. (flag)</p>
+<h3>--keepMultiMapped:</h3>
 
 <blockquote>
-  <h3>--includeTrackDefLine:</h3>
+  <p>Flag to indicate that the tool should NOT filter out multi-mapped reads. Note that even with this flag raised this utility will still only use the 'primary' alignment location for each read. By default any reads that are marked as multi-mapped will be ignored entirely. (flag)</p>
 </blockquote>
 
-<p>DEPRECIATED, nonfunctional (flag)</p>
+<h3>--includeTrackDefLine:</h3>
 
 <blockquote>
-  <h3>--omitTrackDefLine:</h3>
+  <p>DEPRECIATED, nonfunctional (flag)</p>
 </blockquote>
 
-<p>Flag to indicate that a track definition line should NOT be included. (flag)</p>
+<h3>--omitTrackDefLine:</h3>
 
 <blockquote>
-  <h3>--additionalTrackOptions "track options":</h3>
+  <p>Flag to indicate that a track definition line should NOT be included. (flag)</p>
 </blockquote>
 
-<p>More options for the track. For more information refer to the wiggle track definition on the UCSC genome browser website. (String)</p>
+<h3>--additionalTrackOptions "track options":</h3>
 
 <blockquote>
-  <h3>--readGroup readGroupName:</h3>
+  <p>More options for the track. For more information refer to the wiggle track definition on the UCSC genome browser website. (String)</p>
 </blockquote>
 
-<p>If this option is set, all analyses will be restricted to ONLY reads that are tagged with the given readGroupName (using an RG tag). This can be used if multiple read-groups have already been combined into a single bam file, but you want to summarize each read-group separately. (String)</p>
+<h3>--readGroup readGroupName:</h3>
 
 <blockquote>
-  <h3>--rgbColor rval,gval,bval:</h3>
+  <p>If this option is set, all analyses will be restricted to ONLY reads that are tagged with the given readGroupName (using an RG tag). This can be used if multiple read-groups have already been combined into a single bam file, but you want to summarize each read-group separately. (String)</p>
 </blockquote>
 
-<p>A comma delimited list of integers from 0-255, indicating the rgb color and alt-color for the wiggle file.This is equivalent to using --additionalTrackOptions "color=r,g,b altColor=r,g,b itemRgb=On" (String)</p>
+<h3>--rgbColor rval,gval,bval:</h3>
 
 <blockquote>
-  <h3>--noTruncate:</h3>
+  <p>A comma delimited list of integers from 0-255, indicating the rgb color and alt-color for the wiggle file.This is equivalent to using --additionalTrackOptions "color=r,g,b altColor=r,g,b itemRgb=On" (String)</p>
 </blockquote>
 
-<p>The UCSC tool wigToBigWig only allows wiggle files in which every window is of equal size. This means that if the chromosome size is not divisible by the window size, a few bases are not counted on the end of the chromosome. Using this flag will cause this utility to not truncate off the last odd-sized window. However, be aware that this will mean that you cannot use the UCSC 'wigToBigWig' utility to convert the wiggle file to a (smaller and more efficient) bigWig file. (flag)</p>
+<h3>--noTruncate:</h3>
 
 <blockquote>
-  <h3>--windowSize num:</h3>
+  <p>The UCSC tool wigToBigWig only allows wiggle files in which every window is of equal size. This means that if the chromosome size is not divisible by the window size, a few bases are not counted on the end of the chromosome. Using this flag will cause this utility to not truncate off the last odd-sized window. However, be aware that this will mean that you cannot use the UCSC 'wigToBigWig' utility to convert the wiggle file to a (smaller and more efficient) bigWig file. (flag)</p>
 </blockquote>
 
-<p>The length, in base-pairs, for each counting bin, or "window". Note: if this is set low the utility will take longer to run and will consume more memory. The default window size is 100bp. (Int)</p>
+<h3>--windowSize num:</h3>
 
 <blockquote>
-  <h3>--verbose:</h3>
+  <p>The length, in base-pairs, for each counting bin, or "window". Note: if this is set low the utility will take longer to run and will consume more memory. The default window size is 100bp. (Int)</p>
 </blockquote>
 
-<p>Flag to indicate that debugging information and extra progress information should be sent to stderr. (flag)</p>
+<h3>--verbose:</h3>
 
 <blockquote>
-  <h3>--quiet:</h3>
+  <p>Flag to indicate that debugging information and extra progress information should be sent to stderr. (flag)</p>
 </blockquote>
 
-<p>Flag to indicate that only errors and warnings should be sent to stderr. (flag)</p>
+<h3>--quiet:</h3>
+
+<blockquote>
+  <p>Flag to indicate that only errors and warnings should be sent to stderr. (flag)</p>
+</blockquote>
 
 <h2>AUTHORS:</h2>
 

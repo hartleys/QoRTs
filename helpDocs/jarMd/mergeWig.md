@@ -1,7 +1,7 @@
 # QoRTs: Quality Of Rna-seq Tool Set
-Version 0.1.7 ([back to index](index.html))
+Version 0.1.11 ([back to index](index.html))
 
-## Help for java command "mergeWig"
+([back to main](../index.html)) ([back to java-utility help](index.html))## Help for java command "mergeWig"
 
 ## USAGE:
 
@@ -13,73 +13,73 @@ Version 0.1.7 ([back to index](index.html))
 This utility merges multiple '\.wig' wiggle files into a single summary '\.wig' wiggle file\. Optionally it can be used to display the mean read\-pair coverage of each window across all input wiggle files rather than the sum\. Also optionally, the mean/sum can be weighted by a set of user\-supplied normalization factors\.
 
 ## REQUIRED ARGUMENTS:
-> ### outfile:
+### outfile:
 
-The name of the output wiggle file, or '\-' to write to stdout\. 
-If this ends with "\.gz" or "\.zip", then the file will automatically be compressed using the appropriate method\. \(String\)
+> The name of the output wiggle file, or '-' to write to stdout. 
+If this ends with ".gz" or ".zip", then the file will automatically be compressed using the appropriate method. (String)
 
 
 
 ## OPTIONAL ARGUMENTS:
-> ### \-\-makeNegative:
+### --makeNegative:
 
-Flag to indicate that every counting bin value should be multiplied by \-1 \(flag\)
+> Flag to indicate that every counting bin value should be multiplied by -1 (flag)
 
-> ### \-\-calcMean:
+### --calcMean:
 
-Flag to indicate that the mean average should be calculated, rather than the sum\. \(flag\)
+> Flag to indicate that the mean average should be calculated, rather than the sum. (flag)
 
-> ### \-\-sizeFactors val,val,val,\.\.\.:
+### --sizeFactors val,val,val,...:
 
-normalization factors for each wig file\. \(CommaDelimitedListOfDoubles\)
+> normalization factors for each wig file. (CommaDelimitedListOfDoubles)
 
-> ### \-\-trackTitle options:
+### --trackTitle options:
 
-The title of the new merged track\. \(String\)
+> The title of the new merged track. (String)
 
-> ### \-\-additionalTrackOptions options:
+### --additionalTrackOptions options:
 
-Additional track definition options, added to the track definition line\. See the UCSC documentation for more information\. \(String\)
+> Additional track definition options, added to the track definition line. See the UCSC documentation for more information. (String)
 
-> ### \-\-infilePrefix infilePrefix:
+### --infilePrefix infilePrefix:
 
-A file prefix for all input wiggle files\. By default the full file path should be specified by the infile parameter\. \(String\)
+> A file prefix for all input wiggle files. By default the full file path should be specified by the infile parameter. (String)
 
-> ### \-\-infileSuffix infileSuffix:
+### --infileSuffix infileSuffix:
 
-A file suffix for all input wiggle files\. By default the full file path should be specified by the infile parameter\. \(String\)
+> A file suffix for all input wiggle files. By default the full file path should be specified by the infile parameter. (String)
 
-> ### \-\-ignoreSizeFactors:
+### --ignoreSizeFactors:
 
-Flag to indicate that this utility should ignore size factors even if they are found in the input listFile\. \(flag\)
+> Flag to indicate that this utility should ignore size factors even if they are found in the input listFile. (flag)
 
-> ### \-\-quiet:
+### --quiet:
 
- \(flag\)
+>  (flag)
 
-> ### \-\-sizeFactorFile val:
+### --sizeFactorFile val:
 
-A file containing \(at least\) two columns: a list of sample ID's and their double\-precision floating\-point size factors\. The first line must include at least two columns: "sample\.ID" and "size\.factor"If this option is set, all counts will be divided by the given normalization factors\. The length must be the same as the length of infiles\.If sample\.ID's is not specified by the \-\-sampleList or \-\-sampleListFile parameters, then all listed samples will be merged\. \(String\)
+> A file containing (at least) two columns: a list of sample ID's and their double-precision floating-point size factors. The first line must include at least two columns: "sample.ID" and "size.factor"If this option is set, all counts will be divided by the given normalization factors. The length must be the same as the length of infiles.If sample.ID's is not specified by the --sampleList or --sampleListFile parameters, then all listed samples will be merged. (String)
 
-> ### \-\-sizeFactors val:
+### --sizeFactors val:
 
-A list of double\-precision floating\-point values\. If this or any size factor option is set, all counts will be divided by the given normalization factors\. The length must be the same as the number of files to merge\. \(CommaDelimitedListOfDoubles\)
+> A list of double-precision floating-point values. If this or any size factor option is set, all counts will be divided by the given normalization factors. The length must be the same as the number of files to merge. (CommaDelimitedListOfDoubles)
 
-> ### \-\-filenames file1\.wig,file2\.wig,file3\.wig\.gz,\.\.\.:
+### --filenames file1.wig,file2.wig,file3.wig.gz,...:
 
-A comma\-delimited list of wiggle files to merge\. This is optional, and filenames can be inferred from \-\-infilePrefix, \-\-infileSuffix, and the \-\-sampleList, if those options are specified\. \(CommaDelimitedListOfStrings\)
+> A comma-delimited list of wiggle files to merge. This is optional, and filenames can be inferred from --infilePrefix, --infileSuffix, and the --sampleList, if those options are specified. (CommaDelimitedListOfStrings)
 
-> ### \-\-sampleList \[sampleList\.txt | \- | samp1,samp2,samp3,\.\.\.\]:
+### --sampleList [sampleList.txt | - | samp1,samp2,samp3,...]:
 
-Either a comma\-delimited list of sample id's or a file containing a list of sample id's\.The file must either contain no title line, or contain a title line that includes a "sample\.ID" column\. \(String\)
+> Either a comma-delimited list of sample id's or a file containing a list of sample id's.The file must either contain no title line, or contain a title line that includes a "sample.ID" column. (String)
 
-> ### \-\-verbose:
+### --verbose:
 
-Flag to indicate that debugging information and extra progress information should be sent to stderr\. \(flag\)
+> Flag to indicate that debugging information and extra progress information should be sent to stderr. (flag)
 
-> ### \-\-quiet:
+### --quiet:
 
-Flag to indicate that only errors and warnings should be sent to stderr\. \(flag\)
+> Flag to indicate that only errors and warnings should be sent to stderr. (flag)
 
 ## AUTHORS:
 
