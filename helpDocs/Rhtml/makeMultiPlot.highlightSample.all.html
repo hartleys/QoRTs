@@ -1,0 +1,201 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head><title>R: Generating sample highlight multi-plots</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<link rel="stylesheet" type="text/css" href="R.css">
+</head><body>
+
+<table width="100%" summary="page for makeMultiPlot.highlightSample.all {QoRTs}"><tr><td>makeMultiPlot.highlightSample.all {QoRTs}</td><td align="right">R Documentation</td></tr></table>
+
+<h2>
+Generating sample highlight multi-plots
+</h2>
+
+<h3>Description</h3>
+
+<p>Generates multiple sample highlight summary plots, 
+one for every sample.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre>
+  makeMultiPlot.highlightSample.all(res, 
+                     outfile.dir = "./", 
+                     plotter.params = list(), 
+                     plot.device.name = "png", 
+                     plotting.device.params = list(),
+                     verbose = TRUE, debugMode,
+                     rasterize.large.plots,
+                     raster.height = 1000, 
+                     raster.width = 1000,
+                     exclude.autosomes.chrom.rate.plot = TRUE,
+                     chromosome.name.style = "UCSC",
+                     fig.res = 150, fig.base.height.inches = 7,
+                     ...)
+
+  makeMultiPlot.highlightSample.colorByLane.all(res, 
+                     outfile.dir = "./", 
+                     plotter.params = list(), 
+                     plot.device.name = "png", 
+                     plotting.device.params = list(),
+                     verbose = TRUE, debugMode,
+                     rasterize.large.plots,
+                     raster.height = 1000, 
+                     raster.width = 1000,
+                     exclude.autosomes.chrom.rate.plot = TRUE,
+                     chromosome.name.style = "UCSC",
+                     fig.res = 150, fig.base.height.inches = 7,
+                     ...)
+</pre>
+
+
+<h3>Arguments</h3>
+
+<table summary="R argblock">
+<tr valign="top"><td><code>res</code></td>
+<td>
+
+<p>A <code>QoRT_QC_Results</code> object, created by <code><a href="read.qc.results.data.html">read.qc.results.data</a></code>.
+</p>
+</td></tr>
+<tr valign="top"><td><code>outfile.dir</code></td>
+<td>
+
+<p>A file prefix, used for all output files. Usually the directory to
+which you want all files to be written.
+</p>
+</td></tr>
+<tr valign="top"><td><code>plotter.params</code></td>
+<td>
+
+<p>Additional parameters (advanced) used in creation of the Plotter 
+objects. See <a href="build.plotter.html">build.plotter</a>. 
+</p>
+</td></tr>
+<tr valign="top"><td><code>plot.device.name</code></td>
+<td>
+ 
+<p>The method to use to save plots. Can be one of:
+</p>
+
+<ul>
+<li> <p><code>"png"</code> for standard png compression,
+</p>
+</li>
+<li> <p><code>"CairoPNG"</code> for png compression using package Cairo.
+Note that this requires the package Cairo.
+</p>
+</li></ul>
+
+</td></tr>
+<tr valign="top"><td><code>plotting.device.params</code></td>
+<td>
+ 
+<p>A named list of parameters to be passed to the graphics device.
+For example:
+</p>
+
+<ul>
+<li> <p><code>"width = 2000"</code>
+</p>
+</li></ul>
+
+<p>Reasonable values for height, width, and pointsize will be chosen
+by default.
+</p>
+</td></tr>
+<tr valign="top"><td><code>verbose</code></td>
+<td>
+
+<p>Logical. If TRUE, more info will be printed to the console.
+</p>
+</td></tr>
+<tr valign="top"><td><code>debugMode</code></td>
+<td>
+
+<p>Logical. If TRUE, debugging data will be printed to the console.
+</p>
+</td></tr>
+<tr valign="top"><td><code>rasterize.large.plots</code></td>
+<td>
+
+<p>Logical. If TRUE, then if the currently selected plotting device
+is a vector device (or the &quot;curr&quot; device), then certain large plots
+will have their plotting areas rasterized. The axis labels, titles,
+and text will all remain vectorized, only the plotting areas will
+be flattened. <EM>Note that this requires the png package.</EM>
+</p>
+<p>By default, this parameter will be set to TRUE when a vector
+device is selected.
+</p>
+</td></tr>
+<tr valign="top"><td><code>raster.height</code></td>
+<td>
+
+<p>Numeric. If rasterize.plotting.area is TRUE, then this is the
+height of the plotting area raster image, in pixels.
+</p>
+</td></tr>
+<tr valign="top"><td><code>raster.width</code></td>
+<td>
+
+<p>Numeric. If rasterize.plotting.area is TRUE, then this is the
+width of the plotting area raster image, in pixels. Double-pane plots
+will be twice this width.
+</p>
+</td></tr>
+<tr valign="top"><td><code>exclude.autosomes.chrom.rate.plot</code></td>
+<td>
+
+<p>A logical value indicating whether to exclude autosomes from the plot.
+See <code><a href="makePlot.chrom.type.rates.html">makePlot.chrom.type.rates</a></code>
+</p>
+</td></tr>
+<tr valign="top"><td><code>chromosome.name.style</code></td>
+<td>
+
+<p>A string value indicating the style of the chromosome names, 
+and also how to split up the categories. See 
+<code><a href="makePlot.chrom.type.rates.html">makePlot.chrom.type.rates</a></code>
+</p>
+</td></tr>
+<tr valign="top"><td><code>fig.res</code></td>
+<td>
+
+<p>Numeric value. The number of pixels per &quot;inch&quot; (for raster devices only).
+For some plotting devices the figure height will be in pixels not inches, and
+will equal this value multiplied by the fig.base.height.inches value.
+</p>
+</td></tr>
+<tr valign="top"><td><code>fig.base.height.inches</code></td>
+<td>
+
+<p>Numeric value. The base height, in inches, of each sub-figure in the plot. This
+will be equal to the height for vector devices, or used to calculate the height
+in pixels using the fig.res value (see above).
+</p>
+</td></tr>
+<tr valign="top"><td><code>...</code></td>
+<td>
+ 
+<p>Arguments to be passed to methods, such as
+<a href="../../graphics/html/par.html">graphical parameters</a> (see <code><a href="../../graphics/html/par.html">par</a></code>).
+</p>
+</td></tr>
+</table>
+
+
+<h3>Details</h3>
+
+<p>Generates a sample highlight plot for each sample in the dataset.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code><a href="build.plotter.html">build.plotter</a></code>, <code><a href="makeMultiPlot.html">makeMultiPlot</a></code>
+</p>
+
+<hr><div align="center">[Package <em>QoRTs</em> version 0.1.11 <a href="00Index.html">Index</a>]</div>
+</body></html>

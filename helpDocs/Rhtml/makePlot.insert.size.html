@@ -1,0 +1,138 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head><title>R: Plot Insert Size Distribution.</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<link rel="stylesheet" type="text/css" href="R.css">
+</head><body>
+
+<table width="100%" summary="page for makePlot.insert.size {QoRTs}"><tr><td>makePlot.insert.size {QoRTs}</td><td align="right">R Documentation</td></tr></table>
+
+<h2>
+Plot Insert Size Distribution.
+</h2>
+
+<h3>Description</h3>
+
+<p>Plots the distribution of the size of the region covered by the
+two paired reads.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre>
+  makePlot.insert.size(plotter, calc.rate = TRUE, pct.cutoff = 0.98,
+                   plot.medians = TRUE, plot.means = NULL,
+                   debugMode, singleEndMode,
+                   ...)
+</pre>
+
+
+<h3>Arguments</h3>
+
+<table summary="R argblock">
+<tr valign="top"><td><code>plotter</code></td>
+<td>
+
+<p>A <code>QoRT_Plotter</code> reference object. See <code><a href="build.plotter.html">build.plotter</a></code>.
+</p>
+</td></tr>
+<tr valign="top"><td><code>calc.rate</code></td>
+<td>
+
+<p>A logical value indicating whether or not to calculate and
+plot the rate at which each insert size occurs as the y-axis.
+If this is set to false, it will instead plot the total number
+of times each insert size occurs.
+</p>
+</td></tr>
+<tr valign="top"><td><code>pct.cutoff</code></td>
+<td>
+
+<p>A numeric value between 0 and 1, indicating the quantile 
+within which to limit the x-axis. Generally the default value
+of 0.98 is perfectly usable.
+</p>
+</td></tr>
+<tr valign="top"><td><code>plot.means</code></td>
+<td>
+
+<p>A logical value indicating whether or not to plot the mean 
+average for each bamfile at the bottom of the plot.
+</p>
+</td></tr>
+<tr valign="top"><td><code>plot.medians</code></td>
+<td>
+
+<p>A logical value indicating whether or not to plot the median 
+average for each bamfile at the bottom of the plot. 
+Overrides <code>plot.means</code>.
+</p>
+</td></tr>
+<tr valign="top"><td><code>debugMode</code></td>
+<td>
+
+<p>Logical. If TRUE, debugging data will be printed to the console.
+</p>
+</td></tr>
+<tr valign="top"><td><code>singleEndMode</code></td>
+<td>
+
+<p>Logical. Determines whether the dataset consists of single-ended reads. 
+By default this is determined from the data. Thus, this parameter should 
+never need to be set by the user.
+</p>
+</td></tr>
+<tr valign="top"><td><code>...</code></td>
+<td>
+ 
+<p>Arguments to be passed to methods, such as
+<a href="../../graphics/html/par.html">graphical parameters</a> (see <code><a href="../../graphics/html/par.html">par</a></code>).
+</p>
+</td></tr>
+</table>
+
+
+<h3>Details</h3>
+
+<p>x-axis: The insert size. This is the genomic distance from the 
+start of one read to the end of the other. In other words, the
+size of the full region covered by the paired reads.
+</p>
+<p>y-axis: The rate at which the given insert size occurs, for each
+bamfile.
+</p>
+<p>Note: The insert size is calculated by using the alignment  
+as well as the provided gene/splice-junction annotation.
+</p>
+
+<ol>
+<li><p> If the paired reads align to overlapping regions of the
+reference genome, then the insert size can be calculated
+exactly. This is NOT dependant on the annotation. If the two 
+reads align inconsistantly (for example, one read showing a 
+splice junction and the other not), then the read is ignored.
+</p>
+</li>
+<li><p> If the paired reads do NOT overlap, then the annotation
+information is required. Using the full set of all known splice
+junctions that lie between the inner alignment endpoints for 
+the two reads, the shortest possible path from the two 
+endpoints is found. 
+In some rare cases this may underestimate the insert size, if
+the actual insert does not take the minimal path, but this is
+rare.
+In other (somewhat more common) cases this may overestimate 
+the insert size, when the region between the paired reads 
+bridges an unannotated splice junction.
+</p>
+</li></ol>
+
+
+
+<h3>See Also</h3>
+
+<p><code><a href="build.plotter.html">build.plotter</a></code>
+</p>
+
+<hr><div align="center">[Package <em>QoRTs</em> version 0.1.11 <a href="00Index.html">Index</a>]</div>
+</body></html>
