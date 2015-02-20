@@ -1,7 +1,7 @@
 # QoRTs: Quality Of Rna-seq Tool Set
-Version 0.1.12 ([back to index](index.html))
+> Version 0.1.13 (Updated Fri Feb 20 11:46:21 EST 2015)
 
-([back to main](../index.html)) ([back to java-utility help](index.html))
+> ([back to main](../index.html)) ([back to java-utility help](index.html))
 
 ## Help for java command "makeFlatGff"
 
@@ -30,7 +30,7 @@ It can also be used to produce a flattened gff file that adheres to the specific
 ## OPTIONAL ARGUMENTS:
 ### --stranded:
 
-> DEPRECIATED (flag)
+> The strandedness mode. Note that to precisely replicate DEXSeq behavior, always use the --stranded mode regardless of the strandedness of your dataset. However: for most purposes it is usually safer to use the same strandedness mode as your dataset. Otherwise, genes that overlap on different strands will not be identified as such, and instead these reads will simply be ignored as "ambiguous" during the counting step. This may lead to misleading read counts. (flag)
 
 ### --DEXSeqFmt:
 

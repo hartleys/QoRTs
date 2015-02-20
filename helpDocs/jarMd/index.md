@@ -1,5 +1,5 @@
 # QoRTs: Quality Of Rna-seq Tool Set
-Version0.1.12
+> Version0.1.13 (Updated Fri Feb 20 11:46:21 EST 2015)
 
 ([back to help base](../index.html))## General Help
 
@@ -16,7 +16,7 @@ NOTE: if you run into OutOfMemoryExceptions, try adding the java options: "-Xmx8
 ## COMMANDS:
 ### [QC](QC.html)
 
-> This utility runs a large battery of QC / data processing tools on a single given sam or bam file.This is the primary function of the QoRT utility.
+> This utility runs a large battery of QC / data processing tools on a single given sam or bam file. This is the primary function of the QoRT utility. All analyses are run via a single pass through the sam/bam file.
 
 ### [mergeCounts](mergeCounts.html)
 

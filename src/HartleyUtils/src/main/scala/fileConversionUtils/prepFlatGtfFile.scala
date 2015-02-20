@@ -44,7 +44,11 @@ object prepFlatGtfFile {
           argList = 
             new UnaryArgument(name = "stranded",
                               arg = List("--stranded","-r"), // name of value
-                              argDesc = "DEPRECIATED" // description
+                              argDesc = "The strandedness mode. "+
+                                        "Note that to precisely replicate DEXSeq behavior, always use the --stranded mode regardless of the strandedness of your dataset. "+
+                                        "However: for most purposes it is usually safer to use the same strandedness mode as your dataset. Otherwise, "+
+                                        "genes that overlap on different strands will not be identified as such, and instead these reads will simply be ignored as \"ambiguous\" "+
+                                        "during the counting step. This may lead to misleading read counts."
                               ) :: 
             new UnaryArgument(name = "dexseqFmt",
                               arg = List("--DEXSeqFmt"), // name of value
@@ -204,7 +208,7 @@ object prepFlatGtfFile {
     reportln("FlatteningGtf: Adding the aggregate genes themselves...("+getDateAndTimeString+")","debug");
     val featureListMap2 = aggregateSet.foldLeft(featureListMap)((soFar, aggregateGene) =>{
       val features = soFar(aggregateGene);
-      val iv = new GenomicInterval(features.head.chromName, features.head.strand, features.head.start, features.last.end);
+      val iv = new GenomicInterval(features.head.chromName, features.head.strand, features.head.start - 1, features.last.end);
       val gtfLine = FlatOutputGtfLine.makeFlatGtfLine_aggregateGene(iv, stranded , aggregateGene , gtfCodes);
       soFar.updated(aggregateGene, gtfLine +: features);
     });

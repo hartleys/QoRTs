@@ -171,8 +171,7 @@ List(
       
       sb.append("NAME\n");
       sb.append("	" + command + "\n");
-      sb.append("	Version: " + runner.runner.QORTS_VERSION + "\n");
-      sb.append("\n");
+      sb.append("   Version: " + runner.runner.QORTS_VERSION + " (Updated " + runner.runner.QORTS_COMPILE_DATE + ")\n\n");
       sb.append("USAGE\n"); 
       sb.append(wrapLinesWithIndent(getShortHelp(),CLUI_CONSOLE_LINE_WIDTH,"        ", false).substring(4)+"\n");
       sb.append("\n");
@@ -204,8 +203,8 @@ List(
       val sb = new StringBuilder("");
       
       sb.append("# QoRTs: Quality Of Rna-seq Tool Set\n");
-      sb.append("Version " + runner.runner.QORTS_VERSION + " ([back to index](index.html))\n\n");
-      sb.append("([back to main](../index.html)) ([back to java-utility help](index.html))\n\n");
+      sb.append("> Version " + runner.runner.QORTS_VERSION + " (Updated " + runner.runner.QORTS_COMPILE_DATE +")\n\n");
+      sb.append("> ([back to main](../index.html)) ([back to java-utility help](index.html))\n\n");
       sb.append("## Help for java command \""+escapeToMarkdown(command)+"\"\n\n");
  
       sb.append("## USAGE:\n\n"); 

@@ -78,8 +78,8 @@ object runAllQC {
           command = "QC", 
           quickSynopsis = "Runs a battery of QC tools", 
           synopsis = "", 
-          description = "This utility runs a large battery of QC / data processing tools on a single given sam or bam file."+
-                        "This is the primary function of the QoRT utility."+
+          description = "This utility runs a large battery of QC / data processing tools on a single given sam or bam file. "+
+                        "This is the primary function of the QoRT utility. All analyses are run via a single pass through the sam/bam file."+
                         ""+
                         ""+
                         ""+
@@ -136,13 +136,19 @@ object runAllQC {
                                          arg = List("--testRun","-t"), // name of value
                                          argDesc = "Flag to indicate that only the first 100k reads should be read in. Used for testing." // description
                                        ) ::
-
+                                       
+                    new BinaryArgument[Int](name = "minMAPQ",
+                                           arg = List("--minMAPQ"),  
+                                           valueName = "num", 
+                                           argDesc = "Filter out reads with less than the given MAPQ. Set to 0 to turn off mapq filtering.", 
+                                           defaultValue = Some(255)
+                                           ) :: 
                     new UnaryArgument( name = "keepMultiMapped",
                                          arg = List("--keepMultiMapped"), // name of value
                                          argDesc = "Flag to indicate that the tool should NOT filter out multi-mapped reads. Note that even with this flag raised this utility will still only "+
                                                     "use the 'primary' alignment location for each read. By default any reads that are marked as multi-mapped will be ignored entirely."+
-                                                    " Most aligners use the MAPQ value to mark multi-mapped reads. Any read with MAPQ < 255 is assumed to be non-uniquely mapped. "+
-                                                    " Thus: this option is equivalent to setting --minMAPQ to 0."// description
+                                                    " Most aligners use the MAPQ value to mark multi-mapped reads. Any read with MAPQ < 255 is assumed to be non-uniquely mapped (this is the standard used by RNA-STAR and TopHat). "+
+                                                    " Therefore: this option is equivalent to setting --minMAPQ to 0."// description
                                        ) ::
 
                     //new UnaryArgument( name = "neverPartiallyUnpaired",
@@ -162,13 +168,6 @@ object runAllQC {
                                                     "readGroupName (using an RG tag). This can be used if multiple read-groups have already been combined "+
                                                     "into a single bam file, but you want to summarize each read-group separately."
                                         ) ::
-
-                    new BinaryArgument[Int](name = "minMAPQ",
-                                           arg = List("--minMAPQ"),  
-                                           valueName = "num", 
-                                           argDesc = "Filter out reads with less than the given MAPQ. Set to 0 to turn off mapq filtering.", 
-                                           defaultValue = Some(255)
-                                           ) :: 
 
                     new BinaryArgument[List[String]](   name = "dropChromList",
                                                         arg = List("--dropChrom"),  
@@ -191,15 +190,15 @@ object runAllQC {
                     new BinaryArgument[List[String]](name = "runFunctions",
                                                         arg = List("--runFunctions"),  
                                                         valueName = "func1,func2,...", 
-                                                        argDesc = "The complete list of functions to run. Setting this option turns off ALL functions EXCEPT for the ones explicitly requested here. Some functions require other functions. If these functions are requested, all functions it is dependent on will also run. Followed by a comma delimited list, with no internal whitespace. Allowed options are: "+QC_FUNCTION_LIST.mkString(", "), 
+                                                        argDesc = "The complete list of functions to run. Setting this option runs ONLY for the functions explicitly requested here (along with any dependancy functions). The list should be formatted as a comma delimited list, with no internal whitespace. Allowed options are: "+QC_FUNCTION_LIST.mkString(", "), 
                                                         defaultValue = Some(List[String]())
                                                         ) :: 
                     new BinaryOptionArgument[Int](
                                          name = "seqReadCt", 
                                          arg = List("--seqReadCt"), 
                                          valueName = "val",  
-                                         argDesc = "(Optional) The number of reads for the replicate, prior to alignment."+
-                                                   "This will be passed on into the QC.summary.txt file."+
+                                         argDesc = "(Optional) The total number of reads (or read-pairs, for paired-end data) generated by the sequencer for this sample, prior to alignment. "+
+                                                   "This will be passed on into the QC.summary.txt file and used to calculate mapping rate."+
                                                    ""+
                                                    ""
                                         ) ::
@@ -207,7 +206,7 @@ object runAllQC {
                                          name = "rawfastq", 
                                          arg = List("--rawfastq"), 
                                          valueName = "myfastq.fq.gz",  
-                                         argDesc = "(Optional) The raw fastq, prior to alignment. This is used ONLY to calculate the number of pre-alignment reads(or read-pairs) simply by counting the number of lines and dividing by 4. "+
+                                         argDesc = "(Optional) The raw fastq, prior to alignment. This is used ONLY to calculate the number of pre-alignment reads (or read-pairs) simply by counting the number of lines and dividing by 4. "+
                                                    "Alternatively, the number of pre-alignment read-pairs can be included explicitly via the --seqReadCt option, or added in the "+
                                                    "plotting / cross-comparison step by including the input.read.pair.count column in the replicate decoder."+
                                                    "In general, the --seqReadCt option is recommended when available.\n"+
@@ -226,7 +225,9 @@ object runAllQC {
                     new BinaryArgument[String](name = "title",
                                            arg = List("--title"),  
                                            valueName = "myTitle", 
-                                           argDesc = "The title of the replicate. Used for the track name in the track definition line of any browser tracks ('.wig' or '.bed' files) generated by this utility. Also used in the figure text, if figures are being generated."+
+                                           argDesc = "The title of the replicate. Used for the track name in the track definition line of "+
+                                                      "any browser tracks ('.wig' or '.bed' files) generated by this utility. "+
+                                                      "Also may be used in the figure text, if figures are being generated."+
                                                      "Note that no browser tracks will be created by default, unless the '--chromSizes' option is set. Bed files can also be generated using the option '--addFunction makeJunctionBed'", 
                                            defaultValue = Some("Untitled")
                                            ) :: 
@@ -234,13 +235,43 @@ object runAllQC {
                                          name = "flatgfffile", 
                                          arg = List("--flatgff"), 
                                          valueName = "flattenedGffFile.gff.gz",  
-                                         argDesc = "A \"flattened\" gtf file that matches the standard gtf file. Optional."+
-                                                   "It may also be useful for downstream analyses, as it assigns unique identifiers to all exons and splice "+
-                                                   "junctions. The flattened gtf file can be generated using "+
-                                                   "the \"makeFlatGff\" command. Note that the command must be run with the same strandedness code.\n"+
+                                         argDesc = "A \"flattened\" gff file that matches the standard gtf file. Optional. "+
+                                                   "The \"flattened\" gff file assigns unique identifiers for all exons, splice junctions, and aggregate-genes. "+
+                                                   "This is used for the junction counts and exon counts (for DEXSeq). "+
+                                                   "The flattened gtf file can be generated using "+
+                                                   "the \"makeFlatGff\" command. Flattened GFF files containing novel splice junctions can be generated using the \"mergeNovelSplices\" function. "+
+                                                   "Note that (for most purposes) the command should be run with the same strandedness code as found in the dataset. "+
+                                                   "See the documentation for makeFlatGff for more information. "+
+                                                   "\n"+
                                                    "If the filename ends with \".gz\" or \".zip\", the file will be parsed using the appropriate decompression method."
                                         ) ::
 
+
+                    new UnaryArgument( name = "generateMultiPlot",
+                                         arg = List("--generateMultiPlot"), // name of value
+                                         argDesc = "Generate a multi-frame figure, containing a visual summary of all QC stats. "+
+                                                   "(Note: this requires that R be installed and in the PATH, and that QoRTs be installed on that R installation)"+
+                                                   ""+
+                                                   ""
+                                       ) ::
+                    new UnaryArgument( name = "generateSeparatePlots",
+                                         arg = List("--generateSeparatePlots"), // name of value
+                                         argDesc = "Generate seperate plots for each QC stat, rather than only one big multiplot. "+
+                                                   "(Note: this requires that R be installed and in the PATH, and that QoRTs be installed on that R installation) "+
+                                                   ""+
+                                                   ""+
+                                                   ""
+                                       ) ::
+                    new UnaryArgument( name = "generatePdfReport",
+                                       arg = List("--generatePdfReport"), // name of value
+                                       argDesc = "Generate a pdf report. "+
+                                                 "(Note: this requires that R be installed and in the PATH, and that QoRTs be installed on that R installation)"+
+                                                 ""+
+                                                 ""+
+                                                 ""
+                                       ) ::
+                                       
+//BETA OPTIONS:
                       new BinaryOptionArgument[String](
                                          name = "restrictToGeneList", 
                                          arg = List("--restrictToGeneList"), 
@@ -269,30 +300,7 @@ object runAllQC {
                                                     "GC content plots sometimes contain visible spikes caused by small transcripts / RNA's with extremely high expression levels."+
                                                     "ADDITIONAL WARNING: This feature is in BETA, and is not yet fully tested."
                                         ) ::   
-                    new UnaryArgument( name = "generateMultiPlot",
-                                         arg = List("--generateMultiPlot"), // name of value
-                                         argDesc = "Generate a multi-frame figure, containing a visual summary of all QC stats. "+
-                                                   "(Note: this requires that R be installed and in the PATH, and that QoRTs be installed on that R installation)"+
-                                                   ""+
-                                                   ""
-                                       ) ::
-                    new UnaryArgument( name = "generateSeparatePlots",
-                                         arg = List("--generateSeparatePlots"), // name of value
-                                         argDesc = "Generate seperate plots for each QC stat, rather than only one big multiplot. "+
-                                                   "(Note: this requires that R be installed and in the PATH, and that QoRTs be installed on that R installation) "+
-                                                   ""+
-                                                   ""+
-                                                   ""
-                                       ) ::
-                    new UnaryArgument( name = "generatePdfReport",
-                                       arg = List("--generatePdfReport"), // name of value
-                                       argDesc = "Generate a pdf report. "+
-                                                 "(Note: this requires that R be installed and in the PATH, and that QoRTs be installed on that R installation)"+
-                                                 ""+
-                                                 ""+
-                                                 ""
-                                       ) ::
-                                        //DEPRECIATED OPTIONS:
+//DEPRECIATED OPTIONS:
                     new UnaryArgument( name = "noMultiMapped",
                                          arg = List("--fileContainsNoMultiMappedReads"), // name of value
                                          argDesc = "Flag to indicate that the input sam/bam file contains only primary alignments (ie, no multi-mapped reads). This flag is ALWAYS OPTIONAL, but when applicable this utility will run (slightly) faster when using this argument. (DEPRECIATED! The performance improvement was marginal)" // description
@@ -322,7 +330,7 @@ object runAllQC {
                     new FinalArgument[String](
                                          name = "outdir",
                                          valueName = "qcDataDir",
-                                         argDesc = "The output directory (usually a directory name)." // description
+                                         argDesc = "The output directory." // description
                                         ) :: internalUtils.commandLineUI.CLUI_UNIVERSAL_ARGS
       );
     
