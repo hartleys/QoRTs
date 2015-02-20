@@ -676,7 +676,8 @@ object runAllQC {
                                                                                                                    isSingleEnd, stranded, fr_secondStrand, 
                                                                                                                    1.0, true, true, true, None, "") else QCUtility.getBlankUnitUtil;
     
-    val qcALL = parConvert(Vector(qcGGC, qcIS, qcCS, qcJD, qcQSC, qcGC, qcJC, qcST, qcCC, qcCM), numThreads);
+    //val qcALL = parConvert(Vector(qcGGC, qcIS, qcCS, qcJD, qcQSC, qcGC, qcJC, qcST, qcCC, qcCM), numThreads);
+    val qcALL = Vector(qcGGC, qcIS, qcCS, qcJD, qcQSC, qcGC, qcJC, qcST, qcCC, qcCM);
     
     reportln("QC Utilities Generated!","note");
     standardStatusReport(initialTimeStamp);

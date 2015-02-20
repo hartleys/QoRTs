@@ -44,7 +44,7 @@ object prepFlatGtfFile {
           argList = 
             new UnaryArgument(name = "stranded",
                               arg = List("--stranded","-r"), // name of value
-                              argDesc = "Flag to indicate that reads are stranded." // description
+                              argDesc = "DEPRECIATED" // description
                               ) :: 
             new UnaryArgument(name = "dexseqFmt",
                               arg = List("--DEXSeqFmt"), // name of value
@@ -69,7 +69,8 @@ object prepFlatGtfFile {
       prepFlatGtfFile.run(parser.get[String]("infile"),
                           parser.get[String]("outfile"), 
                           parser.get[Boolean]("stranded"),
-                          parser.get[Boolean]("dexseqFmt"));
+                          parser.get[Boolean]("dexseqFmt")
+                          );
       }
     }
   }
@@ -315,7 +316,7 @@ object prepFlatGtfFile {
     reportln("FlatteningGtf: Aggregate Sets built.","debug");
 
     //val sortedFeatureList = buildFeatures(stranded, txArray, txMap , spliceJunctionMap , aggregateGeneMap , aggregateSet );
-    val sortedFeatureIterator = buildFeatures2(stranded, txArray, txMap , spliceJunctionMap , aggregateGeneMap , aggregateSet );
+    val sortedFeatureIterator = buildFeatures2(stranded, txArray, txMap , spliceJunctionMap , aggregateGeneMap , aggregateSet);
     reportln("FlatteningGtf: Features Built.("+getDateAndTimeString+")","debug");
     return(sortedFeatureIterator);
   }
@@ -356,7 +357,7 @@ object prepFlatGtfFile {
   def getFlatGtfLines(infile : String, stranded : Boolean) : IndexedSeq[FlatGtfLine] = {
     val sortedFeatureIterator = getFlatGtfIterator(infile,stranded);
     return sortedFeatureIterator.toVector;
-  }
+  } 
   
 }
 

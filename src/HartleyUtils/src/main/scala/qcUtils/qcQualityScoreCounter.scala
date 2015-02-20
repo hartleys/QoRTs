@@ -76,7 +76,7 @@ class qcQualityScoreCounter(isSingleEnd : Boolean, readLength : Int, maxQualScor
   }
   
   def writeOutput(outfile : String, summaryWriter : WriterUtil){
-    val pcts = Seq[Double](0.0,0.25,0.5,0.75,1.0);
+    val pcts = Seq[Double](0.25,0.5,0.75);
     
     writeOutput(pcts, qualByPos_r1, outfile + ".quals.r1.txt");
     
@@ -93,9 +93,9 @@ class qcQualityScoreCounter(isSingleEnd : Boolean, readLength : Int, maxQualScor
     
     val out_data : Seq[Seq[Int]] = cumulativeSum.map((qualCS : Array[Int]) => {
       val pct_thresh = pcts.map((x : Double) => math.floor(x * qualCS.last.toDouble).toInt);
-      pct_thresh.map((t : Int) => {
+      (Seq(qualCS.indexWhere(_ > 0)) ++ pct_thresh.map((t : Int) => {
         qualCS.indexWhere( _ >= t );
-      }).toSeq
+      }).toSeq ++ Seq(qualCS.indexWhere(_ == qualCS.last)))
     }).toSeq
     
     val writer = openWriterSmart_viaGlobalParam(outfile);

@@ -88,11 +88,11 @@ object qcGetGeneCounts {
    /*
    * FIX ME FOR STRANDEDNESS!!!!
    */
-  def makeGeneIntervalMap(intervalBreaks : Seq[Double], geneArray : GenomicArrayOfSets[String]) : Map[String, Vector[TreeSet[GenomicInterval]]] = {
+  def makeGeneIntervalMap(intervalBreaks : Seq[Double], stdGeneArray : GenomicArrayOfSets[String], strandedGeneArray : GenomicArrayOfSets[String]) : Map[String, Vector[TreeSet[GenomicInterval]]] = {
     //val initialMap = geneSet.foldLeft( new scala.collection.immutable.HashMap[String,  TreeSet[GenomicInterval] ]() )((soFar,curr) =>{
     //  soFar + ((curr, new TreeSet[GenomicInterval]() ));
     //})
-    val geneMap = helper_calculateGeneAssignmentMap_strict(geneArray);
+    val geneMap = helper_calculateGeneAssignmentMap_strict(stdGeneArray, strandedGeneArray);
     reportln("making makeGeneIntervalMap for geneBody calculations. Found: " + geneMap.size + " acceptable genes for gene-body analysis.","debug");
     
     val geneLengths = geneMap.map((cg) => {
@@ -109,7 +109,7 @@ object qcGetGeneCounts {
       val currGene : String = cg._1;
       val currGeneLen : Int = geneLengths(currGene);
       if(geneStrands(currGene) == '+') sofar + ((currGene, helper_calculateBreakMap(cg, currGeneLen, intervalBreaks)));
-      else sofar + ((currGene, helper_calculateBreakMap(cg, currGeneLen, intervalBreaks).reverse));
+      else                             sofar + ((currGene, helper_calculateBreakMap(cg, currGeneLen, intervalBreaks).reverse));
     });
     return out;
   }
@@ -128,10 +128,10 @@ object qcGetGeneCounts {
     //  (geneID, new Array[Int](intervalCount));
     //}).toMap;
   }
-  
-  private def helper_calculateGeneAssignmentMap_strict(geneArray : GenomicArrayOfSets[String]) : Map[String, TreeSet[GenomicInterval]] = {
+   
+  private def helper_calculateGeneAssignmentMap_strict(stdGeneArray : GenomicArrayOfSets[String], strandedGeneArray : GenomicArrayOfSets[String]) : Map[String, TreeSet[GenomicInterval]] = {
 
-    val badGeneSet = geneArray.getSteps.foldLeft(Set[String]())( (soFar, curr) =>{
+    val badGeneSet = stdGeneArray.getSteps.foldLeft(Set[String]())( (soFar, curr) =>{
       val (iv, geneSet) = curr;
       if(geneSet.size > 1){
         soFar ++ geneSet.toSet;
@@ -143,10 +143,10 @@ object qcGetGeneCounts {
     //  soFar ++ curr._2.toSet;
     //});
     
-    reportln("helper_calculateGeneAssignmentMap_strict. Found: " + geneArray.getValueSet.size + " genes in the supplied annotation.","debug");
+    reportln("helper_calculateGeneAssignmentMap_strict. Found: " + strandedGeneArray.getValueSet.size + " genes in the supplied annotation.","debug");
     reportln("helper_calculateGeneAssignmentMap_strict. Found: " + badGeneSet.size + " genes with ambiguous segments.","debug");
     
-    val buf = geneArray.getSteps.foldLeft(  Map[String, TreeSet[GenomicInterval] ]() )( (soFar, curr) => {
+    val buf = strandedGeneArray.getSteps.foldLeft(  Map[String, TreeSet[GenomicInterval] ]() )( (soFar, curr) => {
       val currIv = curr._1;
       val currGeneSet = curr._2;
       if(currGeneSet.size == 1){
@@ -175,8 +175,8 @@ object qcGetGeneCounts {
   }
   
   /*
-   * FIX ME FOR STRANDEDNESS!!!!
-   * Done?
+   * Old note: FIX ME FOR STRANDEDNESS!!!!
+   * FIXED.
    */
   private def helper_calculateBreakMap( cg : (String, TreeSet[GenomicInterval]), currGeneLen : Int,  intervalBreaks : Seq[Double]) : Vector[TreeSet[GenomicInterval]] = {
     val currGene : String = cg._1;
@@ -339,8 +339,11 @@ class qcGetGeneCounts( stranded : Boolean,
   
   val geneBody_IntervalCount : Int = geneBodyIntervalCount;
   val geneBody_intervalBreaks = (0 to geneBody_IntervalCount).map(_.toDouble / geneBody_IntervalCount.toDouble).toSeq
-  val geneBody_CoverageIntervalMap = qcGetGeneCounts.makeGeneIntervalMap(geneBody_intervalBreaks, strandedGeneArray);
-  //reportln("making geneBody_CoverageIntervalMap for geneBody calculations. Found: " + geneBody_CoverageIntervalMap.size + " acceptable genes.","debug");
+  
+  //Major change: fix genebody data for unstranded data:
+  val geneBody_CoverageIntervalMap = qcGetGeneCounts.makeGeneIntervalMap(geneBody_intervalBreaks, geneArray, strandedGeneArray);
+  //val geneBody_CoverageIntervalMap = qcGetGeneCounts.makeGeneIntervalMap(geneBody_intervalBreaks, strandedGeneArray);
+  ////reportln("making geneBody_CoverageIntervalMap for geneBody calculations. Found: " + geneBody_CoverageIntervalMap.size + " acceptable genes.","debug");
   val geneBody_CoverageCountArrays : scala.collection.mutable.Map[String,Array[Int]] = qcGetGeneCounts.makeGeneBodyCoverageCountArrays(geneBody_IntervalCount, geneBody_CoverageIntervalMap.keys);
   
   //val mapLocation_CDS : GenomicArrayOfSets[String]

@@ -1,7 +1,9 @@
 # QoRTs: Quality Of Rna-seq Tool Set
-Version 0.1.11 ([back to index](index.html))
+Version 0.1.12 ([back to index](index.html))
 
-([back to main](../index.html)) ([back to java-utility help](index.html))## Help for java command "makeFlatGff"
+([back to main](../index.html)) ([back to java-utility help](index.html))
+
+## Help for java command "makeFlatGff"
 
 ## USAGE:
 
@@ -28,7 +30,7 @@ It can also be used to produce a flattened gff file that adheres to the specific
 ## OPTIONAL ARGUMENTS:
 ### --stranded:
 
-> Flag to indicate that reads are stranded. (flag)
+> DEPRECIATED (flag)
 
 ### --DEXSeqFmt:
 

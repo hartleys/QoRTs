@@ -205,7 +205,7 @@ List(
       
       sb.append("# QoRTs: Quality Of Rna-seq Tool Set\n");
       sb.append("Version " + runner.runner.QORTS_VERSION + " ([back to index](index.html))\n\n");
-      sb.append("([back to main](../index.html)) ([back to java-utility help](index.html))");
+      sb.append("([back to main](../index.html)) ([back to java-utility help](index.html))\n\n");
       sb.append("## Help for java command \""+escapeToMarkdown(command)+"\"\n\n");
  
       sb.append("## USAGE:\n\n"); 

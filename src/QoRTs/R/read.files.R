@@ -457,67 +457,93 @@ fix.summary.to.numeric <- function(res){
 }
 
 add.to.summary <- function(res){
+   #message("debug 0");
    summary <- res@qc.data[["summary"]];
    summary.names <- names(summary);
-   summary <- lapply(summary,function(dl){
-      known.few <- dl$COUNT[dl$FIELD == "SpliceLoci_Known_FewReads"]
-      known.many <- dl$COUNT[dl$FIELD == "SpliceLoci_Known_ManyReads"]
-      novel <- dl$COUNT[dl$FIELD == "SpliceLoci_Novel"]
-      
-      known.any <- known.few + known.many;
-      spliceLoci.any <- known.any + novel;
+   #plotter$res@qc.data[["summary"]][[1]]$FIELD
+   if(all( sapply(summary, function(s){ "SpliceLoci_Known_FewReads" %in% s$FIELD })) ){
+     summary <- lapply(summary,function(dl){
+        known.few <- dl$COUNT[dl$FIELD == "SpliceLoci_Known_FewReads"]
+        known.many <- dl$COUNT[dl$FIELD == "SpliceLoci_Known_ManyReads"]
+        novel <- dl$COUNT[dl$FIELD == "SpliceLoci_Novel"]
 
-      dl[dim(dl)[1] + 1,] <- c(FIELD = "SpliceLoci_Known_Covered", COUNT = known.any);
-      dl[dim(dl)[1] + 1,] <- c(FIELD = "SpliceLoci_Novel_Covered", COUNT = novel );
-      dl[dim(dl)[1] + 1,] <- c(FIELD = "SpliceLoci_Covered", COUNT = spliceLoci.any);
+        known.any <- known.few + known.many;
+        spliceLoci.any <- known.any + novel;
 
-      dl;
-   })
-   names(summary) <- summary.names;
+        dl[dim(dl)[1] + 1,] <- c(FIELD = "SpliceLoci_Known_Covered", COUNT = known.any);
+        dl[dim(dl)[1] + 1,] <- c(FIELD = "SpliceLoci_Novel_Covered", COUNT = novel );
+        dl[dim(dl)[1] + 1,] <- c(FIELD = "SpliceLoci_Covered", COUNT = spliceLoci.any);
+
+        dl;
+     })
+     names(summary) <- summary.names;
+     #message("debug 0B");
+   }
    
  #message("names(res@qc.data) = ",paste0(names(res@qc.data),collapse=","));
  #message("debug 1");
    if(! res@singleEnd){
-     summary <- INTERNAL.calcAndAdd.averages(summary = summary, summary.names = summary.names, data.list = res@qc.data[["insert.size"]], x.name = "InsertSize", y.name = "Ct", data.title = "InsertSize")
-     summary <- INTERNAL.calcAndAdd.averages(summary = summary, summary.names = summary.names, data.list = res@qc.data[["gc.byPair"]], x.name = "NUM_BASES_GC", y.name = "CT", data.title = "GC_byPair")
+     if(! is.null(res@qc.data[["insert.size"]])){
+       summary <- INTERNAL.calcAndAdd.averages(summary = summary, summary.names = summary.names, data.list = res@qc.data[["insert.size"]], x.name = "InsertSize", y.name = "Ct", data.title = "InsertSize")
+     }
+     if(! is.null(res@qc.data[["gc.byPair"]])){
+       summary <- INTERNAL.calcAndAdd.averages(summary = summary, summary.names = summary.names, data.list = res@qc.data[["gc.byPair"]], x.name = "NUM_BASES_GC", y.name = "CT", data.title = "GC_byPair")
+     }
+     #message("debug 1B");
    }
  #message("debug 2");
-   summary <- INTERNAL.calcAndAdd.averages(summary = summary, summary.names = summary.names, data.list = res@qc.data[["gc.byRead"]], x.name = "NUM_BASES_GC", y.name = "CT", data.title = "GC_byRead")
+ 
+   if(! is.null(res@qc.data[["gc.byRead"]])){
+     summary <- INTERNAL.calcAndAdd.averages(summary = summary, summary.names = summary.names, data.list = res@qc.data[["gc.byRead"]], x.name = "NUM_BASES_GC", y.name = "CT", data.title = "GC_byRead");
+     #message("debug 2B");
+   }
  #message("debug 3");
- #message("debug 4");
-   raw.data.list <- res@qc.data[["geneBodyCoverage.by.expression.level"]];
-   step.size <- raw.data.list[[1]]$QUANTILE[2] - raw.data.list[[1]]$QUANTILE[1];
-   genebody.data.list <- lapply(raw.data.list,function(df){ data.frame(Quantile = df$QUANTILE - (step.size / 2), GeneBodyCoverage = apply(df[,c("X1.bottomHalf","X2.upperMidQuartile","X3.75to90","X4.high")],1,sum)) });
-   genebodyUM.data.list <- lapply(raw.data.list,function(df){ data.frame(Quantile = df$QUANTILE - (step.size / 2), GeneBodyCoverage = df[,"X2.upperMidQuartile"]) });
-   genebodyLOW.data.list <- lapply(raw.data.list,function(df){ data.frame(Quantile = df$QUANTILE - (step.size / 2), GeneBodyCoverage = df[,"X1.bottomHalf"])});
- # message("debug 5");   
-   summary <- INTERNAL.calcAndAdd.averages(summary = summary, summary.names = summary.names, data.list = genebody.data.list, x.name = "Quantile", y.name = "GeneBodyCoverage", data.title = "GeneBodyCoverage_Overall");      
- # message("debug 6");
-   summary <- INTERNAL.calcAndAdd.averages(summary = summary, summary.names = summary.names, data.list = genebodyLOW.data.list, x.name = "Quantile", y.name = "GeneBodyCoverage", data.title = "GeneBodyCoverage_LowExpress");
- # message("debug 7");
-   summary <- INTERNAL.calcAndAdd.averages(summary = summary, summary.names = summary.names, data.list = genebodyUM.data.list, x.name = "Quantile", y.name = "GeneBodyCoverage", data.title = "GeneBodyCoverage_UMQuartile");
- # message("debug 8");
+   if(! is.null(res@qc.data[["geneBodyCoverage.by.expression.level"]])){
+     raw.data.list <- res@qc.data[["geneBodyCoverage.by.expression.level"]];
+     step.size <- raw.data.list[[1]]$QUANTILE[2] - raw.data.list[[1]]$QUANTILE[1];
+     genebody.data.list <- lapply(raw.data.list,function(df){ data.frame(Quantile = df$QUANTILE - (step.size / 2), GeneBodyCoverage = apply(df[,c("X1.bottomHalf","X2.upperMidQuartile","X3.75to90","X4.high")],1,sum)) });
+     genebodyUM.data.list <- lapply(raw.data.list,function(df){ data.frame(Quantile = df$QUANTILE - (step.size / 2), GeneBodyCoverage = df[,"X2.upperMidQuartile"]) });
+     genebodyLOW.data.list <- lapply(raw.data.list,function(df){ data.frame(Quantile = df$QUANTILE - (step.size / 2), GeneBodyCoverage = df[,"X1.bottomHalf"])});
+   # message("debug 5");   
+     summary <- INTERNAL.calcAndAdd.averages(summary = summary, summary.names = summary.names, data.list = genebody.data.list, x.name = "Quantile", y.name = "GeneBodyCoverage", data.title = "GeneBodyCoverage_Overall");      
+   # message("debug 6");
+     summary <- INTERNAL.calcAndAdd.averages(summary = summary, summary.names = summary.names, data.list = genebodyLOW.data.list, x.name = "Quantile", y.name = "GeneBodyCoverage", data.title = "GeneBodyCoverage_LowExpress");
+   # message("debug 7");
+     summary <- INTERNAL.calcAndAdd.averages(summary = summary, summary.names = summary.names, data.list = genebodyUM.data.list, x.name = "Quantile", y.name = "GeneBodyCoverage", data.title = "GeneBodyCoverage_UMQuartile");
+   # message("debug 8");
+     message("debug 3B");
+   }
+ 
+ #message("debug 5");
 
-   summary <- lapply(names(res@calc.data[["LANEBAM_GENE_CDF"]]),function(n){
-      genecdf <- res@calc.data[["LANEBAM_GENE_CDF"]][[n]];
-      dl <- summary[[n]];
-      
-      dl[dim(dl)[1] + 1,] <- c(FIELD = "geneDiversityProfile_top1count", COUNT = genecdf[1]);
-      dl[dim(dl)[1] + 1,] <- c(FIELD = "geneDiversityProfile_top10count", COUNT = genecdf[10]);
-      dl[dim(dl)[1] + 1,] <- c(FIELD = "geneDiversityProfile_top100count", COUNT = genecdf[100]);
-      dl[dim(dl)[1] + 1,] <- c(FIELD = "geneDiversityProfile_top1000count", COUNT = genecdf[1000]);
-      readct <- genecdf[length(genecdf)];
-      dl[dim(dl)[1] + 1,] <- c(FIELD = "geneDiversityProfile_top1pct", COUNT = genecdf[1] / readct);
-      dl[dim(dl)[1] + 1,] <- c(FIELD = "geneDiversityProfile_top10pct", COUNT = genecdf[10] / readct);
-      dl[dim(dl)[1] + 1,] <- c(FIELD = "geneDiversityProfile_top100pct", COUNT = genecdf[100] / readct);
-      dl[dim(dl)[1] + 1,] <- c(FIELD = "geneDiversityProfile_top1000pct", COUNT = genecdf[1000] / readct);
+   if(! is.null(res@calc.data[["LANEBAM_GENE_CDF"]])){
+    # message("debug 5B")
+     summary <- lapply(names(res@calc.data[["LANEBAM_GENE_CDF"]]),function(n){
+        genecdf <- res@calc.data[["LANEBAM_GENE_CDF"]][[n]];
+        dl <- summary[[n]];
 
-      dl;
-   })
-   names(summary) <- summary.names;
+        dl[dim(dl)[1] + 1,] <- c(FIELD = "geneDiversityProfile_top1count", COUNT = genecdf[1]);
+        dl[dim(dl)[1] + 1,] <- c(FIELD = "geneDiversityProfile_top10count", COUNT = genecdf[10]);
+        dl[dim(dl)[1] + 1,] <- c(FIELD = "geneDiversityProfile_top100count", COUNT = genecdf[100]);
+        dl[dim(dl)[1] + 1,] <- c(FIELD = "geneDiversityProfile_top1000count", COUNT = genecdf[1000]);
+        readct <- genecdf[length(genecdf)];
+        dl[dim(dl)[1] + 1,] <- c(FIELD = "geneDiversityProfile_top1pct", COUNT = genecdf[1] / readct);
+        dl[dim(dl)[1] + 1,] <- c(FIELD = "geneDiversityProfile_top10pct", COUNT = genecdf[10] / readct);
+        dl[dim(dl)[1] + 1,] <- c(FIELD = "geneDiversityProfile_top100pct", COUNT = genecdf[100] / readct);
+        dl[dim(dl)[1] + 1,] <- c(FIELD = "geneDiversityProfile_top1000pct", COUNT = genecdf[1000] / readct);
+
+        dl;
+     })
+     names(summary) <- summary.names;
+
+   }
+
+#message("debug 6");
+
    #message("1");
    if("input.read.pair.count" %in% names(res@decoder)){
      #message("2");
+     #message("debug 6B")
      summary <- lapply(1:length(summary.names),function(i){
        #message("3");
        unique.ID <- summary.names[i];
@@ -548,7 +574,9 @@ add.to.summary <- function(res){
        #message("8");
        dl;
      })
+     
    }
+#message("debug 7");
    #message("9");
    names(summary) <- summary.names;
    
@@ -849,14 +877,17 @@ get.lanebam.cycleCt <- function(df){
 }
 
 calc.gene.CDF <- function(res){
+
   temp <- res@qc.data[["geneCounts"]];
-  out <- lapply(temp, function(df){
-    df <- df[substr(df$GENEID,1,1) != "_", c("GENEID","COUNT")];
-    ord <- order(df$COUNT, decreasing=TRUE);
-    sum <- sum(df$COUNT);
-    cumsum(df$COUNT[ord]);
-  });
-  res@calc.data[["LANEBAM_GENE_CDF"]] <- out;
+  if(! is.null(temp)){
+    out <- lapply(temp, function(df){
+      df <- df[substr(df$GENEID,1,1) != "_", c("GENEID","COUNT")];
+      ord <- order(df$COUNT, decreasing=TRUE);
+      sum <- sum(df$COUNT);
+      cumsum(df$COUNT[ord]);
+    });
+    res@calc.data[["LANEBAM_GENE_CDF"]] <- out;
+  }
   return(res);
 }
 

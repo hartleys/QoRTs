@@ -27,7 +27,7 @@ class qcGtfAnnotationBuilder(gtffile : String, flatgtffile : Option[String], str
     reportln("Internal flat gtf \"file\" generated!","progress");
     () => flatlines.iterator;
   }
-  
+   
   //def makeFlatReader : Iterator[FlatGtfLine] = if(! flatgtffile.isEmpty){
   //   GtfReader.getFlatGtfReader(gtffile, stranded, true, "\\s+", flatCodes);
   //} else {
@@ -165,7 +165,7 @@ object qcGtfAnnotationBuilder {
     
     for(gtfLine <- gtfReader){
       if(lineFilter(gtfLine)){
-        buildGenomicArrayOfSets_fromGtfLine(gtfLine, geneArray, elementExtractor);
+        buildGenomicArrayOfSets_fromGtfLine(gtfLine, stranded, geneArray, elementExtractor);
       }
     }
     return geneArray;
@@ -177,15 +177,15 @@ object qcGtfAnnotationBuilder {
     
     for(gtfLine <- gtfReader){
       if(lineFilter(gtfLine)){
-        buildGenomicArrayOfSets_fromGtfLine(gtfLine, geneArray, elementExtractor);
+        buildGenomicArrayOfSets_fromGtfLine(gtfLine, stranded, geneArray, elementExtractor);
       }
     }
     return geneArray;
   }
   
-  private def buildGenomicArrayOfSets_fromGtfLine( gtfLine : GtfLine, geneArray : GenomicArrayOfSets[String], elementExtractor : (GtfLine => String)){
+  private def buildGenomicArrayOfSets_fromGtfLine( gtfLine : GtfLine, stranded : Boolean, geneArray : GenomicArrayOfSets[String], elementExtractor : (GtfLine => String)){
       val element = elementExtractor(gtfLine);
-      geneArray.addSpan(gtfLine.getGenomicInterval, element);
+      geneArray.addSpan(gtfLine.getGenomicInterval.usingStrandedness(stranded), element);
   }
   
   /*
