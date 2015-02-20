@@ -135,7 +135,7 @@ object helpDocs {
       val sb = new StringBuilder("");
       sb.append("# QoRTs: Quality Of Rna-seq Tool Set\n");
       sb.append("> Version" + runner.QORTS_VERSION + " (Updated " + runner.QORTS_COMPILE_DATE +")\n\n");
-      sb.append("([back to help base](../index.html))");
+      sb.append("> ([back to help base](../index.html))\n\n");
       sb.append("## General Help\n\n");
       
       sb.append("## DESCRIPTION:\n\n");
