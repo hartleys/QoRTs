@@ -54,6 +54,12 @@ object testing {
   
   
   
+  val X = 10                                      //> X  : Int = 10
+  val Y = 0                                       //> Y  : Int = 0
+  
+  X.toDouble / Y.toDouble                         //> res6: Double = Infinity
+  
+  
   
   
   

@@ -15,9 +15,13 @@ object commonSeqUtils {
   /******************************************************************************************************
    * Minor Utilities:
    */
+  
+  //0-based alignment start (inclusive)
   def getAlignmentStart(r : SAMRecord) : Int = {
     r.getAlignmentStart() - 1;
   }
+  
+  //0-based alignment end (non-inclusive)
   def getAlignmentEnd(r : SAMRecord) : Int = {
     r.getAlignmentEnd();
   }

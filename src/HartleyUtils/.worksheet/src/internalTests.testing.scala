@@ -48,8 +48,14 @@ object testing {;import org.scalaide.worksheet.runtime.library.WorksheetSupport.
   
   CigarOperator.SOFT_CLIP.consumesReadBases();System.out.println("""res4: Boolean = """ + $show(res$4));$skip(54); val res$5 = 
   
-  CigarOperator.SOFT_CLIP.consumesReferenceBases();System.out.println("""res5: Boolean = """ + $show(res$5))}
+  CigarOperator.SOFT_CLIP.consumesReferenceBases();System.out.println("""res5: Boolean = """ + $show(res$5));$skip(22); 
   
+  
+  
+  val X = 10;System.out.println("""X  : Int = """ + $show(X ));$skip(12); 
+  val Y = 0;System.out.println("""Y  : Int = """ + $show(Y ));$skip(29); val res$6 = 
+  
+  X.toDouble / Y.toDouble;System.out.println("""res6: Double = """ + $show(res$6))}
   
   
   

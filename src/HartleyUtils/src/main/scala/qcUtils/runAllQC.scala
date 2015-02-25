@@ -42,7 +42,7 @@ object runAllQC {
                                                              "writeGeneCounts", 
                                                              "writeClippedNVC", 
                                                              "chromCounts");
-  final val QC_DEFAULT_OFF_FUNCTION_LIST : scala.collection.immutable.Set[String] = scala.collection.immutable.Set("FPKM","makeWiggles","makeJunctionBed","makeAllBrowserTracks", "cigarMatch");
+  final val QC_DEFAULT_OFF_FUNCTION_LIST : scala.collection.immutable.Set[String] = scala.collection.immutable.Set("FPKM","annotatedSpliceExonCounts","makeWiggles","makeJunctionBed","makeAllBrowserTracks", "cigarMatch");
   final val QC_FUNCTION_LIST : scala.collection.immutable.Set[String] = QC_DEFAULT_ON_FUNCTION_LIST ++ QC_DEFAULT_OFF_FUNCTION_LIST;
   final val COMPLETED_OK_FILENAME = ".QORTS_COMPLETED_OK";
   final val COMPLETED_WARN_FILENAME = ".QORTS_COMPLETED_WARN";
@@ -63,9 +63,11 @@ object runAllQC {
       ("writeSpliceExon" -> "JunctionCalcs"),
       ("writeKnownSplices" -> "JunctionCalcs"),
       ("writeNovelSplices" -> "JunctionCalcs"),
+      ("annotatedSpliceExonCounts" -> "JunctionCalcs"),
       ("writeClippedNVC" -> "NVC"),
       ("makeAllBrowserTracks" -> "makeWiggles"),
       ("makeAllBrowserTracks" -> "makeJunctionBed")
+      
   );
   
   
@@ -675,7 +677,7 @@ object runAllQC {
     val qcJD :  QCUtility[Unit]   =   if(runFunc.contains("CigarOpDistribution"))       new qcCigarDistribution(isSingleEnd, readLength)                                            else QCUtility.getBlankUnitUtil;
     val qcQSC : QCUtility[Unit]   =   if(runFunc.contains("QualityScoreDistribution"))  new qcQualityScoreCounter(isSingleEnd, readLength, qcQualityScoreCounter.MAX_QUALITY_SCORE) else QCUtility.getBlankUnitUtil;
     val qcGC :  QCUtility[Unit]   =   if(runFunc.contains("GCDistribution"))            new qcGCContentCount(isSingleEnd, readLength)                                               else QCUtility.getBlankUnitUtil;
-    val qcJC :  QCUtility[Unit]   =   if(runFunc.contains("JunctionCalcs"))             new qcJunctionCounts(anno_holder, stranded, fr_secondStrand, runFunc.contains("writeDEXSeq"), runFunc.contains("writeSpliceExon"), runFunc.contains("writeKnownSplices"), runFunc.contains("writeNovelSplices"))                   else QCUtility.getBlankUnitUtil;
+    val qcJC :  QCUtility[Unit]   =   if(runFunc.contains("JunctionCalcs"))             new qcJunctionCounts(anno_holder, stranded, fr_secondStrand, runFunc.contains("writeDEXSeq"), runFunc.contains("writeSpliceExon"), runFunc.contains("writeKnownSplices"), runFunc.contains("writeNovelSplices"), runFunc.contains("annotatedSpliceExonCounts"))                   else QCUtility.getBlankUnitUtil;
     val qcST :  QCUtility[Unit]   =   if(runFunc.contains("StrandCheck"))               new qcStrandTest(isSingleEnd, anno_holder, stranded, fr_secondStrand)                       else QCUtility.getBlankUnitUtil;
     val qcCC :  QCUtility[Unit]   =   if(runFunc.contains("chromCounts"))               new qcChromCount(isSingleEnd, fr_secondStrand)                                              else QCUtility.getBlankUnitUtil;
     val qcCM :  QCUtility[Unit]   =   if(runFunc.contains("cigarMatch"))                new qcCigarMatch(readLength)                                                   else QCUtility.getBlankUnitUtil;

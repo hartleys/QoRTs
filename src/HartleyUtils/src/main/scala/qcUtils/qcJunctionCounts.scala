@@ -82,7 +82,7 @@ object qcJunctionCounts {
 }
 //runFunc.contains("writeDEXSeq"), runFunc.contains("writeSpliceExon"), runFunc.contains("writeKnownSplices"), runFunc.contains("writeNovelSplices")
 class qcJunctionCounts(anno_holder : qcGtfAnnotationBuilder, stranded : Boolean, fr_secondStrand : Boolean, 
-                       writeDEXSeq : Boolean, writeSpliceExon : Boolean, writeKnownSplices : Boolean, writeNovelSplices : Boolean,
+                       writeDEXSeq : Boolean, writeSpliceExon : Boolean, writeKnownSplices : Boolean, writeNovelSplices : Boolean, annotatedSpliceExonCounts : Boolean,
                        limit_high_expressed_sj : Int = 3)  extends QCUtility[Unit] {
   reportln("> Init JunctionCalcs utility","debug");
   
@@ -135,7 +135,7 @@ class qcJunctionCounts(anno_holder : qcGtfAnnotationBuilder, stranded : Boolean,
   }
   //writeDEXSeq : Boolean, writeSpliceExon : Boolean, writeKnownSplices : Boolean, writeNovelSplices : Boolean
   def writeOutput(outfile : String, summaryWriter : WriterUtil){
-    report("length of knownCountMap after run: " + knownCountMap.size,"debug");  
+    report("length of knownCountMap after run: " + knownCountMap.size,"debug");
     
     if(writeKnownSplices){
       val writer = openWriterSmart_viaGlobalParam(outfile + ".spliceJunctionCounts.knownSplices.txt");
@@ -179,6 +179,29 @@ class qcJunctionCounts(anno_holder : qcGtfAnnotationBuilder, stranded : Boolean,
         }
       }
       writer3.close();
+    }
+    
+
+    if(annotatedSpliceExonCounts){
+      val writer4 = openWriterSmart_viaGlobalParam(outfile + ".annoSpliceJunctionAndExonCounts.txt");
+      val flatgff = anno_holder.makeFlatReader();
+      
+      writer4.write("featureID	featurType	chrom	start	end	strand	geneID	binID	readCount\n");
+      flatgff.foreach( (gffline : FlatGtfLine) => {
+        val f = gffline.getFeatureName;
+        val featureCode = f.split(":")(1).charAt(0);
+        
+        if(featureCode == 'A'){
+          writer4.write( f +"	"+gffline.featureType+"	"+gffline.chromName+"	"+gffline.start+"	"+gffline.end+"	"+gffline.strand+"	"+gffline.getFeatureAggregateGene+"	"+gffline.getFeaturePartNumber+"	"+ flatGeneCountMap(f.split(":")(0)) +"\n");
+        } else if(featureCode == 'J' || featureCode == 'N'){
+          writer4.write( f +"	"+gffline.featureType+"	"+gffline.chromName+"	"+gffline.start+"	"+gffline.end+"	"+gffline.strand+"	"+gffline.getFeatureAggregateGene+"	"+gffline.getFeaturePartNumber+"	"+  knownCountMap(f)._2 +"\n");
+        } else if(featureCode == 'E'){
+          writer4.write( f +"	"+gffline.featureType+"	"+gffline.chromName+"	"+gffline.start+"	"+gffline.end+"	"+gffline.strand+"	"+gffline.getFeatureAggregateGene+"	"+gffline.getFeaturePartNumber+"	"+  exonCountMap(f) +"\n");
+        } else {
+          error("IMMPOSSIBLE STATE! FATAL ERROR! qcJunctionCounts.writeOutput, writing forSpliceSeq");
+        }
+      });
+      writer4.close();
     }
     
     if(writeDEXSeq){

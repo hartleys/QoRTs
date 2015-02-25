@@ -496,12 +496,12 @@ class qcGetGeneCounts( stranded : Boolean,
     if(calcRPKM){
       val writerRPKM = openWriterSmart_viaGlobalParam(outfile + ".FPKM.txt");
       
-      val M = readExonCount / 1000000;
+      val M = readExonCount.toDouble / 1000000.toDouble;
       
       writerRPKM.write("GENEID	FPKM\n");
       for(key <- geneCounts.keys.toSeq.sorted){
-        val K = anno_holder.geneLengthMap(key) / 1000;
-        val F = geneCounts(key);
+        val K = anno_holder.geneLengthMap(key).toDouble / 1000.toDouble;
+        val F = geneCounts(key).toDouble;
         val FPKM = (F / K) / M;
         writerRPKM.write(key + "	"+FPKM+"\n");
       }

@@ -85,11 +85,14 @@ object qcInnerDistance {
     return (shortestPath,sb);
   }
   
+  //Fix algorithm?
   private def findShortestPath_helper(start : Int, end : Int, spliceJunctionsBetween : TreeSet[(Int,Int)]) : Int = {
     
     val spliceDistance : scala.collection.mutable.HashMap[(Int,Int), Int] = new scala.collection.mutable.HashMap[(Int,Int),Int]()
     {
-      override def default(sj : (Int,Int)) = sj._1 + 1 - start;
+      //fixing an off-by-one error:
+      //override def default(sj : (Int,Int)) = sj._1 + 1 - start;
+      override def default(sj : (Int,Int)) = sj._1 - start;
     }
     
     //val spliceJunctions = spliceJunctionsBetween + ((start,start)) + ((end,end+1));
@@ -101,7 +104,9 @@ object qcInnerDistance {
       val splicesAfter = findSplicesAfter(sj._2,spliceJunctionsBetween);
       val distanceSoFar = spliceDistance(sj);
       for(sjnext <- splicesAfter){
-        spliceDistance(sjnext) =  math.min( spliceDistance(sjnext) , distanceSoFar + sjnext._1 + 1 - sj._2);
+        //fixing the same off-by-one error:
+        //spliceDistance(sjnext) =  math.min( spliceDistance(sjnext) , distanceSoFar + sjnext._1 + 1 - sj._2);
+        spliceDistance(sjnext) =  math.min( spliceDistance(sjnext) , distanceSoFar + sjnext._1 - sj._2);
         //val newDist = math.min( spliceDistance(sjnext) )
           /*spliceDistance.get(sjnext) match {
           case Some(d) =>  math.min( d, distanceSoFar + sjnext._1 - sj._2 );
@@ -175,7 +180,7 @@ object qcInnerDistance {
     
     val insertSize = rf.getReadLength() + rr.getReadLength() + minDistance - clipF - clipR 
     
-    //if(DEBUG_INTERNAL_InnerDistanceCalc_reportct < DEBUG_INTERNAL_InnerDistanceCalc_reportLimit && (insertSize == 202 || insertSize == 201 || insertSize == 203)) {
+    //if(DEBUG_INTERNAL_InnerDistanceCalc_reportct < DEBUG_INTERNAL_InnerDistanceCalc_reportLimit) {
     //  report("noOverlap: clipF="+clipF+", clipR="+clipR+", endF="+endF+", startR="+startR +", maxDistance="+ (startR - endF) + ", minDistance = "+minDistance + ". Insert Size = " + insertSize + "\n"+debugString.toString+"#	"+rf.getSAMString()+"#	"+rr.getSAMString(),"debug");
     //  DEBUG_INTERNAL_InnerDistanceCalc_reportct += 1;
     //}
@@ -362,7 +367,7 @@ class qcInnerDistance(annoHolder : qcGtfAnnotationBuilder, stranded : Boolean, f
     //reportln("InsertSize = " + inSize + "\n################################################","note");
     insertSizeMap(inSize._1) += 1;
     //insertSizeMap = insertSizeMap.updated(inSize._1, insertSizeMap(inSize._1) + 1);
-    
+     
     if(inSize._2 == 1){
       insertSizeMap_noOverlap(inSize._1) += 1;
       //insertSizeMap_noOverlap = insertSizeMap_noOverlap.updated(inSize._1, insertSizeMap_noOverlap(inSize._1) + 1);

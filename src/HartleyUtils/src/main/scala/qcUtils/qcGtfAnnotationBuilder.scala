@@ -126,10 +126,10 @@ object qcGtfAnnotationBuilder {
     if(gtfLine.isSpliceJunction){
       acc.get((gtfLine.chromName, gtfLine.strand)) match {
         case Some(chromTree) => {
-          return acc + (((gtfLine.chromName, gtfLine.strand), chromTree + ((gtfLine.start, gtfLine.end)) ));
+          return acc + (((gtfLine.chromName, gtfLine.strand), chromTree + ((gtfLine.start-1, gtfLine.end)) ));
         }
         case None => {
-          return acc + (((gtfLine.chromName, gtfLine.strand), new TreeSet[(Int,Int)]() + ((gtfLine.start, gtfLine.end))));
+          return acc + (((gtfLine.chromName, gtfLine.strand), new TreeSet[(Int,Int)]() + ((gtfLine.start-1, gtfLine.end))));
         }
       }
     } else return acc;

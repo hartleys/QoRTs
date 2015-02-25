@@ -1,5 +1,5 @@
 # QoRTs: Quality Of Rna-seq Tool Set
-> Version 0.1.13 (Updated Fri Feb 20 12:15:10 EST 2015)
+> Version 0.2.0 (Updated Wed Feb 25 13:48:25 EST 2015)
 
 > ([back to main](../index.html)) ([back to java-utility help](index.html))
 
@@ -87,11 +87,11 @@ If the filename ends with ".gz" or ".zip", the file will be parsed using the app
 
 ### --addFunctions func1,func2,...:
 
-> A list of functions to add. This can be used to add functions that are off by default. Followed by a comma delimited list, with no internal whitespace. The default-off functions are: FPKM, cigarMatch, makeJunctionBed, makeWiggles, makeAllBrowserTracks (CommaDelimitedListOfStrings)
+> A list of functions to add. This can be used to add functions that are off by default. Followed by a comma delimited list, with no internal whitespace. The default-off functions are: annotatedSpliceExonCounts, FPKM, cigarMatch, makeJunctionBed, makeWiggles, makeAllBrowserTracks (CommaDelimitedListOfStrings)
 
 ### --runFunctions func1,func2,...:
 
-> The complete list of functions to run. Setting this option runs ONLY for the functions explicitly requested here (along with any dependancy functions). The list should be formatted as a comma delimited list, with no internal whitespace. Allowed options are: NVC, GCDistribution, GeneCalcs, FPKM, cigarMatch, QualityScoreDistribution, writeKnownSplices, writeNovelSplices, writeClippedNVC, CigarOpDistribution, InsertSize, chromCounts, writeSpliceExon, writeGenewiseGeneBody, JunctionCalcs, writeGeneCounts, makeJunctionBed, writeDESeq, writeDEXSeq, makeWiggles, StrandCheck, makeAllBrowserTracks (CommaDelimitedListOfStrings)
+> The complete list of functions to run. Setting this option runs ONLY for the functions explicitly requested here (along with any dependancy functions). The list should be formatted as a comma delimited list, with no internal whitespace. Allowed options are: NVC, annotatedSpliceExonCounts, GCDistribution, GeneCalcs, FPKM, cigarMatch, QualityScoreDistribution, writeKnownSplices, writeNovelSplices, writeClippedNVC, CigarOpDistribution, InsertSize, chromCounts, writeSpliceExon, writeGenewiseGeneBody, JunctionCalcs, writeGeneCounts, makeJunctionBed, writeDESeq, writeDEXSeq, makeWiggles, StrandCheck, makeAllBrowserTracks (CommaDelimitedListOfStrings)
 
 ### --seqReadCt val:
 
