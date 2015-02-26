@@ -228,8 +228,8 @@ makePlot.generic.pair <- function(plot.name, data.list.r1, data.list.r2, plotter
       ylim.min <- min(sapply(c(tf.list.r1,tf.list.r2),function(dl){ min(dl[[y.name]], na.rm = TRUE) }), na.rm = TRUE);
       ylim.max <- max(sapply(c(tf.list.r1,tf.list.r2),function(dl){ max(dl[[y.name]], na.rm = TRUE) }), na.rm = TRUE);
       if((! is.simple.number(ylim.max)) | (! is.simple.number(ylim.min) )){
-        ylim.max <- max(sapply(tf.list,function(dl){ max(  nonsimple.replace(as.numeric(dl[[y.name]]),-Inf), na.rm = TRUE) }), na.rm = TRUE);
-        ylim.min <- min(sapply(tf.list,function(dl){ min(  nonsimple.replace(as.numeric(dl[[y.name]]), Inf), na.rm = TRUE) }), na.rm = TRUE);
+        ylim.max <- max(sapply(c(tf.list.r1,tf.list.r2),function(dl){ max(  nonsimple.replace(as.numeric(dl[[y.name]]),-Inf), na.rm = TRUE) }), na.rm = TRUE);
+        ylim.min <- min(sapply(c(tf.list.r1,tf.list.r2),function(dl){ min(  nonsimple.replace(as.numeric(dl[[y.name]]), Inf), na.rm = TRUE) }), na.rm = TRUE);
       }
       if(is.infinite(ylim.max) & is.infinite(ylim.min)){
         ylim.min <- 0;

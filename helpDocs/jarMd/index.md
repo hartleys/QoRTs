@@ -1,5 +1,5 @@
 # QoRTs: Quality Of Rna-seq Tool Set
-> Version0.2.0 (Updated Wed Feb 25 13:48:25 EST 2015)
+> Version0.2.1 (Updated Thu Feb 26 00:40:41 EST 2015)
 
 > ([back to help base](../index.html))
 

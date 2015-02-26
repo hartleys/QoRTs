@@ -63,9 +63,9 @@ BiocStyle::latex()
 National Human Genome Research Institute\\
 National Institutes of Health}
 \date{August 8 2014\\
-February 25, 2015 %REPLACE_THIS_LINE_WITH_REVISION_DATE
+February 26, 2015 %REPLACE_THIS_LINE_WITH_REVISION_DATE
 \\
-v0.2.0 %REPLACE_THIS_LINE_WITH_VERSION_NUMBER
+v0.2.1 %REPLACE_THIS_LINE_WITH_VERSION_NUMBER
 }
 
 \begin{document}
@@ -305,9 +305,22 @@ This option can be used with any and all of the QoRTs java utilities.
 \section{Visualization}  \label{sec:visualization}
 %-----------------------------------------------------------
 
-Next, you must read in all the QC output from the java utility, using the command below. This command requires 2 arguments: a root directory and a decoder (which can be either a data frame or a file). We will be using the example data found in package \Rpackage{QoRTexampleData}, which is described in Section \ref{subsec:exampledata}
+All visualization is performed the the QoRTs companion R package.
 
-%
+For basic QC analyses it is often not necessary to write any R code, as QoRTs comes with a simple R script that generates a standard set of png multiplots, pdf reports, and a large tab-delimited summary table. The qortsGenMultiQC.R script should be included in the scripts directory of the main package archive. This script can be run using the command:
+\begin{verbatim}
+Rscript qortsGenMultiQC.R infile/dir/ decoderFile.txt outfile/dir/ 
+\end{verbatim}
+
+\verb|infile/dir/| should be the parent directory within which all the QC output data is contained. \verb|decoderFile.txt| should be the decoder file, as described in Section \ref{sec:dataset}. \verb|outfile/dir/| should be the directory where all output plots will be placed.
+
+Alternatively, custom R code can be used to generate non-standard plots or multiplots, alter plotting parameters, or to generate plots interactively. In addition to the documentation provided in the rest of this section, the full R docs can be found online. See the github page for a link to the complete documentation.
+
+%----------
+\subsection{Reading the QC data into R}
+%----------
+
+First you must read in all the QC output from the java utility, using the command below. This command requires 2 arguments: a root directory and a decoder (which can be either a data frame or a file). We will be using the example data found in package \Rpackage{QoRTexampleData}, which is described in Section \ref{subsec:exampledata}.%
 <<getRes, results="hide">>=
 res <- read.qc.results.data(directory, decoder = decoder.data,
                             calc.DESeq2 = TRUE, calc.edgeR = TRUE);
