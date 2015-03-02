@@ -1,6 +1,6 @@
 # QoRTs: Quality of RNA-seq Tool-Set
-v0.2.1
-Revised Thu Feb 26 00:40:41 EST 2015
+v0.2.4
+Revised Mon Mar  2 15:31:28 EST 2015
 
 The QoRTs software package is a fast, efficient, and portable multifunction toolkit designed to assist in
 the analysis, quality control, and data management of RNA-Seq datasets. Its primary function is to aid
@@ -11,12 +11,12 @@ files suitable for use with the UCSC genome browser (or any compatible browser).
 
 The entire QoRTs toolkit can be used in almost any operating system that supports java and R.
 
-The most recent release of QoRTs is available on the [QoRTs github page](github.com/hartleys/QoRTs). Additional help and documentation is available online [here](dl.dropboxusercontent.com/u/103621176/QoRTs/helpDocs/index.html).
+The most recent release of QoRTs is available on the [QoRTs github page](http://github.com/hartleys/QoRTs). Additional help and documentation is available online [here](http://dl.dropboxusercontent.com/u/103621176/QoRTs/helpDocs/index.html).
 
 ##Help Index:
 
-* [QoRTs vignette. User manual and general how-to. Read this first.](doc/QoRTs-vignette.pdf)
-* [Java jar utility help index.](jarHtml/index.html) The Java utility is responsible for the bulk of the data processing, and contains a number of tools.
+* QoRTs vignette. User manual and general how-to. Available as a [pdf](doc/QoRTs-vignette.pdf) or [on the web](QoRTs-vignette/index.html).
+* [Java jar utility help index.](jarHtml/index.html) The Java utility is responsible for the bulk of the data processing, and contains a number of useful tools. It must be run on all replicates.
 * [R package help.](Rhtml/index.html) The R package is responsible for producing visualizations, graphs, plots, and summary tables.
 * [Example walkthrough.](doc/example-walkthrough.pdf)
 * [Example QC data.](https://dl.dropboxusercontent.com/u/103621176/qorts/exData/QoRTsExampleData.tar.gz) This example dataset, formatted as an R package, containing only the QC data from a QoRTs run. It is used in the vignette.
@@ -26,11 +26,11 @@ The most recent release of QoRTs is available on the [QoRTs github page](github.
 ##INSTALLATION:
 The R package can be installed in R using the command:
 
-    > install.packages("QoRTs_0.2.1.tar.gz", repos = NULL, type="source")
+    > install.packages("QoRTs_0.2.4.tar.gz", repos = NULL, type="source")
 
 or using the command-line:
     
-    R CMD INSTALL QoRTs_0.2.1.tar.gz
+    R CMD INSTALL QoRTs_0.2.4.tar.gz
 
 The java jar file does not need to be installed. 
 Just execute it using the java command:
@@ -41,7 +41,7 @@ Just execute it using the java command:
 The example QC output can be found on the github main page, and installed
 with the command:
     
-    install.packages("QoRTsExampleData_0.2.1.tar.gz", repos = NULL, type="source")
+    install.packages("QoRTsExampleData_0.2.4.tar.gz", repos = NULL, type="source")
 
 The original bam files are too large to upload to github. 
 These files, along with a comprehensive walkthrough demonstrating 

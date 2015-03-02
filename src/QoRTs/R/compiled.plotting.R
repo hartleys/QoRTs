@@ -810,13 +810,15 @@ INTERNAL.plot.summaries.pdf <- function(res, plotter,
   makePlot.mapping.rates(plotter, debugMode = debugMode, ...); plot.corner.label(26);
   makePlot.chrom.type.rates(plotter, chromosome.name.style = chromosome.name.style, exclude.autosomes=exclude.autosomes.chrom.rate.plot, debugMode = debugMode, ...); plot.corner.label(27);
   makePlot.norm.factors(plotter, debugMode = debugMode, ...); plot.corner.label(28);
-  makePlot.NVC.lead.clip(plotter, clip.amt = 12, points.highlighted = TRUE, debugMode = debugMode, rasterize.plotting.area = rasterize.large.plots, raster.height = raster.height, raster.width = raster.width, ...); plot.corner.label(29);
-  makePlot.NVC.tail.clip(plotter, clip.amt = 12, points.highlighted = TRUE, debugMode = debugMode, rasterize.plotting.area = rasterize.large.plots, raster.height = raster.height, raster.width = raster.width, ...); plot.corner.label(30);
+  makePlot.norm.factors.vs.TC(plotter, debugMode = debugMode, ...); plot.corner.label(29);
+  plot.new();
   
   layout(matrix(c(1,1,2,2,3,4),3,2,byrow=TRUE));
-  makePlot.raw.NVC(plotter, points.highlighted = TRUE, debugMode = debugMode, rasterize.plotting.area = rasterize.large.plots, raster.height = raster.height, raster.width = 2 * raster.width, ...); plot.corner.label(31);
-  makePlot.minus.clipping.NVC(plotter, points.highlighted = TRUE, debugMode = debugMode, rasterize.plotting.area = rasterize.large.plots, raster.height = raster.height, raster.width = 2 * raster.width, ...); plot.corner.label(32);
-  makePlot.norm.factors.vs.TC(plotter, debugMode = debugMode, ...); plot.corner.label(33);
+  makePlot.NVC.lead.clip(plotter, clip.amt = 12, points.highlighted = TRUE, debugMode = debugMode, rasterize.plotting.area = rasterize.large.plots, raster.height = raster.height, raster.width = raster.width, ...); plot.corner.label(30);
+  makePlot.NVC.tail.clip(plotter, clip.amt = 12, points.highlighted = TRUE, debugMode = debugMode, rasterize.plotting.area = rasterize.large.plots, raster.height = raster.height, raster.width = raster.width, ...); plot.corner.label(31);
+  makePlot.raw.NVC(plotter, points.highlighted = TRUE, debugMode = debugMode, rasterize.plotting.area = rasterize.large.plots, raster.height = raster.height, raster.width = 2 * raster.width, ...); plot.corner.label(32);
+  makePlot.minus.clipping.NVC(plotter, points.highlighted = TRUE, debugMode = debugMode, rasterize.plotting.area = rasterize.large.plots, raster.height = raster.height, raster.width = 2 * raster.width, ...); plot.corner.label(33);
+  
   #makePlot.cigarMismatch(plotter, debugMode = debugMode, ...); plot.corner.label(33);
 
   if(verbose) {message(paste0("Finished all plots"));}

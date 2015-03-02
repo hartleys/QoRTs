@@ -760,7 +760,7 @@ object runAllQC {
     reportln("Writing Output...","note");
     qcALL.seq.foreach( _.writeOutput(outfile, summaryWriter) );
     
-    qcWIG.writeOutput(outfile + "wiggle", summaryWriter);
+    qcWIG.writeOutput(outfile + ".wiggle", summaryWriter);
     //qcGGC.writeOutput(outfile, summaryWriter);
     //qcCS.writeOutput(outfile, summaryWriter);
     //qcJD.writeOutput(outfile, summaryWriter);

@@ -203,7 +203,7 @@ getTimeAndDiff <- function(ts = NULL){
     nts <- Sys.time();
     elapsed <- as.numeric(nts - ts, units = "secs");
     if(elapsed < 1){
-      elapsed <- as.character(elapsed);
+      elapsed <- as.character(round(elapsed,digits=2));
     } else {
       elapsed <- floor(elapsed);
     }

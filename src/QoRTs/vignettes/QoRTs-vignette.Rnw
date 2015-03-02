@@ -63,9 +63,9 @@ BiocStyle::latex()
 National Human Genome Research Institute\\
 National Institutes of Health}
 \date{August 8 2014\\
-February 26, 2015 %REPLACE_THIS_LINE_WITH_REVISION_DATE
+March 02, 2015 %REPLACE_THIS_LINE_WITH_REVISION_DATE
 \\
-v0.2.1 %REPLACE_THIS_LINE_WITH_VERSION_NUMBER
+v0.2.4 %REPLACE_THIS_LINE_WITH_VERSION_NUMBER
 }
 
 \begin{document}
@@ -1287,12 +1287,12 @@ In general, testing aggregate genes in DEXSeq is not recommended, as the two gen
 %ADD MORE INFO HERE.
 
 %--------------------------------------------------
-\section{References}
+%\section{References}
 %--------------------------------------------------
-\begingroup
-\renewcommand{\section}[2]{}%
+%\begingroup
+%\renewcommand{\section}[2]{}%
 \bibliography{QoRTs-vignette}
-\endgroup
+%\endgroup
 
 
 %-----------------------------------------------------------

@@ -383,7 +383,7 @@ object bamToWiggle {
   
   def getReadBlocks(r : SAMRecord) : Vector[(Int,Int)] = {
     r.getAlignmentBlocks().toVector.map((block) => {
-      (block.getReferenceStart(), block.getReferenceStart() + block.getLength());
+      (block.getReferenceStart() - 1, block.getReferenceStart() - 1 + block.getLength());
     });
   }
   
@@ -513,14 +513,17 @@ object bamToWiggle {
   
   case class Chrom(chromName :  String, chromStrand : Char, windowCounts : Array[Long], span : Int, truncate : Boolean){ 
     def countSamRecord(samRecord : SAMRecord) {
-        val blocks = samRecord.getAlignmentBlocks();
-      
-        var i = 0; 
-        while(i < blocks.size()){
-          val block : AlignmentBlock = blocks.get(i);
-          val start = block.getReferenceStart();
-          val length = block.getLength();
-          val end = start + length;
+        //val blocks = samRecord.getAlignmentBlocks();
+        val blocks = getReadBlocks(samRecord);
+        
+        countBlocks(blocks);
+        /*var i = 0; 
+        for((start,end) <- blocks){
+        //while(i < blocks.size()){
+          //val block : AlignmentBlock = blocks.get(i);
+          //val start = block.getReferenceStart();
+          //val length = block.getLength();
+          //val end = start + length;
           
           if(! truncate && (end - 1 / span) >=  windowCounts.length){
             error("ERROR: read extends outside chromosome length!");
@@ -533,7 +536,7 @@ object bamToWiggle {
           }
           
           i = i + 1;
-        }
+        }*/
     }
     
     def countBlocks(blocks : Seq[(Int,Int)]){

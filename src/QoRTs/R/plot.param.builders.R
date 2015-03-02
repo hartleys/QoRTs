@@ -99,7 +99,7 @@ build.plotter.colorBySample <- function(res, plotter.params = list()){
 
 build.plotter.basic <- function(res, plotter.params = list()){
    base.defaultParams <- QoRTs.default.plotting.params;
-   defaultParams <- merge.plotting.params(base.defaultParams,list(alt.lines.alpha = 150, alt.points.alpha = 150, alt.lines.color = "black", alt.lines.lty = 1));
+   defaultParams <- merge.plotting.params(base.defaultParams,list(std.lines.alpha = 150, std.points.alpha = 150, std.color = "gray", std.lines.lty = 1));
    final.params <- merge.plotting.params(defaultParams,plotter.params);
    compiled.params <- compile.plotting.params(final.params);
    

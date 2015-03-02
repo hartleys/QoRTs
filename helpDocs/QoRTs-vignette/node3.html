@@ -1,0 +1,125 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
+
+<!--Converted with LaTeX2HTML 2012 (1.2)
+original version by:  Nikos Drakos, CBLU, University of Leeds
+* revised and updated by:  Marcus Hennecke, Ross Moore, Herb Swan
+* with significant contributions from:
+  Jens Lippmann, Marek Rouchal, Martin Wilck and others -->
+<HTML>
+<HEAD>
+<TITLE>Requirements</TITLE>
+<META NAME="description" CONTENT="Requirements">
+<META NAME="keywords" CONTENT="QoRTs-vignette">
+<META NAME="resource-type" CONTENT="document">
+<META NAME="distribution" CONTENT="global">
+
+<META NAME="Generator" CONTENT="LaTeX2HTML v2012">
+<META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
+
+<LINK REL="STYLESHEET" HREF="QoRTs-vignette.css">
+
+<LINK REL="next" HREF="node4.html">
+<LINK REL="previous" HREF="node2.html">
+<LINK REL="up" HREF="QoRTs-vignette.html">
+<LINK REL="next" HREF="node4.html">
+</HEAD>
+
+<BODY >
+<!--Navigation Panel-->
+<A NAME="tex2html190"
+  HREF="node4.html">
+<IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next" SRC="next.png"></A> 
+<A NAME="tex2html186"
+  HREF="QoRTs-vignette.html">
+<IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up" SRC="up.png"></A> 
+<A NAME="tex2html180"
+  HREF="node2.html">
+<IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous" SRC="prev.png"></A> 
+<A NAME="tex2html188"
+  HREF="node1.html">
+<IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents" SRC="contents.png"></A>  
+<BR>
+<B> Next:</B> <A NAME="tex2html191"
+  HREF="node4.html">Preparations</A>
+<B> Up:</B> <A NAME="tex2html187"
+  HREF="QoRTs-vignette.html">QoRTs Package User Manual</A>
+<B> Previous:</B> <A NAME="tex2html181"
+  HREF="node2.html">Overview</A>
+ &nbsp; <B>  <A NAME="tex2html189"
+  HREF="node1.html">Contents</A></B> 
+<BR>
+<BR>
+<!--End of Navigation Panel-->
+<!--Table of Child-Links-->
+<A NAME="CHILD_LINKS"><STRONG>Subsections</STRONG></A>
+
+<UL>
+<LI><A NAME="tex2html192"
+  HREF="node3.html#SECTION00031000000000000000">Recommendations</A>
+</UL>
+<!--End of Table of Child-Links-->
+<HR>
+
+<H1><A NAME="SECTION00030000000000000000"></A>  <A NAME="sec:reqs"></A>
+<BR>
+Requirements
+</H1>
+
+<P>
+<I>Hardware:</I> The java utility performs the bulk of the data processing, and will generally require at least 4gb of RAM. In general at least 8gb is recommended if available. The R package is only responsible for some light data processing and for plotting/visualization, and thus has much lower resource requirements. It should run adequately on any reasonably-powerful workstation.
+
+<P>
+<I>Software:</I> The QoRTs software package requires R version 3.0.2 or higher, as well as java 6 or higher.
+
+<P>
+<I>Annotation:</I> QoRTs requires transcript annotations in the form of a gtf file. If you are using a annotation guided aligner (which is STRONGLY recommended) it is likely you already have a transcript gtf file for your reference genome. We recommend you use the same annotation gtf for alignment, QC, and downstream analysis. We have found the Ensembl "Gene Sets" gtf<A NAME="tex2html6"
+  HREF="footnode.html#foot1325"><SUP>3</SUP></A> suitable for these purposes. However, any format that adheres to the gtf file specification<A NAME="tex2html8"
+  HREF="footnode.html#foot1326"><SUP>4</SUP></A> will work.
+
+<P>
+<I>Dataset:</I> QoRTs requires aligned and sorted RNA-Seq data. Data can be paired-end or single-end, unstranded or stranded (using either strandedness rule, see Section <A HREF="node7.html#sec:initialProcessing">6</A>). 
+
+<P>
+
+<H2><A NAME="SECTION00031000000000000000"></A>  <A NAME="sec:recs"></A>
+<BR>
+Recommendations
+</H2>
+
+<P>
+<I>Clipping:</I> For the purposes of Quality Control, it is generally best if reads are NOT hard-clipped prior to alignment. This is because hard clipping, espeically variable hard-clipping from both the start and end of reads, makes it impossible to determine sequencer cycle from the aligned bam files, which in turn can obfuscate cycle specific artifacts, biases, errors, and effects. If undesired sequence must be removed, it is generally preferred to replace such nucleotides with N's, as this preserves cycle information. Note that many advanced RNA-Seq aligners will "soft clip" nonmatching sequence that occurs on the read ends, so hard-clipping low quality sequence is generally unnessessary and may reduce mapping rate and accuracy.
+
+<P>
+<I>Replicates:</I> Using barcoding, it is possible to build a combined library of multiple distinct samples which can be run together on the sequencing machine and then demultiplexed afterward. In general, it is recommended that samples for a particular study be multiplexed and merged into "balanced" combined libraries, each containing equal numbers of each biological condition. If necessary, these combined libraries can be run across multiple sequencer lanes or runs to achieve the desired read depth on each sample.
+
+<P>
+<HR>
+<!--Navigation Panel-->
+<A NAME="tex2html190"
+  HREF="node4.html">
+<IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next" SRC="next.png"></A> 
+<A NAME="tex2html186"
+  HREF="QoRTs-vignette.html">
+<IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up" SRC="up.png"></A> 
+<A NAME="tex2html180"
+  HREF="node2.html">
+<IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous" SRC="prev.png"></A> 
+<A NAME="tex2html188"
+  HREF="node1.html">
+<IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents" SRC="contents.png"></A>  
+<BR>
+<B> Next:</B> <A NAME="tex2html191"
+  HREF="node4.html">Preparations</A>
+<B> Up:</B> <A NAME="tex2html187"
+  HREF="QoRTs-vignette.html">QoRTs Package User Manual</A>
+<B> Previous:</B> <A NAME="tex2html181"
+  HREF="node2.html">Overview</A>
+ &nbsp; <B>  <A NAME="tex2html189"
+  HREF="node1.html">Contents</A></B> 
+<!--End of Navigation Panel-->
+<ADDRESS>
+Dr Stephen William Hartley
+2015-03-02
+</ADDRESS>
+</BODY>
+</HTML>

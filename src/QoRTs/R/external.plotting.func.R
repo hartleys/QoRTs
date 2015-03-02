@@ -2181,35 +2181,35 @@ makePlot.legend.box <- function(plotter,debugMode = DEFAULTDEBUGMODE, singleEndM
       title.text <- paste0("Sample Highlight:\n",plotter$title.highlight.name,"\nColored by Lane")
       title.cex <- fit.character.vector(title.text);
 
-      text(0.5,1,title.text,adj=c(0.5,1),cex=title.cex);
-      internal.plot.legend(plotter,"lnpt","bottom");
+      text(0.5,1,title.text,adj=c(0.5,1),cex=title.cex, ...);
+      internal.plot.legend(plotter,"lnpt","bottom", ...);
       #internal.plot.legend(plotter.NVC,"NVC.both","center");
     } else if(plotter$plot.type == "highlightSample") {
       #internal.plot.legend(plotter.NVC,"NVC.both","center");
       title.text <- paste0("Sample Highlight:\n",plotter$title.highlight.name)
       title.cex <- fit.character.vector(title.text);
 
-      internal.plot.legend(plotter,"lnpt","bottom");
-      text(0.5,1,title.text,adj=c(0.5,1),cex=title.cex);
+      internal.plot.legend(plotter,"lnpt","bottom", ...);
+      text(0.5,1,title.text,adj=c(0.5,1),cex=title.cex, ...);
     } else if(plotter$plot.type == "colorBySample") {
       title.text <- paste0("Summary Plots, By Sample")
       title.cex <- fit.character.vector(title.text);
-      text(0.5,1,title.text,adj=c(0.5,1),cex=title.cex);
-      internal.plot.legend(plotter,"lnpt","bottom");
+      text(0.5,1,title.text,adj=c(0.5,1),cex=title.cex, ...);
+      internal.plot.legend(plotter,"lnpt","bottom", ...);
     } else if(plotter$plot.type == "summary"){
       title.text <- paste0("All\nQuality Control\nSummary Plots")
       title.cex <- fit.character.vector(title.text);
-      text(0.5,0.5,title.text,adj=c(0.5,0.5),cex=title.cex);
+      text(0.5,0.5,title.text,adj=c(0.5,0.5),cex=title.cex, ...);
     } else if(plotter$plot.type == "colorByLane"){
       title.text <- paste0("Summary Plots, By Lane")
       title.cex <- fit.character.vector(title.text);
-      text(0.5,1,title.text,adj=c(0.5,1),cex=title.cex);
-      internal.plot.legend(plotter,"lnpt","bottom");
+      text(0.5,1,title.text,adj=c(0.5,1),cex=title.cex, ...);
+      internal.plot.legend(plotter,"lnpt","bottom", ...);
     } else if(plotter$plot.type == "colorByGroup"){
       title.text <- paste0("Summary Plots, By Group")
       title.cex <- fit.character.vector(title.text);
-      text(0.5,1,title.text,adj=c(0.5,1),cex=title.cex);
-      internal.plot.legend(plotter,"lnpt","bottom");
+      text(0.5,1,title.text,adj=c(0.5,1),cex=title.cex, ...);
+      internal.plot.legend(plotter,"lnpt","bottom", ...);
     } else {
       #Do nothing.
       return("");
@@ -2219,7 +2219,7 @@ makePlot.legend.box <- function(plotter,debugMode = DEFAULTDEBUGMODE, singleEndM
 
 makePlot.legend.over <- function(position, plotter, debugMode = DEFAULTDEBUGMODE, singleEndMode = plotter$res@singleEnd, ...) {
   plotter.NVC <- plotter;
-  internal.plot.legend(plotter, "lnpt", position);
+  internal.plot.legend(plotter, "lnpt", position, ...);
 }
 
 get.summary.table <- function(res, outfile = NULL, debugMode = DEFAULTDEBUGMODE){
