@@ -372,8 +372,9 @@ object commonSeqUtils {
     return SamFileAttributes(readLength, isSortedByName, isSortedByPosition, isDefinitelyPairedEnd, minReadLength);
   }*/
   
+  
   case class SamFileAttributes(readLength : Int, 
-                               isSortedByName : Boolean, 
+                               isSortedByNameLexicographically : Boolean,
                                isSortedByPosition : Boolean, 
                                isDefinitelyPairedEnd : Boolean, 
                                allReadsMarkedPaired : Boolean,
@@ -404,7 +405,7 @@ object commonSeqUtils {
     }
      
     //val isSortedByName : Boolean = (Iterator.from(1,2).takeWhile(_ < peekRecords.size).map(peekRecords(_))).zip( (Iterator.from(0,2).takeWhile(_ < peekRecords.size).map(peekRecords(_))) ).forall( (r12) => r12._1.getReadName == r12._2.getReadName );
-    val isSortedByName : Boolean = seqIsSortedBy(peekRecords, (r1 : SAMRecord, r2 : SAMRecord) => {
+    val isSortedByNameLexicographically : Boolean = seqIsSortedBy(peekRecords, (r1 : SAMRecord, r2 : SAMRecord) => {
         val n1 = r1.getReadName();
         val n2 = r2.getReadName();
         n1.compareTo(n2) <= 0;
@@ -441,6 +442,9 @@ object commonSeqUtils {
           true;
         }
     })
+    
+    
+    
     //val isSortedByPosition : Boolean = (peekRecords).zip(peekRecords.tail).forall( r12 => {
     //    val (r1 : SAMRecord,r2 : SAMRecord) = r12;
     //    
@@ -461,7 +465,7 @@ object commonSeqUtils {
     val allReadsMarkedSingle : Boolean = peekRecords.forall(! _.getReadPairedFlag);
     val mixedSingleAndPaired : Boolean = ! (allReadsMarkedPaired | allReadsMarkedSingle);
 
-    return ((SamFileAttributes(readLength, isSortedByName, isSortedByPosition, isDefinitelyPairedEnd, allReadsMarkedPaired, allReadsMarkedSingle, mixedSingleAndPaired, minReadLength), outIter));
+    return ((SamFileAttributes(readLength, isSortedByNameLexicographically, isSortedByPosition, isDefinitelyPairedEnd, allReadsMarkedPaired, allReadsMarkedSingle, mixedSingleAndPaired, minReadLength), outIter));
   }
   
   //def samRecordPairIterator_allPossibleSituations(iter : Iterator[SAMRecord], attr : SamFileAttributes, verbose : Boolean = true, testCutoff : Int = Int.MaxValue) : Iterator[(SAMRecord,SAMRecord)] = {

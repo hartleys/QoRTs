@@ -1,5 +1,5 @@
 # QoRTs: Quality Of Rna-seq Tool Set
-> Version 0.2.4 (Updated Mon Mar  2 15:31:28 EST 2015)
+> Version 0.2.5 (Updated Tue Mar  3 14:17:52 EST 2015)
 
 > ([back to main](../index.html)) ([back to java-utility help](index.html))
 
@@ -83,7 +83,7 @@ If the filename ends with ".gz" or ".zip", the file will be parsed using the app
 
 ### --skipFunctions func1,func2,...:
 
-> A comma-delimited list of functions to skip. Important: No whitespace! The default-on functions are: NVC, GCDistribution, GeneCalcs, QualityScoreDistribution, writeKnownSplices, writeNovelSplices, writeClippedNVC, CigarOpDistribution, InsertSize, chromCounts, writeSpliceExon, writeGenewiseGeneBody, JunctionCalcs, writeGeneCounts, writeDESeq, writeDEXSeq, StrandCheck (CommaDelimitedListOfStrings)
+> A comma-delimited list of functions to skip. Important: No whitespace! The default-on functions are: NVC, GCDistribution, GeneCalcs, QualityScoreDistribution, writeKnownSplices, writeNovelSplices, writeClippedNVC, CigarOpDistribution, InsertSize, chromCounts, writeSpliceExon, writeGenewiseGeneBody, JunctionCalcs, writeGeneCounts, writeDESeq, writeDEXSeq, writeGeneBody, StrandCheck (CommaDelimitedListOfStrings)
 
 ### --addFunctions func1,func2,...:
 
@@ -91,7 +91,7 @@ If the filename ends with ".gz" or ".zip", the file will be parsed using the app
 
 ### --runFunctions func1,func2,...:
 
-> The complete list of functions to run. Setting this option runs ONLY for the functions explicitly requested here (along with any dependancy functions). The list should be formatted as a comma delimited list, with no internal whitespace. Allowed options are: NVC, annotatedSpliceExonCounts, GCDistribution, GeneCalcs, FPKM, cigarMatch, QualityScoreDistribution, writeKnownSplices, writeNovelSplices, writeClippedNVC, CigarOpDistribution, InsertSize, chromCounts, writeSpliceExon, writeGenewiseGeneBody, JunctionCalcs, writeGeneCounts, makeJunctionBed, writeDESeq, writeDEXSeq, makeWiggles, StrandCheck, makeAllBrowserTracks (CommaDelimitedListOfStrings)
+> The complete list of functions to run. Setting this option runs ONLY for the functions explicitly requested here (along with any dependancy functions). The list should be formatted as a comma delimited list, with no internal whitespace. Allowed options are: NVC, annotatedSpliceExonCounts, GCDistribution, GeneCalcs, FPKM, cigarMatch, QualityScoreDistribution, writeKnownSplices, writeNovelSplices, writeClippedNVC, CigarOpDistribution, InsertSize, chromCounts, writeSpliceExon, writeGenewiseGeneBody, JunctionCalcs, writeGeneCounts, makeJunctionBed, writeDESeq, writeDEXSeq, makeWiggles, writeGeneBody, StrandCheck, makeAllBrowserTracks (CommaDelimitedListOfStrings)
 
 ### --seqReadCt val:
 

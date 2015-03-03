@@ -38,6 +38,7 @@ object runAllQC {
                                                              "writeSpliceExon", 
                                                              "writeDESeq",
                                                              "writeDEXSeq",
+                                                             "writeGeneBody",
                                                              "writeGenewiseGeneBody", 
                                                              "writeGeneCounts", 
                                                              "writeClippedNVC", 
@@ -58,7 +59,9 @@ object runAllQC {
   final val QC_FUNCTION_DEPENDANCIES : Map[String,String] = Map[String,String](
       ("writeDESeq" -> "GeneCalcs"),
       ("writeGeneCounts" -> "GeneCalcs"),
+      ("writeGenewiseGeneBody" -> "writeGeneBody"),
       ("writeGenewiseGeneBody" -> "GeneCalcs"),
+      ("writeGeneBody" -> "GeneCalcs"),
       ("writeDEXSeq" -> "JunctionCalcs"),
       ("writeSpliceExon" -> "JunctionCalcs"),
       ("writeKnownSplices" -> "JunctionCalcs"),
@@ -443,6 +446,9 @@ object runAllQC {
     if(isSingleEnd) reportln("QoRTs is Running in single-end mode.","note");
     else reportln("QoRTs is Running in paired-end mode.","note");
     
+    if(unsorted) reportln("QoRTs is Running in coordinate-sorted mode.","note");
+    else reportln("QoRTs is Running in name-sorted mode.","note");
+    
     val dropChrom = dropChromList.toSet;
     
     val defaultFunctonList = if(chromSizes.isEmpty){
@@ -630,7 +636,7 @@ object runAllQC {
     
     val maxObservedReadLength = samFileAttributes.readLength;
     val readLength = if(maxReadLength.isEmpty) maxObservedReadLength else maxReadLength.get;
-    val isSortedByName = samFileAttributes.isSortedByName;
+    val isSortedByNameLexicographically = samFileAttributes.isSortedByNameLexicographically;
     val isSortedByPosition = samFileAttributes.isSortedByPosition;
     val isDefinitelyPairedEnd = samFileAttributes.isDefinitelyPairedEnd;
     val minReadLength = samFileAttributes.minReadLength;
@@ -657,7 +663,8 @@ object runAllQC {
       if( (! isDefinitelyPairedEnd)){ reportln("Warning: Have not found any matched read pairs in the first "+peekCt+" reads. Is data paired-end? Use option --singleEnd for single-end data.","warn"); }
       if( isSortedByPosition & (! unsorted )){ reportln("Based on the first "+peekCt+" reads, SAM/BAM file appears to be sorted by read position. If this is so, you should probably use the \"--coordSorted\" option.","warn"); }
       if( ((! isSortedByPosition) & ( unsorted ))){ reportln("WARNING: You are using the \"--coordSorted\" option, but data does NOT appear to be sorted by read position (based on the first "+peekCt+" reads)! This is technically ok, but may cause QoRTs to use too much memory!","warn"); }
-      if( ((! isSortedByName) & (! unsorted ))) error("FATAL ERROR: SAM/BAM file is not sorted by name (based on the first "+peekCt+" reads)! Either sort the file by name, or sort by read position and use the \"--coordSorted\" option.");
+      //Samtools sorts in an odd way!
+      //if( ((! isSortedByNameLexicographically) & (! unsorted ))) reportln("Note: SAM/BAM file does not appear to be sorted lexicographically by name (based on the first "+peekCt+" reads). It is (hopefully) sorted by read name using the samtools method.","debug");
     }
     
     reportln("SAMRecord Reader Generated. Read length: "+readLength+".","note");
@@ -671,7 +678,7 @@ object runAllQC {
     
     //"writeKnownSplices","writeNovelSplices","writeSpliceExon", "writeDESeq","writeDEXSeq","writeGenewiseGeneBody"
     //  final val QC_FUNCTION_LIST : Seq[String] = Seq("InsertSize","NVC","CigarOpDistribution","QualityScoreDistribution","GCDistribution","GeneCounts","JunctionCounts");
-    val qcGGC:  QCUtility[String] =   if(runFunc.contains("GeneCalcs"))                 new qcGetGeneCounts(stranded,fr_secondStrand,anno_holder,coda,coda_options,40, runFunc.contains("FPKM"), runFunc.contains("writeGenewiseGeneBody"), runFunc.contains("writeDESeq"), runFunc.contains("writeGeneCounts"), geneKeepFunc) else QCUtility.getBlankStringUtil;
+    val qcGGC:  QCUtility[String] =   if(runFunc.contains("GeneCalcs"))                 new qcGetGeneCounts(stranded,fr_secondStrand,anno_holder,coda,coda_options,40, runFunc.contains("FPKM"), runFunc.contains("writeGenewiseGeneBody"), runFunc.contains("writeDESeq"), runFunc.contains("writeGeneCounts"), runFunc.contains("writeGeneBody"), geneKeepFunc) else QCUtility.getBlankStringUtil;
     val qcIS :  QCUtility[Unit]   =   if(runFunc.contains("InsertSize"))                new qcInnerDistance(anno_holder, stranded, fr_secondStrand, readLength)        else QCUtility.getBlankUnitUtil;
     val qcCS :  QCUtility[Unit]   =   if(runFunc.contains("NVC"))                       new qcNVC(isSingleEnd, readLength, runFunc.contains("writeClippedNVC"))                     else QCUtility.getBlankUnitUtil;
     val qcJD :  QCUtility[Unit]   =   if(runFunc.contains("CigarOpDistribution"))       new qcCigarDistribution(isSingleEnd, readLength)                                            else QCUtility.getBlankUnitUtil;

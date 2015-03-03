@@ -63,9 +63,9 @@ BiocStyle::latex()
 National Human Genome Research Institute\\
 National Institutes of Health}
 \date{August 8 2014\\
-March 02, 2015 %REPLACE_THIS_LINE_WITH_REVISION_DATE
+March 03, 2015 %REPLACE_THIS_LINE_WITH_REVISION_DATE
 \\
-v0.2.4 %REPLACE_THIS_LINE_WITH_VERSION_NUMBER
+v0.2.5 %REPLACE_THIS_LINE_WITH_VERSION_NUMBER
 }
 
 \begin{document}

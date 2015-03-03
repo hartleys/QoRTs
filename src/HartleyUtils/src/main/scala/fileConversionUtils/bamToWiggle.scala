@@ -238,6 +238,12 @@ object bamToWiggle {
     
     val initialTimeStamp = TimeStampUtil();
     
+    if(isSingleEnd) reportln("QoRTs is Running in single-end mode.","note");
+    else reportln("QoRTs is Running in paired-end mode.","note");
+    
+    if(coordSorted) reportln("QoRTs is Running in coordinate-sorted mode.","note");
+    else reportln("QoRTs is Running in name-sorted mode.","note");
+    
     val qcBTW : QcBamToWig = new QcBamToWig(trackName , chromLengthFile , noTruncate , windowSize , isSingleEnd, stranded , fr_secondStrand, sizeFactor, negativeReverseStrand, countPairsTogether , includeTrackDef, rgbColor, additionalTrackOptions);
     
     standardStatusReport(initialTimeStamp);
@@ -290,7 +296,7 @@ object bamToWiggle {
     
     val maxObservedReadLength = samFileAttributes.readLength;
     val readLength = maxObservedReadLength 
-    val isSortedByName = samFileAttributes.isSortedByName;
+    val isSortedByNameLexicographically = samFileAttributes.isSortedByNameLexicographically;
     val isSortedByPosition = samFileAttributes.isSortedByPosition;
     val isDefinitelyPairedEnd = samFileAttributes.isDefinitelyPairedEnd;
     val minReadLength = samFileAttributes.minReadLength;
@@ -317,7 +323,7 @@ object bamToWiggle {
       if( (! isDefinitelyPairedEnd)){ reportln("Warning: Have not found any matched read pairs in the first "+peekCt+" reads. Is data paired-end? Use option --singleEnd for single-end data.","warn"); }
       if( isSortedByPosition & (! unsorted )){ reportln("Based on the first "+peekCt+" reads, SAM/BAM file appears to be sorted by read position. If this is so, you should probably use the \"--coordSorted\" option.","warn"); }
       if( ((! isSortedByPosition) & ( unsorted ))){ reportln("WARNING: You are using the \"--coordSorted\" option, but data does NOT appear to be sorted by read position (based on the first "+peekCt+" reads)! This is technically ok, but may cause QoRTs to use too much memory!","warn"); }
-      if( ((! isSortedByName) & (! unsorted ))) error("FATAL ERROR: SAM/BAM file is not sorted by name (based on the first "+peekCt+" reads)! Either sort the file by name, or sort by read position and use the \"--coordSorted\" option.");
+      //if( ((! isSortedByNameLexicographically) & (! unsorted ))) error("FATAL ERROR: SAM/BAM file is not sorted by name (based on the first "+peekCt+" reads)! Either sort the file by name, or sort by read position and use the \"--coordSorted\" option.");
     }
    
     

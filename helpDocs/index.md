@@ -1,6 +1,6 @@
 # QoRTs: Quality of RNA-seq Tool-Set
-v0.2.4
-Revised Mon Mar  2 15:31:28 EST 2015
+v0.2.5
+Revised Tue Mar  3 14:17:52 EST 2015
 
 The QoRTs software package is a fast, efficient, and portable multifunction toolkit designed to assist in
 the analysis, quality control, and data management of RNA-Seq datasets. Its primary function is to aid
@@ -26,11 +26,11 @@ The most recent release of QoRTs is available on the [QoRTs github page](http://
 ##INSTALLATION:
 The R package can be installed in R using the command:
 
-    > install.packages("QoRTs_0.2.4.tar.gz", repos = NULL, type="source")
+    > install.packages("QoRTs_0.2.5.tar.gz", repos = NULL, type="source")
 
 or using the command-line:
     
-    R CMD INSTALL QoRTs_0.2.4.tar.gz
+    R CMD INSTALL QoRTs_0.2.5.tar.gz
 
 The java jar file does not need to be installed. 
 Just execute it using the java command:
@@ -41,7 +41,7 @@ Just execute it using the java command:
 The example QC output can be found on the github main page, and installed
 with the command:
     
-    install.packages("QoRTsExampleData_0.2.4.tar.gz", repos = NULL, type="source")
+    install.packages("QoRTsExampleData_0.2.5.tar.gz", repos = NULL, type="source")
 
 The original bam files are too large to upload to github. 
 These files, along with a comprehensive walkthrough demonstrating 

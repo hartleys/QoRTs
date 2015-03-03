@@ -329,7 +329,7 @@ class qcGetGeneCounts( stranded : Boolean,
                        coda : Array[Int], 
                        coda_options : Array[Boolean] , 
                        geneBodyIntervalCount : Int, 
-                       calcRPKM : Boolean, writeGenewiseGeneBody : Boolean, writeDESeq : Boolean, writeGeneCounts : Boolean,
+                       calcRPKM : Boolean, writeGenewiseGeneBody : Boolean, writeDESeq : Boolean, writeGeneCounts : Boolean, writeGeneBody : Boolean,
                        geneKeepFunc : (String => Boolean)) extends QCUtility[String] {
   
   reportln("> Init GeneCalcs Utility","debug");
@@ -487,11 +487,14 @@ class qcGetGeneCounts( stranded : Boolean,
     }
     
     //delete this later:
-    debug_writeGeneBodySpans(outfile);
-    if(writeGenewiseGeneBody){
-      writeGeneBodyCoverage_genewise(outfile);
+    if(writeGeneBody){
+      debug_writeGeneBodySpans(outfile);
+      if(writeGenewiseGeneBody){
+        writeGeneBodyCoverage_genewise(outfile);
+      }
+      writeGeneBodyCoverage_summaryByExpressionLevel(outfile);
     }
-    writeGeneBodyCoverage_summaryByExpressionLevel(outfile);
+
     
     if(calcRPKM){
       val writerRPKM = openWriterSmart_viaGlobalParam(outfile + ".FPKM.txt");
