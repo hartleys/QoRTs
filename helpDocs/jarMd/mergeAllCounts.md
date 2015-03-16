@@ -1,5 +1,5 @@
 # QoRTs: Quality Of Rna-seq Tool Set
-> Version 0.2.5 (Updated Tue Mar  3 14:17:52 EST 2015)
+> Version 0.2.7 (Updated Mon Mar 16 17:02:31 EDT 2015)
 
 > ([back to main](../index.html)) ([back to java-utility help](index.html))
 
@@ -61,7 +61,7 @@ and
 
 ## AUTHORS:
 
-Stephen W\. Hartley, Ph\.D\. <stephen\.hartley@nih\.gov>
+Stephen W\. Hartley, Ph\.D\. stephen\.hartley \(at nih dot gov\)
 
 ## LEGAL:
 

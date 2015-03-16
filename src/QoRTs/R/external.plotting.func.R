@@ -1727,12 +1727,15 @@ makePlot.mapping.rates <- function(plotter, plot.mm = NULL, y.counts.in.millions
          
          text(2,usr[4],"Read Count",adj=c(0.5,1.1), ...);
          text(6,usr[4],"Rates",adj=c(0.5,1.1), ...);
+         
+         axis(4, at = (yrange / 2) + usr[3], labels=c("Rate"),col="transparent", line=1, ...);
+         axis(2, at = (yrange / 2) + usr[3], labels=c("Read Counts"),col="transparent", line=1.5, ...);
          par(mar = old.mar);
       } else {
          tryCatch({
            old.mar <- par("mar");
-	   curr.mar <- par("mar");
-	   curr.mar[4] <- curr.mar[2];
+           curr.mar <- par("mar");
+           curr.mar[4] <- curr.mar[2];
            par(mar = curr.mar);
            #par(mar = c(5,4,4,4) + 0.1);
            tf.list <- generic.points.tf(plotter$res@calc.data[["map.rates"]], 
@@ -1761,6 +1764,8 @@ makePlot.mapping.rates <- function(plotter, plot.mm = NULL, y.counts.in.millions
          
          text(1.5,usr[4],"Read Counts",adj=c(0.5,1.1), ...);
          text(4.5,usr[4],"Rates",adj=c(0.5,1.1), ...);
+         axis(4, at = (yrange / 2) + usr[3], labels=c("Rate"),col="transparent", line=1, ...);
+         axis(2, at = (yrange / 2) + usr[3], labels=c("Read Counts"),col="transparent", line=1.5, ...);
          
          par(mar = old.mar);
       }
@@ -1769,13 +1774,12 @@ makePlot.mapping.rates <- function(plotter, plot.mm = NULL, y.counts.in.millions
         pretty.y <- pretty(c(usr[3],usr[4]))
         pretty.y.labels <- pretty.y;
         pretty.y.labels <- paste0(pretty.y / 1000000, "M");
-        axis(2,at=pretty.y,labels=pretty.y.labels,las=1, ...);
+        axis(2,at=pretty.y,labels=pretty.y.labels,las=1, lwd = -1, lwd.ticks = 1, ...);
       } else {
-         axis(2, ...)
+         axis(2, lwd = -1, lwd.ticks = 1, ...)
       }
       abline(h=0,col="grey",lty=3, ...);
-      axis(2, at = (yrange / 2) + usr[3], labels=c("Read Count"),col="transparent", line=1.5, ...);
-      axis(4, at = (yrange / 2) + usr[3], labels=c("Rate"),col="transparent", line=1, ...);     
+        
       internal.plot.main.title("Mapping Stats", plotter, ...);
       if(debugMode){ message("Finished: ",plot.name," plot.",getTimeAndDiff(ts)); }
 

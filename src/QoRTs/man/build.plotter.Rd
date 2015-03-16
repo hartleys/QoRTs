@@ -76,7 +76,7 @@
         \item \code{"std.points.pch"}: Character to use for points for the "highlighted" replicates. (see \code{pch} in \link{graphical parameters})
         \item \code{"std.points.alpha"}: Alpha transparency value to use on points for the "highlighted" replicates. Numeric value between 0 and 255.
         \item \code{"std.points.color"}: Color to use for the "highlighted" replicates.
-        \item \code{"std.NVC.colors"}: A named list with elements named "A", "T","C", and "G", with each element specifying a color. The colors used to indicate each base for the "highlighted" replicates in the nucleotide-rate-by-position plots.
+        \item \code{"std.NVC.colors"}: A named list with elements named "A", "T", "C", and "G", with each element specifying a color. The colors used to indicate each base for the "highlighted" replicates in the nucleotide-rate-by-position plots.
 
         \item \code{"alt.color"}: Color to use for the "non-highlighted" replicates.
         \item \code{"alt.lines.lty"}: Line type to use for the "non-highlighted" replicates. (see \code{lty} in \link{graphical parameters})

@@ -460,7 +460,6 @@ object commonSeqUtils {
       peekRecords.iterator ++ bufferIterator(iter, bufferSize);
     }
     
-     
     val allReadsMarkedPaired : Boolean = peekRecords.forall( _.getReadPairedFlag);
     val allReadsMarkedSingle : Boolean = peekRecords.forall(! _.getReadPairedFlag);
     val mixedSingleAndPaired : Boolean = ! (allReadsMarkedPaired | allReadsMarkedSingle);

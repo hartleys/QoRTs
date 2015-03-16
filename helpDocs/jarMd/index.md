@@ -1,5 +1,5 @@
 # QoRTs: Quality Of Rna-seq Tool Set
-> Version0.2.5 (Updated Tue Mar  3 14:17:52 EST 2015)
+> Version0.2.7 (Updated Mon Mar 16 17:02:31 EDT 2015)
 
 > ([back to help base](../index.html))
 
@@ -55,7 +55,7 @@ It can also be used to produce a flattened gff file that adheres to the specific
 
 ## AUTHORS:
 
-Stephen W. Hartley, Ph.D. <stephen.hartley@nih.gov>
+Stephen W. Hartley, Ph.D. stephen.hartley (at nih dot gov)
 ## LEGAL:
 
     This software is "United States Government Work" under the terms 

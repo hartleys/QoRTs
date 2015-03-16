@@ -26,26 +26,26 @@ original version by:  Nikos Drakos, CBLU, University of Leeds
 
 <BODY >
 <!--Navigation Panel-->
-<A NAME="tex2html242"
+<A NAME="tex2html240"
   HREF="node8.html">
 <IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next" SRC="next.png"></A> 
-<A NAME="tex2html238"
+<A NAME="tex2html236"
   HREF="QoRTs-vignette.html">
 <IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up" SRC="up.png"></A> 
-<A NAME="tex2html232"
+<A NAME="tex2html230"
   HREF="node6.html">
 <IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous" SRC="prev.png"></A> 
-<A NAME="tex2html240"
+<A NAME="tex2html238"
   HREF="node1.html">
 <IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents" SRC="contents.png"></A>  
 <BR>
-<B> Next:</B> <A NAME="tex2html243"
+<B> Next:</B> <A NAME="tex2html241"
   HREF="node8.html">Visualization</A>
-<B> Up:</B> <A NAME="tex2html239"
+<B> Up:</B> <A NAME="tex2html237"
   HREF="QoRTs-vignette.html">QoRTs Package User Manual</A>
-<B> Previous:</B> <A NAME="tex2html233"
+<B> Previous:</B> <A NAME="tex2html231"
   HREF="node6.html">Dataset Organization</A>
- &nbsp; <B>  <A NAME="tex2html241"
+ &nbsp; <B>  <A NAME="tex2html239"
   HREF="node1.html">Contents</A></B> 
 <BR>
 <BR>
@@ -54,7 +54,7 @@ original version by:  Nikos Drakos, CBLU, University of Leeds
 <A NAME="CHILD_LINKS"><STRONG>Subsections</STRONG></A>
 
 <UL>
-<LI><A NAME="tex2html244"
+<LI><A NAME="tex2html242"
   HREF="node7.html#SECTION00071000000000000000">Memory Usage</A>
 </UL>
 <!--End of Table of Child-Links-->
@@ -69,9 +69,9 @@ Processing of aligned RNA-Seq data
 </FONT></FONT></FONT>
 <P>
 <FONT COLOR="#585858"><FONT COLOR="#585858"></FONT></FONT><PRE>
-java -jar /path/to/jarfile/QoRTs.jar QC
-                   mybamfile.bam
-                   transcriptAnnotationFile.gtf.gz
+java -jar /path/to/jarfile/QoRTs.jar QC \
+                   mybamfile.bam \
+                   transcriptAnnotationFile.gtf.gz \
                    /qc/data/dir/path/
 </PRE><FONT COLOR="#585858"><FONT COLOR="#585858"></FONT></FONT>
 <P>
@@ -79,7 +79,7 @@ java -jar /path/to/jarfile/QoRTs.jar QC
 </FONT></FONT></FONT>
 <P>
 <FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858">The bam processing tool includes numerous options. A full description of these options can be found in the online documentation of the jar utility<A NAME="tex2html13"
-  HREF="footnode.html#foot1328"><SUP>6</SUP></A>, or by entering the command:
+  HREF="footnode.html#foot1336"><SUP>6</SUP></A>, or by entering the command:
 </FONT></FONT></FONT><PRE>
 java -jar /path/to/jarfile/QoRTs.jar QC --man
 </PRE><FONT COLOR="#585858"><FONT COLOR="#585858"></FONT></FONT>
@@ -107,11 +107,11 @@ java -jar /path/to/jarfile/QoRTs.jar QC --man
 </FONT></FONT></FONT>
 <P>
 <FONT COLOR="#585858"><FONT COLOR="#585858"></FONT></FONT><PRE>
-java -jar /path/to/jarfile/QoRTs.jar QC
-                   --stranded
-                   --coordSorted
-                   inputData/bamFiles/SAMP1_RG1.bam
-                   inputData/annoFiles/anno.gtf.gz
+java -jar /path/to/jarfile/QoRTs.jar QC \
+                   --stranded \
+                   --coordSorted \
+                   inputData/bamFiles/SAMP1_RG1.bam \
+                   inputData/annoFiles/anno.gtf.gz \
                    outputData/qortsData/SAMP1_RG1/
 </PRE><FONT COLOR="#585858"><FONT COLOR="#585858"></FONT></FONT>
 <P>
@@ -129,19 +129,19 @@ Memory Usage
 <P>
 <FONT COLOR="#585858"><FONT COLOR="#585858"></FONT></FONT><PRE>
 #Set the maximum to the minimum recommended 4 gigabytes:
-java -Xmx4000M -jar /path/to/jarfile/QoRTs.jar QC
-                   --stranded
-                   --coordSorted
-                   inputData/bamFiles/SAMP1_RG1.bam
-                   inputData/annoFiles/anno.gtf.gz
+java -Xmx4000M -jar /path/to/jarfile/QoRTs.jar QC \
+                   --stranded \
+                   --coordSorted \
+                   inputData/bamFiles/SAMP1_RG1.bam \
+                   inputData/annoFiles/anno.gtf.gz \
                    outputData/qortsData/SAMP1_RG1/
 
 #Or Set the maximum to 16 gigabytes:
-java -Xmx16G -jar /path/to/jarfile/QoRTs.jar QC
-                   --stranded
-                   --coordSorted
-                   inputData/bamFiles/SAMP1_RG1.bam
-                   inputData/annoFiles/anno.gtf.gz
+java -Xmx16G -jar /path/to/jarfile/QoRTs.jar QC \
+                   --stranded \
+                   --coordSorted \
+                   inputData/bamFiles/SAMP1_RG1.bam \
+                   inputData/annoFiles/anno.gtf.gz \
                    outputData/qortsData/SAMP1_RG1/
 </PRE><FONT COLOR="#585858"><FONT COLOR="#585858"></FONT></FONT>
 <P>
@@ -150,31 +150,31 @@ java -Xmx16G -jar /path/to/jarfile/QoRTs.jar QC
 <P>
 <FONT COLOR="#585858"><FONT COLOR="#585858"></FONT></FONT><HR>
 <!--Navigation Panel-->
-<A NAME="tex2html242"
+<A NAME="tex2html240"
   HREF="node8.html">
 <IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next" SRC="next.png"></A> 
-<A NAME="tex2html238"
+<A NAME="tex2html236"
   HREF="QoRTs-vignette.html">
 <IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up" SRC="up.png"></A> 
-<A NAME="tex2html232"
+<A NAME="tex2html230"
   HREF="node6.html">
 <IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous" SRC="prev.png"></A> 
-<A NAME="tex2html240"
+<A NAME="tex2html238"
   HREF="node1.html">
 <IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents" SRC="contents.png"></A>  
 <BR>
-<B> Next:</B> <A NAME="tex2html243"
+<B> Next:</B> <A NAME="tex2html241"
   HREF="node8.html">Visualization</A>
-<B> Up:</B> <A NAME="tex2html239"
+<B> Up:</B> <A NAME="tex2html237"
   HREF="QoRTs-vignette.html">QoRTs Package User Manual</A>
-<B> Previous:</B> <A NAME="tex2html233"
+<B> Previous:</B> <A NAME="tex2html231"
   HREF="node6.html">Dataset Organization</A>
- &nbsp; <B>  <A NAME="tex2html241"
+ &nbsp; <B>  <A NAME="tex2html239"
   HREF="node1.html">Contents</A></B> 
 <!--End of Navigation Panel-->
 <ADDRESS>
 Dr Stephen William Hartley
-2015-03-03
+2015-03-16
 </ADDRESS>
 </BODY>
 </HTML>

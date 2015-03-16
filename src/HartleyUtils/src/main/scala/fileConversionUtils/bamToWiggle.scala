@@ -145,20 +145,27 @@ object bamToWiggle {
                                          arg = List("--noTruncate"), // name of value
                                          argDesc = "The UCSC tool wigToBigWig only allows wiggle files in which every window is of equal size. "+
                                                    "This means that if the chromosome size is not divisible by the window size, a few bases are not "+
-                                                   "counted on the end of the chromosome. Using this flag will cause this utility to not truncate off"+
-                                                   " the last odd-sized window. However, be aware that this will mean that you cannot use the UCSC 'wigToBigWig' utility to"+
-                                                   " convert the wiggle file to a (smaller and more efficient) bigWig file." 
+                                                   "counted on the end of the chromosome. Using this flag will cause this utility to NOT truncate off "+
+                                                   "the final odd-sized window of each chromosome. However, be aware that this will mean that you "+
+                                                   "CANNOT use the UCSC 'wigToBigWig' utility to "+
+                                                   "convert the wiggle file to a (more efficient) 'bigWig' file." 
                                        ) ::
                     new BinaryArgument[Int](   name = "windowSize",
                                                         arg = List("--windowSize"),  
                                                         valueName = "num", 
-                                                        argDesc = "The length, in base-pairs, for each counting bin, or \"window\". Note: if this is set low the utility will take longer to run and will consume more memory. The default window size is 100bp.", 
+                                                        argDesc = "The size, in base-pairs, of each counting bin, or \"window\". "+
+                                                                  "Note: if this is set low the utility will take longer to run and "+
+                                                                  "will consume more memory. This utility is optimized for speed non memory use, and "+
+                                                                  "consumes (roughly) 8 bytes per window (plus maybe 250mb in overhead). "+
+                                                                  "The default window size is 100bp.", 
                                                         defaultValue = Some(100)
                                                         ) :: 
                     new FinalArgument[List[String]](
                                          name = "infiles",
                                          valueName = "infile.bam[,infile2.bam,...]",
-                                         argDesc = "The input sam or bam file or files, or '-' to read from stdin. Note: if you include more than one bam file, the list must be comma delimited with no whitespace!" // description
+                                         argDesc = "The input sam or bam file or files, or '-' to read from stdin. "+
+                                                   "Note: if you include more than one bam file, the list must be "+
+                                                   "comma delimited with no whitespace!" // description
                                         ) ::
                     new FinalArgument[String](
                                          name = "trackTitlePrefix",
@@ -177,7 +184,12 @@ object bamToWiggle {
                     new FinalArgument[String](
                                          name = "outfilePrefix",
                                          valueName = "outfilePrefix",
-                                         argDesc = "The output file prefix. If unstranded, this will produce one file named \"outfilePrefix.unstranded.wig.gz\". If stranded, this will produce two files: \"outfilePrefix.fwd.wig.gz\" and \"outfilePrefix.rev.wig.gz\". If the \"--noGzipOutput\" flag is raised then the output files will not have the \".gz\" extension at the end. IMPORTANT NOTE: if the window size is set to any size other than the default of 100, the window size will be added to the filename. The filename will be  \"outfilePrefix.win50.unstranded.wig.gz\" for unstranded wiggles with a 50bp window, and so on." // description
+                                         argDesc = "The output file prefix. If unstranded, this will produce one file named \"outfilePrefix.unstranded.wig.gz\". "+
+                                                   "If stranded, this will produce two files: \"outfilePrefix.fwd.wig.gz\" and \"outfilePrefix.rev.wig.gz\". "+
+                                                   "If the \"--noGzipOutput\" flag is raised then the output files will not have the \".gz\" extension at the end. "+
+                                                   "IMPORTANT NOTE: if the window size is set to any size other than the default of 100, the window size will be "+
+                                                   "added to the filename. The filename will be  \"outfilePrefix.win50.unstranded.wig.gz\" for unstranded wiggles "+
+                                                   "with a 50bp window, and so on." // description
                                         ) :: internalUtils.commandLineUI.CLUI_UNIVERSAL_ARGS );
       
      def run(args : Array[String]) {
@@ -238,11 +250,14 @@ object bamToWiggle {
     
     val initialTimeStamp = TimeStampUtil();
     
-    if(isSingleEnd) reportln("QoRTs is Running in single-end mode.","note");
-    else reportln("QoRTs is Running in paired-end mode.","note");
-    
-    if(coordSorted) reportln("QoRTs is Running in coordinate-sorted mode.","note");
-    else reportln("QoRTs is Running in name-sorted mode.","note");
+    if(isSingleEnd){
+      reportln("QoRTs is Running in single-end mode.","note");
+      reportln("Note: read-sorting is irrelevant in single-ended mode.","note");
+    } else {
+      reportln("QoRTs is Running in paired-end mode.","note");
+      if(coordSorted) reportln("QoRTs is Running in coordinate-sorted mode.","note");
+      else         reportln("QoRTs is Running in name-sorted mode.","note");
+    }
     
     val qcBTW : QcBamToWig = new QcBamToWig(trackName , chromLengthFile , noTruncate , windowSize , isSingleEnd, stranded , fr_secondStrand, sizeFactor, negativeReverseStrand, countPairsTogether , includeTrackDef, rgbColor, additionalTrackOptions);
     
@@ -275,7 +290,6 @@ object bamToWiggle {
                    minMAPQ : Int,
                    isSingleEnd : Boolean,
                    unsorted : Boolean){
-    
     
     val peekCt = 2000;
     val (samFileAttributes, recordIter) = initSamRecordIterator(infile, peekCt);

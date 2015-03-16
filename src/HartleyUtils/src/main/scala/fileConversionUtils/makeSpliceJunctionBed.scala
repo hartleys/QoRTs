@@ -30,7 +30,64 @@ object makeSpliceJunctionBed {
                         ""+
                         "",
           argList = 
+                    new BinaryOptionArgument[List[String]](
+                                         name = "filenames", 
+                                         arg = List("--filenames"), 
+                                         valueName = "file1,file2,file3,...",  
+                                         argDesc = "A comma-delimited list of wiggle files to merge. "+
+                                                   "This is optional, and filenames can be inferred from --infilePrefix, --infileSuffix, and the --sampleList, if those options are specified. "+
+                                                   "Either this option OR --sampleList MUST BE SPECIFIED."+
+                                                   ""
+                                        ) ::
                     new BinaryOptionArgument[String](
+                                         name = "sampleList", 
+                                         arg = List("--sampleList"), 
+                                         valueName = "[sampleList.txt | - | samp1,samp2,samp3,...]",  
+                                         argDesc = "Either a comma-delimited list of sample id's or a file containing a list of sample id's. "+
+                                                   "The file must either contain no title line, or contain a title line that includes a \"sample.ID\" column. "+
+                                                   "Either this option OR --filenames MUST BE SPECIFIED. Note if the sample list is a file then it must end with the extension '.txt'"+
+                                                   ""
+                                        ) ::
+                    new BinaryArgument[String](   name = "infilePrefix",
+                                                        arg = List("--infilePrefix"),  
+                                                        valueName = "infilePrefix", 
+                                                        argDesc = "A file prefix for all input junction count files. By default the full file path should be specified by the infile parameter.", 
+                                                        defaultValue = Some("")
+                                                        ) ::
+                    new BinaryArgument[String](   name = "infileSuffix",
+                                                        arg = List("--infileSuffix"),  
+                                                        valueName = "infileSuffix", 
+                                                        argDesc = "A file suffix for all input junction count files. By default the full file path should be specified by the infile parameter.", 
+                                                        defaultValue = Some("")
+                                                        ) :: 
+                    new BinaryOptionArgument[String](
+                                         name = "sizeFactorFile", 
+                                         arg = List("--sizeFactorFile"), 
+                                         valueName = "val",  
+                                         argDesc = "A file containing (at least) two columns: a list of sample ID's and their double-precision floating-point size factors. "+
+                                                   "The first line must include at least two columns: \"sample.ID\" and \"size.factor\""+
+                                                   "If this option is set, all counts will be divided by the given normalization factors. The length must be the same as the length of infiles."+
+                                                   "If sample.ID's is not specified by the --sampleList or --sampleListFile parameters, then all listed samples will be merged."
+                                        ) ::
+                    new BinaryOptionArgument[List[Double]](
+                                         name = "sizeFactors", 
+                                         arg = List("--sizeFactors"), 
+                                         valueName = "val",  
+                                         argDesc = "A list of double-precision floating-point values. "+
+                                                   "If this or any size factor option is set,"+
+                                                   " all counts will be divided by the given normalization factors."+
+                                                   " The length must be the same as the number of files to merge."
+                                        ) ::
+                    new UnaryArgument(name = "calcMean",
+                              arg = List("--calcMean"), // name of value
+                              argDesc = "Flag to indicate that the splice junction counts should be averaged, rather than added up." // description
+                              ) ::             
+                    new UnaryArgument(name = "stranded",
+                              arg = List("--stranded"), // name of value
+                              argDesc = "Flag to indicate that data is stranded." // description
+                              ) :: 
+                              
+                   new BinaryOptionArgument[String](
                                          name = "rgb", 
                                          arg = List("--rgb"), 
                                          valueName = "r,g,b",  
@@ -53,18 +110,12 @@ object makeSpliceJunctionBed {
                               arg = List("--includeFullSpliceNames"), // name of value
                               argDesc = "Flag to indicate that full splice names, including gene ID, should be used." // description
                               ) :: 
-                    new UnaryArgument(name = "calcMean",
-                              arg = List("--calcMean"), // name of value
-                              argDesc = "Flag to indicate that the splice junction counts should be averaged, rather than added up." // description
-                              ) :: 
+
                     new UnaryArgument(name = "ignoreSizeFactors",
                               arg = List("--ignoreSizeFactors"), // name of value
                               argDesc = "Flag to indicate that this utility should ignore size factors even if they are found in the input listFile." // description
                               ) ::
-                    new UnaryArgument(name = "stranded",
-                              arg = List("--stranded"), // name of value
-                              argDesc = "Flag to indicate that data is stranded." // description
-                              ) :: 
+
                     new UnaryArgument(name = "nonflatgtf",
                               arg = List("--nonflatgtf"), // name of value
                               argDesc = "Flag to indicate that instead of a \"flattened\" gff file, a standard-format gtf file has been specified. If this flag is raised, it will automatically create the standard flattened gtf information, in memory. It will not be written to disk" // description
@@ -89,54 +140,9 @@ object makeSpliceJunctionBed {
                                                         argDesc = "The number of digits after the decimal to include for counts.", 
                                                         defaultValue = Some(2)
                                                         ) ::
-                    new BinaryArgument[String](   name = "infilePrefix",
-                                                        arg = List("--infilePrefix"),  
-                                                        valueName = "infilePrefix", 
-                                                        argDesc = "A file prefix for all input junction count files. By default the full file path should be specified by the infile parameter.", 
-                                                        defaultValue = Some("")
-                                                        ) ::
-                    new BinaryArgument[String](   name = "infileSuffix",
-                                                        arg = List("--infileSuffix"),  
-                                                        valueName = "infileSuffix", 
-                                                        argDesc = "A file suffix for all input junction count files. By default the full file path should be specified by the infile parameter.", 
-                                                        defaultValue = Some("")
-                                                        ) ::
-                    new BinaryOptionArgument[String](
-                                         name = "sizeFactorFile", 
-                                         arg = List("--sizeFactorFile"), 
-                                         valueName = "val",  
-                                         argDesc = "A file containing (at least) two columns: a list of sample ID's and their double-precision floating-point size factors. "+
-                                                   "The first line must include at least two columns: \"sample.ID\" and \"size.factor\""+
-                                                   "If this option is set, all counts will be divided by the given normalization factors. The length must be the same as the length of infiles."+
-                                                   "If sample.ID's is not specified by the --sampleList or --sampleListFile parameters, then all listed samples will be merged."
-                                        ) ::
-                    new BinaryOptionArgument[List[Double]](
-                                         name = "sizeFactors", 
-                                         arg = List("--sizeFactors"), 
-                                         valueName = "val",  
-                                         argDesc = "A list of double-precision floating-point values. "+
-                                                   "If this or any size factor option is set,"+
-                                                   " all counts will be divided by the given normalization factors."+
-                                                   " The length must be the same as the number of files to merge."
-                                        ) ::
-                    new BinaryOptionArgument[List[String]](
-                                         name = "filenames", 
-                                         arg = List("--filenames"), 
-                                         valueName = "file1.wig,file2.wig,file3.wig.gz,...",  
-                                         argDesc = "A comma-delimited list of wiggle files to merge. "+
-                                                   "This is optional, and filenames can be inferred from --infilePrefix, --infileSuffix, and the --sampleList, if those options are specified."+
-                                                   ""+
-                                                   ""
-                                        ) ::
-                    new BinaryOptionArgument[String](
-                                         name = "sampleList", 
-                                         arg = List("--sampleList"), 
-                                         valueName = "[sampleList.txt | - | samp1,samp2,samp3,...]",  
-                                         argDesc = "Either a comma-delimited list of sample id's or a file containing a list of sample id's."+
-                                                   "The file must either contain no title line, or contain a title line that includes a \"sample.ID\" column."+
-                                                   ""+
-                                                   ""
-                                        ) ::
+
+
+
                    new BinaryOptionArgument[String](
                                          name = "title", 
                                          arg = List("--title"), 

@@ -1,5 +1,5 @@
 # QoRTs: Quality Of Rna-seq Tool Set
-> Version 0.2.5 (Updated Tue Mar  3 14:17:52 EST 2015)
+> Version 0.2.7 (Updated Mon Mar 16 17:02:31 EDT 2015)
 
 > ([back to main](../index.html)) ([back to java-utility help](index.html))
 
@@ -107,11 +107,11 @@ Generates '\.wig' wiggle files, suitable for use with the UCSC genome browser or
 
 ### --noTruncate:
 
-> The UCSC tool wigToBigWig only allows wiggle files in which every window is of equal size. This means that if the chromosome size is not divisible by the window size, a few bases are not counted on the end of the chromosome. Using this flag will cause this utility to not truncate off the last odd-sized window. However, be aware that this will mean that you cannot use the UCSC 'wigToBigWig' utility to convert the wiggle file to a (smaller and more efficient) bigWig file. (flag)
+> The UCSC tool wigToBigWig only allows wiggle files in which every window is of equal size. This means that if the chromosome size is not divisible by the window size, a few bases are not counted on the end of the chromosome. Using this flag will cause this utility to NOT truncate off the final odd-sized window of each chromosome. However, be aware that this will mean that you CANNOT use the UCSC 'wigToBigWig' utility to convert the wiggle file to a (more efficient) 'bigWig' file. (flag)
 
 ### --windowSize num:
 
-> The length, in base-pairs, for each counting bin, or "window". Note: if this is set low the utility will take longer to run and will consume more memory. The default window size is 100bp. (Int)
+> The size, in base-pairs, of each counting bin, or "window". Note: if this is set low the utility will take longer to run and will consume more memory. This utility is optimized for speed non memory use, and consumes (roughly) 8 bytes per window (plus maybe 250mb in overhead). The default window size is 100bp. (Int)
 
 ### --verbose:
 
@@ -123,7 +123,7 @@ Generates '\.wig' wiggle files, suitable for use with the UCSC genome browser or
 
 ## AUTHORS:
 
-Stephen W\. Hartley, Ph\.D\. <stephen\.hartley@nih\.gov>
+Stephen W\. Hartley, Ph\.D\. stephen\.hartley \(at nih dot gov\)
 
 ## LEGAL:
 

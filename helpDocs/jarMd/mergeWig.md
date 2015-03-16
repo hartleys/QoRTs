@@ -1,5 +1,5 @@
 # QoRTs: Quality Of Rna-seq Tool Set
-> Version 0.2.5 (Updated Tue Mar  3 14:17:52 EST 2015)
+> Version 0.2.7 (Updated Mon Mar 16 17:02:31 EDT 2015)
 
 > ([back to main](../index.html)) ([back to java-utility help](index.html))
 
@@ -23,6 +23,30 @@ If this ends with ".gz" or ".zip", then the file will automatically be compresse
 
 
 ## OPTIONAL ARGUMENTS:
+### --filenames file1.wig,file2.wig,file3.wig.gz,...:
+
+> A comma-delimited list of wiggle files to merge. This is optional, and filenames can be inferred from --infilePrefix, --infileSuffix, and the --sampleList, if those options are specified. Either this option OR --sampleList MUST BE SPECIFIED. (CommaDelimitedListOfStrings)
+
+### --sampleList [sampleList.txt | - | samp1,samp2,samp3,...]:
+
+> Either a comma-delimited list of sample id's or a '.txt' file containing a list of sample id's. The file must either contain no title line, or contain a title line that includes a "sample.ID" column. Either this option OR --filenames MUST BE SPECIFIED. Note that the sample list file must end with the extension '.txt' (String)
+
+### --infilePrefix infilePrefix:
+
+> A file prefix for all input wiggle files. Used with the --sampleList parameter. (String)
+
+### --infileSuffix infileSuffix:
+
+> A file suffix for all input wiggle files. Used with the --sampleList parameter. (String)
+
+### --sizeFactorFile val:
+
+> A file containing (at least) two columns: a list of sample ID's and their double-precision floating-point size factors. The first line must include at least two columns: "sample.ID" and "size.factor"If this option is set, all counts will be divided by the given normalization factors. The length must be the same as the length of infiles.If sample.ID's is not specified by the --sampleList or --sampleListFile parameters, then all listed samples will be merged. (String)
+
+### --sizeFactors val,val,val,...:
+
+> A list of double-precision floating-point values. If this or any size factor option is set, all counts will be divided by the given normalization factors. The length must be the same as the number of files to merge. (CommaDelimitedListOfDoubles)
+
 ### --makeNegative:
 
 > Flag to indicate that every counting bin value should be multiplied by -1 (flag)
@@ -30,10 +54,6 @@ If this ends with ".gz" or ".zip", then the file will automatically be compresse
 ### --calcMean:
 
 > Flag to indicate that the mean average should be calculated, rather than the sum. (flag)
-
-### --sizeFactors val,val,val,...:
-
-> normalization factors for each wig file. (CommaDelimitedListOfDoubles)
 
 ### --trackTitle options:
 
@@ -43,37 +63,9 @@ If this ends with ".gz" or ".zip", then the file will automatically be compresse
 
 > Additional track definition options, added to the track definition line. See the UCSC documentation for more information. (String)
 
-### --infilePrefix infilePrefix:
-
-> A file prefix for all input wiggle files. By default the full file path should be specified by the infile parameter. (String)
-
-### --infileSuffix infileSuffix:
-
-> A file suffix for all input wiggle files. By default the full file path should be specified by the infile parameter. (String)
-
 ### --ignoreSizeFactors:
 
 > Flag to indicate that this utility should ignore size factors even if they are found in the input listFile. (flag)
-
-### --quiet:
-
->  (flag)
-
-### --sizeFactorFile val:
-
-> A file containing (at least) two columns: a list of sample ID's and their double-precision floating-point size factors. The first line must include at least two columns: "sample.ID" and "size.factor"If this option is set, all counts will be divided by the given normalization factors. The length must be the same as the length of infiles.If sample.ID's is not specified by the --sampleList or --sampleListFile parameters, then all listed samples will be merged. (String)
-
-### --sizeFactors val:
-
-> A list of double-precision floating-point values. If this or any size factor option is set, all counts will be divided by the given normalization factors. The length must be the same as the number of files to merge. (CommaDelimitedListOfDoubles)
-
-### --filenames file1.wig,file2.wig,file3.wig.gz,...:
-
-> A comma-delimited list of wiggle files to merge. This is optional, and filenames can be inferred from --infilePrefix, --infileSuffix, and the --sampleList, if those options are specified. (CommaDelimitedListOfStrings)
-
-### --sampleList [sampleList.txt | - | samp1,samp2,samp3,...]:
-
-> Either a comma-delimited list of sample id's or a file containing a list of sample id's.The file must either contain no title line, or contain a title line that includes a "sample.ID" column. (String)
 
 ### --verbose:
 
@@ -85,7 +77,7 @@ If this ends with ".gz" or ".zip", then the file will automatically be compresse
 
 ## AUTHORS:
 
-Stephen W\. Hartley, Ph\.D\. <stephen\.hartley@nih\.gov>
+Stephen W\. Hartley, Ph\.D\. stephen\.hartley \(at nih dot gov\)
 
 ## LEGAL:
 

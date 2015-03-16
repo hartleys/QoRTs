@@ -1,7 +1,15 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head><title> QoRTs jar utility </title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<link rel="stylesheet" type="text/css" href="jar.css">
+</head>
+<body>
+<div id="wrap">
+
 <h1>QoRTs: Quality Of Rna-seq Tool Set</h1>
 
 <blockquote>
-  <p>Version 0.2.5 (Updated Tue Mar  3 14:17:52 EST 2015)</p>
+  <p>Version 0.2.7 (Updated Mon Mar 16 17:02:31 EDT 2015)</p>
 
 <p>(<a href="../index.html">back to main</a>) (<a href="index.html">back to java-utility help</a>)</p>
 </blockquote>
@@ -51,6 +59,12 @@
   <p>The minimum mean normalized read coverage needed for inclusion of a novel splice junction. By default, equal to 10.0. (Double)</p>
 </blockquote>
 
+<h3>--minSpan len:</h3>
+
+<blockquote>
+  <p>The minimum (genomic) distance threshold for novel splice junctions. 'Novel splice junctions' that span a distance smaller than this value will be IGNORED. This can be useful because many aligners do not distinguish between deletions and splice junctions. The default is 10 bp. (Int)</p>
+</blockquote>
+
 <h3>--stranded:</h3>
 
 <blockquote>
@@ -89,8 +103,10 @@
 
 <h2>AUTHORS:</h2>
 
-<p>Stephen W. Hartley, Ph.D. <stephen\.hartley@nih\.gov></p>
+<p>Stephen W. Hartley, Ph.D. stephen.hartley (at nih dot gov)</p>
 
 <h2>LEGAL:</h2>
 
 <p>This software is "United States Government Work" under the terms of the United States Copyright  Act.  It was written as part of the authors' official duties for the United States Government and  thus cannot be copyrighted.  This software is freely available to the public for use without a  copyright notice.  Restrictions cannot be placed on its present or future use.  Although all reasonable efforts have been taken to ensure the accuracy and reliability of the  software and data, the National Human Genome Research Institute (NHGRI) and the U.S. Government  does not and cannot warrant the performance or results that may be obtained by using this software  or data.  NHGRI and the U.S. Government disclaims all warranties as to performance, merchantability  or fitness for any particular purpose.  In any work or product derived from this material, proper attribution of the authors as the source  of the software or data should be made, using "NHGRI Genome Technology Branch" as the citation.  NOTE: This package includes (internally) the sam-1.113.jar library from picard tools. That package uses the MIT license, which can be accessed using the command:  java -jar thisjarfile.jar help samjdkinfo</p>
+
+</div></body></html>

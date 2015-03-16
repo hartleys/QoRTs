@@ -4,6 +4,8 @@ No implementation found for style `/home/hartleys/R/R3.1.1/lib/BiocStyle/resourc
 No implementation found for style `hyperref'
 No implementation found for style `upquote'
 
+QoRTs-vignette.tex is newer than QoRTs-vignette.aux: Please rerun latex.
+
 Substitution of arg to newlabelxx delayed.
 
 QoRTs-vignette.tex is newer than QoRTs-vignette.bbl: Please rerun latex and bibtex.

@@ -41,6 +41,15 @@ object addNovelSplices {
                                                         argDesc = "The minimum mean normalized read coverage needed for inclusion of a novel splice junction. By default, equal to 10.0.", 
                                                         defaultValue = Some(10.0)
                                                         ) :: 
+                    new BinaryArgument[Int](name = "minSpan",
+                                                        arg = List("--minSpan"),  
+                                                        valueName = "len", 
+                                                        argDesc = "The minimum (genomic) distance threshold for novel splice junctions. "+
+                                                                  "'Novel splice junctions' that span a distance smaller than this value will be IGNORED. "+
+                                                                  "This can be useful because many aligners do not distinguish between "+
+                                                                  "deletions and splice junctions. The default is 10 bp.", 
+                                                        defaultValue = Some(10)
+                                                        ) :: 
                     new UnaryArgument( name = "stranded",
                                          arg = List("--stranded","-s"), // name of value
                                          argDesc = "Flag to indicate that data is stranded." // description
@@ -90,13 +99,14 @@ object addNovelSplices {
              parser.get[Boolean]("stranded"),
              parser.get[Double]("minCount"),
              parser.get[Boolean]("noGzipOutput"),
-             parser.get[Boolean]("noGzipInput")
+             parser.get[Boolean]("noGzipInput"),
+             parser.get[Int]("minSpan")
            );
          }
      }
    }
   
-  def mergeNovel(infileDir : String, decoderFile : String, gtfFile : String, outfileDir : String, stranded : Boolean, minCount : Double, noGzipOutput : Boolean, noGzipInput : Boolean){
+  def mergeNovel(infileDir : String, decoderFile : String, gtfFile : String, outfileDir : String, stranded : Boolean, minCount : Double, noGzipOutput : Boolean, noGzipInput : Boolean, minSpan : Int){
      //internalUtils.optionHolder.OPTION_noGzipOutput = noGzipOutput;
      
      val decoderLines = getLines(decoderFile).toVector;
@@ -116,12 +126,13 @@ object addNovelSplices {
      
      val flatlines = fileConversionUtils.prepFlatGtfFile.getFlatGtfLines(gtfFile,stranded);
      
-     mergeNovelHelper(infileDir , sampleSF , flatlines, outfileDir , stranded, minCount ,noGzipOutput , noGzipInput);
+     mergeNovelHelper(infileDir , sampleSF , flatlines, outfileDir , stranded, minCount ,noGzipOutput , noGzipInput, minSpan);
   }
   
   //INCOMPLETE!!!!!!!!!!!!!!!!
   
-  def mergeNovelHelper(infileDir : String, sampleSF : Seq[(String,Double)], flatgff : IndexedSeq[FlatGtfLine], outfileDir : String, stranded : Boolean, minCount : Double, noGzipOutput : Boolean, noGzipInput : Boolean){
+  def mergeNovelHelper(infileDir : String, sampleSF : Seq[(String,Double)], flatgff : IndexedSeq[FlatGtfLine], outfileDir : String, 
+                       stranded : Boolean, minCount : Double, noGzipOutput : Boolean, noGzipInput : Boolean, minSpan : Int){
     
     val Splice_suffix = "/QC.spliceJunctionAndExonCounts.forJunctionSeq.txt" + (if(noGzipInput){""} else {".gz"});
     val NovelSplice_suffix = "/QC.spliceJunctionCounts.novelSplices.txt" + (if(noGzipInput){""} else {".gz"});
@@ -159,14 +170,18 @@ object addNovelSplices {
     
     //determine which splice junctions satisfy the filtering requirements.
     val pfSpliceMap : scala.collection.mutable.Map[GenomicInterval,Array[Int]] = novelSpliceMap.filter{ case (iv : GenomicInterval, counts : Array[Int]) => {
-      val meanNormCounts = counts.toVector.zip(sampleSF).foldLeft(0.0)( (soFar,curr) => {
+      val meanNormCounts = (counts.toVector.zip(sampleSF).foldLeft(0.0)( (soFar,curr) => {
         val (ct, (name, sf)) = curr;
         soFar + (ct.toDouble * sf);
-      });
-      meanNormCounts > minCount;
+      }) /  sampleSF.length.toDouble);
+      val span = iv.end - iv.start;
+      
+      meanNormCounts > minCount && span >= minSpan;
     }}
     
     reportln("Finished filtering novel splice files. Found "+pfSpliceMap.size+" novel splice junctions that pass expression coverage filters.","debug");
+    
+    
     
     val passedFilter = pfSpliceMap.size;
     
@@ -192,7 +207,9 @@ object addNovelSplices {
     reportln("Finished assigning splice junctions to genes.\n"+
              "                  Found "+addedSplices+" that fall inside one unique gene.\n"+
              "                  Found "+dropped_orphanSplices+" orphaned.\n"+
-             "                  Found "+dropped_ambigSplices+" ambiguous.","debug");
+             "                  Found "+dropped_ambigSplices+" ambiguous.\n"+
+             "                  Novel splices found for "+geneNovelSplices.size+" genes.",
+             "debug");
     
     //Read in the existing gff:
     val gffLineMap = scala.collection.mutable.AnyRefMap[String,Vector[FlatGtfLine]]().withDefault(str => Vector[FlatGtfLine]());

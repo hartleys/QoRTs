@@ -443,11 +443,16 @@ object runAllQC {
     val stdGtfCodes = new internalUtils.GtfTool.GtfCodes();
     val flatGtfCodes = new internalUtils.GtfTool.GtfCodes();
     
-    if(isSingleEnd) reportln("QoRTs is Running in single-end mode.","note");
-    else reportln("QoRTs is Running in paired-end mode.","note");
+    if(isSingleEnd){
+      reportln("QoRTs is Running in single-end mode.","note");
+      reportln("Note: read-sorting is irrelevant in single-ended mode.","note");
+    } else {
+      reportln("QoRTs is Running in paired-end mode.","note");
+      if(unsorted) reportln("QoRTs is Running in coordinate-sorted mode.","note");
+      else         reportln("QoRTs is Running in name-sorted mode.","note");
+    }
     
-    if(unsorted) reportln("QoRTs is Running in coordinate-sorted mode.","note");
-    else reportln("QoRTs is Running in name-sorted mode.","note");
+
     
     val dropChrom = dropChromList.toSet;
     
@@ -663,7 +668,7 @@ object runAllQC {
       if( (! isDefinitelyPairedEnd)){ reportln("Warning: Have not found any matched read pairs in the first "+peekCt+" reads. Is data paired-end? Use option --singleEnd for single-end data.","warn"); }
       if( isSortedByPosition & (! unsorted )){ reportln("Based on the first "+peekCt+" reads, SAM/BAM file appears to be sorted by read position. If this is so, you should probably use the \"--coordSorted\" option.","warn"); }
       if( ((! isSortedByPosition) & ( unsorted ))){ reportln("WARNING: You are using the \"--coordSorted\" option, but data does NOT appear to be sorted by read position (based on the first "+peekCt+" reads)! This is technically ok, but may cause QoRTs to use too much memory!","warn"); }
-      //Samtools sorts in an odd way!
+      //Samtools sorts in an odd way! Delete name sort check:
       //if( ((! isSortedByNameLexicographically) & (! unsorted ))) reportln("Note: SAM/BAM file does not appear to be sorted lexicographically by name (based on the first "+peekCt+" reads). It is (hopefully) sorted by read name using the samtools method.","debug");
     }
     

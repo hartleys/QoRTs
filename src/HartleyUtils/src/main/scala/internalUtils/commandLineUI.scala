@@ -19,7 +19,7 @@ object commandLineUI {
   val DEFAULT_QUICK_SYNOPSIS = "<Synopsis not written>";
   val DEFAULT_SYNOPSIS = "<Synopsis not written>";
   val DEFAULT_DESCRIPTION = "<Description not written>";
-  val DEFAULT_AUTHOR = List("Stephen W. Hartley, Ph.D. <stephen.hartley@nih.gov>");
+  val DEFAULT_AUTHOR = List("Stephen W. Hartley, Ph.D. stephen.hartley (at nih dot gov)");
   val DEFAULT_LEGAL =  
 List(
      " This software is \"United States Government Work\" under the terms of the United States Copyright "+

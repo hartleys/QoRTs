@@ -26,6 +26,55 @@ object SumWigglesFast {
                         ""+
                         "",   
           argList = 
+            
+           new BinaryOptionArgument[List[String]](
+                                         name = "filenames", 
+                                         arg = List("--filenames"), 
+                                         valueName = "file1.wig,file2.wig,file3.wig.gz,...",  
+                                         argDesc = "A comma-delimited list of wiggle files to merge. "+
+                                                   "This is optional, and filenames can be inferred from --infilePrefix, --infileSuffix, and the --sampleList, if those options are specified. "+
+                                                   "Either this option OR --sampleList MUST BE SPECIFIED."+
+                                                   ""
+                                        ) ::
+           new BinaryOptionArgument[String](
+                                         name = "sampleList", 
+                                         arg = List("--sampleList"), 
+                                         valueName = "[sampleList.txt | - | samp1,samp2,samp3,...]",  
+                                         argDesc = "Either a comma-delimited list of sample id's or a '.txt' file containing a list of sample id's. "+
+                                                   "The file must either contain no title line, or contain a title line that includes a \"sample.ID\" column. "+
+                                                   "Either this option OR --filenames MUST BE SPECIFIED. Note that the sample list file must end with the extension '.txt'"+
+                                                   ""
+                                        ) ::
+            new BinaryArgument[String](   name = "infilePrefix",
+                                                        arg = List("--infilePrefix"),  
+                                                        valueName = "infilePrefix", 
+                                                        argDesc = "A file prefix for all input wiggle files. Used with the --sampleList parameter.", 
+                                                        defaultValue = Some("")
+                                                        ) ::
+            new BinaryArgument[String](   name = "infileSuffix",
+                                                        arg = List("--infileSuffix"),  
+                                                        valueName = "infileSuffix", 
+                                                        argDesc = "A file suffix for all input wiggle files. Used with the --sampleList parameter.", 
+                                                        defaultValue = Some("")
+                                                        ) ::
+            new BinaryOptionArgument[String](
+                                         name = "sizeFactorFile", 
+                                         arg = List("--sizeFactorFile"), 
+                                         valueName = "val",  
+                                         argDesc = "A file containing (at least) two columns: a list of sample ID's and their double-precision floating-point size factors. "+
+                                                   "The first line must include at least two columns: \"sample.ID\" and \"size.factor\""+
+                                                   "If this option is set, all counts will be divided by the given normalization factors. The length must be the same as the length of infiles."+
+                                                   "If sample.ID's is not specified by the --sampleList or --sampleListFile parameters, then all listed samples will be merged."
+                                        ) ::
+            new BinaryOptionArgument[List[Double]](
+                                         name = "sizeFactors", 
+                                         arg = List("--sizeFactors"), 
+                                         valueName = "val,val,val,...",  
+                                         argDesc = "A list of double-precision floating-point values. "+
+                                                   "If this or any size factor option is set,"+
+                                                   " all counts will be divided by the given normalization factors."+
+                                                   " The length must be the same as the number of files to merge."
+                                        ) ::
             new UnaryArgument(name = "makeNegative",
                               arg = List("--makeNegative","-n"), // name of value
                               argDesc = "Flag to indicate that every counting bin value should be multiplied by -1" // description
@@ -34,12 +83,7 @@ object SumWigglesFast {
                               arg = List("--calcMean","-m"), // name of value
                               argDesc = "Flag to indicate that the mean average should be calculated, rather than the sum." // description
                               ) ::                          
-            new BinaryOptionArgument[List[Double]](
-                                         name = "sizeFactors", 
-                                         arg = List("--sizeFactors"), 
-                                         valueName = "val,val,val,...",  
-                                         argDesc = "normalization factors for each wig file."
-                                        ) ::
+
             new BinaryArgument[String](   name = "trackTitle",
                                                         arg = List("--trackTitle"),  
                                                         valueName = "options", 
@@ -52,62 +96,11 @@ object SumWigglesFast {
                                                         argDesc = "Additional track definition options, added to the track definition line. See the UCSC documentation for more information.", 
                                                         defaultValue = Some("")
                                                         ) ::
-            new BinaryArgument[String](   name = "infilePrefix",
-                                                        arg = List("--infilePrefix"),  
-                                                        valueName = "infilePrefix", 
-                                                        argDesc = "A file prefix for all input wiggle files. By default the full file path should be specified by the infile parameter.", 
-                                                        defaultValue = Some("")
-                                                        ) ::
-            new BinaryArgument[String](   name = "infileSuffix",
-                                                        arg = List("--infileSuffix"),  
-                                                        valueName = "infileSuffix", 
-                                                        argDesc = "A file suffix for all input wiggle files. By default the full file path should be specified by the infile parameter.", 
-                                                        defaultValue = Some("")
-                                                        ) ::
             new UnaryArgument(name = "ignoreSizeFactors",
                               arg = List("--ignoreSizeFactors"), // name of value
                               argDesc = "Flag to indicate that this utility should ignore size factors even if they are found in the input listFile." // description
                               ) ::
-            new UnaryArgument(name = "quiet",
-                              arg = List("--quiet","-q"), // name of value
-                              argDesc = "" // description
-                              ) :: 
-                    new BinaryOptionArgument[String](
-                                         name = "sizeFactorFile", 
-                                         arg = List("--sizeFactorFile"), 
-                                         valueName = "val",  
-                                         argDesc = "A file containing (at least) two columns: a list of sample ID's and their double-precision floating-point size factors. "+
-                                                   "The first line must include at least two columns: \"sample.ID\" and \"size.factor\""+
-                                                   "If this option is set, all counts will be divided by the given normalization factors. The length must be the same as the length of infiles."+
-                                                   "If sample.ID's is not specified by the --sampleList or --sampleListFile parameters, then all listed samples will be merged."
-                                        ) ::
-                    new BinaryOptionArgument[List[Double]](
-                                         name = "sizeFactors", 
-                                         arg = List("--sizeFactors"), 
-                                         valueName = "val",  
-                                         argDesc = "A list of double-precision floating-point values. "+
-                                                   "If this or any size factor option is set,"+
-                                                   " all counts will be divided by the given normalization factors."+
-                                                   " The length must be the same as the number of files to merge."
-                                        ) ::
-                    new BinaryOptionArgument[List[String]](
-                                         name = "filenames", 
-                                         arg = List("--filenames"), 
-                                         valueName = "file1.wig,file2.wig,file3.wig.gz,...",  
-                                         argDesc = "A comma-delimited list of wiggle files to merge. "+
-                                                   "This is optional, and filenames can be inferred from --infilePrefix, --infileSuffix, and the --sampleList, if those options are specified."+
-                                                   ""+
-                                                   ""
-                                        ) ::
-                    new BinaryOptionArgument[String](
-                                         name = "sampleList", 
-                                         arg = List("--sampleList"), 
-                                         valueName = "[sampleList.txt | - | samp1,samp2,samp3,...]",  
-                                         argDesc = "Either a comma-delimited list of sample id's or a file containing a list of sample id's."+
-                                                   "The file must either contain no title line, or contain a title line that includes a \"sample.ID\" column."+
-                                                   ""+
-                                                   ""
-                                        ) ::
+
             new FinalArgument[String](
                                          name = "outfile",
                                          valueName = "outfile",

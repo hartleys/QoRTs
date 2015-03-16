@@ -165,12 +165,12 @@ makePlot.generic <- function(plot.name, data.list, plotter, x.name, y.name, norm
       pretty.axis.x <- pretty.axis.x[pretty.axis.x.is.int];
       pretty.axis.x.labels <- 10 ^ pretty.axis.x;
     }
-    axis(1,at=pretty.axis.x, labels=pretty.axis.x.labels);
+    axis(1,at=pretty.axis.x, labels=pretty.axis.x.labels, lwd = -1, lwd.ticks = par("lwd"));
     
     if(draw.horiz.lines){
       #axis(2, at = horiz.lines.at, labels = rep("",length(horiz.lines.at)));
-      axis(2, at = c(pretty(ylim) - 0.5, pretty(ylim) + 0.5), rep("",length(pretty(ylim))*2) );
-      axis(2, tcl=0, las=1);
+      axis(2, at = c(pretty(ylim) - 0.5, pretty(ylim) + 0.5), rep("",length(pretty(ylim))*2) , lwd = -1, lwd.ticks = par("lwd"));
+      axis(2, tcl=0, las=1, lwd = -1, lwd.ticks = par("lwd"));
     } else {
       #axis(2);
       pretty.axis.y <- pretty(ylim);
@@ -180,7 +180,7 @@ makePlot.generic <- function(plot.name, data.list, plotter, x.name, y.name, norm
         pretty.axis.y <- pretty.axis.y[pretty.axis.y.is.int];
         pretty.axis.y.labels <- 10 ^ pretty.axis.y ;
       }
-      axis(2,at=pretty.axis.y, labels= pretty.axis.y.labels, las = y.axis.las);
+      axis(2,at=pretty.axis.y, labels= pretty.axis.y.labels, las = y.axis.las, lwd = -1, lwd.ticks = par("lwd"));
     }
     box();
     return(TRUE);
@@ -290,13 +290,13 @@ makePlot.generic.pair <- function(plot.name, data.list.r1, data.list.r2, plotter
       pretty.axis.x <- pretty.axis.x[pretty.axis.x.is.int];
       pretty.axis.x.labels <- 10 ^ pretty.axis.x;
     }
-    axis(1,at=pretty.axis.x + r2.offset, labels = pretty.axis.x);
-    axis(1,at=pretty.axis.x, labels=pretty.axis.x.labels);
+    axis(1,at=pretty.axis.x + r2.offset, labels = pretty.axis.x, lwd = -1, lwd.ticks = par("lwd"));
+    axis(1,at=pretty.axis.x, labels=pretty.axis.x.labels, lwd = -1, lwd.ticks = par("lwd"));
     box();
     if(draw.horiz.lines){
       #axis(2, at = horiz.lines.at, labels = rep("",length(horiz.lines.at)));
-      axis(2, at = c(pretty(ylim) - 0.5, pretty(ylim) + 0.5), rep("",length(pretty(ylim))*2) );
-      axis(2, tcl=0, las=1);
+      axis(2, at = c(pretty(ylim) - 0.5, pretty(ylim) + 0.5), rep("",length(pretty(ylim))*2) , lwd = -1, lwd.ticks = par("lwd"));
+      axis(2, tcl=0, las=1, lwd = -1, lwd.ticks = par("lwd"));
     } else {
       #axis(2);
       pretty.axis.y <- pretty(ylim);
@@ -306,7 +306,7 @@ makePlot.generic.pair <- function(plot.name, data.list.r1, data.list.r2, plotter
         pretty.axis.y <- pretty.axis.y[pretty.axis.y.is.int];
         pretty.axis.y.labels <- 10 ^ pretty.axis.y ;
       }
-      axis(2,at=pretty.axis.y, labels= pretty.axis.y.labels, las = y.axis.las);
+      axis(2,at=pretty.axis.y, labels= pretty.axis.y.labels, las = y.axis.las, lwd = -1, lwd.ticks = par("lwd"));
     }
     usr <- par("usr");
     yrange <- abs(usr[4] - usr[3]);
@@ -476,11 +476,11 @@ makePlot.gene.cdf.bySample.helper <- function(plot.name, data.list, curr.sample,
 
      box();
      title(ylab="Cumulative % of total reads",xlab="# Genes");
-     axis(2,at=c(0,0.25,0.5,0.75,1.0),labels=c("0%","25%","50%","75%","100%"));
-     axis(2,at=c(0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9),labels=rep("",9),tcl=-0.3);
+     axis(2,at=c(0,0.25,0.5,0.75,1.0),labels=c("0%","25%","50%","75%","100%"), lwd = -1, lwd.ticks = par("lwd"));
+     axis(2,at=c(0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9),labels=rep("",9),tcl=-0.3, lwd = -1, lwd.ticks = par("lwd"));
 
-     axis(1, at=c(1,10,100,1000,10000));
-     axis(1, at=c(gene.ct));
+     axis(1, at=c(1,10,100,1000,10000), lwd = -1, lwd.ticks = par("lwd"));
+     axis(1, at=c(gene.ct), lwd = -1, lwd.ticks = par("lwd"));
 
      if(plot.intercepts){
        xs.2 <- 0.1;
@@ -672,12 +672,12 @@ makePlot.generic.NVC.single.DEFAULT <- function(plot.name, data.list.r1, plotter
 
     if(count.x.from.end){ 
       max.cycle.ct <- max(plotter$res@decoder$cycle.CT);
-      axis(1,at=pretty.axis,labels= max.cycle.ct - (xlim.max - pretty.axis));
+      axis(1,at=pretty.axis,labels= max.cycle.ct - (xlim.max - pretty.axis), lwd = -1, lwd.ticks = par("lwd"));
     } else if(! is.null(x.axis.labels)){
       x.labels <- x.axis.labels[pretty.axis];
-      axis(1,at=pretty.axis,labels= x.labels);
+      axis(1,at=pretty.axis,labels= x.labels, lwd = -1, lwd.ticks = par("lwd"));
     } else {
-      axis(1,at=pretty.axis,labels=pretty.axis);
+      axis(1,at=pretty.axis,labels=pretty.axis, lwd = -1, lwd.ticks = par("lwd"));
     }
 
     if(show.base.legend){
@@ -688,10 +688,10 @@ makePlot.generic.NVC.single.DEFAULT <- function(plot.name, data.list.r1, plotter
       #test(par("usr")[2],par("usr")[3], );
       #mtext(c("A\nT\nG\nC"),side = 4);
 
-      axis(4,at=y.center, labels = "A\n \n \n ",col="transparent",col.axis = nvc.colors[["A"]], font = 2, las=1, hadj=0, tcl=0, line = -0.5);
-      axis(4,at=y.center, labels = " \nT\n \n ",col="transparent",col.axis = nvc.colors[["T"]], font = 2, las=1, hadj=0, tcl=0, line = -0.5);
-      axis(4,at=y.center, labels = " \n \nG\n ",col="transparent",col.axis = nvc.colors[["G"]], font = 2, las=1, hadj=0, tcl=0, line = -0.5);
-      axis(4,at=y.center, labels = " \n \n \nC",col="transparent",col.axis = nvc.colors[["C"]], font = 2, las=1, hadj=0, tcl=0, line = -0.5);
+      axis(4,at=y.center, labels = "A\n \n \n ",col="transparent",col.axis = nvc.colors[["A"]], font = 2, las=1, hadj=0, tcl=0, line = -0.5, lwd = -1, lwd.ticks = par("lwd"));
+      axis(4,at=y.center, labels = " \nT\n \n ",col="transparent",col.axis = nvc.colors[["T"]], font = 2, las=1, hadj=0, tcl=0, line = -0.5, lwd = -1, lwd.ticks = par("lwd"));
+      axis(4,at=y.center, labels = " \n \nG\n ",col="transparent",col.axis = nvc.colors[["G"]], font = 2, las=1, hadj=0, tcl=0, line = -0.5, lwd = -1, lwd.ticks = par("lwd"));
+      axis(4,at=y.center, labels = " \n \n \nC",col="transparent",col.axis = nvc.colors[["C"]], font = 2, las=1, hadj=0, tcl=0, line = -0.5, lwd = -1, lwd.ticks = par("lwd"));
 
       #text(par("usr")[2],par("usr")[3],"A\n\n\n", adj=base.legend.adj, col = nvc.colors[["A"]], font=2, xpd=TRUE)
       #text(par("usr")[2],par("usr")[3],"\nT\n\n", adj=base.legend.adj, col = nvc.colors[["T"]], font=2, xpd=TRUE)
@@ -707,7 +707,7 @@ makePlot.generic.NVC.single.DEFAULT <- function(plot.name, data.list.r1, plotter
 
 
     box();
-    axis(2);
+    axis(2, lwd = -1, lwd.ticks = par("lwd"));
     return(TRUE);
   }, error = function(e){ errorPlot(plot.name, e, code = 2, newPlot = FALSE);  stop();});
 
@@ -855,12 +855,12 @@ makePlot.generic.NVC.single.RASTERIZED <- function(plot.name, data.list.r1,plott
 
     if(count.x.from.end){ 
       max.cycle.ct <- max(plotter$res@decoder$cycle.CT);
-      axis(1,at=pretty.axis,labels= max.cycle.ct - (xlim.max - pretty.axis));
+      axis(1,at=pretty.axis,labels= max.cycle.ct - (xlim.max - pretty.axis), lwd = -1, lwd.ticks = par("lwd"));
     } else if(! is.null(x.axis.labels)){
       x.labels <- x.axis.labels[pretty.axis];
-      axis(1,at=pretty.axis,labels= x.labels);
+      axis(1,at=pretty.axis,labels= x.labels, lwd = -1, lwd.ticks = par("lwd"));
     } else {
-      axis(1,at=pretty.axis,labels=pretty.axis);
+      axis(1,at=pretty.axis,labels=pretty.axis, lwd = -1, lwd.ticks = par("lwd"));
     }
 
     if(show.base.legend){
@@ -871,10 +871,10 @@ makePlot.generic.NVC.single.RASTERIZED <- function(plot.name, data.list.r1,plott
       #test(par("usr")[2],par("usr")[3], );
       #mtext(c("A\nT\nG\nC"),side = 4);
 
-      axis(4,at=y.center, labels = "A\n \n \n ",col="transparent",col.axis = nvc.colors[["A"]], font = 2, las=1, hadj=0, tcl=0, line = -0.5);
-      axis(4,at=y.center, labels = " \nT\n \n ",col="transparent",col.axis = nvc.colors[["T"]], font = 2, las=1, hadj=0, tcl=0, line = -0.5);
-      axis(4,at=y.center, labels = " \n \nG\n ",col="transparent",col.axis = nvc.colors[["G"]], font = 2, las=1, hadj=0, tcl=0, line = -0.5);
-      axis(4,at=y.center, labels = " \n \n \nC",col="transparent",col.axis = nvc.colors[["C"]], font = 2, las=1, hadj=0, tcl=0, line = -0.5);
+      axis(4,at=y.center, labels = "A\n \n \n ",col="transparent",col.axis = nvc.colors[["A"]], font = 2, las=1, hadj=0, tcl=0, line = -0.5, lwd = -1, lwd.ticks = par("lwd"));
+      axis(4,at=y.center, labels = " \nT\n \n ",col="transparent",col.axis = nvc.colors[["T"]], font = 2, las=1, hadj=0, tcl=0, line = -0.5, lwd = -1, lwd.ticks = par("lwd"));
+      axis(4,at=y.center, labels = " \n \nG\n ",col="transparent",col.axis = nvc.colors[["G"]], font = 2, las=1, hadj=0, tcl=0, line = -0.5, lwd = -1, lwd.ticks = par("lwd"));
+      axis(4,at=y.center, labels = " \n \n \nC",col="transparent",col.axis = nvc.colors[["C"]], font = 2, las=1, hadj=0, tcl=0, line = -0.5, lwd = -1, lwd.ticks = par("lwd"));
 
       #text(par("usr")[2],par("usr")[3],"A\n\n\n", adj=base.legend.adj, col = nvc.colors[["A"]], font=2, xpd=TRUE)
       #text(par("usr")[2],par("usr")[3],"\nT\n\n", adj=base.legend.adj, col = nvc.colors[["T"]], font=2, xpd=TRUE)
@@ -890,7 +890,7 @@ makePlot.generic.NVC.single.RASTERIZED <- function(plot.name, data.list.r1,plott
 
 
     box();
-    axis(2);
+    axis(2, lwd = -1, lwd.ticks = par("lwd"));
     return(TRUE);
   }, error = function(e){ errorPlot(plot.name, e, code = 2, newPlot = FALSE); stop();});
 }
@@ -1060,15 +1060,15 @@ makePlot.generic.NVC.pair.DEFAULT <- function(plot.name, data.list.r1, data.list
 
     if(count.x.from.end){ 
       max.cycle.ct <- max(plotter$res@decoder$cycle.CT);
-      axis(1,at=pretty.axis + r2.offset, labels = max.cycle.ct - (xlim.max - pretty.axis));
-      axis(1,at=pretty.axis,labels= max.cycle.ct - (xlim.max - pretty.axis));
+      axis(1,at=pretty.axis + r2.offset, labels = max.cycle.ct - (xlim.max - pretty.axis), lwd = -1, lwd.ticks = par("lwd"));
+      axis(1,at=pretty.axis,labels= max.cycle.ct - (xlim.max - pretty.axis), lwd = -1, lwd.ticks = par("lwd"));
     } else if(! is.null(x.axis.labels)){
       x.labels <- x.axis.labels[pretty.axis];
-      axis(1,at=pretty.axis + r2.offset, labels = x.labels);
-      axis(1,at=pretty.axis,labels= x.labels);
+      axis(1,at=pretty.axis + r2.offset, labels = x.labels, lwd = -1, lwd.ticks = par("lwd"));
+      axis(1,at=pretty.axis,labels= x.labels, lwd = -1, lwd.ticks = par("lwd"));
     } else {
-      axis(1,at=pretty.axis + r2.offset, labels = pretty.axis);
-      axis(1,at=pretty.axis,labels=pretty.axis);
+      axis(1,at=pretty.axis + r2.offset, labels = pretty.axis, lwd = -1, lwd.ticks = par("lwd"));
+      axis(1,at=pretty.axis,labels=pretty.axis, lwd = -1, lwd.ticks = par("lwd"));
     }
 
     if(show.base.legend){
@@ -1079,10 +1079,10 @@ makePlot.generic.NVC.pair.DEFAULT <- function(plot.name, data.list.r1, data.list
       #test(par("usr")[2],par("usr")[3], );
       #mtext(c("A\nT\nG\nC"),side = 4);
 
-      axis(4,at=y.center, labels = "A\n \n \n ",col="transparent",col.axis = nvc.colors[["A"]], font = 2, las=1, hadj=0, tcl=0, line = -0.5);
-      axis(4,at=y.center, labels = " \nT\n \n ",col="transparent",col.axis = nvc.colors[["T"]], font = 2, las=1, hadj=0, tcl=0, line = -0.5);
-      axis(4,at=y.center, labels = " \n \nG\n ",col="transparent",col.axis = nvc.colors[["G"]], font = 2, las=1, hadj=0, tcl=0, line = -0.5);
-      axis(4,at=y.center, labels = " \n \n \nC",col="transparent",col.axis = nvc.colors[["C"]], font = 2, las=1, hadj=0, tcl=0, line = -0.5);
+      axis(4,at=y.center, labels = "A\n \n \n ",col="transparent",col.axis = nvc.colors[["A"]], font = 2, las=1, hadj=0, tcl=0, line = -0.5, lwd = -1, lwd.ticks = par("lwd"));
+      axis(4,at=y.center, labels = " \nT\n \n ",col="transparent",col.axis = nvc.colors[["T"]], font = 2, las=1, hadj=0, tcl=0, line = -0.5, lwd = -1, lwd.ticks = par("lwd"));
+      axis(4,at=y.center, labels = " \n \nG\n ",col="transparent",col.axis = nvc.colors[["G"]], font = 2, las=1, hadj=0, tcl=0, line = -0.5, lwd = -1, lwd.ticks = par("lwd"));
+      axis(4,at=y.center, labels = " \n \n \nC",col="transparent",col.axis = nvc.colors[["C"]], font = 2, las=1, hadj=0, tcl=0, line = -0.5, lwd = -1, lwd.ticks = par("lwd"));
 
       #text(par("usr")[2],par("usr")[3],"A\n\n\n", adj=base.legend.adj, col = nvc.colors[["A"]], font=2, xpd=TRUE)
       #text(par("usr")[2],par("usr")[3],"\nT\n\n", adj=base.legend.adj, col = nvc.colors[["T"]], font=2, xpd=TRUE)
@@ -1098,7 +1098,7 @@ makePlot.generic.NVC.pair.DEFAULT <- function(plot.name, data.list.r1, data.list
 
 
     box();
-    axis(2);
+    axis(2, lwd = -1, lwd.ticks = par("lwd"));
     #rect(xlim[2] + mini.buffer, ylim[1] - ylim[2], xlim[2] + 1 + r2.buffer - mini.buffer, ylim[2] * 2, border="black",col="white");   
     usr <- par("usr");
     yrange <- abs(usr[4] - usr[3]);
@@ -1264,15 +1264,15 @@ makePlot.generic.NVC.pair.RASTERIZED <- function(plot.name, data.list.r1, data.l
 
     if(count.x.from.end){ 
       max.cycle.ct <- max(plotter$res@decoder$cycle.CT);
-      axis(1,at=pretty.axis + r2.offset, labels = max.cycle.ct - (xlim.max - pretty.axis));
-      axis(1,at=pretty.axis,labels= max.cycle.ct - (xlim.max - pretty.axis));
+      axis(1,at=pretty.axis + r2.offset, labels = max.cycle.ct - (xlim.max - pretty.axis), lwd = -1, lwd.ticks = par("lwd"));
+      axis(1,at=pretty.axis,labels= max.cycle.ct - (xlim.max - pretty.axis), lwd = -1, lwd.ticks = par("lwd"));
     } else if(! is.null(x.axis.labels)){
       x.labels <- x.axis.labels[pretty.axis];
-      axis(1,at=pretty.axis + r2.offset, labels = x.labels);
-      axis(1,at=pretty.axis,labels= x.labels);
+      axis(1,at=pretty.axis + r2.offset, labels = x.labels, lwd = -1, lwd.ticks = par("lwd"));
+      axis(1,at=pretty.axis,labels= x.labels, lwd = -1, lwd.ticks = par("lwd"));
     } else {
-      axis(1,at=pretty.axis + r2.offset, labels = pretty.axis);
-      axis(1,at=pretty.axis,labels=pretty.axis);
+      axis(1,at=pretty.axis + r2.offset, labels = pretty.axis, lwd = -1, lwd.ticks = par("lwd"));
+      axis(1,at=pretty.axis,labels=pretty.axis, lwd = -1, lwd.ticks = par("lwd"));
     }
 
     if(show.base.legend){
@@ -1283,10 +1283,10 @@ makePlot.generic.NVC.pair.RASTERIZED <- function(plot.name, data.list.r1, data.l
       #test(par("usr")[2],par("usr")[3], );
       #mtext(c("A\nT\nG\nC"),side = 4);
 
-      axis(4,at=y.center, labels = "A\n \n \n ",col="transparent",col.axis = nvc.colors[["A"]], font = 2, las=1, hadj=0, tcl=0, line = -0.5);
-      axis(4,at=y.center, labels = " \nT\n \n ",col="transparent",col.axis = nvc.colors[["T"]], font = 2, las=1, hadj=0, tcl=0, line = -0.5);
-      axis(4,at=y.center, labels = " \n \nG\n ",col="transparent",col.axis = nvc.colors[["G"]], font = 2, las=1, hadj=0, tcl=0, line = -0.5);
-      axis(4,at=y.center, labels = " \n \n \nC",col="transparent",col.axis = nvc.colors[["C"]], font = 2, las=1, hadj=0, tcl=0, line = -0.5);
+      axis(4,at=y.center, labels = "A\n \n \n ",col="transparent",col.axis = nvc.colors[["A"]], font = 2, las=1, hadj=0, tcl=0, line = -0.5, lwd = -1, lwd.ticks = par("lwd"));
+      axis(4,at=y.center, labels = " \nT\n \n ",col="transparent",col.axis = nvc.colors[["T"]], font = 2, las=1, hadj=0, tcl=0, line = -0.5, lwd = -1, lwd.ticks = par("lwd"));
+      axis(4,at=y.center, labels = " \n \nG\n ",col="transparent",col.axis = nvc.colors[["G"]], font = 2, las=1, hadj=0, tcl=0, line = -0.5, lwd = -1, lwd.ticks = par("lwd"));
+      axis(4,at=y.center, labels = " \n \n \nC",col="transparent",col.axis = nvc.colors[["C"]], font = 2, las=1, hadj=0, tcl=0, line = -0.5, lwd = -1, lwd.ticks = par("lwd"));
 
       #text(par("usr")[2],par("usr")[3],"A\n\n\n", adj=base.legend.adj, col = nvc.colors[["A"]], font=2, xpd=TRUE)
       #text(par("usr")[2],par("usr")[3],"\nT\n\n", adj=base.legend.adj, col = nvc.colors[["T"]], font=2, xpd=TRUE)
@@ -1302,7 +1302,7 @@ makePlot.generic.NVC.pair.RASTERIZED <- function(plot.name, data.list.r1, data.l
 
 
     box();
-    axis(2);
+    axis(2, lwd = -1, lwd.ticks = par("lwd"));
     #rect(xlim[2] + mini.buffer, ylim[1] - ylim[2], xlim[2] + 1 + r2.buffer - mini.buffer, ylim[2] * 2, border="black",col="white");
     #rect(xlim[2] + mini.buffer, ylim[1] - abs(ylim[2] - ylim[1])*0.02, xlim[2]+buffer - mini.buffer, (abs(ylim[1]) + abs(ylim[2])) * 2, border="white",col="white", xpd = FALSE,...);
     #rect(xlim[2] + mini.buffer, ylim[1] - abs(ylim[2] - ylim[1])*0.02, xlim[2]+buffer - mini.buffer, (abs(ylim[1]) + abs(ylim[2])) * 2, border="black",col="white", xpd = TRUE,...);
@@ -1455,10 +1455,10 @@ makePlot.generic.points <- function(plot.name, tf.list, plotter, plot.type = "po
 
     text(1:xlim.max,rep(y.abs.min,xlim.max),labels = x.titles, adj=c(0.5,1.05) , xpd=T, cex = cex.x.axis);
 
-    axis(1,at=(1:xlim.max - 0.5),labels=F);
-    axis(1,at=(1:xlim.max + 0.5),labels=F);
+    axis(1,at=(1:xlim.max - 0.5),labels=F, lwd = -1, lwd.ticks = par("lwd"));
+    axis(1,at=(1:xlim.max + 0.5),labels=F, lwd = -1, lwd.ticks = par("lwd"));
 
-    if(label.y) axis(2);
+    if(label.y) axis(2, lwd = -1, lwd.ticks = par("lwd"));
     box();
     return(TRUE);
   }, error = function(e){ errorPlot(plot.name, e, code = 2, newPlot = FALSE); stop();});
@@ -1518,7 +1518,7 @@ makePlot.generic.points.right <- function(plot.name, tf.list, plotter, plot.type
         curr.y <- tf.y(curr.data$y);
         curr.x <- curr.data$x + xlim.min;
         if(plot.type == "points"){
-          points(curr.x, curr.y, pch = p.params$points.pch[j], col = p.params$points.col[j]);
+          points(curr.x, curr.y, pch = p.params$points.pch[j], col = p.params$points.col[j], ...);
         }
       }
     }
@@ -1530,13 +1530,13 @@ makePlot.generic.points.right <- function(plot.name, tf.list, plotter, plot.type
       cex.x.axis <- par("cex.axis");
       cex.x.axis <- fit.character.vector.helper(x.titles, cex.x.axis, min.width = 0.6, max.width = 0.95, max.width.per.char = 0.15);
     }
-    text((xlim.min + 1):xlim.max,rep(y.abs.min,length(x.titles)),labels = x.titles, adj=c(0.5,1.05) , xpd=T, cex = cex.x.axis);
-    axis(1,at=((xlim.min + 1):xlim.max - 0.5),labels=F);
-    axis(1,at=((xlim.min + 1):xlim.max + 0.5),labels=F);
+    text((xlim.min + 1):xlim.max,rep(y.abs.min,length(x.titles)),labels = x.titles, adj=c(0.5,1.05) , xpd=T, cex = cex.x.axis, ...);
+    axis(1,at=((xlim.min + 1):xlim.max - 0.5),labels=F, lwd = -1, lwd.ticks = par("lwd"), ...);
+    axis(1,at=((xlim.min + 1):xlim.max + 0.5),labels=F, lwd = -1, lwd.ticks = par("lwd"), ...);
 
     if(label.y){
       pretty.ax <- pretty(ylim.data, n = 5);
-      axis(4, at = tf.y(pretty.ax), labels= pretty.ax);
+      axis(4, at = tf.y(pretty.ax), labels= pretty.ax, lwd = -1, lwd.ticks = par("lwd"), ...);
     }
     box();
     return(TRUE);
@@ -1633,15 +1633,21 @@ internal.plot.main.title <- function(plot.title, plotter, plot.type = "", print.
 }
 
 internal.get.main.title.fragment <- function(plotter, plot.type){
+  if(plot.type == "NVC"){
+    diff.text <- "Marked";
+  } else {
+    diff.text <- "Colored";
+  }
+
   if(plotter$plot.type == "highlightSample.colorByLane" & plot.type == "NVC")        return( paste0("\nWith Sample ",plotter$title.highlight.name," in Bold"));
-  if(plotter$plot.type == "highlightSample.colorByLane")        return( paste0("\nWith Sample ",plotter$title.highlight.name," colored by lane"));
+  if(plotter$plot.type == "highlightSample.colorByLane")        return( paste0("\nWith Sample ",plotter$title.highlight.name," ",diff.text," by lane"));
   if(plotter$plot.type == "highlightSample")                    return( paste0("\nWith Sample ",plotter$title.highlight.name," in ", plotter$legend.params$lines.col[1]));
   if(plotter$plot.type == "highlightSample.colorByLane.NVC")    return( paste0("\nWith Sample ",plotter$title.highlight.name," in Bold"));
   if(plotter$plot.type == "summary") return("");
-  if(plotter$plot.type == "colorByLane") return("\nColored by Lane");
-  if(plotter$plot.type == "colorByGroup") return("\nColored by Group");
-  if(plotter$plot.type == "colorBySample") return("\nColored by Sample");
-  if(plotter$plot.type == "colorByX") return(paste0("\nColored by ",plotter$title.highlight.name));
+  if(plotter$plot.type == "colorByLane") return(paste0("\n",diff.text," by Lane"));
+  if(plotter$plot.type == "colorByGroup") return(paste0("\n",diff.text," by Group"));
+  if(plotter$plot.type == "colorBySample") return(paste0("\n",diff.text," by Sample"));
+  if(plotter$plot.type == "colorByX") return(paste0("\n",diff.text," by ",plotter$title.highlight.name));
   return("");
 }
 

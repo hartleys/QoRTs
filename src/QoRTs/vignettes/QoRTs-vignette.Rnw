@@ -63,9 +63,9 @@ BiocStyle::latex()
 National Human Genome Research Institute\\
 National Institutes of Health}
 \date{August 8 2014\\
-March 03, 2015 %REPLACE_THIS_LINE_WITH_REVISION_DATE
+March 16, 2015 %REPLACE_THIS_LINE_WITH_REVISION_DATE
 \\
-v0.2.5 %REPLACE_THIS_LINE_WITH_VERSION_NUMBER
+v0.2.7 %REPLACE_THIS_LINE_WITH_VERSION_NUMBER
 }
 
 \begin{document}
@@ -165,10 +165,10 @@ Technically, unsorted bam files can be run through QoRTs using the \verb|--coord
 In order to produce quality control metrics, plots, and pdf reports on a single replicate, simply use the command:
 
 \begin{verbatim}
-java -Xmx4G -jar /path/to/jarfile/QoRTs.jar QC
-                   --generatePlots 
-                   mybamfile.bam 
-                   transcriptAnnotationFile.gtf.gz 
+java -Xmx4G -jar /path/to/jarfile/QoRTs.jar QC \
+                   --generatePlots  \
+                   mybamfile.bam  \
+                   transcriptAnnotationFile.gtf.gz  \
                    /qc/data/dir/path/
 \end{verbatim}
 
@@ -239,9 +239,9 @@ THIS DATASET IS INTENDED FOR DEMONSTRATION AND TESTING PURPOSES ONLY. Due to the
 The first step is to process the aligned RNA-Seq data. The bulk of the data-processing is performed by the QoRTs.jar java utility. This tool produces an array of output files, analyzing and tabulating the data in various ways. This utility requires about 10-20gb of RAM for most genomes, and takes roughly 4-7 minutes to process 1 million read-pairs.
 
 \begin{verbatim}
-java -jar /path/to/jarfile/QoRTs.jar QC
-                   mybamfile.bam
-                   transcriptAnnotationFile.gtf.gz
+java -jar /path/to/jarfile/QoRTs.jar QC \
+                   mybamfile.bam \
+                   transcriptAnnotationFile.gtf.gz \
                    /qc/data/dir/path/
 \end{verbatim}
 
@@ -265,11 +265,11 @@ There are a number of crucial points that require attention when using the QoRTs
 For example, to read the first read group bam-file for SAMP1 from the example dataset (which is stranded, coordinate-sorted, and uses the \verb|fr_firstStrand| stranded library type), one would use the following command:
 
 \begin{verbatim}
-java -jar /path/to/jarfile/QoRTs.jar QC
-                   --stranded
-                   --coordSorted
-                   inputData/bamFiles/SAMP1_RG1.bam
-                   inputData/annoFiles/anno.gtf.gz
+java -jar /path/to/jarfile/QoRTs.jar QC \
+                   --stranded \
+                   --coordSorted \
+                   inputData/bamFiles/SAMP1_RG1.bam \
+                   inputData/annoFiles/anno.gtf.gz \
                    outputData/qortsData/SAMP1_RG1/
 \end{verbatim}
 
@@ -283,19 +283,19 @@ This command must be run on each bam file (and possibly more than once on each, 
 
 \begin{verbatim}
 #Set the maximum to the minimum recommended 4 gigabytes:
-java -Xmx4000M -jar /path/to/jarfile/QoRTs.jar QC
-                   --stranded
-                   --coordSorted
-                   inputData/bamFiles/SAMP1_RG1.bam
-                   inputData/annoFiles/anno.gtf.gz
+java -Xmx4000M -jar /path/to/jarfile/QoRTs.jar QC \
+                   --stranded \
+                   --coordSorted \
+                   inputData/bamFiles/SAMP1_RG1.bam \
+                   inputData/annoFiles/anno.gtf.gz \
                    outputData/qortsData/SAMP1_RG1/
 
 #Or Set the maximum to 16 gigabytes:
-java -Xmx16G -jar /path/to/jarfile/QoRTs.jar QC
-                   --stranded
-                   --coordSorted
-                   inputData/bamFiles/SAMP1_RG1.bam
-                   inputData/annoFiles/anno.gtf.gz
+java -Xmx16G -jar /path/to/jarfile/QoRTs.jar QC \
+                   --stranded \
+                   --coordSorted \
+                   inputData/bamFiles/SAMP1_RG1.bam \
+                   inputData/annoFiles/anno.gtf.gz \
                    outputData/qortsData/SAMP1_RG1/
 \end{verbatim}
 
@@ -572,7 +572,7 @@ makePlot.legend.over("topright",sample.SAMP1.colorByLane.plotter);
 
 Which produces Figure \ref{plotterExamples-5-fig}:
 
-\myincfig{plotterExamples-5}{0.75\textwidth}{Phred Quality Score Plots}
+\myincfig{plotterExamples-5}{0.65\textwidth}{Phred Quality Score Plots}
 
 The above example plot displays the "Insert Size" of each replicate, as described in Section \ref{subsec:plotDesc-5}.
 
@@ -681,7 +681,7 @@ makePlot.cigarOp.byCycle(byLane.plotter, "Splice");
 \subsubsection{Insert Size} \label{subsec:plotDesc-5}
 %----------
 
-\myincfig{indivPlot-5}{0.65\textwidth}{Insert Size}
+\myincfig{indivPlot-5}{0.55\textwidth}{Insert Size}
 
 For each replicate, Figure \ref{indivPlot-5-fig} displays a histogram of the "insert size". Each line corresponds to one replicate, and displays the rate (y-axis) at which that replicate's reads possess a given insert size (x-axis).
 
@@ -758,7 +758,7 @@ makePlot.cigarLength.distribution(byLane.plotter, "Del")
 \subsubsection{Cumulative Gene Diversity} \label{subsec:plotDesc-9}
 %----------
 
-\myincfig{indivPlot-9}{0.95\textwidth}{Cumulative Gene Diversity}
+\myincfig{indivPlot-9}{0.65\textwidth}{Cumulative Gene Diversity}
 
 For each replicate, Figure \ref{indivPlot-9-fig} displays the cumulative gene diversity. For each replicate, the genes are sorted by read-count. Then, a cumulative function is calculated for the percent of the total proportion of reads as a function of the number of genes. Intercepts are plotted as well, showing the cumulative percent for 1 gene, 10 genes, 100 genes, 1000 genes, and 10000 genes. 
 
@@ -855,7 +855,7 @@ Any integer can be used as the \verb|clip.amt| value.
 \subsubsection{Mapping location rates} \label{subsec:plotDesc-12}
 %----------
 
-\myincfig{indivPlot-12}{0.65\textwidth}{Gene assignment rates}
+\myincfig{indivPlot-12}{0.55\textwidth}{Gene assignment rates}
 
 For each replicate, Figure \ref{indivPlot-12-fig} displays the rate (y-axis) for which the replicate's read-pairs are assigned to the given categories.
 
@@ -881,9 +881,19 @@ makePlot.gene.assignment.rates(byLane.plotter);
 \subsubsection{Splice Junction Loci} \label{subsec:plotDesc-13}
 %----------
 
-\myincfig{indivPlot-13}{0.65\textwidth}{Splice junction loci}
+\myincfig{indivPlot-13}{0.55\textwidth}{Splice junction loci}
 
 For each replicate, Figure \ref{indivPlot-13-fig} displays the number (y-axis) of splice junction \emph{loci} of each type that appear in the replicate's reads. Splice junctions are split into 4 groups, first by whether the splice junction appears in the transcript annotation gtf ("known" vs "novel"), and then by whether the splice junction has 4 or more reads covering it, or 1-3 reads ("Hi" vs "Lo").
+
+The six categories of splice junction locus are:
+      \begin{itemize}
+        \item Known: The splice junction locus is found in the supplied transcript annotation gtf file.
+        \item Novel: The splice junction locus is NOT found in the supplied transcript annotation gtf file.
+        \item Known, 1-3 reads: The locus is known, and is only covered by 1-3 read-pairs.
+        \item Known, 4+ reads: The locus is known, and is covered by 4 or more read-pairs.
+        \item Novel, 1-3 reads: The locus is novel, and is only covered by 1-3 read-pairs.
+        \item Novel, 4+ reads: The locus is novel, and is covered by 4 or more read-pairs.
+      \end{itemize}
 
 This plot can be used to detect a number of anomalies. For example: whether mapping or sequencing artifacts caused a disproportionate discovery of novel splice junctions in one sample or batch.
 
@@ -901,16 +911,6 @@ makePlot.splice.junction.loci.counts(byLane.plotter);
 \myincfig{indivPlot-14d}{0.65\textwidth}{Number of splice junction events}
 
 For each replicate, Figure \ref{indivPlot-14d-fig} displays the number (y-axis) of all splice junction events falling into each of six categories. A splice junction "event" is one instance of a read-pair bridging a splice junction. Some reads may contain multiple splice junction events, some may contain none. If a splice junction appears on both reads of a read-pair, this is still only counted as a single "event".
-
-The six categories are:
-      \itemize{
-        \item Known: The splice junction locus is found in the supplied transcript annotation gtf file.
-        \item Novel: The splice junction locus is NOT found in the supplied transcript annotation gtf file.
-        \item Known, 1-3 reads: The locus is known, and is only covered by 1-3 read-pairs.
-        \item Known, 4+ reads: The locus is known, and is covered by 4 or more read-pairs.
-        \item Novel, 1-3 reads: The locus is novel, and is only covered by 1-3 read-pairs.
-        \item Novel, 4+ reads: The locus is novel, and is covered by 4 or more read-pairs.
-      }
 
 Note that because different samples/runs may have different total read counts and/or library sizes, this function is generally not the best for comparing between samples. In general, the event rates per read-pair should be used, see the next section, \ref{subsec:plotDesc-14}.
 
@@ -1079,6 +1079,7 @@ This plot can be generated individually with the command:
 makePlot.dropped.rates(byLane.plotter);
 @
 
+\pagebreak
 %-----------------------------------------------------------
 \section{Secondary Utilities} \label{sec:minorUtils}
 %-----------------------------------------------------------
@@ -1092,8 +1093,8 @@ In addition to the standard quality-control tools described in the previous sect
 Before counting exons and splice junctions, QoRTs generates a set of non-overlapping exonic fragments out of all the exons in the genome annotation gtf file. It then assigns each exonic fragment a unique identifier. Similarly, it assigns every splice junction its own unique identifier. A gtf file listing all these genomic features and their unique identifiers can be created using the following command:
 
 \begin{verbatim}
-java -jar /path/to/jarfile/QoRTs.jar makeFlatGtf 
-                                     input.gtf
+java -jar /path/to/jarfile/QoRTs.jar makeFlatGtf \
+                                     input.gtf \
                                      flattened.gff
 \end{verbatim}
 Both the input and output annotation files can be either .zip or .gz compressed. Compression is autodetected from the file extension.
@@ -1113,9 +1114,9 @@ For the purposes of quality control it is generally preferable to run QoRTs on e
 
 Thus, the java utility includes a function for quickly and easily calculating merged sample-wise counts:
 \begin{verbatim}
-java -jar /path/to/jarfile/QoRTs.jar mergeAllCounts 
-                                    decoder.txt 
-                                    /path/to/qc/results/dir/ 
+java -jar /path/to/jarfile/QoRTs.jar mergeAllCounts \
+                                    decoder.txt  \
+                                    /path/to/qc/results/dir/  \
                                     ./merged/
 \end{verbatim}
 This decoder MUST contain the unique.ID and sample.ID columns.
@@ -1163,13 +1164,13 @@ java -jar /path/to/jarfile/QoRTs.jar bamToWiggle
 The chromLengthFile is a simple tab-delimited text file that includes each chromosome in the first column and the chromosome's length (in base-pairs) in the second column. If the wiggle file is intended for use with a standard genome on the UCSC genome browser, then the UCSC utility \verb|fetchChromSizes| should be used to generate this file. (see \url{http://genome.ucsc.edu/goldenPath/help/bigWig.html} for more information on \verb|fetchChromSizes|, as well as information on how to compress your wig files into smaller and more efficient bigWig files). It also takes 
 
 \noindent Common options and flags for this function include:
-  \begin{itemize}
-    \item \verb|--sizefactor 1.0|: A float value. All the coverage values will be divided by this factor. Useful for comparing two samples that may have different normalization factors.
-    \item \verb|--stranded|: Flag to indicate that data should be treated as stranded.
-    \item \verb|--fr_secondStrand|: Flag to indicate that the data is of the fr\_secondstrand stranded library type. (See section \ref{sec:initialProcessing} for more information on the two stranded library types).
-    \item \verb|--negativeReverseStrand|: If this flag is set, then the negative strand will be counted in negative numbers. This can be useful for plotting both strands in a single multiwig track, via a trackhub. (see \url{http://genome.ucsc.edu/goldenPath/help/trackDb/trackDbDoc.html})
-    \item \verb|--simpleCountByRead|: If this flag is raised, then each read of each read-pair will be counted separately. Thus the wiggle plot will count simple read coverage depth rather than read-pair coverage depth. This means that when read-pairs overlap they will be counted twice over the overlapping region.
-  \end{itemize}
+  \begin{description}
+    \item[\texttt{--sizefactor 1.0}]: A float value. All the coverage values will be divided by this factor. Useful for comparing two samples that may have different normalization factors.
+    \item[\texttt{--stranded}]: Flag to indicate that data should be treated as stranded.
+    \item[\texttt{--fr\_secondStrand}]: Flag to indicate that the data is of the fr\_secondstrand stranded library type. (See section \ref{sec:initialProcessing} for more information on the two stranded library types).
+    \item[\texttt{--negativeReverseStrand}]: If this flag is set, then the negative strand will be counted in negative numbers. This can be useful for plotting both strands in a single multiwig track, via a trackhub. (see \url{http://genome.ucsc.edu/goldenPath/help/trackDb/trackDbDoc.html})
+    \item[\texttt{--simpleCountByRead}]: If this flag is raised, then each read of each read-pair will be counted separately. Thus the wiggle plot will count simple read coverage depth rather than read-pair coverage depth. This means that when read-pairs overlap they will be counted twice over the overlapping region. This option will have no effect on single-ended data.
+  \end{description}
 Many of the other parameters are identical to those used by the QC tool: \verb|--singleEnded|, \verb|--coordSorted|, etc. 
 
 More information and a full accounting of all parameters and options can be found in the online documentation\footnote{Found here: \url{https://dl.dropboxusercontent.com/u/103621176/QoRTs/helpDocs/jarHtml/index.html}}, or by using the command:
@@ -1183,25 +1184,27 @@ java -jar /path/to/jarfile/QoRTs.jar bamToWiggle --man
 QoRTs includes a utility for summing or averaging multiple wiggle files, either with or without normalization factors. For example, to calculate the normalized mean coverage for each 100-bp window across all CASE samples in the example dataset:
 
 \begin{verbatim}
-java -jar /path/to/jarfile/QoRTs.jar mergeWig 
+java -jar /path/to/jarfile/QoRTs.jar mergeWig \
                 --calcMean \
-                --filenames outputData/countTables/SAMP1/QC.wiggle.fwd.wig.gz,outputData/countTables/SAMP2/QC.wiggle.fwd.wig.gz,outputData/countTables/SAMP3/QC.wiggle.fwd.wig.gz \
+                --filenames outputData/countTables/SAMP1/QC.wiggle.fwd.wig.gz,output\
+Data/countTables/SAMP2/QC.wiggle.fwd.wig.gz,outputData/countTables/SAMP3/QC.wiggle.f\
+wd.wig.gz \
                 --sizeFactors 1.057995,0.999932,1.015372 \
                 path/to/output/CASE.fwd.wig.gz
 \end{verbatim}
 
-There are a number of other allowed parameterizations. The \verb|--sampleList| parameter (which can be either a comma-delimited list or a list .txt file) can be used along with the \verb|--infilePrefix| and \verb|--infileSuffix| to specify the file names if all of the wiggle files are in the same parent directory. If the \verb|--sizeFactors| is omitted then the non-normalized means will be calculated.
+There are a number of other alternative parameterizations. The \verb|--sampleList| parameter (which can be either a comma-delimited list or a ".txt" file containing a list) can be used along with the \verb|--infilePrefix| and \verb|--infileSuffix| to specify the file names if all of the wiggle files are in the same parent directory. The size factors can also be provided in a tab-delimited file using the \verb|--sizeFactorFile| parameter. If the \verb|--sizeFactors| and \verb|--sizeFactorFile| parameters are omitted then the non-normalized sums/means will be calculated.
 
 % MORE INFO HERE
 
 \noindent Common options and flags for this function include:
-  \begin{itemize}
-    \item \verb|--calcMean|: If this flag is raised, the utility will calculate the average rather than the total coverage for each window.
-    \item \verb|--makeNegative|: If this flag is raised, the output will be multiplied by -1.
-    \item \verb|--sizeFactorFile|: A file containing at least two columns, the sample.ID and the size.factor. This file must include all samples in the sample list, but can include other samples that are not included in the sample list.
-  \end{itemize}
+  \begin{description}
+    \item[\texttt{--calcMean}]: If this flag is raised, the utility will calculate the average rather than the total coverage for each window.
+    \item[\texttt{--makeNegative}]: If this flag is raised, all output values will be multiplied by -1.
+    \item[\texttt{--sizeFactorFile}]: A file containing at least two columns, the sample.ID and the size.factor. This file must include all samples in the sample list, but can include other samples that are not included in the sample list.
+  \end{description}
 
-More information and a full accounting of all parameters and options can be found in the online documentation\footnote{Found here: \url{https://dl.dropboxusercontent.com/u/103621176/QoRTs/helpDocs/jarHtml/index.html}}, or by using the command:
+More information and a full accounting of all parameters and options can be found in the online documentation\footnote{Found here: \url{https://dl.dropboxusercontent.com/u/103621176/QoRTs/helpDocs/jarHtml/mergeWig.html}}, or by using the command:
 \begin{verbatim}
 java -jar /path/to/jarfile/QoRTs.jar mergeWig --man
 \end{verbatim}
@@ -1212,50 +1215,51 @@ java -jar /path/to/jarfile/QoRTs.jar mergeWig --man
 To visualize splice junction data, QoRTs can produce bed files that show splice junction counts:
 
 \begin{verbatim}
-java -jar /path/to/jarfile/QoRTs.jar makeJunctionTrack  
+java -jar /path/to/jarfile/QoRTs.jar makeJunctionTrack  \
                 --stranded \
-                --filenames outputData/countTables/SAMP1/QC.spliceJunctionAndExonCounts.withNovel.forJunctionSeq.txt.gz \
+                --filenames outputData/countTables/SAMP1/QC.spliceJunctionAndExonCou\
+nts.withNovel.forJunctionSeq.txt.gz \
                 flattened.gff \
                 path/to/output/CASE.bed.gz
 \end{verbatim}
 
 \noindent Common options and flags for this function include:
-  \begin{itemize}
-    \item \emph{--rgb}: The color to use for each bed entry.
-  \end{itemize}
+  \begin{description}
+    \item[\texttt{--rgb r,g,b}]: The color to use for each bed entry. Three integers, comma-delimited (with no spaces), each between 0 and 255.
+    \item[\texttt{--stranded}]: Whether the data is stranded.
+    \item[\texttt{--sizeFactors sf1,sf2,...}]: A list of size factors with which to normalize replicates to a common scale. The list must have the same length as the number of replicates provided (ie the filenames parameter).
+    \item[\texttt{--skipNovelJunctions}]: If this option is used, novel splice junctions will not be included in the output file.
+    \item[\texttt{--title}]: A prefix to append to each splice junction ID.
+  \end{description}
 
-\subsubsection{Merging splice-junction tracks}
-
-More information and a full accounting of all parameters and options can be found in the online documentation\footnote{Found here: \url{https://dl.dropboxusercontent.com/u/103621176/QoRTs/helpDocs/jarHtml/index.html}}, or by using the command:
+More information and a full accounting of all parameters and options can be found in the online documentation\footnote{Found here: \url{https://dl.dropboxusercontent.com/u/103621176/QoRTs/helpDocs/jarHtml/makeJunctionTrack.html}}, or by using the command:
 \begin{verbatim}
-java -jar /path/to/jarfile/QoRTs.jar makeSpliceBed --man
+java -jar /path/to/jarfile/QoRTs.jar makeJunctionTrack --man
 \end{verbatim}
 
 %----------
-\subsubsection{Generating splice-junction tracks}
+\subsubsection{Merging splice-junction tracks}
 
 Merged splice junction tracks can be created using the same utility used to create single-sample splice junction tracks. This uses syntax similar to the syntax used for merging wiggle files:
 
 \begin{verbatim}
-java -jar /path/to/jarfile/QoRTs.jar makeJunctionTrack  
+java -jar /path/to/jarfile/QoRTs.jar makeJunctionTrack  \
                 --calcMean \
                 --stranded \
-                --filenames outputData/countTables/SAMP1/QC.spliceJunctionAndExonCounts.withNovel.forJunctionSeq.txt.gz,outputData/countTables/SAMP2/QC.spliceJunctionAndExonCounts.withNovel.forJunctionSeq.txt.gz,outputData/countTables/SAMP3/QC.spliceJunctionAndExonCounts.withNovel.forJunctionSeq.txt.gz \
+                --filenames  outputData/countTables/SAMP1/QC.spliceJunctionAndExonCo\
+unts.withNovel.forJunctionSeq.txt.gz,outputData/countTables/SAMP2/QC.spliceJunctionA\
+ndExonCounts.withNovel.forJunctionSeq.txt.gz,outputData/countTables/SAMP3/QC.spliceJ\
+unctionAndExonCounts.withNovel.forJunctionSeq.txt.gz \
                 --sizeFactors 1.057995,0.999932,1.015372 \
                 flattened.gff \
                 path/to/output/CASE.bed.gz
 \end{verbatim}
 
-\noindent Common options and flags for this function include:
-  \begin{itemize}
-    \item \emph{--rgb}: The color to use for each bed entry.
-  \end{itemize}
+As with the wiggle-file merge utility, there are a number of other alternative parameterizations. The \verb|--sampleList| parameter (which can be either a comma-delimited list or a ".txt" file containing a list) can be used along with the \verb|--infilePrefix| and \verb|--infileSuffix| to specify the file names if all of the wiggle files are in the same parent directory. The size factors can also be provided in a tab-delimited file using the \verb|--sizeFactorFile| parameter. If the \verb|--sizeFactors| and \verb|--sizeFactorFile| parameters are omitted then the non-normalized sums/means will be calculated.
 
-\subsubsection{Merging splice-junction tracks}
-
-More information and a full accounting of all parameters and options can be found in the online documentation\footnote{Found here: \url{https://dl.dropboxusercontent.com/u/103621176/QoRTs/helpDocs/jarHtml/index.html}}, or by using the command:
+More information and a full accounting of all parameters and options can be found in the online documentation\footnote{Found here: \url{https://dl.dropboxusercontent.com/u/103621176/QoRTs/helpDocs/jarHtml/makeJunctionTrack.html}}, or by using the command:
 \begin{verbatim}
-java -jar /path/to/jarfile/QoRTs.jar makeSpliceBed --man
+java -jar /path/to/jarfile/QoRTs.jar makeJunctionTrack --man
 \end{verbatim}
 
 %----------

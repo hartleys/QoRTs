@@ -1,5 +1,5 @@
 # QoRTs: Quality Of Rna-seq Tool Set
-> Version 0.2.5 (Updated Tue Mar  3 14:17:52 EST 2015)
+> Version 0.2.7 (Updated Mon Mar 16 17:02:31 EDT 2015)
 
 > ([back to main](../index.html)) ([back to java-utility help](index.html))
 
@@ -41,6 +41,10 @@ This utility takes the QC output from the standard QC utility run on a series of
 
 > The minimum mean normalized read coverage needed for inclusion of a novel splice junction. By default, equal to 10.0. (Double)
 
+### --minSpan len:
+
+> The minimum (genomic) distance threshold for novel splice junctions. 'Novel splice junctions' that span a distance smaller than this value will be IGNORED. This can be useful because many aligners do not distinguish between deletions and splice junctions. The default is 10 bp. (Int)
+
 ### --stranded:
 
 > Flag to indicate that data is stranded. (flag)
@@ -67,7 +71,7 @@ This utility takes the QC output from the standard QC utility run on a series of
 
 ## AUTHORS:
 
-Stephen W\. Hartley, Ph\.D\. <stephen\.hartley@nih\.gov>
+Stephen W\. Hartley, Ph\.D\. stephen\.hartley \(at nih dot gov\)
 
 ## LEGAL:
 
