@@ -84,7 +84,7 @@ object runAllQC {
           quickSynopsis = "Runs a battery of QC tools", 
           synopsis = "", 
           description = "This utility runs a large battery of QC / data processing tools on a single given sam or bam file. "+
-                        "This is the primary function of the QoRT utility. All analyses are run via a single pass through the sam/bam file."+
+                        "This is the primary function of the QoRTs utility. All analyses are run via a single pass through the sam/bam file."+
                         ""+
                         ""+
                         ""+

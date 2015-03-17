@@ -219,7 +219,7 @@ object makeSpliceJunctionBed {
     
     val rgbline = if(rgb.isEmpty) " " else " itemRgb=\"On\" ";
     
-    run_helper(title, infiles, outfile , gffIterator, gff , stranded , sf, rgb , digits , includeFullSpliceNames , calcMean , nonflatgtf, Some("track name="+trackTitle+" description="+trackTitle+" "+rgbline+additionalTrackOptions), skipAnnotatedJunctions, skipNovelJunctions);
+    run_helper(title, infiles, outfile , gffIterator, gff , stranded , sf, rgb , digits , includeFullSpliceNames , ! calcMean , nonflatgtf, Some("track name="+trackTitle+" description="+trackTitle+" "+rgbline+additionalTrackOptions), skipAnnotatedJunctions, skipNovelJunctions);
   }
   
   def getSampleList(sampleList : Option[String], filenames : Option[List[String]]) : Vector[String] = {

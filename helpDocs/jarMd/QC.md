@@ -1,5 +1,5 @@
 # QoRTs: Quality Of Rna-seq Tool Set
-> Version 0.2.7 (Updated Mon Mar 16 17:02:31 EDT 2015)
+> Version 0.2.9 (Updated Tue Mar 17 16:19:11 EDT 2015)
 
 > ([back to main](../index.html)) ([back to java-utility help](index.html))
 
@@ -12,7 +12,7 @@
 
 ## DESCRIPTION:
 
-This utility runs a large battery of QC / data processing tools on a single given sam or bam file\. This is the primary function of the QoRT utility\. All analyses are run via a single pass through the sam/bam file\.
+This utility runs a large battery of QC / data processing tools on a single given sam or bam file\. This is the primary function of the QoRTs utility\. All analyses are run via a single pass through the sam/bam file\.
 
 ## REQUIRED ARGUMENTS:
 ### infile:

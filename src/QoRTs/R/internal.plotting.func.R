@@ -1437,10 +1437,10 @@ makePlot.generic.points <- function(plot.name, tf.list, plotter, plot.type = "po
         curr.y <- curr.data$y
         curr.x <- curr.data$x
         if(plot.type == "points"){
-          points(curr.x, curr.y, pch = p.params$points.pch[j], col = p.params$points.col[j]);
+          points(curr.x, curr.y, pch = p.params$points.pch[j], col = p.params$points.col[j], lwd =  p.params$lines.lwd[j]);
         }
         if(draw.lines){
-          lines(curr.x, curr.y, lty = p.params$lines.lty[j], col = p.params$lines.col[j])
+          lines(curr.x, curr.y, lty = p.params$lines.lty[j], col = p.params$lines.col[j], lwd =  p.params$lines.lwd[j])
         }
       }
     }
@@ -1518,7 +1518,7 @@ makePlot.generic.points.right <- function(plot.name, tf.list, plotter, plot.type
         curr.y <- tf.y(curr.data$y);
         curr.x <- curr.data$x + xlim.min;
         if(plot.type == "points"){
-          points(curr.x, curr.y, pch = p.params$points.pch[j], col = p.params$points.col[j], ...);
+          points(curr.x, curr.y, pch = p.params$points.pch[j], col = p.params$points.col[j], lwd =  p.params$lines.lwd[j], ...);
         }
       }
     }

@@ -63,9 +63,9 @@ BiocStyle::latex()
 National Human Genome Research Institute\\
 National Institutes of Health}
 \date{August 8 2014\\
-March 16, 2015 %REPLACE_THIS_LINE_WITH_REVISION_DATE
+March 17, 2015 %REPLACE_THIS_LINE_WITH_REVISION_DATE
 \\
-v0.2.7 %REPLACE_THIS_LINE_WITH_VERSION_NUMBER
+v0.2.9 %REPLACE_THIS_LINE_WITH_VERSION_NUMBER
 }
 
 \begin{document}
@@ -374,7 +374,7 @@ The most basic \Robject{QoRTs\_Plotter} can be created using the command:
 basic.plotter <- build.plotter.basic(res);
 @
 
-This \Robject{QoRTs\_Plotter} object can be used to plot all replicates on top of one another in semi-transparent gray. For example:
+This \Robject{QoRTs\_Plotter} object can be used to plot all replicates on top of one another in semi-transparent blue. For example:
 
 <<plotterExamples-1,results="hide", fig.width=6.5, fig.height=5.5>>=
 makePlot.insert.size(basic.plotter);
