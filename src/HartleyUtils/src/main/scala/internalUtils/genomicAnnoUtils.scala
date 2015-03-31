@@ -70,7 +70,7 @@ object genomicAnnoUtils {
       return new GenomicSpliceJunctionSet[B](isStranded,  Map[GenomicInterval,B]());
     }
   }
-    
+  
   case class GenomicSpliceJunctionSet[B](isStranded : Boolean, sjMap : Map[GenomicInterval,B]) {
     def getSpliceJunction(iv : GenomicInterval) : Option[B] = {
       sjMap.get(iv);

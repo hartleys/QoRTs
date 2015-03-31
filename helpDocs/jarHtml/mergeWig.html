@@ -9,7 +9,7 @@
 <h1>QoRTs: Quality Of Rna-seq Tool Set</h1>
 
 <blockquote>
-  <p>Version 0.2.9 (Updated Tue Mar 17 16:19:11 EDT 2015)</p>
+  <p>Version 0.2.11 (Updated Tue Mar 31 13:43:12 EDT 2015)</p>
 
 <p>(<a href="../index.html">back to main</a>) (<a href="index.html">back to java-utility help</a>)</p>
 </blockquote>
@@ -23,7 +23,8 @@
 
 <h2>DESCRIPTION:</h2>
 
-<p>This utility merges multiple '.wig' wiggle files into a single summary '.wig' wiggle file. Optionally it can be used to display the mean read-pair coverage of each window across all input wiggle files rather than the sum. Also optionally, the mean/sum can be weighted by a set of user-supplied normalization factors.</p>
+<p>This utility merges multiple '.wig' wiggle files into a single summary '.wig' wiggle file. Optionally it can be used to display the mean read-pair coverage of each window across all input wiggle files rather than the sum. Also optionally, the mean/sum can be weighted by a set of user-supplied normalization factors.
+Note: Either the '--filenames' or the '--sampleList' option must be set! The sampleList option is generally used with the --infilePrefix and --infileSuffix options.</p>
 
 <h2>REQUIRED ARGUMENTS:</h2>
 
@@ -45,7 +46,7 @@ If this ends with ".gz" or ".zip", then the file will automatically be compresse
 <h3>--sampleList [sampleList.txt | - | samp1,samp2,samp3,...]:</h3>
 
 <blockquote>
-  <p>Either a comma-delimited list of sample id's or a '.txt' file containing a list of sample id's. The file must either contain no title line, or contain a title line that includes a "sample.ID" column. Either this option OR --filenames MUST BE SPECIFIED. Note that the sample list file must end with the extension '.txt' (String)</p>
+  <p>Either a comma-delimited list of sample id's or a '.txt' file containing a list of sample id's. The file must either contain no title line, or contain a title line that includes a "sample.ID" column. Either this option OR --filenames MUST BE SPECIFIED. Note that the sample list file must end with the extension '.txt'. Similarly, the sample names CANNOT end with '.txt'. (String)</p>
 </blockquote>
 
 <h3>--infilePrefix infilePrefix:</h3>

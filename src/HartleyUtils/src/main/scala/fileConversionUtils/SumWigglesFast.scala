@@ -18,9 +18,9 @@ object SumWigglesFast {
           synopsis = "",  
           description = "This utility merges multiple '.wig' wiggle files into a single summary '.wig' wiggle file. "+
                         "Optionally it can be used to display the mean read-pair coverage of each window across all input wiggle files rather than the sum. "+
-                        "Also optionally, the mean/sum can be weighted by a set of user-supplied normalization factors."+
-                        ""+
-                        ""+
+                        "Also optionally, the mean/sum can be weighted by a set of user-supplied normalization factors.\n"+
+                        "Note: Either the '--filenames' or the '--sampleList' option must be set! The sampleList option is "+
+                        "generally used with the --infilePrefix and --infileSuffix options."+
                         ""+
                         ""+
                         ""+
@@ -42,8 +42,8 @@ object SumWigglesFast {
                                          valueName = "[sampleList.txt | - | samp1,samp2,samp3,...]",  
                                          argDesc = "Either a comma-delimited list of sample id's or a '.txt' file containing a list of sample id's. "+
                                                    "The file must either contain no title line, or contain a title line that includes a \"sample.ID\" column. "+
-                                                   "Either this option OR --filenames MUST BE SPECIFIED. Note that the sample list file must end with the extension '.txt'"+
-                                                   ""
+                                                   "Either this option OR --filenames MUST BE SPECIFIED. Note that the sample list file must end with the extension '.txt'. "+
+                                                   "Similarly, the sample names CANNOT end with '.txt'."
                                         ) ::
             new BinaryArgument[String](   name = "infilePrefix",
                                                         arg = List("--infilePrefix"),  

@@ -1,5 +1,5 @@
 # QoRTs: Quality Of Rna-seq Tool Set
-> Version0.2.9 (Updated Tue Mar 17 16:19:11 EDT 2015)
+> Version0.2.11 (Updated Tue Mar 31 13:43:12 EDT 2015)
 
 > ([back to help base](../index.html))
 
@@ -13,7 +13,7 @@ NOTE: if you run into OutOfMemoryExceptions, try adding the java options: "-Xmx8
 
 ## GENERAL SYNTAX:
 
-    java [java\_options] -jar QoRTs.jar COMMAND [options]
+    java [java_options] -jar QoRTs.jar COMMAND [options]
 
 ## COMMANDS:
 ### [QC](QC.html)
@@ -34,15 +34,17 @@ NOTE: if you run into OutOfMemoryExceptions, try adding the java options: "-Xmx8
 
 ### [makeJunctionTrack](makeJunctionTrack.html)
 
-> This utility takes the splice junction count files created by the QoRTs QC utility across multiple samples and creates a single merged splice junction 'bed' file that lists each splice junction along with the mean read-pair coverage counts (optionally, the mean normalized counts).This splice junction bed file can be used to visualize splice junction counts using the UCSC genome browser and other similar utilities.
+> This utility takes the splice junction count files created by the QoRTs QC utility across multiple samples and creates a single merged splice junction 'bed' file that lists each splice junction along with the mean read-pair coverage counts (optionally, the mean normalized counts).This splice junction bed file can be used to visualize splice junction counts using the UCSC genome browser and other similar utilities.Note: Either the '--filenames' or the '--sampleList' option must be set! The sampleList option is generally used with the --infilePrefix and --infileSuffix options.
 
 ### [mergeNovelSplices](mergeNovelSplices.html)
 
 > This utility takes the QC output from the standard QC utility run on a series of samples and performs two functions: first, it compiles all splice junctions across all samples and filters low-coverage novel splice junctions by mean coverage across all samples (optionally normalized with user-supplied size factors). It then assigns unique identifiers to each novel splice junction that passed this filter, and outputs a special flat gff file listing all exons, annotated splice junctions and passed-filter novel splice junctions with assigned unique identifiers for all features. Next, it uses these unique identifiers to create a new set of JunctionSeq-formatted count files, one for each input sample. This new count file will include counts for the passed-filter novel splice junctions in addition to the usual counts for annotated splice junctions, exons, and aggregated-genes, all listed by the assigned unique identifiers.
 
+
 ### [mergeWig](mergeWig.html)
 
 > This utility merges multiple '.wig' wiggle files into a single summary '.wig' wiggle file. Optionally it can be used to display the mean read-pair coverage of each window across all input wiggle files rather than the sum. Also optionally, the mean/sum can be weighted by a set of user-supplied normalization factors.
+Note: Either the '--filenames' or the '--sampleList' option must be set! The sampleList option is generally used with the --infilePrefix and --infileSuffix options.
 
 ### [makeFlatGff](makeFlatGff.html)
 

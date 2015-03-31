@@ -1,5 +1,5 @@
 # QoRTs: Quality Of Rna-seq Tool Set
-> Version 0.2.9 (Updated Tue Mar 17 16:19:11 EDT 2015)
+> Version 0.2.11 (Updated Tue Mar 31 13:43:12 EDT 2015)
 
 > ([back to main](../index.html)) ([back to java-utility help](index.html))
 
@@ -47,7 +47,7 @@ If the filename ends with ".gz" or ".zip", the file will be parsed using the app
 
 ### --stranded\_fr\_secondstrand:
 
-> Flag to indicate that reads are from a fr\_secondstrand type of stranded library (equivalent to the "stranded = yes" option in HTSeq or the "fr\_secondStrand" library-type option in TopHat/CuffLinks). If your data is stranded, you must know the library type in order to analyze it properly. This utility uses the same definitions as cufflinks to define strandedness type. By default, the fr\_firststrand library type is assumed for all stranded data (equivalent to the "stranded = reverse" option in HTSeq). (flag)
+> Flag to indicate that reads are from a fr\_secondstrand type of stranded library (equivalent to the "stranded = yes" option in HTSeq or the "fr\_secondStrand" library-type option in TopHat/CuffLinks). If your data is stranded, you must know the library type in order to analyze it properly. This utility uses the same definitions as cufflinks to define strandedness type. By default, the fr\_firststrand library type is assumed for all stranded data (equivalent to the "stranded = D" option in HTSeq). (flag)
 
 ### --maxReadLength len:
 
@@ -113,7 +113,7 @@ This file is ONLY needed to produce wiggle files. If this is provided, then by d
 
 ### --flatgff flattenedGffFile.gff.gz:
 
-> A "flattened" gff file that matches the standard gtf file. Optional. The "flattened" gff file assigns unique identifiers for all exons, splice junctions, and aggregate-genes. This is used for the junction counts and exon counts (for DEXSeq). The flattened gtf file can be generated using the "makeFlatGff" command. Flattened GFF files containing novel splice junctions can be generated using the "mergeNovelSplices" function. Note that (for most purposes) the command should be run with the same strandedness code as found in the dataset. See the documentation for makeFlatGff for more information. 
+> A "flattened" gff file that matches the standard gtf file. Optional. The "flattened" gff file assigns unique identifiers for all exons, splice junctions, and aggregate-genes. This is used for the junction counts and exon counts (for DEXSeq). The flattened gtf file can be generated using the "makeFlatGff" command. Flattened GFF files containing novel splice junctions can be generated using the "mergeNovelSplices" function. Note that (for most purposes) the command should be run with the same strandedness code as found in the dataset. Running a flattened gff that was generated using a different strandedness mode may be useful for certain purposes, but is generally not supported and is for advanced users only.See the documentation for makeFlatGff for more information. 
 If the filename ends with ".gz" or ".zip", the file will be parsed using the appropriate decompression method. (String)
 
 ### --generateMultiPlot:

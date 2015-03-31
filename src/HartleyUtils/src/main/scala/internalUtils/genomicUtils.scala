@@ -21,7 +21,7 @@ object genomicUtils {
   def getBlockEnd(b : AlignmentBlock) : Int = {
     b.getReferenceStart - 1 + b.getLength();
   } 
-     
+      
   def getGenomicIntervalsFromRead(r : SAMRecord, stranded : Boolean, fr_secondStrand : Boolean) : Iterator[GenomicInterval] = {
     val strand = getStrand(r,stranded,fr_secondStrand);
     val blocks : Iterator[AlignmentBlock] = r.getAlignmentBlocks().iterator;

@@ -1,5 +1,5 @@
 # QoRTs: Quality Of Rna-seq Tool Set
-> Version 0.2.9 (Updated Tue Mar 17 16:19:11 EDT 2015)
+> Version 0.2.11 (Updated Tue Mar 31 13:43:12 EDT 2015)
 
 > ([back to main](../index.html)) ([back to java-utility help](index.html))
 
@@ -13,6 +13,7 @@
 ## DESCRIPTION:
 
 This utility merges multiple '\.wig' wiggle files into a single summary '\.wig' wiggle file\. Optionally it can be used to display the mean read\-pair coverage of each window across all input wiggle files rather than the sum\. Also optionally, the mean/sum can be weighted by a set of user\-supplied normalization factors\.
+Note: Either the '\-\-filenames' or the '\-\-sampleList' option must be set\! The sampleList option is generally used with the \-\-infilePrefix and \-\-infileSuffix options\.
 
 ## REQUIRED ARGUMENTS:
 ### outfile:
@@ -29,7 +30,7 @@ If this ends with ".gz" or ".zip", then the file will automatically be compresse
 
 ### --sampleList [sampleList.txt | - | samp1,samp2,samp3,...]:
 
-> Either a comma-delimited list of sample id's or a '.txt' file containing a list of sample id's. The file must either contain no title line, or contain a title line that includes a "sample.ID" column. Either this option OR --filenames MUST BE SPECIFIED. Note that the sample list file must end with the extension '.txt' (String)
+> Either a comma-delimited list of sample id's or a '.txt' file containing a list of sample id's. The file must either contain no title line, or contain a title line that includes a "sample.ID" column. Either this option OR --filenames MUST BE SPECIFIED. Note that the sample list file must end with the extension '.txt'. Similarly, the sample names CANNOT end with '.txt'. (String)
 
 ### --infilePrefix infilePrefix:
 

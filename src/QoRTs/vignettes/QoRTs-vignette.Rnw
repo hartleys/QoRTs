@@ -63,9 +63,9 @@ BiocStyle::latex()
 National Human Genome Research Institute\\
 National Institutes of Health}
 \date{August 8 2014\\
-March 17, 2015 %REPLACE_THIS_LINE_WITH_REVISION_DATE
+March 31, 2015 %REPLACE_THIS_LINE_WITH_REVISION_DATE
 \\
-v0.2.9 %REPLACE_THIS_LINE_WITH_VERSION_NUMBER
+v0.2.11 %REPLACE_THIS_LINE_WITH_VERSION_NUMBER
 }
 
 \begin{document}
@@ -1272,11 +1272,16 @@ In addition to providing quality control information, QoRTs also provides the re
 
 All the data files can be found in the \verb|qc.data.dir| directory. The files for use with \Biocpkg{DESeq}, \Biocpkg{DESeq2}, and \Biocpkg{EdgeR} will be named \verb|QC.geneCounts.formatted.for.DESeq.txt.gz| and the files for use with \Biocpkg{DEXSeq} will be named \verb|QC.exonCounts.formatted.for.DEXSeq.txt.gz|
 
-A note on the DEXSeq counts: The DEXSeq counts may not be perfectly identical to those produced by the DEXSeq \verb|dexseq_prepare_annotation.py| and \verb|dexseq_count.py| scripts. There are two reasons for these differences, both relating to the treatment of aggregate genes. The first reason is minor: Aggregate genes will be named slightly differently. When multiple genes overlap with one another, DEXSeq produces "aggregate genes" which include all transcripts for all these overlapping genes. It names the aggregate gene using the set of genes in the aggregate, delimited with \verb|+| characters. Unfortunately, the genes are not listed in any particular order. Thus, it is not possible for QoRTs to produce the exact same aggregate gene names. QoRTs lists the contained genes in lexicographic order.
 
-Secondly, for UNSTRANDED data, the QoRTs and DEXSeq annotation "flattening" step will behave slightly differently under default conditions. DEXSeq's \verb|dexseq_prepare_annotation.py| script always operates in "stranded" mode, and explicitly destinguishes between genes on opposing strands. QoRTs, on the other hand, prepares the annotation in stranded or unstranded modes. If the DEXSeq-style behavior is desired, a stranded flat gff file can be produced by the \verb|makeFlatGff| utility, then passed explicitly to the QoRTs QC utility running in non-stranded mode using the \verb|--flatgff| parameter. This will override the default (and recommended) behavior in which the flattened gff will use the same stranded rule as the counting utility.
+%----------
+\subsubsection{DEXSeq compatibility} \label{sec:noteOnDex}
+%----------
 
-In general, testing aggregate genes in DEXSeq is not recommended, as the two genes are likely to be independently regulated and will likely produce false positives. For most purposes, it is preferable to drop such genes from the count tables prior to DEXSeq analysis.
+A note on the DEXSeq counts: The DEXSeq counts may not be perfectly identical to those produced by the \verb|dexseq_prepare_annotation.py| and \verb|dexseq_count.py| scripts. There are two reasons for these differences, both relating to the treatment of aggregate genes. The first reason is minor: Aggregate genes will be named slightly differently. When multiple genes overlap with one another, DEXSeq produces "aggregate genes" which include all transcripts for all these overlapping genes. It names the aggregate gene using the set of genes in the aggregate, delimited with \verb|+| characters. Unfortunately, the genes are drawn from an unordered set and thus not listed in any defined order. Thus, it is not possible for QoRTs to replicate the exact same order in multi-gene aggregates. QoRTs lists the contained genes in lexicographic order.
+
+Secondly, for UNSTRANDED data, the QoRTs and DEXSeq annotation "flattening" step will behave slightly differently under default conditions. DEXSeq's \verb|dexseq_prepare_annotation.py| script always operates in "stranded" mode, and explicitly destinguishes between genes on opposing strands. QoRTs, on the other hand, prepares the flattened annotation in stranded or unstranded modes. If the DEXSeq-style behavior is desired, a stranded flat gff file can be produced by the \verb|makeFlatGff| utility, then passed explicitly to the QoRTs QC utility running in non-stranded mode using the \verb|--flatgff| parameter. This will override the default (and recommended) behavior in which the flattened gff will use the same stranded rule as the counting utility. Warning: if this variation is used, the counting run should be restricted to only the DEXSeq-count utility using the additional parameter: "--runFunctions writeDEXSeq". The behavior of the other QoRTs utilities when run with a nonmatching flattened annotation is not defined.
+
+In general, testing aggregate genes in DEXSeq is not recommended, as the two genes are likely to be independently regulated and will likely produce false positives. For most purposes it is preferable to drop such genes from the count tables prior to DEXSeq analysis. In this case, the counts produced by DEXSeq and QoRTs will be identical.
 
 %\pagebreak
 %%-----------------------------------------------------------

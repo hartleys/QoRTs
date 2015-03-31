@@ -143,7 +143,7 @@ object helpDocs {
       sb.append("NOTE: if you run into OutOfMemoryExceptions, try adding the java options: \"-Xmx8G\""+"\n\n");
       
       sb.append("## GENERAL SYNTAX:\n\n");
-      sb.append("    java [java\\_options] -jar "+runner.Runner_ThisProgramsExecutableJarFileName +" COMMAND [options]"+"\n\n");
+      sb.append("    java [java_options] -jar "+runner.Runner_ThisProgramsExecutableJarFileName +" COMMAND [options]"+"\n\n");
       
       sb.append("## COMMANDS:\n");
       for((arg, cmdMaker) <- runner.sortedCommandList){

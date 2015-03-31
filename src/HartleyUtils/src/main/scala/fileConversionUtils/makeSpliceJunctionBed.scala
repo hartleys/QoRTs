@@ -24,6 +24,8 @@ object makeSpliceJunctionBed {
                         "This splice junction bed file "+
                         "can be used to visualize splice junction counts using the UCSC genome browser "+
                         "and other similar utilities."+
+                        "Note: Either the '--filenames' or the '--sampleList' option must be set! The sampleList option is "+
+                        "generally used with the --infilePrefix and --infileSuffix options."+
                         ""+
                         ""+
                         ""+

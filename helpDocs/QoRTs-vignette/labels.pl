@@ -498,6 +498,10 @@ $key = q/subsec:plotDesc-9/;
 $external_labels{$key} = "$URL/" . q|node8.html|; 
 $noresave{$key} = "$nosave";
 
+$key = q/sec:noteOnDex/;
+$external_labels{$key} = "$URL/" . q|node9.html|; 
+$noresave{$key} = "$nosave";
+
 $key = q/cite_STAR/;
 $external_labels{$key} = "$URL/" . q|node10.html|; 
 $noresave{$key} = "$nosave";
@@ -975,6 +979,10 @@ $noresave{$key} = "$nosave";
 
 $key = q/subsec:plotDesc-9/;
 $external_latex_labels{$key} = q|7.4.9|; 
+$noresave{$key} = "$nosave";
+
+$key = q/sec:noteOnDex/;
+$external_latex_labels{$key} = q|8.4.1|; 
 $noresave{$key} = "$nosave";
 
 1;

@@ -102,7 +102,7 @@ object commonSeqUtils {
       if(strand == '+') return new GenomicInterval(chromName, '-', start, end);
       if(strand == '-') return new GenomicInterval(chromName, '+', start, end);
       return this;
-    }
+    } 
     
     def overlaps(that : GenomicInterval) : Boolean = {
       return (this.chromName == that.chromName) && (this.strand == that.strand) && (this.start < that.end) && (that.start < this.end);

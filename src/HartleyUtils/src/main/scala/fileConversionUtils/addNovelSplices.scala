@@ -32,7 +32,7 @@ object addNovelSplices {
                         "and passed-filter novel splice junctions with assigned unique identifiers for all features. "+
                         "Next, it uses these unique identifiers to create a new set of JunctionSeq-formatted count files, one for each "+
                         "input sample. This new count file will include counts for the passed-filter novel splice junctions "+
-                        "in addition to the usual counts for annotated splice junctions, exons, and aggregated-genes, all listed by the assigned unique identifiers."+
+                        "in addition to the usual counts for annotated splice junctions, exons, and aggregated-genes, all listed by the assigned unique identifiers.\n"+
                         "",   
           argList = 
                     new BinaryArgument[Double](name = "minCount",
@@ -52,11 +52,11 @@ object addNovelSplices {
                                                         ) :: 
                     new UnaryArgument( name = "stranded",
                                          arg = List("--stranded","-s"), // name of value
-                                         argDesc = "Flag to indicate that data is stranded." // description
+                                         argDesc = "Flag to indicate that data is stranded. This MUST be the same as the strandedness of the original QoRTs QC run." // description
                                        ) ::                 
                     new UnaryArgument( name = "stranded_fr_secondstrand",
                                          arg = List("--stranded_fr_secondstrand"), // name of value
-                                         argDesc = "Nonfunctional." // description
+                                         argDesc = "Nonfunctional, as the strandedness rule will have already been applied." // description
                                        ) ::                                            
                     new UnaryArgument( name = "noGzipInput",
                                          arg = List("--noGzipInput"), // name of value
@@ -69,22 +69,27 @@ object addNovelSplices {
                     new FinalArgument[String](
                                          name = "infileDir",
                                          valueName = "infileDir",
-                                         argDesc = "The input file directory." // description
+                                         argDesc = "The input file directory. All samples should be contained inside this directory, "+
+                                                   "in a subdirectory with the same name as the sample's sample.ID." // description
                                         ) ::
                     new FinalArgument[String](
                                          name = "sizeFactorFile",
                                          valueName = "sizeFactorFile",
-                                         argDesc = "" // description
+                                         argDesc = "This file must contain (at least) two columns: one labelled 'sample.ID' and one labelled 'size.factor'. "+
+                                                   " Size factors can be generated using DESeq, EdgeR, DEXSeq, CuffLinks, or similar utilities. "+
+                                                   "Rough size factors can be calculated simply by taking the read count for each sample and dividing it by the average read count "+
+                                                   "across all samples. Note that this overly-simplistic 'total count' normalization method is NOT recommended."// description
                                         ) :: 
                     new FinalArgument[String](
                                          name = "gtfFile",
                                          valueName = "annotation.gtf.gz",
-                                         argDesc = "" // description
+                                         argDesc = "An input gtf file, containing the reference transcript annotation. A number of transcript annotations are available from ensembl, UCSC, or RefSeq." // description
                                         ) ::    
                     new FinalArgument[String](
                                          name = "outfileDir",
                                          valueName = "outfileDir",
-                                         argDesc = "The output file directory" // description
+                                         argDesc = "The output file directory. This can be the same as the input file directory, in which case this utility will simply place the merged novel/known count files "+
+                                                   "in each sample's subdirectory."// description
                                         ) :: internalUtils.commandLineUI.CLUI_UNIVERSAL_ARGS );
       
      def run(args : Array[String]) {
@@ -172,14 +177,14 @@ object addNovelSplices {
     val pfSpliceMap : scala.collection.mutable.Map[GenomicInterval,Array[Int]] = novelSpliceMap.filter{ case (iv : GenomicInterval, counts : Array[Int]) => {
       val meanNormCounts = (counts.toVector.zip(sampleSF).foldLeft(0.0)( (soFar,curr) => {
         val (ct, (name, sf)) = curr;
-        soFar + (ct.toDouble * sf);
+        soFar + (ct.toDouble / sf);
       }) /  sampleSF.length.toDouble);
       val span = iv.end - iv.start;
       
       meanNormCounts > minCount && span >= minSpan;
     }}
     
-    reportln("Finished filtering novel splice files. Found "+pfSpliceMap.size+" novel splice junctions that pass expression coverage filters.","debug");
+    reportln("Finished filtering novel splice files. Found "+pfSpliceMap.size+" novel splice junctions that pass expression coverage filters or minimum span length filter.","debug");
     
     
     

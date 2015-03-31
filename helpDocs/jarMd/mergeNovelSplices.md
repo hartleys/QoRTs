@@ -1,5 +1,5 @@
 # QoRTs: Quality Of Rna-seq Tool Set
-> Version 0.2.9 (Updated Tue Mar 17 16:19:11 EDT 2015)
+> Version 0.2.11 (Updated Tue Mar 31 13:43:12 EDT 2015)
 
 > ([back to main](../index.html)) ([back to java-utility help](index.html))
 
@@ -14,25 +14,26 @@
 
 This utility takes the QC output from the standard QC utility run on a series of samples and performs two functions: first, it compiles all splice junctions across all samples and filters low\-coverage novel splice junctions by mean coverage across all samples \(optionally normalized with user\-supplied size factors\)\. It then assigns unique identifiers to each novel splice junction that passed this filter, and outputs a special flat gff file listing all exons, annotated splice junctions and passed\-filter novel splice junctions with assigned unique identifiers for all features\. Next, it uses these unique identifiers to create a new set of JunctionSeq\-formatted count files, one for each input sample\. This new count file will include counts for the passed\-filter novel splice junctions in addition to the usual counts for annotated splice junctions, exons, and aggregated\-genes, all listed by the assigned unique identifiers\.
 
+
 ## REQUIRED ARGUMENTS:
 ### infileDir:
 
-> The input file directory. (String)
+> The input file directory. All samples should be contained inside this directory, in a subdirectory with the same name as the sample's sample.ID. (String)
 
 
 ### sizeFactorFile:
 
->  (String)
+> This file must contain (at least) two columns: one labelled 'sample.ID' and one labelled 'size.factor'.  Size factors can be generated using DESeq, EdgeR, DEXSeq, CuffLinks, or similar utilities. Rough size factors can be calculated simply by taking the read count for each sample and dividing it by the average read count across all samples. Note that this overly-simplistic 'total count' normalization method is NOT recommended. (String)
 
 
 ### annotation.gtf.gz:
 
->  (String)
+> An input gtf file, containing the reference transcript annotation. A number of transcript annotations are available from ensembl, UCSC, or RefSeq. (String)
 
 
 ### outfileDir:
 
-> The output file directory (String)
+> The output file directory. This can be the same as the input file directory, in which case this utility will simply place the merged novel/known count files in each sample's subdirectory. (String)
 
 
 
@@ -47,11 +48,11 @@ This utility takes the QC output from the standard QC utility run on a series of
 
 ### --stranded:
 
-> Flag to indicate that data is stranded. (flag)
+> Flag to indicate that data is stranded. This MUST be the same as the strandedness of the original QoRTs QC run. (flag)
 
 ### --stranded\_fr\_secondstrand:
 
-> Nonfunctional. (flag)
+> Nonfunctional, as the strandedness rule will have already been applied. (flag)
 
 ### --noGzipInput:
 

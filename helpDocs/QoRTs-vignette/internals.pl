@@ -498,6 +498,10 @@ $key = q/subsec:plotDesc-9/;
 $ref_files{$key} = "$dir".q|node8.html|; 
 $noresave{$key} = "$nosave";
 
+$key = q/sec:noteOnDex/;
+$ref_files{$key} = "$dir".q|node9.html|; 
+$noresave{$key} = "$nosave";
+
 $key = q/cite_STAR/;
 $ref_files{$key} = "$dir".q|node10.html|; 
 $noresave{$key} = "$nosave";

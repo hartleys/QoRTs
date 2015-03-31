@@ -1,7 +1,7 @@
 <h1>QoRTs: Quality Of Rna-seq Tool Set</h1>
 
 <blockquote>
-  <p>Version 0.2.9 (Updated Tue Mar 17 16:19:11 EDT 2015)</p>
+  <p>Version 0.2.11 (Updated Tue Mar 31 13:43:12 EDT 2015)</p>
 
 <p>(<a href="../index.html">back to main</a>) (<a href="index.html">back to java-utility help</a>)</p>
 </blockquote>
@@ -22,25 +22,25 @@
 <h3>infileDir:</h3>
 
 <blockquote>
-  <p>The input file directory. (String)</p>
+  <p>The input file directory. All samples should be contained inside this directory, in a subdirectory with the same name as the sample's sample.ID. (String)</p>
 </blockquote>
 
 <h3>sizeFactorFile:</h3>
 
 <blockquote>
-  <p>(String)</p>
+  <p>This file must contain (at least) two columns: one labelled 'sample.ID' and one labelled 'size.factor'.  Size factors can be generated using DESeq, EdgeR, DEXSeq, CuffLinks, or similar utilities. Rough size factors can be calculated simply by taking the read count for each sample and dividing it by the average read count across all samples. Note that this overly-simplistic 'total count' normalization method is NOT recommended. (String)</p>
 </blockquote>
 
 <h3>annotation.gtf.gz:</h3>
 
 <blockquote>
-  <p>(String)</p>
+  <p>An input gtf file, containing the reference transcript annotation. A number of transcript annotations are available from ensembl, UCSC, or RefSeq. (String)</p>
 </blockquote>
 
 <h3>outfileDir:</h3>
 
 <blockquote>
-  <p>The output file directory (String)</p>
+  <p>The output file directory. This can be the same as the input file directory, in which case this utility will simply place the merged novel/known count files in each sample's subdirectory. (String)</p>
 </blockquote>
 
 <h2>OPTIONAL ARGUMENTS:</h2>
@@ -60,13 +60,13 @@
 <h3>--stranded:</h3>
 
 <blockquote>
-  <p>Flag to indicate that data is stranded. (flag)</p>
+  <p>Flag to indicate that data is stranded. This MUST be the same as the strandedness of the original QoRTs QC run. (flag)</p>
 </blockquote>
 
 <h3>--stranded_fr_secondstrand:</h3>
 
 <blockquote>
-  <p>Nonfunctional. (flag)</p>
+  <p>Nonfunctional, as the strandedness rule will have already been applied. (flag)</p>
 </blockquote>
 
 <h3>--noGzipInput:</h3>

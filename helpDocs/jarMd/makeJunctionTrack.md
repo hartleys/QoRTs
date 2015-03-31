@@ -1,5 +1,5 @@
 # QoRTs: Quality Of Rna-seq Tool Set
-> Version 0.2.9 (Updated Tue Mar 17 16:19:11 EDT 2015)
+> Version 0.2.11 (Updated Tue Mar 31 13:43:12 EDT 2015)
 
 > ([back to main](../index.html)) ([back to java-utility help](index.html))
 
@@ -12,7 +12,7 @@
 
 ## DESCRIPTION:
 
-This utility takes the splice junction count files created by the QoRTs QC utility across multiple samples and creates a single merged splice junction 'bed' file that lists each splice junction along with the mean read\-pair coverage counts \(optionally, the mean normalized counts\)\.This splice junction bed file can be used to visualize splice junction counts using the UCSC genome browser and other similar utilities\.
+This utility takes the splice junction count files created by the QoRTs QC utility across multiple samples and creates a single merged splice junction 'bed' file that lists each splice junction along with the mean read\-pair coverage counts \(optionally, the mean normalized counts\)\.This splice junction bed file can be used to visualize splice junction counts using the UCSC genome browser and other similar utilities\.Note: Either the '\-\-filenames' or the '\-\-sampleList' option must be set\! The sampleList option is generally used with the \-\-infilePrefix and \-\-infileSuffix options\.
 
 ## REQUIRED ARGUMENTS:
 ### flatgff.gff.gz:

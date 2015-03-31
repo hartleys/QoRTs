@@ -43,7 +43,13 @@ object runAllQC {
                                                              "writeGeneCounts", 
                                                              "writeClippedNVC", 
                                                              "chromCounts");
-  final val QC_DEFAULT_OFF_FUNCTION_LIST : scala.collection.immutable.Set[String] = scala.collection.immutable.Set("FPKM","annotatedSpliceExonCounts","makeWiggles","makeJunctionBed","makeAllBrowserTracks", "cigarMatch");
+  final val QC_DEFAULT_OFF_FUNCTION_LIST : scala.collection.immutable.Set[String] = scala.collection.immutable.Set(
+                                                             "FPKM",
+                                                             "annotatedSpliceExonCounts",
+                                                             "makeWiggles",
+                                                             "makeJunctionBed",
+                                                             "makeAllBrowserTracks", 
+                                                             "cigarMatch");
   final val QC_FUNCTION_LIST : scala.collection.immutable.Set[String] = QC_DEFAULT_ON_FUNCTION_LIST ++ QC_DEFAULT_OFF_FUNCTION_LIST;
   final val COMPLETED_OK_FILENAME = ".QORTS_COMPLETED_OK";
   final val COMPLETED_WARN_FILENAME = ".QORTS_COMPLETED_WARN";
@@ -113,7 +119,7 @@ object runAllQC {
                                          argDesc = "Flag to indicate that reads are from a fr_secondstrand type of stranded library (equivalent to the \"stranded = yes\" option in HTSeq or the \"fr_secondStrand\" library-type option in TopHat/CuffLinks). "+
                                                    "If your data is stranded, you must know the library type in order to analyze it properly. This utility uses the same "+
                                                    "definitions as cufflinks to define strandedness type. By default, the fr_firststrand "+
-                                                   "library type is assumed for all stranded data (equivalent to the \"stranded = reverse\" option in HTSeq)." // description
+                                                   "library type is assumed for all stranded data (equivalent to the \"stranded = D\" option in HTSeq)." // description
                                        ) ::
                     new BinaryOptionArgument[Int](
                                          name = "maxReadLength", 
@@ -246,6 +252,8 @@ object runAllQC {
                                                    "The flattened gtf file can be generated using "+
                                                    "the \"makeFlatGff\" command. Flattened GFF files containing novel splice junctions can be generated using the \"mergeNovelSplices\" function. "+
                                                    "Note that (for most purposes) the command should be run with the same strandedness code as found in the dataset. "+
+                                                   "Running a flattened gff that was generated using a different strandedness mode may be useful for certain purposes, but is generally not supported "+
+                                                   "and is for advanced users only."+
                                                    "See the documentation for makeFlatGff for more information. "+
                                                    "\n"+
                                                    "If the filename ends with \".gz\" or \".zip\", the file will be parsed using the appropriate decompression method."

@@ -92,8 +92,8 @@ class qcJunctionCounts(anno_holder : qcGtfAnnotationBuilder, stranded : Boolean,
       val (iv, spliceID) = pair;
       ((spliceID,((iv,0))));
     }) 
-  reportln("length of knownSpliceMap after instantiation: " + knownSpliceMap.size,"debug");  
-  reportln("length of knownCountMap after instantiation: "  + knownCountMap.size,"debug");  
+  reportln("length of knownSpliceMap after instantiation: " + knownSpliceMap.size,"debug");
+  reportln("length of knownCountMap after instantiation: "  + knownCountMap.size,"debug");
   
   var novelCountMap : GenMap[GenomicInterval,Int] = (Map[GenomicInterval,Int]()).withDefault(k => 0);
   

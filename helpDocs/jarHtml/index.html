@@ -9,7 +9,7 @@
 <h1>QoRTs: Quality Of Rna-seq Tool Set</h1>
 
 <blockquote>
-  <p>Version0.2.9 (Updated Tue Mar 17 16:19:11 EDT 2015)</p>
+  <p>Version0.2.11 (Updated Tue Mar 31 13:43:12 EDT 2015)</p>
 
 <p>(<a href="../index.html">back to help base</a>)</p>
 </blockquote>
@@ -24,7 +24,7 @@
 
 <h2>GENERAL SYNTAX:</h2>
 
-<pre><code>java [java\_options] -jar QoRTs.jar COMMAND [options]
+<pre><code>java [java_options] -jar QoRTs.jar COMMAND [options]
 </code></pre>
 
 <h2>COMMANDS:</h2>
@@ -56,7 +56,7 @@
 <h3><a href="makeJunctionTrack.html">makeJunctionTrack</a></h3>
 
 <blockquote>
-  <p>This utility takes the splice junction count files created by the QoRTs QC utility across multiple samples and creates a single merged splice junction 'bed' file that lists each splice junction along with the mean read-pair coverage counts (optionally, the mean normalized counts).This splice junction bed file can be used to visualize splice junction counts using the UCSC genome browser and other similar utilities.</p>
+  <p>This utility takes the splice junction count files created by the QoRTs QC utility across multiple samples and creates a single merged splice junction 'bed' file that lists each splice junction along with the mean read-pair coverage counts (optionally, the mean normalized counts).This splice junction bed file can be used to visualize splice junction counts using the UCSC genome browser and other similar utilities.Note: Either the '--filenames' or the '--sampleList' option must be set! The sampleList option is generally used with the --infilePrefix and --infileSuffix options.</p>
 </blockquote>
 
 <h3><a href="mergeNovelSplices.html">mergeNovelSplices</a></h3>
@@ -68,7 +68,8 @@
 <h3><a href="mergeWig.html">mergeWig</a></h3>
 
 <blockquote>
-  <p>This utility merges multiple '.wig' wiggle files into a single summary '.wig' wiggle file. Optionally it can be used to display the mean read-pair coverage of each window across all input wiggle files rather than the sum. Also optionally, the mean/sum can be weighted by a set of user-supplied normalization factors.</p>
+  <p>This utility merges multiple '.wig' wiggle files into a single summary '.wig' wiggle file. Optionally it can be used to display the mean read-pair coverage of each window across all input wiggle files rather than the sum. Also optionally, the mean/sum can be weighted by a set of user-supplied normalization factors.
+Note: Either the '--filenames' or the '--sampleList' option must be set! The sampleList option is generally used with the --infilePrefix and --infileSuffix options.</p>
 </blockquote>
 
 <h3><a href="makeFlatGff.html">makeFlatGff</a></h3>
