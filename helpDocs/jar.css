@@ -14,8 +14,7 @@ span, code, pre {
 	font-family: Monaco, "Lucida Console", "Courier New", Courier, monospace;
 }
 body, td, th {
-	font-family: "Trebuchet MS", "Lucida Grande", "Lucida Sans Unicode", "Lucida Sans", Arial, sans-serif;
-	font-size: 14px;
+	font: 12px Monaco, andale mono, courier, mono;
 }
 body {
 	color: #000;
@@ -43,11 +42,9 @@ th {
 	padding: 0.3em;
 }
 #wrap {
+  width: 740px;
   text-align: left;
-  padding: 0 5px; 
-  margin: 0 auto; 
-  width: 80%;
-  max-width: 60em; 
+  margin: 0 auto;
 }
 hr {
 	margin: 1em 0;

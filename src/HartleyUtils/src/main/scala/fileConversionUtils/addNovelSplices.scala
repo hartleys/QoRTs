@@ -92,7 +92,7 @@ object addNovelSplices {
                                                    "in each sample's subdirectory."// description
                                         ) :: internalUtils.commandLineUI.CLUI_UNIVERSAL_ARGS );
       
-     def run(args : Array[String]) {
+     def run(args : Array[String]) { 
        val out = parser.parseArguments(args.toList.tail);
       
        if(out){

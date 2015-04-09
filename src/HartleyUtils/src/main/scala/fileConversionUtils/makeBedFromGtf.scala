@@ -44,7 +44,7 @@ class converter extends CommandLineRunUtil {
                                          name = "outfile",
                                          valueName = "outfile",
                                          argDesc = "The output bed file. If the filename ends with \".gz\" or \".zip\" then the file will be compressed using the appropriate method." // description
-                                        ) :: List() );
+                                        ) :: internalUtils.commandLineUI.CLUI_UNIVERSAL_ARGS );
       
      def run(args : Array[String]) {
        val out = parser.parseArguments(args.toList.tail);
@@ -97,8 +97,8 @@ class converter extends CommandLineRunUtil {
         }
       }
       
-     
-     // if(lnct % 100000 == 0){if(lnct%500000==0) print("("+exonct+"/"+genect+":"+md._1+","+md._2+")\n"); else print("("+exonct+"/"+genect+":"+md._1+","+md._2+")");}
+     if(lnct % 100000 == 0) reportln(lnct + " gtf lines read.","debug")
+     //if(lnct % 100000 == 0){if(lnct%500000==0) print("("+exonct+"/"+genect+":"+md._1+","+md._2+")\n"); else print("("+exonct+"/"+genect+":"+md._1+","+md._2+")");}
      //if(lnct % 100000 == 0){if(lnct%500000==0) print("("+featurect+"/"+transct+")\n"); else print("("+featurect+"/"+transct+")");}
      
       lnct = lnct + 1;

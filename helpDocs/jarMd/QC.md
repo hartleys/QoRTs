@@ -1,5 +1,5 @@
 # QoRTs: Quality Of Rna-seq Tool Set
-> Version 0.2.11 (Updated Tue Mar 31 13:43:12 EDT 2015)
+> Version 0.2.13 (Updated Thu Apr  9 11:56:46 EDT 2015)
 
 > ([back to main](../index.html)) ([back to java-utility help](index.html))
 
@@ -67,7 +67,7 @@ If the filename ends with ".gz" or ".zip", the file will be parsed using the app
 
 ### --keepMultiMapped:
 
-> Flag to indicate that the tool should NOT filter out multi-mapped reads. Note that even with this flag raised this utility will still only use the 'primary' alignment location for each read. By default any reads that are marked as multi-mapped will be ignored entirely. Most aligners use the MAPQ value to mark multi-mapped reads. Any read with MAPQ < 255 is assumed to be non-uniquely mapped (this is the standard used by RNA-STAR and TopHat).  Therefore: this option is equivalent to setting --minMAPQ to 0. (flag)
+> Flag to indicate that the tool should NOT filter out multi-mapped reads. Note that even with this flag raised this utility will still only use the 'primary' alignment location for each read. By default any reads that are marked as multi-mapped will be ignored entirely. Most aligners use the MAPQ value to mark multi-mapped reads. Any read with MAPQ < 255 is assumed to be non-uniquely mapped (this is the standard used by RNA-STAR and TopHat/TopHat2).  This option is equivalent to "--minMAPQ 0". (flag)
 
 ### --noGzipOutput:
 

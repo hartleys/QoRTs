@@ -55,6 +55,7 @@ object runAllQC {
   final val COMPLETED_WARN_FILENAME = ".QORTS_COMPLETED_WARN";
   final val MASTERLEVEL_FUNCTION_LIST = List[String]("GeneCalcs", "InsertSize","NVC","CigarOpDistribution","QualityScoreDistribution","GCDistribution","JunctionCalcs","StrandCheck","chromCounts","cigarMatch","makeWiggles");
   
+  
   final val QC_INCOMPATIBLE_WITH_SINGLE_END_FUNCTION_LIST : scala.collection.immutable.Set[String] = scala.collection.immutable.Set(
       "InsertSize","cigarMatch"
   );
@@ -74,11 +75,11 @@ object runAllQC {
       ("writeNovelSplices" -> "JunctionCalcs"),
       ("annotatedSpliceExonCounts" -> "JunctionCalcs"),
       ("writeClippedNVC" -> "NVC"),
-      ("makeAllBrowserTracks" -> "makeWiggles"),
       ("makeAllBrowserTracks" -> "makeJunctionBed")
-      
   );
   
+  final val SAM_PEEK_LINECT = 10000;
+  final val SAM_TESTRUN_LINECT = 100000;
   
   //def run(args : Array[String]){
   
@@ -158,8 +159,8 @@ object runAllQC {
                                          arg = List("--keepMultiMapped"), // name of value
                                          argDesc = "Flag to indicate that the tool should NOT filter out multi-mapped reads. Note that even with this flag raised this utility will still only "+
                                                     "use the 'primary' alignment location for each read. By default any reads that are marked as multi-mapped will be ignored entirely."+
-                                                    " Most aligners use the MAPQ value to mark multi-mapped reads. Any read with MAPQ < 255 is assumed to be non-uniquely mapped (this is the standard used by RNA-STAR and TopHat). "+
-                                                    " Therefore: this option is equivalent to setting --minMAPQ to 0."// description
+                                                    " Most aligners use the MAPQ value to mark multi-mapped reads. Any read with MAPQ < 255 is assumed to be non-uniquely mapped (this is the standard used by RNA-STAR and TopHat/TopHat2). "+
+                                                    " This option is equivalent to \"--minMAPQ 0\"."// description
                                        ) ::
 
                     //new UnaryArgument( name = "neverPartiallyUnpaired",
@@ -544,7 +545,7 @@ object runAllQC {
     val anno_holder = new qcGtfAnnotationBuilder(gtffile , flatgtffile , stranded , stdGtfCodes, flatGtfCodes);
     
     if(parallelFileRead){
-      reportln("ERROR ERROR ERROR: parallell file read is NOT IMPLEMENTED AT THIS TIME!","warn");
+      reportln("ERROR ERROR ERROR: parallel file read is NOT IMPLEMENTED AT THIS TIME!","warn");
       //runOnSeqFile_PAR(initialTimeStamp = initialTimeStamp, infile = infile, outfile = outfile, anno_holder = anno_holder, testRun = testRun, runFunc = runFunc, stranded = stranded, fr_secondStrand = fr_secondStrand, dropChrom = dropChrom, keepMultiMapped = keepMultiMapped, noMultiMapped = noMultiMapped, numThreads = numThreads, readGroup )
     } else {
       runOnSeqFile(initialTimeStamp = initialTimeStamp, infile = infile, outfile = outfile, anno_holder = anno_holder, testRun = testRun, 
@@ -628,22 +629,23 @@ object runAllQC {
     }
     
     
-    val peekCt = 2000;
+    val peekCt = SAM_PEEK_LINECT;
+    val testRunLineCt = SAM_TESTRUN_LINECT
     val COMPLETED_OK_FILEPATH = outfile + COMPLETED_OK_FILENAME;
     val COMPLETED_WARN_FILEPATH = outfile + COMPLETED_WARN_FILENAME;
     val (samFileAttributes, recordIter) = initSamRecordIterator(infile, peekCt);
     
     val pairedIter : Iterator[(SAMRecord,SAMRecord)] = 
       if(isSingleEnd){
-        if(testRun) samRecordPairIterator_withMulti_singleEnd(recordIter, true, 200000) else samRecordPairIterator_withMulti_singleEnd(recordIter);
+        if(testRun) samRecordPairIterator_withMulti_singleEnd(recordIter, true, testRunLineCt) else samRecordPairIterator_withMulti_singleEnd(recordIter);
       } else {
         if(unsorted){
-          if(testRun) samRecordPairIterator_unsorted(recordIter, true, 200000) else samRecordPairIterator_unsorted(recordIter)
+          if(testRun) samRecordPairIterator_unsorted(recordIter, true, testRunLineCt) else samRecordPairIterator_unsorted(recordIter)
         // Faster noMultiMapped running is DEPRECIATED!
         //} else if(noMultiMapped){
         //  if(testRun) samRecordPairIterator(recordIter, true, 200000) else samRecordPairIterator(recordIter)
         } else {
-          if(testRun) samRecordPairIterator_withMulti(recordIter, true, 200000) else samRecordPairIterator_withMulti(recordIter)
+          if(testRun) samRecordPairIterator_withMulti(recordIter, true, testRunLineCt) else samRecordPairIterator_withMulti(recordIter)
         }
       }
     
@@ -682,7 +684,7 @@ object runAllQC {
     
     reportln("SAMRecord Reader Generated. Read length: "+readLength+".","note");
     standardStatusReport(initialTimeStamp);
-
+    
     val coda : Array[Int] = internalUtils.commonSeqUtils.getNewCauseOfDropArray;
     val coda_options : Array[Boolean] = internalUtils.commonSeqUtils.CODA_DEFAULT_OPTIONS.toArray;
     if(isSingleEnd) CODA_SINGLE_END_OFF_OPTIONS.foreach( coda_options(_) = false );
@@ -713,6 +715,7 @@ object runAllQC {
     standardStatusReport(initialTimeStamp);
     //GenomicArrayOfSets.printGenomicArrayToFile("TEST.OUT.gtf",geneArray);
     var readNum = 0;
+    var useReadNum = 0;
     var keptMultiMappedCt = 0;
     val samIterationTimeStamp = TimeStampUtil();
     for(pair <- pairedIter){
@@ -734,7 +737,7 @@ object runAllQC {
             qcCC.runOnReadPair(r1,r2,readNum);
             qcCM.runOnReadPair(r1,r2,readNum);
             qcWIG.runOnReadPair(r1,r2,readNum);
-            
+            useReadNum += 1;
             if(internalUtils.commonSeqUtils.isReadMultiMapped(r1) || internalUtils.commonSeqUtils.isReadMultiMapped(r2)){
               keptMultiMappedCt += 1;
             }
@@ -742,8 +745,11 @@ object runAllQC {
       }
     }
     
-    reportln("Finished reading SAM. Read: " + readNum + " read-pairs","note");
+    reportln("Finished reading SAM. Read: " + readNum + " reads/read-pairs.","note");
+    reportln("Finished reading SAM. Used: " + useReadNum + " reads/read-pairs.","note");
     standardStatusReport(initialTimeStamp);
+    
+    
     
     val outputIterationTimeStamp = TimeStampUtil();
     report("> Read Stats:\n" + stripFinalNewline(indentifyLines(internalUtils.commonSeqUtils.causeOfDropArrayToString(coda, coda_options),">   ")),"note");
@@ -777,6 +783,18 @@ object runAllQC {
     summaryWriter.write("BENCHMARK_MinutesPerMillionReads	" + "%1.2f".format(minutesPerMillion) + "\n");
     summaryWriter.write("BENCHMARK_MinutesPerMillionGoodReads	" + "%1.2f".format(minutesPerMillionPF) + "\n");
     
+    if(useReadNum == 0) reportln("WARNING WARNING WARNING: Zero \"usable\" reads found! This could be due to a number of factors: \n"+
+          "If the reads were not aligned via one of the standard RNA-Seq aligners such as RNA-STAR or TopHat/TopHat2, then "+
+          "the alignments might not use the common convention of using MAPQ to indicate multi-mapping status. \n"+
+          "RNA-STAR and TopHat both mark multi-mapped reads by "+
+          "assigning them a MAPQ score of less than 255. By default QoRTs ignores these multi-mapped reads. "+
+          "You can deactivate this filtering step using the \"--keepMultiMapped\" option.\n"+
+          "Note: Alignment via BowTie, BowTie2, or other non-spliced aligners is NOT RECOMMENDED for RNA-Seq data. \n"+
+          "If the data was aligned using such methods, it is strongly recommended that it be realigned using a splice-aware aligner.\n"+
+          "\n"+
+          "Continuing with output execution. Errors will likely follow..."+
+          "\n","warn");
+
     reportln("Writing Output...","note");
     qcALL.seq.foreach( _.writeOutput(outfile, summaryWriter) );
     
