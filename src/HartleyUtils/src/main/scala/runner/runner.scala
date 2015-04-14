@@ -9,8 +9,8 @@ import internalUtils.commandLineUI._;
 
 object runner {
   
-  final val QORTS_VERSION = "0.2.13"; // REPLACE_THIS_QORTS_VERSION_VARIABLE_WITH_VERSION_NUMBER          (note this exact text is used in a search-and-replace. Do not change it.)
-  final val QORTS_COMPILE_DATE = "Thu Apr  9 11:56:46 EDT 2015"; // REPLACE_THIS_QORTS_DATE_VARIABLE_WITH_DATE          (note this exact text is used in a search-and-replace. Do not change it.)
+  final val QORTS_VERSION = "0.2.17"; // REPLACE_THIS_QORTS_VERSION_VARIABLE_WITH_VERSION_NUMBER          (note this exact text is used in a search-and-replace. Do not change it.)
+  final val QORTS_COMPILE_DATE = "Tue Apr 14 13:54:48 EDT 2015"; // REPLACE_THIS_QORTS_DATE_VARIABLE_WITH_DATE          (note this exact text is used in a search-and-replace. Do not change it.)
   
   //final val FOR_HELP_STRING = "For help, use command: "
   
@@ -47,7 +47,7 @@ object runner {
     (internalUtils.commandLineUI.HELP_COMMAND_LIST ++ internalUtils.commandLineUI.MANUAL_COMMAND_LIST).map( (c : String) => {
       (c, (() => new helpDocs()));
     }).toMap;
-
+  
   final val commandList = utilCommandList ++ helpCommandList;
          
   final val depreciated_commandList : Map[String, () => CommandLineRunUtil] = 

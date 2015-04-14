@@ -103,14 +103,8 @@ object runAllQC {
                                          arg = List("--singleEnded","-e"), // name of value
                                          argDesc = "Flag to indicate that reads are single end." // description
                                        ) ::
-                    new UnaryArgument( name = "coordSorted",
-                                         arg = List("--coordSorted"), // name of value
-                                         argDesc = "Flag to indicate that input bam file is coordinate-sorted, rather than name-sorted. "+
-                                                   "Note that QoRTs will take longer to run and use more memory in this mode. To improve performance, sort the data by name prior to using of QoRTs. "+
-                                                   "In addition, if an (extremely) large fraction of the read-pairs are "+
-                                                   "mapped to extremely distant loci (or different chromosomes), then memory issues may arise. However, this should not be a problem with most datasets. "+
-                                                   "Technically this function will also allow QoRTs to work on unsorted bam files, but this is STRONGLY not recommended, as memory usage will by greatly increased." // description
-                                       ) ::
+
+
                     new UnaryArgument( name = "stranded",
                                          arg = List("--stranded","-s"), // name of value
                                          argDesc = "Flag to indicate that data is stranded." // description
@@ -274,7 +268,7 @@ object runAllQC {
                                                    "(Note: this requires that R be installed and in the PATH, and that QoRTs be installed on that R installation) "+
                                                    ""+
                                                    ""+
-                                                   ""
+                                                   "" 
                                        ) ::
                     new UnaryArgument( name = "generatePdfReport",
                                        arg = List("--generatePdfReport"), // name of value
@@ -314,10 +308,36 @@ object runAllQC {
                                                     "GC content plots sometimes contain visible spikes caused by small transcripts / RNA's with extremely high expression levels."+
                                                     "ADDITIONAL WARNING: This feature is in BETA, and is not yet fully tested."
                                         ) ::   
+
+                    new UnaryArgument( name = "nameSorted",
+                                         arg = List("--nameSorted"), // name of value
+                                         argDesc = "Relevant for paired-end reads only. \n"+
+                                                   "This flag is used to run QoRTs in \"name-sorted\" mode. This flag is optional, as under the "+"default mode QoRTs will accept BAM files sorted by either name OR position. "+
+                                                   "However, "+
+                                                   "The only actual requirement in this mode is that "+
+                                                   "read pairs be adjacent. \n"+
+                                                   "Errors may occur if the SAM flags are inconsistent: for example, if orphaned reads appear with the \"mate mapped\" SAM flag set."+
+                                                   ""+
+                                                   ""+
+                                                   "" // description
+                                       ) ::                                        
 //DEPRECIATED OPTIONS:
+                    new UnaryArgument( name = "coordSorted",
+                                         arg = List("--coordSorted"), // name of value
+                                         argDesc = ""+
+                                                   "DEPRECIATED: this mode is now subsumed by the default mode and as such this parameter is now nonfunctional.\n"+
+                                                   "Note that, in the default mode, for paired-end data QoRTs will accept "+
+                                                   "EITHER coordinate-sorted OR name-sorted bam files. In \"--nameSorted\" mode, QoRTs ONLY accepts "+
+                                                   "name-sorted bam files.\n"+
+                                                   "If a large fraction of the read-pairs are "+
+                                                   "mapped to extremely distant loci (or to different chromosomes), then memory "+
+                                                   "issues may arise. However, this should not be a problem with most datasets. "+
+                                                   "Technically by default QoRTs can run on arbitrarily-ordered bam files, "+
+                                                   "but this is STRONGLY not recommended, as memory usage will by greatly increased." // description
+                                       ) ::
                     new UnaryArgument( name = "noMultiMapped",
                                          arg = List("--fileContainsNoMultiMappedReads"), // name of value
-                                         argDesc = "Flag to indicate that the input sam/bam file contains only primary alignments (ie, no multi-mapped reads). This flag is ALWAYS OPTIONAL, but when applicable this utility will run (slightly) faster when using this argument. (DEPRECIATED! The performance improvement was marginal)" // description
+                                         argDesc = "DEPRECIATED. Flag to indicate that the input sam/bam file contains only primary alignments (ie, no multi-mapped reads). This flag is ALWAYS OPTIONAL, but when applicable this utility will run (slightly) faster when using this argument. (DEPRECIATED! The performance improvement was marginal)" // description
                                        ) ::
                     new UnaryArgument( name = "parallelFileRead",
                                          arg = List("--parallelFileRead"), // name of value
@@ -373,7 +393,7 @@ object runAllQC {
           parser.get[Int]("minMAPQ"),
           parser.get[Option[String]]("restrictToGeneList"),
           parser.get[Option[String]]("dropGeneList"),
-          parser.get[Boolean]("coordSorted"),
+          ! parser.get[Boolean]("nameSorted"),
           parser.get[Option[Int]]("maxReadLength"),
           parser.get[Option[Int]]("seqReadCt"),
           parser.get[Option[String]]("rawfastq"),
@@ -676,8 +696,8 @@ object runAllQC {
     
     if(! isSingleEnd){
       if( (! isDefinitelyPairedEnd)){ reportln("Warning: Have not found any matched read pairs in the first "+peekCt+" reads. Is data paired-end? Use option --singleEnd for single-end data.","warn"); }
-      if( isSortedByPosition & (! unsorted )){ reportln("Based on the first "+peekCt+" reads, SAM/BAM file appears to be sorted by read position. If this is so, you should probably use the \"--coordSorted\" option.","warn"); }
-      if( ((! isSortedByPosition) & ( unsorted ))){ reportln("WARNING: You are using the \"--coordSorted\" option, but data does NOT appear to be sorted by read position (based on the first "+peekCt+" reads)! This is technically ok, but may cause QoRTs to use too much memory!","warn"); }
+      if( isSortedByPosition & (! unsorted )){ reportln("Warning: Based on the first "+peekCt+" reads, SAM/BAM file appears to be sorted by read position. If this is so, you should probably omit the '--nameSorted' option, as errors may follow.","warn"); }
+      if( ((! isSortedByPosition) & ( unsorted ))){ reportln("Note: Sam lines do not appear to be sorted by read position (based on the first "+peekCt+" reads).","note"); }
       //Samtools sorts in an odd way! Delete name sort check:
       //if( ((! isSortedByNameLexicographically) & (! unsorted ))) reportln("Note: SAM/BAM file does not appear to be sorted lexicographically by name (based on the first "+peekCt+" reads). It is (hopefully) sorted by read name using the samtools method.","debug");
     }

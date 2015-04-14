@@ -63,9 +63,9 @@ BiocStyle::latex()
 National Human Genome Research Institute\\
 National Institutes of Health}
 \date{August 8 2014\\
-April 09, 2015 %REPLACE_THIS_LINE_WITH_REVISION_DATE
+April 14, 2015 %REPLACE_THIS_LINE_WITH_REVISION_DATE
 \\
-v0.2.13 %REPLACE_THIS_LINE_WITH_VERSION_NUMBER
+v0.2.17 %REPLACE_THIS_LINE_WITH_VERSION_NUMBER
 }
 
 \begin{document}
@@ -114,7 +114,7 @@ The most recent release of QoRTs is available on the QoRTs github page (\url{htt
 
 \emph{Annotation:} QoRTs requires transcript annotations in the form of a gtf file. If you are using a annotation guided aligner (which is STRONGLY recommended) it is likely you already have a transcript gtf file for your reference genome. We recommend you use the same annotation gtf for alignment, QC, and downstream analysis. We have found the Ensembl "Gene Sets" gtf\footnote{Which can be acquired from the Ensembl website at \url{http://www.ensembl.org}} suitable for these purposes. However, any format that adheres to the gtf file specification\footnote{See the gtf file specification at \url{http://genome.ucsc.edu/FAQ/FAQformat.html}} will work.
 
-\emph{Dataset:} QoRTs requires aligned and sorted RNA-Seq data. Data can be paired-end or single-end, unstranded or stranded (using either strandedness rule, see Section \ref{sec:initialProcessing}). 
+\emph{Dataset:} QoRTs requires aligned RNA-Seq data. Data can be paired-end or single-end, unstranded or stranded (using either strandedness rule, see Section \ref{sec:initialProcessing}). It is strongly recommended, but not explicitly required, that the SAM/BAM files be sorted (either by name or position). QoRTs can use additional metadata (such as technical replicate status, case/control status, batch id, etc) to produce comparisons between these replicate groups, but this information is optional.
 
 %-----------------------------------------------------------
 \subsection{Recommendations}  \label{sec:recs}
@@ -140,7 +140,9 @@ QoRTs is designed to run on paired-end next-gen RNA-Seq data. The data must be a
 \subsection{Sorting}  \label{sec:sort}
 %-----------------------------------------------------------
 
-For paired-end data, QoRTs requires that the bam files be sorted by either read name or by position. Sorting by name will result in a smaller memory footprint, but sorting by coordinate is more common in most production pipelines. Sorting can be accomplished via the samtools or novosort tools (which are NOT included with QoRTs). Sorting is unnecessary for single-end data.
+For single-end data, the reads can be in any order, and sorting is unnecessary.
+
+For paired-end data, QoRTs is designed to automatically accept files sorted by either read-name or position. Sorting can be accomplished via the samtools or novosort tools (which are NOT included with QoRTs). Sorting is unnecessary for single-end data.
 
 \noindent To sort by coordinate:
 \begin{verbatim}
@@ -156,7 +158,9 @@ OR
 novosort -n unsorted.bam > sortedByName.bam
 \end{verbatim}
 
-Technically, unsorted bam files can be run through QoRTs using the \verb|--coordSorted| option. However, this is NOT RECOMMENDED, as the memory footprint may grow very large. As QoRTs iterates through the bam file it generates a (hash-table based) ref-map of unpaired reads. Thus, if too many read pairs are too far apart in the bam file then out-of-memory errors may occur. Similarly, certain unusual datasets containing large quantities of chimeric read-pairs (in which many read pairs are mapped to distant loci) may use unacceptable quantities of memory. QoRTs will print several warnings if the number of unpaired reads grows too high. In this case, it is recommended that the bam file be sorted by name.
+Running in the default mode, QoRTs will accept both name-sorted and position-sorted BAM files. Technically QoRTs can accept any BAM files regardless of ordering; however, if a large number of paired mates are not located near one another in the file then memory usage may be too high as QoRTs stores unmatched mates in memory.
+
+QoRTs also has a separate mode designed only for name-sorted samples, which can be activated using the "\verb|--nameSorted|" option. Under certain conditions this may improve speed and reduce memory usage. Under typical conditions any improvement is trivial.
 
 %-----------------------------------------------------------
 \section{Quick Start}  \label{sec:quickstart}
@@ -258,7 +262,7 @@ There are a number of crucial points that require attention when using the QoRTs
     \item \emph{Stranded Data:} By default, QoRTs assumes that the data is \emph{NOT} strand-specific. For strand-specific data, the \verb|--stranded| option must be used.
     \item \emph{Stranded Library Type:} The \verb|--fr_secondStrand| option may be required depending on the stranded library type. QoRTs does not attempt to automatically detect the platform and protocol used for stranded data. There are two types of strand-specific protocols, which are described by the TopHat/CuffLinks documentation at \url{http://cufflinks.cbcb.umd.edu/manual.html#library} as \verb|fr-firststrand| and \verb|fr-secondstrand|. In HTSeq, these same library type options are defined as \verb|-s reverse| and \verb|-s yes| respectively. According to the CuffLinks manual, \verb|fr-firststrand| (the default used by QoRTs for stranded data) applies to dUTP, NSR, and NNSR protocols, whereas \verb|fr-secondstrand| applies to "Directional Illumina (ligation)" and "Standard SOLiD" protocols. If you are unsure which library type applies to your dataset, don't worry: one of the tests will report stranded library type. If you use this test to determine library type, be aware that you may have to re-run QoRTs with the correct library type set.
     \item \emph{Read Groups:} Depending on the production pipeline, each biological sample may be run across multiple sequencer lanes. These seperate files can be merged together either before or after analysis with QoRTs (and maybe even before alignment). However, if the merger occurs before analysis with QoRTs, then each bam file will consist of multiple seperate lanes or runs. In this case, it is STRONGLY recommended that seperate QC runs be performed on each "read group", using the \verb|--readGroup| option. This will prevent run- or lane-specific biases, artifacts, or errors from being obfuscated.
-    \item \emph{Read Sorting:} For paired-end data reads must be sorted. By default, QoRTs assumes that the bam file is sorted by \emph{NAME}. If the bam file is instead sorted by position, then the \verb|--coordSorted| option must be used. Sorting is unnecessary for single-end data.
+    \item \emph{Read Sorting:} For paired-end data reads must be sorted. By default, QoRTs can accept files sorted by name OR by position.
     \item \emph{Single-end vs paired-end:} By default, QoRTs assumes the input bam file consists of paired-end data. For single-end data, the \verb|--isSingleEnd| option must be used.
   \end{itemize}
 
@@ -267,7 +271,6 @@ For example, to read the first read group bam-file for SAMP1 from the example da
 \begin{verbatim}
 java -jar /path/to/jarfile/QoRTs.jar QC \
                    --stranded \
-                   --coordSorted \
                    inputData/bamFiles/SAMP1_RG1.bam \
                    inputData/annoFiles/anno.gtf.gz \
                    outputData/qortsData/SAMP1_RG1/
@@ -285,7 +288,6 @@ This command must be run on each bam file (and possibly more than once on each, 
 #Set the maximum to the minimum recommended 4 gigabytes:
 java -Xmx4000M -jar /path/to/jarfile/QoRTs.jar QC \
                    --stranded \
-                   --coordSorted \
                    inputData/bamFiles/SAMP1_RG1.bam \
                    inputData/annoFiles/anno.gtf.gz \
                    outputData/qortsData/SAMP1_RG1/
@@ -293,7 +295,6 @@ java -Xmx4000M -jar /path/to/jarfile/QoRTs.jar QC \
 #Or Set the maximum to 16 gigabytes:
 java -Xmx16G -jar /path/to/jarfile/QoRTs.jar QC \
                    --stranded \
-                   --coordSorted \
                    inputData/bamFiles/SAMP1_RG1.bam \
                    inputData/annoFiles/anno.gtf.gz \
                    outputData/qortsData/SAMP1_RG1/
@@ -1171,7 +1172,7 @@ The chromLengthFile is a simple tab-delimited text file that includes each chrom
     \item[\texttt{--negativeReverseStrand}]: If this flag is set, then the negative strand will be counted in negative numbers. This can be useful for plotting both strands in a single multiwig track, via a trackhub. (see \url{http://genome.ucsc.edu/goldenPath/help/trackDb/trackDbDoc.html})
     \item[\texttt{--simpleCountByRead}]: If this flag is raised, then each read of each read-pair will be counted separately. Thus the wiggle plot will count simple read coverage depth rather than read-pair coverage depth. This means that when read-pairs overlap they will be counted twice over the overlapping region. This option will have no effect on single-ended data.
   \end{description}
-Many of the other parameters are identical to those used by the QC tool: \verb|--singleEnded|, \verb|--coordSorted|, etc. 
+Many of the other parameters are identical to those used by the QC tool: \verb|--singleEnded|, \verb|--nameSorted|, etc. 
 
 More information and a full accounting of all parameters and options can be found in the online documentation\footnote{Found here: \url{https://dl.dropboxusercontent.com/u/103621176/QoRTs/helpDocs/jarHtml/index.html}}, or by using the command:
 \begin{verbatim}

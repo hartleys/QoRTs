@@ -91,7 +91,10 @@ Sorting
 </H2>
 
 <P>
-For paired-end data, QoRTs requires that the bam files be sorted by either read name or by position. Sorting by name will result in a smaller memory footprint, but sorting by coordinate is more common in most production pipelines. Sorting can be accomplished via the samtools or novosort tools (which are NOT included with QoRTs). Sorting is unnecessary for single-end data.
+For single-end data, the reads can be in any order, and sorting is unnecessary.
+
+<P>
+For paired-end data, QoRTs is designed to automatically accept files sorted by either read-name or position. Sorting can be accomplished via the samtools or novosort tools (which are NOT included with QoRTs). Sorting is unnecessary for single-end data.
 
 <P>
 To sort by coordinate:
@@ -110,7 +113,10 @@ novosort -n unsorted.bam &gt; sortedByName.bam
 </PRE>
 
 <P>
-Technically, unsorted bam files can be run through QoRTs using the <code>--coordSorted</code> option. However, this is NOT RECOMMENDED, as the memory footprint may grow very large. As QoRTs iterates through the bam file it generates a (hash-table based) ref-map of unpaired reads. Thus, if too many read pairs are too far apart in the bam file then out-of-memory errors may occur. Similarly, certain unusual datasets containing large quantities of chimeric read-pairs (in which many read pairs are mapped to distant loci) may use unacceptable quantities of memory. QoRTs will print several warnings if the number of unpaired reads grows too high. In this case, it is recommended that the bam file be sorted by name.
+Running in the default mode, QoRTs will accept both name-sorted and position-sorted BAM files. Technically QoRTs can accept any BAM files regardless of ordering; however, if a large number of paired mates are not located near one another in the file then memory usage may be too high as QoRTs stores unmatched mates in memory.
+
+<P>
+QoRTs also has a separate mode designed only for name-sorted samples, which can be activated using the "<code>--nameSorted</code>" option. Under certain conditions this may improve speed and reduce memory usage. Under typical conditions any improvement is trivial.
 
 <P>
 <HR>
@@ -139,7 +145,7 @@ Technically, unsorted bam files can be run through QoRTs using the <code>--coord
 <!--End of Navigation Panel-->
 <ADDRESS>
 Dr Stephen William Hartley
-2015-04-09
+2015-04-14
 </ADDRESS>
 </BODY>
 </HTML>

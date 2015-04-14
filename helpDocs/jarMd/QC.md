@@ -1,5 +1,5 @@
 # QoRTs: Quality Of Rna-seq Tool Set
-> Version 0.2.13 (Updated Thu Apr  9 11:56:46 EDT 2015)
+> Version 0.2.17 (Updated Tue Apr 14 13:54:48 EDT 2015)
 
 > ([back to main](../index.html)) ([back to java-utility help](index.html))
 
@@ -36,10 +36,6 @@ If the filename ends with ".gz" or ".zip", the file will be parsed using the app
 ### --singleEnded:
 
 > Flag to indicate that reads are single end. (flag)
-
-### --coordSorted:
-
-> Flag to indicate that input bam file is coordinate-sorted, rather than name-sorted. Note that QoRTs will take longer to run and use more memory in this mode. To improve performance, sort the data by name prior to using of QoRTs. In addition, if an (extremely) large fraction of the read-pairs are mapped to extremely distant loci (or different chromosomes), then memory issues may arise. However, this should not be a problem with most datasets. Technically this function will also allow QoRTs to work on unsorted bam files, but this is STRONGLY not recommended, as memory usage will by greatly increased. (flag)
 
 ### --stranded:
 
@@ -136,9 +132,21 @@ If the filename ends with ".gz" or ".zip", the file will be parsed using the app
 
 > If this option is set, almost all analyses will be restricted to reads that are NOT found on genes named in the supplied gene list file. The file should contain a gene ID on each line and nothing else. The only functions that will be run on the full set of all reads will be the functions that calculate the gene mapping itself. NOTE: if you want to EXCLUDE ambiguous reads, include a line with the text: '\_ambiguous'. If you want to EXCLUDE reads that do not map to any known feature, include a line with the text: '\_no\_feature'. WARNING: this is not intended for default use. It is intended to be used when re-running QoRTs, with the intention of examining artifacts that can be caused by certain individual 'problem genes'. For example, GC content plots sometimes contain visible spikes caused by small transcripts / RNA's with extremely high expression levels.ADDITIONAL WARNING: This feature is in BETA, and is not yet fully tested. (String)
 
+### --nameSorted:
+
+> Relevant for paired-end reads only. 
+This flag is used to run QoRTs in "name-sorted" mode. This flag is optional, as under the default mode QoRTs will accept BAM files sorted by either name OR position. However, The only actual requirement in this mode is that read pairs be adjacent. 
+Errors may occur if the SAM flags are inconsistent: for example, if orphaned reads appear with the "mate mapped" SAM flag set. (flag)
+
+### --coordSorted:
+
+> DEPRECIATED: this mode is now subsumed by the default mode and as such this parameter is now nonfunctional.
+Note that, in the default mode, for paired-end data QoRTs will accept EITHER coordinate-sorted OR name-sorted bam files. In "--nameSorted" mode, QoRTs ONLY accepts name-sorted bam files.
+If a large fraction of the read-pairs are mapped to extremely distant loci (or to different chromosomes), then memory issues may arise. However, this should not be a problem with most datasets. Technically by default QoRTs can run on arbitrarily-ordered bam files, but this is STRONGLY not recommended, as memory usage will by greatly increased. (flag)
+
 ### --fileContainsNoMultiMappedReads:
 
-> Flag to indicate that the input sam/bam file contains only primary alignments (ie, no multi-mapped reads). This flag is ALWAYS OPTIONAL, but when applicable this utility will run (slightly) faster when using this argument. (DEPRECIATED! The performance improvement was marginal) (flag)
+> DEPRECIATED. Flag to indicate that the input sam/bam file contains only primary alignments (ie, no multi-mapped reads). This flag is ALWAYS OPTIONAL, but when applicable this utility will run (slightly) faster when using this argument. (DEPRECIATED! The performance improvement was marginal) (flag)
 
 ### --parallelFileRead:
 

@@ -1,5 +1,5 @@
 # QoRTs: Quality Of Rna-seq Tool Set
-> Version 0.2.13 (Updated Thu Apr  9 11:56:46 EDT 2015)
+> Version 0.2.17 (Updated Tue Apr 14 13:54:48 EDT 2015)
 
 > ([back to main](../index.html)) ([back to java-utility help](index.html))
 
@@ -40,10 +40,6 @@ Generates '\.wig' wiggle files, suitable for use with the UCSC genome browser or
 ### --sizefactor float:
 
 > The size factor, for normalization. Defaults to 1. If set, then the count of every cell will be divided by the given value. (Double)
-
-### --coordSorted:
-
-> Flag to indicate that input bam file is coordinate-sorted, rather than name-sorted. Note that QoRTs will take longer to run and use more memory in this mode. To improve performance, sort the data by name prior to using of QoRTs. In addition, if an (extremely) large fraction of the read-pairs are mapped to extremely distant loci (or different chromosomes), then memory issues may arise. However, this should not be a problem with most datasets. Technically this function will also allow QoRTs to work on unsorted bam files, but this is STRONGLY not recommended, as memory usage will by greatly increased. (flag)
 
 ### --minMAPQ num:
 
@@ -112,6 +108,18 @@ Generates '\.wig' wiggle files, suitable for use with the UCSC genome browser or
 ### --windowSize num:
 
 > The size, in base-pairs, of each counting bin, or "window". Note: if this is set low the utility will take longer to run and will consume more memory. This utility is optimized for speed non memory use, and consumes (roughly) 8 bytes per window (plus maybe 250mb in overhead). The default window size is 100bp. (Int)
+
+### --nameSorted:
+
+> Relevant for paired-end reads only. 
+This flag is used to run QoRTs in "name-sorted" mode. This flag is optional, as under the default mode QoRTs will accept BAM files sorted by either name OR position. However, The only actual requirement in this mode is that read pairs be adjacent. 
+Errors may occur if the SAM flags are inconsistent: for example, if orphaned reads appear with the "mate mapped" SAM flag set. (flag)
+
+### --coordSorted:
+
+> DEPRECIATED: this mode is now subsumed by the default mode and as such this parameter is now nonfunctional.
+Note that, in the default mode, for paired-end data QoRTs will accept EITHER coordinate-sorted OR name-sorted bam files. In "--nameSorted" mode, QoRTs ONLY accepts name-sorted bam files.
+If a large fraction of the read-pairs are mapped to extremely distant loci (or to different chromosomes), then memory issues may arise. However, this should not be a problem with most datasets. Technically by default QoRTs can run on arbitrarily-ordered bam files, but this is STRONGLY not recommended, as memory usage will by greatly increased. (flag)
 
 ### --verbose:
 

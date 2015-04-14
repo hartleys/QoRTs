@@ -64,7 +64,7 @@ object genomicAnnoUtils {
     def getValueSet : Set[B];
     
   }
-  
+   
   object GenomicSpliceJunctionSet {
     def apply[B](isStranded : Boolean) : GenomicSpliceJunctionSet[B] = {
       return new GenomicSpliceJunctionSet[B](isStranded,  Map[GenomicInterval,B]());

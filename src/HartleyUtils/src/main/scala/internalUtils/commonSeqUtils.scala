@@ -559,7 +559,12 @@ object commonSeqUtils {
         val rA = iter.next;
         val rB = iter.next;
         if(rA.getReadName != rB.getReadName){
-          error("FATAL ERROR: SAMRecord is improperly paired! Is the file sorted by name?");
+          error("FATAL ERROR: SAMRecord is improperly paired! Is the file sorted by name?\n"+
+                "    Offending reads: "+rA.getReadName + " != " + rB.getReadName +"\n"+
+                "If the file is not sorted by name then you should included the '--coordSorted' parameter.\n"+
+                "(Note: in coordSorted mode it is highly recommended but not actually required that the file be sorted by position)\n"+
+                "This problem could also have a number of other causes: if there are orphaned reads that aren't marked as such in the sam flags, for example."
+                );
         }
         if(rA.getFirstOfPairFlag) return( (rA,rB) );
         else return( (rB,rA) );

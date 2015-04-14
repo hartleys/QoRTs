@@ -50,22 +50,6 @@ object bamToWiggle {
                                                         argDesc = "The size factor, for normalization. Defaults to 1. If set, then the count of every cell will be divided by the given value.", 
                                                         defaultValue = Some(1.0)
                                                         ) ::
-                    /*new UnaryArgument( name = "verbose",
-                                         arg = List("--verbose"), // name of value
-                                         argDesc = "Flag to indicate that debugging information and extra progress information should be sent to stderr." // description
-                                       ) ::
-                    new UnaryArgument( name = "quiet",
-                                         arg = List("--quiet","-s"), // name of value
-                                         argDesc = "Flag to indicate that only errors and warnings should be sent to stderr." // description
-                                       ) ::*/
-                    new UnaryArgument( name = "coordSorted",
-                                         arg = List("--coordSorted"), // name of value
-                                         argDesc = "Flag to indicate that input bam file is coordinate-sorted, rather than name-sorted. "+
-                                                   "Note that QoRTs will take longer to run and use more memory in this mode. To improve performance, sort the data by name prior to using of QoRTs. "+
-                                                   "In addition, if an (extremely) large fraction of the read-pairs are "+
-                                                   "mapped to extremely distant loci (or different chromosomes), then memory issues may arise. However, this should not be a problem with most datasets. "+
-                                                   "Technically this function will also allow QoRTs to work on unsorted bam files, but this is STRONGLY not recommended, as memory usage will by greatly increased." // description
-                                       ) ::
                     new BinaryArgument[Int](name = "minMAPQ",
                                            arg = List("--minMAPQ"),  
                                            valueName = "num", 
@@ -160,6 +144,32 @@ object bamToWiggle {
                                                                   "The default window size is 100bp.", 
                                                         defaultValue = Some(100)
                                                         ) :: 
+                    new UnaryArgument( name = "nameSorted",
+                                         arg = List("--nameSorted"), // name of value
+                                         argDesc = "Relevant for paired-end reads only. \n"+
+                                                   "This flag is used to run QoRTs in \"name-sorted\" mode. This flag is optional, as under the "+"default mode QoRTs will accept BAM files sorted by either name OR position. "+
+                                                   "However, "+
+                                                   "The only actual requirement in this mode is that "+
+                                                   "read pairs be adjacent. \n"+
+                                                   "Errors may occur if the SAM flags are inconsistent: for example, if orphaned reads appear with the \"mate mapped\" SAM flag set."+
+                                                   ""+
+                                                   ""+
+                                                   "" // description
+                                       ) ::                                        
+//DEPRECIATED OPTIONS:
+                    new UnaryArgument( name = "coordSorted",
+                                         arg = List("--coordSorted"), // name of value
+                                         argDesc = ""+
+                                                   "DEPRECIATED: this mode is now subsumed by the default mode and as such this parameter is now nonfunctional.\n"+
+                                                   "Note that, in the default mode, for paired-end data QoRTs will accept "+
+                                                   "EITHER coordinate-sorted OR name-sorted bam files. In \"--nameSorted\" mode, QoRTs ONLY accepts "+
+                                                   "name-sorted bam files.\n"+
+                                                   "If a large fraction of the read-pairs are "+
+                                                   "mapped to extremely distant loci (or to different chromosomes), then memory "+
+                                                   "issues may arise. However, this should not be a problem with most datasets. "+
+                                                   "Technically by default QoRTs can run on arbitrarily-ordered bam files, "+
+                                                   "but this is STRONGLY not recommended, as memory usage will by greatly increased." // description
+                                       ) ::
                     new FinalArgument[List[String]](
                                          name = "infiles",
                                          valueName = "infile.bam[,infile2.bam,...]",
@@ -216,7 +226,7 @@ object bamToWiggle {
              ! parser.get[Boolean]("omitTrackDefLine"),
              parser.get[Option[String]]("rgbColor"),
              parser.get[String]("additionalTrackOptions"),
-             parser.get[Boolean]("coordSorted"),
+             ! parser.get[Boolean]("nameSorted"),
              parser.get[Int]("minMAPQ")
            );
          }
@@ -335,11 +345,10 @@ object bamToWiggle {
     
     if(! isSingleEnd){
       if( (! isDefinitelyPairedEnd)){ reportln("Warning: Have not found any matched read pairs in the first "+peekCt+" reads. Is data paired-end? Use option --singleEnd for single-end data.","warn"); }
-      if( isSortedByPosition & (! unsorted )){ reportln("Based on the first "+peekCt+" reads, SAM/BAM file appears to be sorted by read position. If this is so, you should probably use the \"--coordSorted\" option.","warn"); }
-      if( ((! isSortedByPosition) & ( unsorted ))){ reportln("WARNING: You are using the \"--coordSorted\" option, but data does NOT appear to be sorted by read position (based on the first "+peekCt+" reads)! This is technically ok, but may cause QoRTs to use too much memory!","warn"); }
+      if( isSortedByPosition & (! unsorted )){ reportln("Warning: Based on the first "+peekCt+" reads, SAM/BAM file appears to be sorted by read position. If this is so, you should probably omit the '--nameSorted' option, as errors may follow.","warn"); }
+      if( ((! isSortedByPosition) & ( unsorted ))){ reportln("Note: Sam lines do not appear to be sorted by read position (based on the first "+peekCt+" reads).","note"); }
       //if( ((! isSortedByNameLexicographically) & (! unsorted ))) error("FATAL ERROR: SAM/BAM file is not sorted by name (based on the first "+peekCt+" reads)! Either sort the file by name, or sort by read position and use the \"--coordSorted\" option.");
     }
-   
     
     //reportln("SAMRecord Reader Generated. Read length: "+readLength+".","note");
 
