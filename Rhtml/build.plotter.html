@@ -1,0 +1,170 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head><title>R: Generating plotters</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<link rel="stylesheet" type="text/css" href="R.css">
+</head><body>
+
+<table width="100%" summary="page for build.plotter {QoRTs}"><tr><td>build.plotter {QoRTs}</td><td align="right">R Documentation</td></tr></table>
+
+<h2>
+Generating plotters
+</h2>
+
+<h3>Description</h3>
+
+<p>Generating QC_Plotter objects, which can be used in many of the QoRT utilities to organize samples in various ways to allow for easy comparison and detection of consistent biases and artifacts. 
+</p>
+
+
+<h3>Usage</h3>
+
+<pre>
+  build.plotter.basic(res, plotter.params = list())
+
+  build.plotter.colorByGroup(res, plotter.params = list())
+  
+  build.plotter.colorByLane(res, plotter.params = list())
+  
+  build.plotter.colorBySample(res, plotter.params = list())
+  
+  build.plotter.highlightSample(curr.sample,
+                                  res,
+                                  plotter.params = list(),
+                                  merge.offset.outgroup = TRUE)
+                                  
+  build.plotter.highlightSample.colorByLane(curr.sample,
+                                  res,
+                                  plotter.params = list(),
+                                  merge.offset.outgroup = TRUE)
+
+  build.plotter.colorByX(res, color.by.name,
+                         color.by.title.name = color.by.name, 
+                         plotter.params = list())
+
+</pre>
+
+
+<h3>Arguments</h3>
+
+<table summary="R argblock">
+<tr valign="top"><td><code>res</code></td>
+<td>
+
+<p>A <code>QoRT_QC_Results</code> object, created by <code><a href="read.qc.results.data.html">read.qc.results.data</a></code>.
+</p>
+</td></tr>
+<tr valign="top"><td><code>curr.sample</code></td>
+<td>
+
+<p>A character string. For the sample highlight summary plots,
+this should be the sample.ID of the sample that is to be
+highlighted.
+</p>
+</td></tr>
+<tr valign="top"><td><code>merge.offset.outgroup</code></td>
+<td>
+
+<p>(For advanced users) A logical value. For the sample highlight plots, determines whether the all lanes that do not include the current sample should be treated as a single &quot;outgroup&quot;.
+</p>
+</td></tr>
+<tr valign="top"><td><code>plotter.params</code></td>
+<td>
+
+<p>(For advanced users) A named list. Allows you to specify 
+colors, offsets, and other similar patterns. By default 
+these will all be set to reasonable values, however, if 
+you want more control over colors, line-transparency, point 
+plotting characters, or similar, then you can specify a 
+named list.
+</p>
+<p>Any parameters that are not specified in the 
+<code>plotter.params</code> list will be left as default.
+</p>
+<p>Legal parameters are:
+</p>
+
+<ul>
+<li> <p><code>"contrasting.colors"</code>: colors to use for contrast. By default these are set to a series of reasonably-contrasting colors. However, if you have too many different categories then it may be hard to tell some colors apart.
+</p>
+</li>
+<li> <p><code>"contrasting.pch"</code>: point types to use for contrast (see <code>pch</code> in <a href="../../graphics/html/par.html">graphical parameters</a>). By default this is set to the basic point types, then following through the upper and lower case letters.
+</p>
+</li>
+<li> <p><code>"std.color"</code>: Color to use for the &quot;highlighted&quot; replicates.
+</p>
+</li>
+<li> <p><code>"std.lines.lty"</code>: Line type to use for the &quot;highlighted&quot; replicates. (see <code>lty</code> in <a href="../../graphics/html/par.html">graphical parameters</a>)
+</p>
+</li>
+<li> <p><code>"std.lines.lwd"</code>: Line width to use for the &quot;highlighted&quot; replicates. (see <code>lwd</code> in <a href="../../graphics/html/par.html">graphical parameters</a>)
+</p>
+</li>
+<li> <p><code>"std.lines.alpha"</code>: Alpha transparency value to use on lines for the &quot;highlighted&quot; replicates. Numeric value between 0 and 255.
+</p>
+</li>
+<li> <p><code>"std.points.pch"</code>: Character to use for points for the &quot;highlighted&quot; replicates. (see <code>pch</code> in <a href="../../graphics/html/par.html">graphical parameters</a>)
+</p>
+</li>
+<li> <p><code>"std.points.alpha"</code>: Alpha transparency value to use on points for the &quot;highlighted&quot; replicates. Numeric value between 0 and 255.
+</p>
+</li>
+<li> <p><code>"std.points.color"</code>: Color to use for the &quot;highlighted&quot; replicates.
+</p>
+</li>
+<li> <p><code>"std.NVC.colors"</code>: A named list with elements named &quot;A&quot;, &quot;T&quot;, &quot;C&quot;, and &quot;G&quot;, with each element specifying a color. The colors used to indicate each base for the &quot;highlighted&quot; replicates in the nucleotide-rate-by-position plots.
+</p>
+</li>
+<li> <p><code>"alt.color"</code>: Color to use for the &quot;non-highlighted&quot; replicates.
+</p>
+</li>
+<li> <p><code>"alt.lines.lty"</code>: Line type to use for the &quot;non-highlighted&quot; replicates. (see <code>lty</code> in <a href="../../graphics/html/par.html">graphical parameters</a>)
+</p>
+</li>
+<li> <p><code>"alt.lines.lwd"</code>: Line width to use for the &quot;non-highlighted&quot; replicates. (see <code>lwd</code> in <a href="../../graphics/html/par.html">graphical parameters</a>)
+</p>
+</li>
+<li> <p><code>"alt.lines.alpha"</code>: Alpha transparency value to use on lines for the &quot;non-highlighted&quot; replicates. Numeric value between 0 and 255.
+</p>
+</li>
+<li> <p><code>"alt.points.pch"</code>: Character to use for points for the &quot;non-highlighted&quot; replicates. (see <code>pch</code> in <a href="../../graphics/html/par.html">graphical parameters</a>)
+</p>
+</li>
+<li> <p><code>"alt.points.alpha"</code>: Alpha transparency value to use on points for the &quot;non-highlighted&quot; replicates. Numeric value between 0 and 255.
+</p>
+</li>
+<li> <p><code>"alt.NVC.colors"</code>: A named list with elements named &quot;A&quot;, &quot;T&quot;,&quot;C&quot;, and &quot;G&quot;, with each element specifying a color. The colors used to indicate each base for the &quot;non-highlighted&quot; replicates in the nucleotide-rate-by-position plots.
+</p>
+</li>
+<li> <p><code>"show.legend"</code>: DEPRECIATED. Currently nonfunctional.
+</p>
+</li></ul>
+
+</td></tr>
+<tr valign="top"><td><code>color.by.name</code></td>
+<td>
+
+<p>(For advanced users) A character string. (TODO: document functionality)
+</p>
+</td></tr>
+<tr valign="top"><td><code>color.by.title.name</code></td>
+<td>
+
+<p>(For advanced users) A character string. (TODO: document functionality)
+</p>
+</td></tr>
+</table>
+
+
+<h3>Value</h3>
+
+<p>A QoRT_Plotter reference object used to create QC summary plots. Depending on which plotter is used, samples/lane-bams can be organized by group, sample, lane, or any arbitrary variable found in the decoder.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code><a href="read.qc.results.data.html">read.qc.results.data</a></code> 
+</p>
+
+<hr><div align="center">[Package <em>QoRTs</em> version 0.2.17 <a href="00Index.html">Index</a>]</div>
+</body></html>

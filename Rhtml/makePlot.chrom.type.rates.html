@@ -1,0 +1,139 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head><title>R: Chromosome type rate plot</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<link rel="stylesheet" type="text/css" href="R.css">
+</head><body>
+
+<table width="100%" summary="page for makePlot.chrom.type.rates {QoRTs}"><tr><td>makePlot.chrom.type.rates {QoRTs}</td><td align="right">R Documentation</td></tr></table>
+
+<h2>
+Chromosome type rate plot
+</h2>
+
+<h3>Description</h3>
+
+<p>Plots the number or percent of read-pairs falling on each type of chromosome.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre>
+makePlot.chrom.type.rates(plotter, 
+                      plot.rates = TRUE,
+                      chromosome.name.style = "UCSC",
+                      exclude.autosomes = FALSE,
+                      chrom.norm.factors = NULL,
+                      custom.chromosome.style.def.function = NULL,
+                      return.table = FALSE, 
+                      debugMode, singleEndMode,
+                      ...)
+</pre>
+
+
+<h3>Arguments</h3>
+
+<table summary="R argblock">
+<tr valign="top"><td><code>plotter</code></td>
+<td>
+
+<p>A <code>QoRT_Plotter</code> reference object. See <code><a href="build.plotter.html">build.plotter</a></code>.
+</p>
+</td></tr>
+<tr valign="top"><td><code>plot.rates</code></td>
+<td>
+
+<p>A logical value indicating whether to plot percent of the total 
+(for each bam file), rather than read-counts.
+</p>
+</td></tr>
+<tr valign="top"><td><code>chromosome.name.style</code></td>
+<td>
+
+<p>A string value indicating the style of the chromosome names, 
+and also how to split up the categories. There are 4 legal
+options:
+</p>
+
+<ul>
+<li><p> &quot;UCSC&quot;: The default. Chromosomes are named: &quot;chr1,chr2,...,chrX,chrY,chrXY,chrM&quot;. There are 6 categories: autosome, X, Y, XY, mitochondrial, and other.
+</p>
+</li>
+<li><p> &quot;ENSEMBL&quot;: Chromosomes are named: &quot;1,2,...,X,Y,XY,MT&quot;. There are 6 categories: autosome, X, Y, XY, mitochondrial, and other.
+</p>
+</li>
+<li><p> &quot;UCSC_WITH_ERCC&quot;: As UCSC, but there is an additional category, which contains all chromosomes that begin with the text &quot;ERCC&quot;.
+</p>
+</li>
+<li><p> &quot;ENSEMBL_WITH_ERCC&quot;: As ENSEMBL, but there is an additional category, which contains all chromosomes that begin with the text &quot;ERCC&quot;. 
+</p>
+</li></ul>
+
+</td></tr>
+<tr valign="top"><td><code>chrom.norm.factors</code></td>
+<td>
+
+<p>(Advanced users)
+</p>
+</td></tr>
+<tr valign="top"><td><code>exclude.autosomes</code></td>
+<td>
+
+<p>A logical value indicating whether to exclude autosomes from the plot.
+</p>
+</td></tr>
+<tr valign="top"><td><code>custom.chromosome.style.def.function</code></td>
+<td>
+
+<p>(For advanced users) If your chromosomes do not match any of the above styles, then you can set your own chromosome style by handing this option a function. The function must take one argument. When handed NULL, it must return a list of all legal categories. When handed a single chromosome name, it must return one of those categories. 
+</p>
+</td></tr>
+<tr valign="top"><td><code>return.table</code></td>
+<td>
+
+<p>A Logical value. If TRUE, the function will return a table containing the plotted data.
+</p>
+</td></tr>
+<tr valign="top"><td><code>debugMode</code></td>
+<td>
+
+<p>Logical. If TRUE, debugging data will be printed to the console.
+</p>
+</td></tr>
+<tr valign="top"><td><code>singleEndMode</code></td>
+<td>
+
+<p>Logical. Determines whether the dataset consists of single-ended reads. 
+By default this is determined from the data. Thus, this parameter should 
+never need to be set by the user.
+</p>
+</td></tr>
+<tr valign="top"><td><code>...</code></td>
+<td>
+ 
+<p>Arguments to be passed to methods, such as
+<a href="../../graphics/html/par.html">graphical parameters</a> (see <code><a href="../../graphics/html/par.html">par</a></code>).
+</p>
+</td></tr>
+</table>
+
+
+<h3>Details</h3>
+
+<p>For each sample-run, this function plots the number of read-pairs mapping to each category of chromosome. 
+</p>
+
+
+<h3>Value</h3>
+
+<p>By default, this function returns nothing. If the return.table parameter is TRUE, then it returns a data.frame with the data that was plotted.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code><a href="build.plotter.html">build.plotter</a></code>
+</p>
+
+<hr><div align="center">[Package <em>QoRTs</em> version 0.2.17 <a href="00Index.html">Index</a>]</div>
+</body></html>

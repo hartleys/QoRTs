@@ -1,0 +1,9 @@
+No implementation found for style `graphicx'
+No implementation found for style `framed'
+No implementation found for style `/home/hartleys/R/R3.1.1/lib/BiocStyle/resources/latex/Bioconductor'
+No implementation found for style `hyperref'
+No implementation found for style `upquote'
+
+Substitution of arg to newlabelxx delayed.
+
+QoRTs-vignette.tex is newer than QoRTs-vignette.bbl: Please rerun latex and bibtex.

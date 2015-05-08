@@ -1,0 +1,99 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head><title>R: Gene assignment rate plot</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<link rel="stylesheet" type="text/css" href="R.css">
+</head><body>
+
+<table width="100%" summary="page for makePlot.gene.assignment.rates {QoRTs}"><tr><td>makePlot.gene.assignment.rates {QoRTs}</td><td align="right">R Documentation</td></tr></table>
+
+<h2>
+Gene assignment rate plot
+</h2>
+
+<h3>Description</h3>
+
+<p>Plots the rate at which reads are assigned into various 
+categories.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre>
+makePlot.gene.assignment.rates(plotter,  debugMode, singleEndMode, ...)
+                         
+</pre>
+
+
+<h3>Arguments</h3>
+
+<table summary="R argblock">
+<tr valign="top"><td><code>plotter</code></td>
+<td>
+
+<p>A <code>QoRT_Plotter</code> reference object. See <code><a href="build.plotter.html">build.plotter</a></code>.
+</p>
+</td></tr>
+<tr valign="top"><td><code>debugMode</code></td>
+<td>
+
+<p>Logical. If TRUE, debugging data will be printed to the console.
+</p>
+</td></tr>
+<tr valign="top"><td><code>singleEndMode</code></td>
+<td>
+
+<p>Logical. Determines whether the dataset consists of single-ended reads. 
+By default this is determined from the data. Thus, this parameter should 
+never need to be set by the user.
+</p>
+</td></tr>
+<tr valign="top"><td><code>...</code></td>
+<td>
+ 
+<p>Arguments to be passed to methods, such as
+<a href="../../graphics/html/par.html">graphical parameters</a> (see <code><a href="../../graphics/html/par.html">par</a></code>).
+</p>
+</td></tr>
+</table>
+
+
+<h3>Details</h3>
+
+<p>For each bam-file, this function plots the rate (y-axis) for which the bam-file's read-pairs are assigned to the given categories.
+</p>
+<p>The categories are:
+</p>
+
+<ul>
+<li> <p><EM>Unique Gene</EM>: The read-pair overlaps with the exonic segments of one and only one gene. For many downstream analyses tools, such as DESeq, DESeq2, and EdgeR, only read-pairs in this category are used.
+</p>
+</li>
+<li> <p><EM>Ambig Gene</EM>: The read-pair overlaps with the exons of more than one gene.
+</p>
+</li>
+<li> <p><EM>No Gene</EM>: The read-pair does not overlap with the exons of any annotated gene.
+</p>
+</li>
+<li> <p><EM>No Gene, Intronic</EM>: The read-pair does not overlap with the exons of any annotated gene, but appears in a region that is bridged by an annotated splice junction.
+</p>
+</li>
+<li> <p><EM>No Gene, 1kb from gene</EM>: The read-pair does not overlap with the exons of any annotated gene, but is within 1 kilobase from the nearest annotated gene.
+</p>
+</li>
+<li> <p><EM>No Gene, 10kb from gene</EM>: The read-pair does not overlap with the exons of any annotated gene, but is within 10 kilobases from the nearest annotated gene.
+</p>
+</li>
+<li> <p><EM>No Gene, middle of nowhere</EM>: The read-pair does not overlap with the exons of any annotated gene, and is <EM>more</EM> than 10 kilobases from the nearest annotated gene.
+</p>
+</li></ul>
+
+
+
+<h3>See Also</h3>
+
+<p><code><a href="build.plotter.html">build.plotter</a></code>
+</p>
+
+<hr><div align="center">[Package <em>QoRTs</em> version 0.2.17 <a href="00Index.html">Index</a>]</div>
+</body></html>
