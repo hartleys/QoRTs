@@ -14,7 +14,7 @@ The most recent release of QoRTs is available on the [QoRTs github page](http://
 
 ##HELP AND DOCUMENTATION:
 Additional help and documentation is available online 
-[here](http://dl.dropboxusercontent.com/u/103621176/QoRTs/helpDocs/index.html). 
+[here](http://hartleys.github.io/QoRTs/index.html). 
 
 Issues, bug reports, or feature requests can be posted to the [github issues page](https://github.com/hartleys/QoRTs/issues).
 
@@ -71,7 +71,7 @@ For a full listing of all help topics for the R utility, use the R command:
 
 ##LEGAL:
 This software is "United States Government Work" under the terms of the United 
-States Copyright Act. It was written as part of the authors’ official duties 
+States Copyright Act. It was written as part of the authorsâ€™ official duties 
 for the United States Government and thus QoRT Package User Manual cannot be 
 copyrighted. This software is freely available to the public for use without a 
 copyright notice. Restrictions cannot be placed on its present or future use.
