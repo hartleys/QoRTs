@@ -596,6 +596,8 @@ object bamToWiggle {
   def genChrom(chromLengthFile : String, span : Int, stranded : Boolean, truncate : Boolean) : Map[(String,Char),Chrom] = {
     var chromMap = Map[(String,Char),Chrom]();
     
+    reportln("Beginning allocation of genomic window array...","note");
+    
     val lines = getLines(chromLengthFile);
     
     for(line <- lines){
@@ -617,7 +619,9 @@ object bamToWiggle {
         val chrom = new Chrom(chromName,'.',Array.ofDim[Long](spanCt),span, truncate);
         chromMap = chromMap + (((chromName,'.'), chrom));
       }
+      reportln("Finished allocation of chromosome " + chromName,"debug");
     }
+    reportln("Finished allocation of genomic window array.","note");
     chromMap;
   }
 }

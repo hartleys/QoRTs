@@ -14,6 +14,12 @@ object stdUtils {
    * Utility Classes:
    */
  
+  def generalizedTo(f : Int, t : Int) : Seq[Int] = {
+    if(f == t) return (f until t);
+    else if(f < t) return (f to t);
+    else return Range(f, t-1, -1);
+  }
+  
   /**************************************************************************************************************************
    * timestamp / memory-usage utilities
    **************************************************************************************************************************/

@@ -19,12 +19,13 @@ import scala.collection.GenMap;
 class qcGtfAnnotationBuilder(gtffile : String, flatgtffile : Option[String], stranded : Boolean, stdCodes : GtfCodes, flatCodes : GtfCodes){
   
   def makeStdReader : Iterator[StdGtfLine] = GtfReader.getStdGtfReader(gtffile, stranded, true, "\\s+", stdCodes);
-  val makeFlatReader : (() => Iterator[FlatGtfLine]) = if(! flatgtffile.isEmpty){
+  
+  lazy val makeFlatReader : (() => Iterator[FlatGtfLine]) = if(! flatgtffile.isEmpty){
     () => GtfReader.getFlatGtfReader(flatgtffile.get, stranded, true, "\\s+", flatCodes);
   } else {
-    reportln("Generating flat gtf \"file\", internally in memory...","progress");
+    reportln("Compiling flat feature annotation, internally in memory...","progress");
     val flatlines = fileConversionUtils.prepFlatGtfFile.getFlatGtfLines(gtffile,stranded);
-    reportln("Internal flat gtf \"file\" generated!","progress");
+    reportln("Internal flat feature annotation compiled!","progress");
     () => flatlines.iterator;
   }
    
@@ -34,26 +35,26 @@ class qcGtfAnnotationBuilder(gtffile : String, flatgtffile : Option[String], str
      
   //}
 
-  val spliceJunctionTreeMap : GenMap[(String,Char),TreeSet[(Int,Int)]] = qcGtfAnnotationBuilder.qcInnerDistance_readSplicesFromGtfFile(makeFlatReader,stranded, flatCodes);
-  val knownSpliceJunctionNameMap : GenMap[GenomicInterval,String] = qcGtfAnnotationBuilder.qcJunctionCounts_makeJunctionMap(makeFlatReader, stranded, flatCodes);
-  val geneArray : GenomicArrayOfSets[String] = qcGtfAnnotationBuilder.qcGetGeneCounts_readGtf(stranded,gtffile, stdCodes).finalizeStepVectors;
-  val qcGetGeneCounts_cdsArray : GenomicArrayOfSets[String]  =  qcGtfAnnotationBuilder.qcGetGeneCounts_geneArea_CDS_readGtf(stranded, gtffile, stdCodes).finalizeStepVectors;
-  val qcGetGeneCounts_intronArray : GenomicArrayOfSets[String]  =  qcGtfAnnotationBuilder.qcGetGeneCounts_geneArea_INTRONS_readFlatGtf(stranded, makeFlatReader, flatCodes).finalizeStepVectors;
+  lazy val spliceJunctionTreeMap : GenMap[(String,Char),TreeSet[(Int,Int)]] = qcGtfAnnotationBuilder.qcInnerDistance_readSplicesFromGtfFile(makeFlatReader,stranded, flatCodes);
+  lazy val knownSpliceJunctionNameMap : GenMap[GenomicInterval,String] = qcGtfAnnotationBuilder.qcJunctionCounts_makeJunctionMap(makeFlatReader, stranded, flatCodes);
+  lazy val geneArray : GenomicArrayOfSets[String] = qcGtfAnnotationBuilder.qcGetGeneCounts_readGtf(stranded,gtffile, stdCodes).finalizeStepVectors;
+  lazy val qcGetGeneCounts_cdsArray : GenomicArrayOfSets[String]  =  qcGtfAnnotationBuilder.qcGetGeneCounts_geneArea_CDS_readGtf(stranded, gtffile, stdCodes).finalizeStepVectors;
+  lazy val qcGetGeneCounts_intronArray : GenomicArrayOfSets[String]  =  qcGtfAnnotationBuilder.qcGetGeneCounts_geneArea_INTRONS_readFlatGtf(stranded, makeFlatReader, flatCodes).finalizeStepVectors;
 
-  val flatFeatureList : IndexedSeq[String] = qcGtfAnnotationBuilder.getFlatFeatureList(makeFlatReader, stranded, flatCodes);
+  lazy val flatFeatureList : IndexedSeq[String] = qcGtfAnnotationBuilder.getFlatFeatureList(makeFlatReader, stranded, flatCodes);
   
-  val geneLengthMap : GenMap[String,Int] = qcGtfAnnotationBuilder.getGeneLengthMap(geneArray);
-  val flatExonArray : GenomicArrayOfSets[String] = qcGtfAnnotationBuilder.makeFlatExonMap(stranded,makeFlatReader, flatCodes).finalizeStepVectors;
-  val flatGeneSet : Set[String] = qcGtfAnnotationBuilder.makeFlatGeneSet(flatExonArray);
+  lazy val geneLengthMap : GenMap[String,Int] = qcGtfAnnotationBuilder.getGeneLengthMap(geneArray);
+  lazy val flatExonArray : GenomicArrayOfSets[String] = qcGtfAnnotationBuilder.makeFlatExonMap(stranded,makeFlatReader, flatCodes).finalizeStepVectors;
+  lazy val flatGeneSet : Set[String] = qcGtfAnnotationBuilder.makeFlatGeneSet(flatExonArray);
   
-  val strandedGeneArray = if(stranded) {
+  lazy val strandedGeneArray = if(stranded) {
     geneArray; 
   } else {
     qcGtfAnnotationBuilder.qcGetGeneCounts_readGtf(true,gtffile, stdCodes).finalizeStepVectors;
   }
   
   def initializationReport() {
-    reportln("initializationReport: qcInnerDistance_spliceMapTree.size: " + spliceJunctionTreeMap.size + " chromosome/strands with annotated splice Junction sites.", "debug");
+    /*reportln("initializationReport: qcInnerDistance_spliceMapTree.size: " + spliceJunctionTreeMap.size + " chromosome/strands with annotated splice Junction sites.", "debug");
     reportln("initializationReport: qcJunctionCounts_knownSpliceMap.size: " + knownSpliceJunctionNameMap.size + " annotated splice junction sites.", "debug");
     reportln("initializationReport: qcGetGeneCounts_geneArray.getValueSet.size: " + geneArray.getValueSet.size + " annotated genes.", "debug");
     reportln("initializationReport: qcGetGeneCounts_cdsArray.getValueSet.size: " + qcGetGeneCounts_cdsArray.getValueSet.size + " annotated genes with annotated CDS.", "debug");
@@ -61,7 +62,7 @@ class qcGtfAnnotationBuilder(gtffile : String, flatgtffile : Option[String], str
     reportln("initializationReport: flatExonArray.getValueSet.size: " + flatExonArray.getValueSet.size + " flattened exons bins.", "debug");
     reportln("initializationReport: geneLengthMap.size: " + geneLengthMap.size + " genes.", "debug");
     reportln("initializationReport: flatGeneSet.size: " + flatGeneSet.size + " aggregate-genes.", "debug");
-    reportln("initializationReport: flatFeatureList.size: " + flatFeatureList.size + " gene features.", "debug");
+    reportln("initializationReport: flatFeatureList.size: " + flatFeatureList.size + " gene features.", "debug");*/
   }
   
   initializationReport();

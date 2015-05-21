@@ -63,9 +63,9 @@ BiocStyle::latex()
 National Human Genome Research Institute\\
 National Institutes of Health}
 \date{August 8 2014\\
-April 14, 2015 %REPLACE_THIS_LINE_WITH_REVISION_DATE
+May 21, 2015 %REPLACE_THIS_LINE_WITH_REVISION_DATE
 \\
-v0.2.17 %REPLACE_THIS_LINE_WITH_VERSION_NUMBER
+v0.3.3 %REPLACE_THIS_LINE_WITH_VERSION_NUMBER
 }
 
 \begin{document}
@@ -98,11 +98,13 @@ The QoRTs software package is a fast, efficient, and portable multifunction tool
 
 In its primary role as a QC tool it can produce a wide variety of graphs, plots, and tables that allow the data to be visualized in various ways. Data can be compiled and contrasted in multiple ways to allow systematic errors or artifacts to reveal themselves more easily. While it will not directly assign pass/fail status, it is a powerful tool for bioinformaticians to detect and identify features in the data. In (hopefully) most cases, these plots and graphs will not reveal anything other than mixed statistical noise. Next-Gen sequencing technologies have matured to the point where gross systematic errors and batch-specific biases are relatively modest and rare. However: mistakes can still occur, and basing conclusions on flawed data can be disastrous.
 
-The QoRTs package is composed of two parts: a java jar-file (for data processing) and a companion R package (for generating tables, figures, and plots). The java utility is written in the Scala programming language (v2.11.1), however, it has been compiled to java byte-code and does not require an installation of Scala (or any other external libraries) in order to function. The entire QoRTs toolkit can be used in almost any operating system that supports java and R.
+Across the field of bioinformatics there are numerous cases where biases, artifacts, and other data quality or bioinformatic issues have called results into question, sometimes resulting in retractions. In many of these cases the problems were only identified after the study came under intense scrutiny when the results were interesting and/or contentious, and the specific issues at fault were generally not well-characterized until afterwards. The primary purpose of QoRTs is to cast a wide net, characterizing the data in as many ways as is feasible so that quality issues that would otherwise be obscured can be recognized and dealt with, even if these issues have not been previously encountered.
+
+The QoRTs package is composed of two parts: a java jar-file (for data processing) and a companion R package (for generating tables, figures, and plots). The java utility is written in the Scala programming language (v2.11.1), however, it has been compiled to java byte-code and does not require an installation of Scala (or any other external libraries) in order to function. The entire QoRTs toolkit can be used on almost any operating system that supports java and R. While not explicitly required, the use of a 64-bit version of java is recommended.
 
 This vignette primarily covers the quality control functionality of QoRTs, and briefly covers the other functions and capabilities.
 
-The most recent release of QoRTs is available on the QoRTs github page (\url{http://github.com/hartleys/QoRTs}). Additional help and documentation is available online (\url{https://dl.dropboxusercontent.com/u/103621176/QoRTs/helpDocs/index.html}). A comprehensive walkthrough covering the entire process from post-alignment all the way to differential expression analysis, along with a full example dataset and example output can be found online (\url{https://dl.dropboxusercontent.com/u/103621176/qorts/exData/QoRTsFullExampleData.zip}).
+The most recent release of QoRTs is available on the QoRTs github page (\url{http://github.com/hartleys/QoRTs}). Additional help and documentation is available online (\url{http://hartleys.github.io/QoRTs/index.html}). A comprehensive walkthrough covering the entire process from post-alignment all the way to differential expression analysis, along with a full example dataset and example output can be found online (\url{https://dl.dropboxusercontent.com/u/103621176/qorts/exData/QoRTsFullExampleData.zip}).
 
 %-----------------------------------------------------------
 \section{Requirements}  \label{sec:reqs}
@@ -110,9 +112,9 @@ The most recent release of QoRTs is available on the QoRTs github page (\url{htt
 
 \emph{Hardware:} The java utility performs the bulk of the data processing, and will generally require at least 4gb of RAM. In general at least 8gb is recommended if available. The R package is only responsible for some light data processing and for plotting/visualization, and thus has much lower resource requirements. It should run adequately on any reasonably-powerful workstation.
 
-\emph{Software:} The QoRTs software package requires R version 3.0.2 or higher, as well as java 6 or higher.
+\emph{Software:} The QoRTs software package requires \href{http://www.r-project.org/}{R} version 3.0.2 or higher, as well as \href{https://www.java.com}{java} 6 or higher. It is strongly recommended that a 64-bit version of java be used, as the 32-bit versions generally cannot allocate sufficient RAM.
 
-\emph{Annotation:} QoRTs requires transcript annotations in the form of a gtf file. If you are using a annotation guided aligner (which is STRONGLY recommended) it is likely you already have a transcript gtf file for your reference genome. We recommend you use the same annotation gtf for alignment, QC, and downstream analysis. We have found the Ensembl "Gene Sets" gtf\footnote{Which can be acquired from the Ensembl website at \url{http://www.ensembl.org}} suitable for these purposes. However, any format that adheres to the gtf file specification\footnote{See the gtf file specification at \url{http://genome.ucsc.edu/FAQ/FAQformat.html}} will work.
+\emph{Annotation:} QoRTs requires transcript annotations in the form of a gtf file. If you are using a annotation-guided aligner (which is STRONGLY recommended) it is likely you already have a transcript gtf file for your reference genome. We recommend you use the same annotation gtf for alignment, QC, and downstream analysis. We have found the Ensembl "Gene Sets" gtf\footnote{Which can be acquired from the Ensembl website at \url{http://www.ensembl.org}} suitable for these purposes. However, any format that adheres to the gtf file specification\footnote{See the gtf file specification at \url{http://genome.ucsc.edu/FAQ/FAQformat.html}} will work.
 
 \emph{Dataset:} QoRTs requires aligned RNA-Seq data. Data can be paired-end or single-end, unstranded or stranded (using either strandedness rule, see Section \ref{sec:initialProcessing}). It is strongly recommended, but not explicitly required, that the SAM/BAM files be sorted (either by name or position). QoRTs can use additional metadata (such as technical replicate status, case/control status, batch id, etc) to produce comparisons between these replicate groups, but this information is optional.
 
@@ -134,7 +136,7 @@ There are a number of processing steps that must occur prior to the creation of 
 \subsection{Alignment}  \label{sec:aln}
 %-----------------------------------------------------------
 
-QoRTs is designed to run on paired-end next-gen RNA-Seq data. The data must be aligned (or "mapped") to a reference genome before QoRTs can be run. RNA-Star\cite{STAR}, GSNAP\cite{GSNAP}, and TopHat2\cite{TopHat2} are all popular and effective aligners for use with RNA-Seq data. The use of short-read or unspliced aligners such as BowTie, ELAND, BWA, or Novoalign is NOT recommended.
+QoRTs is designed to run on paired-ended or single-ended next-gen RNA-Seq data. The data must be aligned (or "mapped") to a reference genome before QoRTs can be run. RNA-Star\cite{STAR}, GSNAP\cite{GSNAP}, and TopHat2\cite{TopHat2} are all popular and effective aligners for use with RNA-Seq data. The use of short-read or unspliced aligners such as BowTie, ELAND, BWA, or Novoalign is NOT recommended.
 
 %-----------------------------------------------------------
 \subsection{Sorting}  \label{sec:sort}
@@ -176,7 +178,7 @@ java -Xmx4G -jar /path/to/jarfile/QoRTs.jar QC \
                    /qc/data/dir/path/
 \end{verbatim}
 
-Note: This command must be executed as a single line. Additional options may be required depending on the nature of the dataset. For single-ended data, the \verb|--singleEnded| option should be included. For strand-specific data, the \verb|--stranded| option should be included, and possibly also the \verb|--fr_secondStrand| option depending on the stranded library type. For position-sorted data, the \verb|--coordSorted| option should be used. See \ref{sec:initialProcessing}, or the QC utility documentation\footnote{Found here: \url{https://dl.dropboxusercontent.com/u/103621176/QoRTs/helpDocs/jarHtml/QC.html}} for more information on the available options.
+Note: This command must be executed as a single line. Additional options may be required depending on the nature of the dataset. For single-ended data, the \verb|--singleEnded| option should be included. For strand-specific data, the \verb|--stranded| option should be included, and possibly also the \verb|--fr_secondStrand| option depending on the stranded library type. For position-sorted data, the \verb|--coordSorted| option should be used. See \ref{sec:initialProcessing}, or the QC utility documentation\footnote{Found  \href{http://hartleys.github.io/QoRTs/jarHtml/QC.html}{here}.} for more information on the available options.
 
 %-----------------------------------------------------------
 \section{Dataset Organization}  \label{sec:dataset}
@@ -234,7 +236,7 @@ Due to size constraints the example dataset contained in this R package includes
 
 The example dataset is derived from a set of rat pineal gland samples, which were multiplexed and sequenced across six sequencer lanes. For the sake of simplicity, the example dataset was limited to only six samples and three lanes. However, the bam files alone would still occupy 18 gigabytes of disk space, which would make it unsuitable for distribution as an example dataset. To further reduce the example bamfile sizes, only reads that mapped to chromosomes chr14, chr15, chrX, and chrM were included. Additionally, all the selected chromosomes EXCEPT for chromosome 14 were randomly downsampled to 30 percent of their original read counts.
 
-THIS DATASET IS INTENDED FOR DEMONSTRATION AND TESTING PURPOSES ONLY. Due to the various alterations that have been made to reduce file sizes and improve portability, it is really not suitable for any actual analyses.
+THIS DATASET IS INTENDED FOR DEMONSTRATION AND TESTING PURPOSES ONLY. Due to the various alterations that have been made to reduce file sizes and improve portability, it is not representitive of the original data and as such is really not suitable for any actual analyses.
 
 %-----------------------------------------------------------
 \section{Processing of aligned RNA-Seq data}  \label{sec:initialProcessing}
@@ -251,7 +253,7 @@ java -jar /path/to/jarfile/QoRTs.jar QC \
 
 In the above command (which must be entered as a single line), you must replace \verb|/path/to/jarfile/| with the file-path to the directory in which the jar file is kept. The path \verb|/qc/data/dir/path/| should be replaced with the path you want the QC data to be written. This should match the path located in the decoder in the qc.data.dir column for this sample-run.
 
-The bam processing tool includes numerous options. A full description of these options can be found in the online documentation of the jar utility\footnote{Found here: \url{https://dl.dropboxusercontent.com/u/103621176/QoRTs/helpDocs/jarHtml/index.html}}, or by entering the command:
+The bam processing tool includes numerous options. A full description of these options can be found in the online documentation of the jar utility\footnote{Found here: \url{http://hartleys.github.io/QoRTs/jarHtml/index.html}}, or by entering the command:
 \begin{verbatim}
 java -jar /path/to/jarfile/QoRTs.jar QC --man
 \end{verbatim}
@@ -594,6 +596,39 @@ QoRTs is capable of producing a wide variety of different plots and graphs. Whil
 
 The example plots in the following section all use the \verb|byLane.plotter| \Robject{QoRTs\_Plotter} (from Section \ref{subsec:plotterDesc2b}), which colors each replicate by its lane ID.
 
+\begin{framed}
+\emph{What it means and what to look for:} 
+
+In general, when examining these plots, users should scan for a number of potential anomalies:
+  \begin{itemize} \small
+    \item \textbf{"Spikes"}: In which one of the metrics jumps up or down abruptly, then returns to baseline.
+    \item \textbf{"Shelves"}: In which one of the metrics jumps up or down abruptly, then continues at an increased or decreased level.
+    \item \textbf{Outliers}: In which one or more particular samples or replicates are very different from all or most of the others. The presence of outliers may be an indicator for sample-collection, library-prep, or sequencing errors or artifacts.
+    \item \textbf{Systematic Biases}: In which consistent differences appear between subsets of the data (eg. "lane.ID" or "group.ID"). Many of the biases measured by QoRTs are well-characterized, and many downstream analysis tools are robust against them when they are consistent and uniform. However: biases that vary disproportionately between sample groups may still drive false associations downstream.
+    \item \textbf{Inconsistent samples}: In which the technical replicates of a specific biological sample shows substantial variation. In most studies, technical variation is very small relative to biological variation. In the example dataset (for example) the technical replicates are plotted almost on top of one another across many of the plots. If technical replicates do not cluster tightly, or if they cluster with the wrong replicates, then this may be an indicator of a sample swap.
+  \end{itemize}
+
+Some "anomalous" metrics may be fundamental to the dataset and may not be 
+indicative of any quality issues. For example, when profiling two different 
+cell types one would expect the two groups to have very different profiles 
+across a number of metrics. However: a single sample that is wildly different 
+from the others within the same group may be cause for concern. In many cases 
+variations may be observed across multiple metrics, all driven by the same 
+underlying phenomenon. The breadth and depth of the metrics provided are 
+intended to provide the tools necessary to identify the most likely underlying 
+source(s) of the aberration(s).
+
+Some aberrations may not be relevant to the study analysis even when they are
+representative of a real data quality issue. A moderate increase in the deletion rate
+may not have a noticable impact on expression quantification in a simple differential expression
+study. The same issue, however, might be catastrophic in a study focused on quantifying the rate of 
+RNA transcription errors or RNA editing events. The number of combinations of study design, sample set structure, sequencing technology, and observed 
+quality control issues are myriad, and all of these factors would inform decisionmaking. 
+
+Ultimatiely, bioinformaticians must use their own judgement in deciding how to proceed when 
+unexplained abnormalities are discovered in their dataset.
+\end{framed}
+
 \pagebreak
 %----------
 \subsubsection{Phred Quality Score} \label{subsec:plotDesc-1}
@@ -608,7 +643,7 @@ The example plots in the following section all use the \verb|byLane.plotter| \Ro
 %  \label{indivPlot-Fig-1}
 %  \end{figure}
 
-\myincfigThree{indivPlot-1}{0.34\textwidth}{Phred Quality Score Plots}
+\myincfigThree{indivPlot-1}{0.3\textwidth}{Phred Quality Score Plots}
 
 The plots shown in Figure \ref{indivPlot-1-fig} displays information about the phred quality score (y-axis) as a function of the position in the read (x-axis). Five statistics can be plotted: minimum, maximum, upper and lower quartiles, and median. These statistics are calculated individually for each replicate and each read position (ie, each plotted line corresponds to a replicate).
 
@@ -628,6 +663,10 @@ makePlot.qual.pair(byLane.plotter,"min");
 makePlot.qual.pair(byLane.plotter,"max");
 @
 
+\begin{framed} \small
+\emph{What it means and what to look for:} These plots can be used to detect sequencer problems, bad lanes, or similar hardware-level artifacts and errors. Look for spikes or shelves, and ensure that the quality score is relatively consistent across samples and lanes, and that any differences that do exist are not disproportionate with respect to the study condition (or "group.ID").
+\end{framed}
+
 \pagebreak
 %----------
 \subsubsection{GC Content} \label{subsec:plotDesc-2}
@@ -645,6 +684,10 @@ makePlot.gc(byLane.plotter);
 
 The \verb|byPair| option can be used to calculate the GC-distribution for read-pairs rather than for all reads individually. This is disabled by default because it often results in a jagged distribution when a appreciable proportion of the reads have an insert size equal to or smaller than the read length. When this occurs, the read-pair will almost always have an even number of G/C nucleotides.
 
+\begin{framed} \small
+\emph{What it means and what to look for:} GC bias has been indicated as a potential driver of false discoveries. Under certain circumstances the GC bias may vary by batch or by sample. If this is apparent in your dataset, particularly if it is associated with study conditions, one may need to apply a GC bias correction method (such as CQN).
+\end{framed}
+
 \pagebreak
 %----------
 \subsubsection{Clipping Profile} \label{subsec:plotDesc-3}
@@ -660,12 +703,16 @@ This plot can be generated individually with the command:
 makePlot.clipping(byLane.plotter);
 @
 
+\begin{framed} \small
+\emph{What it means and what to look for:} Abnormalities ("spikes", "shelves", or cases where sample groups are visibly different) in these plots can be caused by adaptor sequencing, gene fusions, mutations, population stratification, or differences in insert size.
+\end{framed}
+
 \pagebreak
 %----------
 \subsubsection{Cigar Op Profile} \label{subsec:plotDesc-4}
 %----------
 
-\myincfigThree{indivPlot-4}{0.34\textwidth}{Cigar Operation Profiles}
+\myincfigThree{indivPlot-4}{0.3\textwidth}{Cigar Operation Profiles}
 
 For each replicate, Figure  \ref{indivPlot-4-fig} displays the rate (y-axis) of various cigar operations as a function of read position (x-axis). All 9 legal cigar operations can be plotted, but for most purposes only Deletions, Insertions, and Splice junctions will be informative.
 
@@ -677,6 +724,47 @@ makePlot.cigarOp.byCycle(byLane.plotter, "Ins");
 makePlot.cigarOp.byCycle(byLane.plotter, "Splice");
 @
 
+\begin{framed} \small
+\emph{What it means and what to look for:} These plots are most 
+often used in conjuction with the plots in Section \ref{subsec:plotDesc-8}. 
+Among other things these plots can reveal sequencer errors: a sequencer cycle-skip might 
+result in a spike in the deletion rate at a particular cycle, whereas an 
+incomplete wash may result in a spike in the insertion rate. These plots 
+may also reveal biological differences like population stratification 
+(eg: a sub-population disproportionately mismatches the reference genome), 
+or broad genome rearrangements/editing (eg: in cancer cells).
+
+In the example dataset, apparent spikes are plainly visible, stemming from
+deletions in one short and highly-expressed mitochondrial gene. The plots are also fairly
+noisy due to the small number of reads used in the example dataset and the extremely low
+frequency of deletions/insertions.
+\end{framed}
+
+\pagebreak
+%----------
+\subsubsection{Cigar Length Distribution} \label{subsec:plotDesc-8}
+%----------
+
+\myincfigTwo{indivPlot-8}{0.4\textwidth}{Cigar Length Distribution}
+
+The plots in Figure \ref{indivPlot-8-fig} display histograms of cigar operation lengths for each replicate.
+
+These plots can be generated individually with the commands:
+
+<<indivPlot-8,results="hide">>=
+makePlot.cigarLength.distribution(byLane.plotter, "Ins");
+makePlot.cigarLength.distribution(byLane.plotter, "Del")
+@
+
+\begin{framed} \small
+\emph{What it means and what to look for:} These plots are most often used in 
+conjuction with the plots in Section \ref{subsec:plotDesc-4}. They can elucidate 
+the nature of any oddities observed in the previous plots. For example: a large 
+spike at one particular length may suggest that an apparent spike may be due 
+simply to an unannotated variant in one particular high-expression gene, although 
+further investigation is likely merited, to confirm that this is the case.
+\end{framed}
+
 \pagebreak
 %----------
 \subsubsection{Insert Size} \label{subsec:plotDesc-5}
@@ -684,51 +772,40 @@ makePlot.cigarOp.byCycle(byLane.plotter, "Splice");
 
 \myincfig{indivPlot-5}{0.55\textwidth}{Insert Size}
 
+{
+\small
 For each replicate, Figure \ref{indivPlot-5-fig} displays a histogram of the "insert size". Each line corresponds to one replicate, and displays the rate (y-axis) at which that replicate's reads possess a given insert size (x-axis).
 
 \emph{Definition: "Insert Size":} The "insert size" is the length (in base-pairs) between the two sequencing adapters for a pair of paired-end reads. In other words, it is the size of the original RNA fragment.
 
 \emph{Insert Size Estimation:} The Insert size is calculated using the alignment of the paired reads. When the two paired reads are aligned such that they overlap with one another the insert size can be calculated exactly. In such cases, the calculation of the insert size does \emph{not} depend on the transcript annotation. However, when there is no overlap the exact insert size can be uncertain. Multiple splice junctions may lie in the region between the endpoints of the two paired reads, and there is no real way to determine which junctions the fragment used, if any. QoRTs uses the set of all splice junctions found between the endpoints of the two reads, and uses the shortest possible path from endpoint to endpoint. In some cases this may \emph{under-estimate} the insert size, as the actual path may not be the shortest possible path. In other cases this may also \emph{over-estimate} the insert size, if the RNA fragment includes novel splice junctions not found in the transcript annotation. However, in most cases this method appears to produce a reasonably good approximation of the insert size.
 
-Note that the median average insert sizes for each replicate are plotted below the main plot. Each point corresponds to one replicate.
+Note that the median average insert sizes for each replicate are plotted below the main plot. Each point corresponds to one replicate. 
 
 This plot can be generated individually with the command:
+}
 
 <<indivPlot-5,results="hide">>=
 makePlot.insert.size(byLane.plotter);
 @
 
-If the dataset is single-ended, this will generate a placeholder plot.
+Note: If the dataset is single-ended, this will generate a placeholder plot.
 
-\pagebreak
-%----------
-\subsubsection{Gene-Body Coverage} \label{subsec:plotDesc-6}
-%----------
+\begin{framed} \small
+\emph{What it means and what to look for:} Spikes in the insert size are common, 
+generally the result of short, highly-expressed (often mitochondrial) transcripts. 
+Because the size-selection of many RNA-Seq protocols is somewhat random, it is 
+important to ensure that the resultant size selection is (relatively) consistent, 
+and that variations are not associated with study condition status. If one study 
+group has disproportionately high or low insert size, this could cause fragment 
+bias that could drive the false discovery of differential effects.
+\end{framed}
 
-\myincfigThree{indivPlot-6}{0.34\textwidth}{Gene-Body Coverage}
-
-For each replicate, the leftmost plot of Figure \ref{indivPlot-6-fig} displays the coverage profile across quantiles of all genes' lengths, from 5' to 3'. The middle plot displays the coverage profile for only the genes that are in the upper-middle quartile by read-count. The leftmost plot displays the coverage profile for the genes that are in the two lower quartiles.
-
-\emph{Minor notes:} To calculate the coverage profile, all the transcripts for each gene are merged together into a single "flat" pseudo-transcript which contains all exonic regions belonging to the gene. For each gene, the pseudo-transcript is broken up into 40 equal-length counting bins, so that each bin contains 2.5\% of the total gene length. Each read-pair is counted once for every counting bin with which it overlaps.
-Any genes that overlap with other genes are automatically excluded.
-Any reads that overlap with more than one gene are automatically excluded.
-Any genes that have zero reads on a given replicate are automatically excluded for the purposes of finding the gene quantiles.
-
-This plot can be generated individually with the command:
-
-<<indivPlot-6,results="hide">>=
-makePlot.genebody.coverage(byLane.plotter);
-makePlot.genebody.coverage.UMQuartile(byLane.plotter);
-makePlot.genebody.coverage.lowExpress(byLane.plotter);
-@
-
-
-\pagebreak
 %----------
 \subsubsection{N-Rate} \label{subsec:plotDesc-7}
 %----------
 
-\myincfig{indivPlot-7}{0.65\textwidth}{PLOT NAME}
+\myincfig{indivPlot-7}{0.65\textwidth}{N-Rate plot}
 
 Figure \ref{indivPlot-7-fig} displays the rate (y-axis) at which the read sequence is "N" (or "missing"), as a function of the read position (x-axis). Each line corresponds to one replicate.
 
@@ -738,39 +815,57 @@ This plot can be generated individually with the command:
 makePlot.missingness.rate(byLane.plotter);
 @
 
+\begin{framed} \small
+\emph{What it means and what to look for:} A number of potential sequencer issues 
+can cause an abrupt "spike" or "shelf" in this plot. In one real sample assessed 
+by QoRTs by the software author, it was determined that the sequencer camera was 
+slightly offset on one specific cycle of one specific run. All the reads at the 
+bottom or right edges were lost from that cycle forward, causing the rate of "N" 
+calls to increase more than a hundred-fold. Once the problem was recognized the 
+affected reads were identified and removed.
+\end{framed}
+
 \pagebreak
 %----------
-\subsubsection{Cigar Length Distribution} \label{subsec:plotDesc-8}
+\subsubsection{Gene-Body Coverage} \label{subsec:plotDesc-6}
 %----------
 
-\myincfigTwo{indivPlot-8}{0.45\textwidth}{Cigar Length Distribution}
+\myincfigThree{indivPlot-6}{0.3\textwidth}{Gene-Body Coverage}
 
-The plots in Figure \ref{indivPlot-8-fig} display histograms of cigar operation length.
+For each replicate, the leftmost plot of Figure \ref{indivPlot-6-fig} displays the coverage profile across quantiles of all genes' lengths, from 5' to 3'. The middle plot displays the coverage profile for only the genes that are in the upper-middle quartile by read-count. The leftmost plot displays the coverage profile for the genes that are in the two lower quartiles.
 
-These plots can be generated individually with the commands:
+\emph{Minor notes:} To calculate the coverage profile, all the transcripts for each gene are merged together into a single "flat" pseudo-transcript which contains all exonic regions belonging to the gene. For each gene, the pseudo-transcript is broken up into 40 equal-length counting bins, so that each bin contains 2.5\% of the total gene length. Each read-pair is counted once for every counting bin with which it overlaps. Genes are excluded from this analysis if they overlap with other genes or if they have zero reads for a given replicate. Additionally, any reads that overlap with more than one gene are automatically excluded.
 
-<<indivPlot-8,results="hide">>=
-makePlot.cigarLength.distribution(byLane.plotter, "Ins");
-makePlot.cigarLength.distribution(byLane.plotter, "Del")
+This plot can be generated individually with the command:
+
+<<indivPlot-6,results="hide">>=
+makePlot.genebody.coverage(byLane.plotter);
+makePlot.genebody.coverage.UMQuartile(byLane.plotter);
+makePlot.genebody.coverage.lowExpress(byLane.plotter);
 @
+
+\begin{framed} \small
+\emph{What it means and what to look for:} When run on degraded RNA and/or when using poly-A selection, RNA-Seq often tends to have "3' bias", in which read coverage is higher on the 3' end of transcripts. The degree of this 3' bias tends to be dependent on the degree of degradation. Many analysis tools are robust against this issue when it occurs uniformly across the dataset; However, if some samples are substantially more degraded than others then this may cause problems downstream, particularly if RNA degradation is associated to the experimental condition(s). When studying this plot, check to make sure the gene-body coverage is consistant and/or matches your expectations.
+
+Note that the overall gene-body coverage may be strongly influenced by extreme high-coverage genes (and potentially sequence-specific biases on those specific transcripts). Therefore the upper-middle-quartile plot is generally the preferred general metric for assessing overall gene-body coverage.
+\end{framed}
+
 
 \pagebreak
 %----------
 \subsubsection{Cumulative Gene Diversity} \label{subsec:plotDesc-9}
 %----------
 
-\myincfig{indivPlot-9}{0.65\textwidth}{Cumulative Gene Diversity}
+\myincfig{indivPlot-9}{0.45\textwidth}{Cumulative Gene Diversity}
 
+{
+\small
 For each replicate, Figure \ref{indivPlot-9-fig} displays the cumulative gene diversity. For each replicate, the genes are sorted by read-count. Then, a cumulative function is calculated for the percent of the total proportion of reads as a function of the number of genes. Intercepts are plotted as well, showing the cumulative percent for 1 gene, 10 genes, 100 genes, 1000 genes, and 10000 genes. 
 
-So, for example, across all the replicate, around 50 to 55 percent of the read-pairs were found to map to the top 1000 genes. Around 20 percent of the reads were found in the top 100 genes. And so on.
-
-This can be used as an indicator of whether a large proportion of the reads stem from of a small number of genes.
-
-Note that this is restricted to only the reads that map to a single unique gene. Reads that map to more than one gene, or that map to intronic or intergenic areas are ignored.
+So, for example, across all the replicate, around 50 to 55 percent of the read-pairs were found to map to the top 1000 genes. Around 20 percent of the reads were found in the top 100 genes. And so on. This can be used as an indicator of whether a large proportion of the reads stem from of a small number of genes. Note that this is restricted to only the reads that map to a single unique gene. Reads that map to more than one gene, or that map to intronic or intergenic areas are ignored.
 
 This plot can be generated individually with the command:
-
+}
 % <<plot9-2b,results="hide", eval=FALSE, echo = FALSE>>=
 % ##For gene-specific:
 % makePlot.gene.cdf.bySample(byLane.plotter);
@@ -778,6 +873,14 @@ This plot can be generated individually with the command:
 <<indivPlot-9,results="hide">>=
 makePlot.gene.cdf(byLane.plotter);
 @
+
+\begin{framed} \small
+\emph{What it means and what to look for:} This plot can reveal a number of phenomena. First of all: if the top few genes dominate a sample (representing a large percentage of the total reads), oddities may appear in many of the other plots produced by QoRTs, as traits specific to these particular genes are dominant over the variation found across the genome. 
+
+It can also reveal biological variations: Different cell types or cells that are healthy, dying, or under stress often have very different diversity profiles from one another. If one sample of within a group is an extreme outlier it may suggest that something is wrong with that sample. 
+
+Or technical issues: These plots will often reveal inefficiency of hemoglobin or ribosome depletion protocols, and can also clearly reveal low library complexity (indicated by a very small number of genes being represented).
+\end{framed}
 
 \pagebreak
 %----------
@@ -798,6 +901,10 @@ This plot can be generated individually with the command:
 makePlot.raw.NVC(byLane.plotter);
 @
 
+\begin{framed} \small
+\emph{What it means and what to look for:} This can reveal sequence-specific biases such as hexamer or primer bias. Additionally, it can reveal adaptor sequencing. Such issues are generally not a problem as long as they are consistent across samples and groups.
+\end{framed}
+
 \pagebreak
 %----------
 \subsubsection{Aligned Nucleotide Rates, by Cycle} \label{subsec:plotDesc-10b}
@@ -812,6 +919,10 @@ This plot can be generated individually with the command:
 <<indivPlot-10b,results="hide">>=
 makePlot.minus.clipping.NVC(byLane.plotter);
 @
+
+\begin{framed} \small
+\emph{What it means and what to look for:} This can reveal sequence-specific biases such as hexamer or primer bias. Such issues are generally not a problem as long as they are consistent across samples and groups. Unlike the raw NVC plot, adaptor sequence will generally be absent from this plot as it usually will not align to the reference.
+\end{framed}
 
 \pagebreak
 %----------
@@ -830,6 +941,10 @@ makePlot.NVC.lead.clip(byLane.plotter, clip.amt = 12);
 @
 
 Any integer can be used as the \verb|clip.amt| value.
+
+\begin{framed} \small
+\emph{What it means and what to look for:} If a large proportion of the reads are shorter than the read length then this can reveal the adaptor sequence.
+\end{framed}
 
 \pagebreak
 %----------
@@ -851,6 +966,10 @@ makePlot.NVC.tail.clip(byLane.plotter, clip.amt = 12);
 
 Any integer can be used as the \verb|clip.amt| value.
 
+\begin{framed} \small
+\emph{What it means and what to look for:} If a large proportion of the reads are shorter than the read length then this can reveal the adaptor sequence.
+\end{framed}
+
 \pagebreak
 %----------
 \subsubsection{Mapping location rates} \label{subsec:plotDesc-12}
@@ -861,7 +980,7 @@ Any integer can be used as the \verb|clip.amt| value.
 For each replicate, Figure \ref{indivPlot-12-fig} displays the rate (y-axis) for which the replicate's read-pairs are assigned to the given categories.
 
 \noindent The categories are:
-  \begin{itemize}
+  \begin{itemize} \small
     \item \emph{Unique Gene}: The read-pair overlaps with the exonic segments of one and only one gene. For many downstream analyses tools, such as DESeq, DESeq2 \cite{DESeq} and \Biocpkg{EdgeR} \cite{edgeR}, only read-pairs in this category are used.
     \item \emph{Ambig Gene}: The read-pair overlaps with the exons of more than one gene.
     \item \emph{No Gene}: The read-pair does not overlap with the exons of any annotated gene.
@@ -877,6 +996,10 @@ This plot can be generated individually with the command:
 makePlot.gene.assignment.rates(byLane.plotter);
 @
 
+\begin{framed} \small
+\emph{What it means and what to look for:} Outliers in these plots can indicate biological variations or the presence of large mapping problems. They may also suggest the presence of large, highly-expressed, unannotated transcripts or genes.
+\end{framed}
+
 \pagebreak
 %----------
 \subsubsection{Splice Junction Loci} \label{subsec:plotDesc-13}
@@ -884,10 +1007,10 @@ makePlot.gene.assignment.rates(byLane.plotter);
 
 \myincfig{indivPlot-13}{0.55\textwidth}{Splice junction loci}
 
-For each replicate, Figure \ref{indivPlot-13-fig} displays the number (y-axis) of splice junction \emph{loci} of each type that appear in the replicate's reads. Splice junctions are split into 4 groups, first by whether the splice junction appears in the transcript annotation gtf ("known" vs "novel"), and then by whether the splice junction has 4 or more reads covering it, or 1-3 reads ("Hi" vs "Lo").
+For each replicate, Figure \ref{indivPlot-13-fig} displays the number (y-axis) of splice junction \emph{loci} of each type that appear in the replicate's reads. Splice junctions are split into 4 groups, first by whether the splice junction appears in the transcript annotation gtf ("known" vs "novel"), and then by whether the splice junction has 4 or more reads covering it or 1-3 reads.
 
 The six categories of splice junction locus are:
-      \begin{itemize}
+      \begin{itemize} \small
         \item Known: The splice junction locus is found in the supplied transcript annotation gtf file.
         \item Novel: The splice junction locus is NOT found in the supplied transcript annotation gtf file.
         \item Known, 1-3 reads: The locus is known, and is only covered by 1-3 read-pairs.
@@ -896,13 +1019,17 @@ The six categories of splice junction locus are:
         \item Novel, 4+ reads: The locus is novel, and is covered by 4 or more read-pairs.
       \end{itemize}
 
-This plot can be used to detect a number of anomalies. For example: whether mapping or sequencing artifacts caused a disproportionate discovery of novel splice junctions in one sample or batch.
-
 This plot can be generated individually with the command:
 
 <<indivPlot-13,results="hide">>=
 makePlot.splice.junction.loci.counts(byLane.plotter);
 @
+
+\begin{framed} \small
+\emph{What it means and what to look for:} This plot can be used to detect a number of anomalies. For example: whether mapping or sequencing artifacts caused a disproportionate discovery of novel splice junctions in one sample or batch. It can also be used as an indicator of the comprehensiveness the genome annotation. Replicates that are obvious outliers may have sequencing/technical issues causing false detection of splice junctions.
+
+Abnormalities in the splice junction rates are generally a symptom of larger issues which will generally be picked up by other metrics. Numerous factors can reduce the efficacy by which aligners map across splice junctions, and as such these plots become very important if the intended downstream analyses include transcript assembly, transcript deconvolution, differential splicing, or any other form of analysis that in some way involves the splice junctions themselves. These plots can be used to assess whether other minor abnormalities observed in the other plots are of sufficient severity to impact splice junction mapping and thus potentially compromise such analyses.
+\end{framed}
 
 \pagebreak
 %----------
@@ -911,7 +1038,7 @@ makePlot.splice.junction.loci.counts(byLane.plotter);
 
 \myincfig{indivPlot-14d}{0.65\textwidth}{Number of splice junction events}
 
-For each replicate, Figure \ref{indivPlot-14d-fig} displays the number (y-axis) of all splice junction events falling into each of six categories. A splice junction "event" is one instance of a read-pair bridging a splice junction. Some reads may contain multiple splice junction events, some may contain none. If a splice junction appears on both reads of a read-pair, this is still only counted as a single "event".
+For each replicate, Figure \ref{indivPlot-14d-fig} displays the number (y-axis) of all splice junction events falling into each of the six junction categories. A splice junction "event" is one instance of a read-pair bridging a splice junction. Some reads may contain multiple splice junction events, some may contain none. If a splice junction appears on both reads of a read-pair, this is still only counted as a single "event".
 
 Note that because different samples/runs may have different total read counts and/or library sizes, this function is generally not the best for comparing between samples. In general, the event rates per read-pair should be used, see the next section, \ref{subsec:plotDesc-14}.
 
@@ -923,6 +1050,12 @@ This plot can be generated individually with the command:
 makePlot.splice.junction.event.counts(byLane.plotter);
 @
 
+\begin{framed} \small
+\emph{What it means and what to look for:} This plot is useful for identifying mapping and/or annotation issues, and can indicate the comprehensiveness the genome annotation. Replicates that are obvious outliers may have sequencing/technical issues causing false detection of splice junctions.
+
+Abnormalities in the splice junction rates are generally a symptom of larger issues which will generally be picked up by other metrics. Numerous factors can reduce the efficacy by which aligners map across splice junctions, and as such these plots become very important if the intended downstream analyses include transcript assembly, transcript deconvolution, differential splicing, or any other form of analysis that in some way involves the splice junctions themselves. These plots can be used to assess whether other minor abnormalities observed in the other plots are of sufficient severity to impact splice junction mapping and thus potentially compromise such analyses.
+\end{framed}
+
 \pagebreak
 %----------
 \subsubsection{Splice Junction Event Rates per Read-Pair} \label{subsec:plotDesc-14}
@@ -930,15 +1063,19 @@ makePlot.splice.junction.event.counts(byLane.plotter);
 
 \myincfig{indivPlot-14}{0.65\textwidth}{Splice junction events}
 
-For each replicate, Figure \ref{indivPlot-14-fig} displays the rate (y-axis) at which each type of splice junction events appear, per read-pair. 
-
-This plot is used to detect whether sample-specific or batch effects have a substantial or biased effect on splice junction appearance, either due to differences in the original RNA, or due to artifacts that alter the rate at which the aligner maps across splice junctions.
+For each replicate, Figure \ref{indivPlot-14-fig} displays the rate, per read-pair, (y-axis) at which each type of splice junction events appear. This is equivalent to the results seen in \ref{subsec:plotDesc-14d}, except that each sample is scaled by the number of reads belonging to that sample.
 
 This plot can be generated individually with the command:
 
 <<indivPlot-14,results="hide">>=
 makePlot.splice.junction.event.ratesPerRead(byLane.plotter);
 @
+
+\begin{framed} \small
+\emph{What it means and what to look for:} This plot is used to detect whether sample-specific or batch effects have a substantial or biased effect on splice junction appearance, either due to differences in the original RNA, or due to artifacts that alter the rate at which the aligner maps across splice junctions. It can assist in identifying mapping and/or annotation issues, and can indicate the comprehensiveness the genome annotation. Replicates that are obvious outliers may have sequencing/technical issues causing false detection of splice junctions.
+
+Abnormalities in the splice junction rates are generally a symptom of larger issues which will generally be picked up by other metrics. Numerous factors can reduce the efficacy by which aligners map across splice junctions, and as such these plots become very important if the intended downstream analyses include transcript assembly, transcript deconvolution, differential splicing, or any other form of analysis that in some way involves the splice junctions themselves. These plots can be used to assess whether other minor abnormalities observed in the other plots are of sufficient severity to impact splice junction mapping and thus potentially compromise such analyses.
+\end{framed}
 
 \pagebreak
 %----------
@@ -947,7 +1084,7 @@ makePlot.splice.junction.event.ratesPerRead(byLane.plotter);
 
 \myincfig{indivPlot-14c}{0.65\textwidth}{Proportions of splice junction events}
 
-For each replicate, Figure \ref{indivPlot-14c-fig} displays the proportion (y-axis) of all splice junction events falling into the six categories.
+For each replicate, Figure \ref{indivPlot-14c-fig} displays the proportion of all splice junctions events that bridge splice junctions of each of the six splice junction types.
 
 This plot is used to detect whether sample-specific or batch effects have a substantial or biased effect on splice junction appearance, either due to differences in the original RNA, or due to artifacts that alter the rate at which the aligner maps across splice junctions.
 
@@ -957,6 +1094,12 @@ This plot can be generated individually with the command:
 makePlot.splice.junction.event.proportions(byLane.plotter);
 @
 
+\begin{framed} \small
+\emph{What it means and what to look for:} This plot is used to detect whether sample-specific or batch effects have a substantial or biased effect on splice junction appearance, either due to differences in the original RNA, or due to artifacts that alter the rate at which the aligner maps across splice junctions. This plot is useful for identifying mapping and/or annotation issues, and can indicate the comprehensiveness the genome annotation. Replicates that are obvious outliers may have sequencing/technical issues causing false detection of splice junctions.
+
+Abnormalities in the splice junction rates are generally a symptom of larger issues which will generally be picked up by other metrics. Numerous factors can reduce the efficacy by which aligners map across splice junctions, and as such these plots become very important if the intended downstream analyses include transcript assembly, transcript deconvolution, differential splicing, or any other form of analysis that in some way involves the splice junctions themselves. These plots can be used to assess whether other minor abnormalities observed in the other plots are of sufficient severity to impact splice junction mapping and thus potentially compromise such analyses.
+\end{framed}
+
 \pagebreak
 %----------
 \subsubsection{Breakdown of Splice Junction Events, by locus type} \label{subsec:plotDesc-14b}
@@ -964,15 +1107,19 @@ makePlot.splice.junction.event.proportions(byLane.plotter);
 
 \myincfig{indivPlot-14b}{0.65\textwidth}{Splice junction events}
 
-For each replicate, Figure \ref{indivPlot-14b-fig} displays the proportion (y-axis) at which splice junction events appear on known vs novel splice junction loci, the proportion of known splice junction events that occur on low-coverage junctions (1-3 read-pairs) vs high-coverage junctions (4 or more read-pairs), and the proportion of novel splice junction events that occur on low vs high coverage junctions.
-
-This plot is used to detect whether sample-specific or batch effects have a substantial or biased effect on splice junction appearance, either due to differences in the original RNA, or due to artifacts that alter the rate at which the aligner maps across splice junctions.
+In Figure \ref{indivPlot-14b-fig} the left two columns display the proportion of splice junction events that are known vs novel. The middle columns display the proportion of known splice junction events that bridge junctions that have high (>4) vs low (1-3) read-pairs covering them. The right two columns display the proportion of novel splice junction events that bridge junctions that have high (>4) vs low (1-3) read-pairs covering them.
 
 This plot can be generated individually with the command:
 
 <<indivPlot-14b,results="hide">>=
 makePlot.splice.junction.event.proportionsByType(byLane.plotter);
 @
+
+\begin{framed} \small
+\emph{What it means and what to look for:} This plot is useful for identifying mapping and/or annotation issues, and can indicate the comprehensiveness the genome annotation. Replicates that are obvious outliers may have sequencing/technical issues causing false detection of splice junctions.
+
+Abnormalities in the splice junction rates are generally a symptom of larger issues which will generally be picked up by other metrics. Numerous factors can reduce the efficacy by which aligners map across splice junctions, and as such these plots become very important if the intended downstream analyses include transcript assembly, transcript deconvolution, differential splicing, or any other form of analysis that in some way involves the splice junctions themselves. These plots can be used to assess whether other minor abnormalities observed in the other plots are of sufficient severity to impact splice junction mapping and thus potentially compromise such analyses.
+\end{framed}
 
 \pagebreak
 %----------
@@ -985,13 +1132,15 @@ Figure \ref{indivPlot-15-fig} displays the rate at which reads appear to follow 
 
 This plot is used to detect whether your data is indeed stranded, and whether you are using the correct stranded data library type option. For unstranded libraries, one would expect all points to fall very close to the 50-50 center line. For stranded libraries, all points should fall closer to 99% vs 1%, with the vast majority of reads matching the selected library type. 
 
-If (and only if) all the replicates were run using the same strandedness and library type options, then green target boxes will be drawn around the areas where the points should appear. If points appear substantially outside these boxes, then you may be running QoRTs using the wrong library type options.
-
 This plot can be generated individually with the command:
 
 <<indivPlot-15,results="hide">>=
 makePlot.strandedness.test(byLane.plotter);
 @
+
+\begin{framed} \small
+\emph{What it means and what to look for:} This plot can indicate the efficiency of the strand-specific selection protocol, and reveal variations in such efficiency. They can also be used to determine the "strandedness rule", which is required by many downstream analysis tools.
+\end{framed}
 
 \pagebreak
 %----------
@@ -1010,7 +1159,11 @@ This plot can be generated individually with the command:
 makePlot.mapping.rates(byLane.plotter);
 @
 
-If the input read count data is not found, this will generate a placeholder plot.
+If the input read count or multi-mapped count information is not found, this will generate a placeholder plot.
+
+\begin{framed} \small
+\emph{What it means and what to look for:} Presence of outliers in the mapping rate statistics may be an indicator of large sample-prep, library-prep, or sequencer errors.
+\end{framed}
 
 \pagebreak
 %----------
@@ -1031,6 +1184,10 @@ This plot can be generated individually with the command:
 makePlot.chrom.type.rates(byLane.plotter);
 @
 
+\begin{framed} \small
+\emph{What it means and what to look for:} Presence of outliers in these plots may point to variable inefficiency in a ribosomal/mitochondrial depletion protocol. In most datasets the Y chromosome counts can be used to determine sample sex (but not in this case, since the Y chromosome is not included in the example dataset's genome assembly). The raw metrics generated by QoRTs can also be used to generate counts for the ERCC spike-ins or similar.
+\end{framed}
+
 \pagebreak
 %----------
 \subsubsection{Normalization Factors} \label{subsec:plotDesc-19}
@@ -1048,9 +1205,13 @@ This plot can be generated individually with the command:
 makePlot.norm.factors(byLane.plotter);
 @
 
+\begin{framed} \small
+\emph{What it means and what to look for:} These normalization factors can be used for a number of downstream analyses, including the generation of summary browser tracks.
+\end{framed}
+
 \pagebreak
 %----------
-\subsubsection{Normalization Factors} \label{subsec:plotDesc-19b}
+\subsubsection{Normalization Factor Ratio} \label{subsec:plotDesc-19b}
 %----------
 
 \myincfig{indivPlot-19b}{0.65\textwidth}{Normalization Factors vs TC}
@@ -1064,6 +1225,10 @@ This plot can be generated individually with the command:
 <<indivPlot-19b,results="hide">>=
 makePlot.norm.factors.vs.TC(byLane.plotter);
 @
+
+\begin{framed} \small
+\emph{What it means and what to look for:} Large variations in these ratios can indicate large-scale differences between the samples.
+\end{framed}
 
 \pagebreak
 %----------
@@ -1079,6 +1244,10 @@ This plot can be generated individually with the command:
 <<indivPlot-20,results="hide">>=
 makePlot.dropped.rates(byLane.plotter);
 @
+
+\begin{framed} \small
+\emph{What it means and what to look for:} This can be used to assess the occurrance rates of a number of failure modes. 
+\end{framed}
 
 \pagebreak
 %-----------------------------------------------------------
@@ -1132,7 +1301,7 @@ java -jar /path/to/jarfile/QoRTs.jar mergeCounts
 
 The list of QC data directories must be separated by commas and contain no whitespace.
 
-More information and a full accounting of all parameters and options can be found in the online documentation\footnote{Found here: \url{https://dl.dropboxusercontent.com/u/103621176/QoRTs/helpDocs/jarHtml/index.html}}, or by using the commands:
+More information and a full accounting of all parameters and options can be found in the online documentation\footnote{Found here: \url{http://hartleys.github.io/QoRTs/jarHtml/index.html}}, or by using the commands:
 \begin{verbatim}
 java -jar /path/to/jarfile/QoRTs.jar mergeAllCounts--man
 and
@@ -1174,7 +1343,7 @@ The chromLengthFile is a simple tab-delimited text file that includes each chrom
   \end{description}
 Many of the other parameters are identical to those used by the QC tool: \verb|--singleEnded|, \verb|--nameSorted|, etc. 
 
-More information and a full accounting of all parameters and options can be found in the online documentation\footnote{Found here: \url{https://dl.dropboxusercontent.com/u/103621176/QoRTs/helpDocs/jarHtml/index.html}}, or by using the command:
+More information and a full accounting of all parameters and options can be found in the online documentation\footnote{Found here: \url{http://hartleys.github.io/QoRTs/jarHtml/index.html}}, or by using the command:
 \begin{verbatim}
 java -jar /path/to/jarfile/QoRTs.jar bamToWiggle --man
 \end{verbatim}
@@ -1205,7 +1374,7 @@ There are a number of other alternative parameterizations. The \verb|--sampleLis
     \item[\texttt{--sizeFactorFile}]: A file containing at least two columns, the sample.ID and the size.factor. This file must include all samples in the sample list, but can include other samples that are not included in the sample list.
   \end{description}
 
-More information and a full accounting of all parameters and options can be found in the online documentation\footnote{Found here: \url{https://dl.dropboxusercontent.com/u/103621176/QoRTs/helpDocs/jarHtml/mergeWig.html}}, or by using the command:
+More information and a full accounting of all parameters and options can be found in the online documentation\footnote{Found here: \url{http://hartleys.github.io/QoRTs/jarHtml/mergeWig.html}}, or by using the command:
 \begin{verbatim}
 java -jar /path/to/jarfile/QoRTs.jar mergeWig --man
 \end{verbatim}
@@ -1233,7 +1402,7 @@ nts.withNovel.forJunctionSeq.txt.gz \
     \item[\texttt{--title}]: A prefix to append to each splice junction ID.
   \end{description}
 
-More information and a full accounting of all parameters and options can be found in the online documentation\footnote{Found here: \url{https://dl.dropboxusercontent.com/u/103621176/QoRTs/helpDocs/jarHtml/makeJunctionTrack.html}}, or by using the command:
+More information and a full accounting of all parameters and options can be found in the online documentation\footnote{Found here: \url{http://hartleys.github.io/QoRTs/jarHtml/makeJunctionTrack.html}}, or by using the command:
 \begin{verbatim}
 java -jar /path/to/jarfile/QoRTs.jar makeJunctionTrack --man
 \end{verbatim}
@@ -1258,7 +1427,7 @@ unctionAndExonCounts.withNovel.forJunctionSeq.txt.gz \
 
 As with the wiggle-file merge utility, there are a number of other alternative parameterizations. The \verb|--sampleList| parameter (which can be either a comma-delimited list or a ".txt" file containing a list) can be used along with the \verb|--infilePrefix| and \verb|--infileSuffix| to specify the file names if all of the wiggle files are in the same parent directory. The size factors can also be provided in a tab-delimited file using the \verb|--sizeFactorFile| parameter. If the \verb|--sizeFactors| and \verb|--sizeFactorFile| parameters are omitted then the non-normalized sums/means will be calculated.
 
-More information and a full accounting of all parameters and options can be found in the online documentation\footnote{Found here: \url{https://dl.dropboxusercontent.com/u/103621176/QoRTs/helpDocs/jarHtml/makeJunctionTrack.html}}, or by using the command:
+More information and a full accounting of all parameters and options can be found in the online documentation\footnote{Found here: \url{http://hartleys.github.io/QoRTs/jarHtml/makeJunctionTrack.html}}, or by using the command:
 \begin{verbatim}
 java -jar /path/to/jarfile/QoRTs.jar makeJunctionTrack --man
 \end{verbatim}
@@ -1325,10 +1494,31 @@ Although all reasonable efforts have been taken to ensure the accuracy and relia
 
 In any work or product derived from this material, proper attribution of the authors as the source of the software or data should be made, using "NHGRI Genome Technology Branch" as the citation.
 
-NOTE: The Scala package includes (internally) the sam-JDK library (sam-1.113.jar), from picard tools. 
-The MIT license and copyright information can be accessed using the command:
-\begin{verbatim}
-java -jar /path/to/jarfile/QoRTs.jar ? samjdkinfo
-\end{verbatim}
+The QoRTs Scala package includes (internally) the sam-JDK library (sam-1.113.jar) from picard tools, which is licensed under the MIT license:
+    The MIT License
+    Copyright (c) 2009 The Broad Institute
+    Permission is hereby granted, free of charge, to any person
+    obtaining a copy of this software and associated documentation
+    files (the "Software"), to deal in the Software without
+    restriction, including without limitation the rights to use,
+    copy, modify, merge, publish, distribute, sublicense, and/or
+    sell copies of the Software, and to permit persons to whom the
+    Software is furnished to do so, subject to the following
+    conditions:
+    The above copyright notice and this permission notice shall be
+    included in all copies or substantial portions of the Software.
+    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+    EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
+    OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+    NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+    HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+    WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+    FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
+    OTHER DEALINGS IN THE SOFTWARE.
+
+The MIT license and copyright information can also be accessed using the command:
+\begin{framed} \begin{verbatim}
+java -jar /path/to/jarfile/QoRTs.jar "?" samjdkinfo
+\end{verbatim}  \end{framed}
 
 \end{document}

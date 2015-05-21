@@ -9,8 +9,8 @@ import internalUtils.commandLineUI._;
 
 object runner {
   
-  final val QORTS_VERSION = "0.2.17"; // REPLACE_THIS_QORTS_VERSION_VARIABLE_WITH_VERSION_NUMBER          (note this exact text is used in a search-and-replace. Do not change it.)
-  final val QORTS_COMPILE_DATE = "Tue Apr 14 13:54:48 EDT 2015"; // REPLACE_THIS_QORTS_DATE_VARIABLE_WITH_DATE          (note this exact text is used in a search-and-replace. Do not change it.)
+  final val QORTS_VERSION = "0.3.3"; // REPLACE_THIS_QORTS_VERSION_VARIABLE_WITH_VERSION_NUMBER          (note this exact text is used in a search-and-replace. Do not change it.)
+  final val QORTS_COMPILE_DATE = "Thu May 21 12:39:22 EDT 2015"; // REPLACE_THIS_QORTS_DATE_VARIABLE_WITH_DATE          (note this exact text is used in a search-and-replace. Do not change it.)
   
   //final val FOR_HELP_STRING = "For help, use command: "
   
@@ -33,7 +33,6 @@ object runner {
            ("generateSamplePlots" -> (() => new fileConversionUtils.generatePlotsWithR.genSimplePlots))
            
             
-
            //(("prepFlatGtfFile",((fileConversionUtils.prepFlatGtfFile.run(_), "", "")))),
            //(("QC", ((qcUtils.runAllQC.run(_)),"",""))),
            //(("convertSoftToHardClipping", ((fileConversionUtils.convertSoftToHardClipping.run(_)),"",""))),
@@ -71,7 +70,15 @@ object runner {
     
     internalUtils.Reporter.reportln("Starting QoRTs v"+QORTS_VERSION+" (Compiled " + QORTS_COMPILE_DATE + ")","debug");
     internalUtils.Reporter.reportln("Starting time: ("+(new java.util.Date()).toString+")","debug");
-
+    
+    if(System.getProperty("sun.arch.data.model") == "32"){
+      internalUtils.Reporter.reportln(
+               "> Warning: 32-bit Java detected! 32-bit JVMs generally have a built-in hard ceiling on their memory usage. \n"+
+               ">          Usually between 1.5 and 3 gigabytes of RAM (The precise ceiling varies depending on the version, the hardware, and the operating system).\n"+
+               ">          It is generally recommended that you install a 64-bit version of Java, if available.\n"+
+               ">          This can be downloaded from \"www.java.com\".","warn")
+    } 
+    
     try{
 	    if(args.length == 0){
 	      internalUtils.Reporter.reportln("No command given!","output");

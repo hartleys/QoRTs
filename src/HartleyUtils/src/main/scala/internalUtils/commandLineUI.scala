@@ -84,7 +84,7 @@ List(
                                        ) :: 
                                        List();
   
-  class CommandLineArgParser(command : String, quickSynopsis : String, synopsis : String, description : String,  argList : List[Argument[Any]], authors : List[String] = DEFAULT_AUTHOR, legal : List[String] = DEFAULT_LEGAL) {
+  class CommandLineArgParser(command : String, quickSynopsis : String, synopsis : String, description : String,  argList : List[Argument[Any]], authors : List[String] = DEFAULT_AUTHOR, legal : List[String] = DEFAULT_LEGAL, manualExtras : String = "", markdownManualExtras : String = "") {
 
     //private var argMap = Map.empty[String,(Type, Any)];
     //private def registerArg[T](name : String, item : T)(implicit t : TypeTag[T]){
@@ -190,6 +190,8 @@ List(
         sb.append(arg.getFullDescription+"\n");
         sb.append("\n");
       }
+      sb.append(manualExtras);
+      
       sb.append("AUTHORS:\n");
       sb.append(lineseq2string(wrapLinesWithIndent(authors,CLUI_CONSOLE_LINE_WIDTH,"    ",false)) + "\n");
       
@@ -221,6 +223,8 @@ List(
       for(arg <- argList.filter(! _.argIsMandatory)){
         sb.append( arg.getFullMarkdownDescription);
       }
+      sb.append(markdownManualExtras);
+      
       sb.append("## AUTHORS:\n\n");
       sb.append(escapeToMarkdown(authors.mkString(", "))+ "\n\n");
       

@@ -25,7 +25,42 @@ import scala.collection.parallel.immutable.ParVector;
 
 object runAllQC {
   
-  final val QC_DEFAULT_ON_FUNCTION_LIST  : scala.collection.immutable.Set[String] = scala.collection.immutable.Set("InsertSize",
+  final val QC_DEFAULT_ON_FUNCTION_MAP : scala.collection.immutable.Map[String,String] = Map(
+                      ("InsertSize"                -> "Insert size distribution (paired-end data only)."),
+                      ("NVC"                       -> "Nucleotide-vs-Cycle counts."),
+                      ("CigarOpDistribution"       -> "Cigar operation rates by cycle and cigar operation length rates (deletions, insertions, splicing, clipping, etc)."),
+                      ("QualityScoreDistribution"  -> "Calculate quality scores by cycle."),
+                      ("GCDistribution"            -> "Calculate GC content distribution."),
+                      ("GeneCalcs"                 -> "Find gene assignment and gene body calculations."),
+                      ("JunctionCalcs"             -> "Find splice junctions (both novel and annotated)."),
+                      ("StrandCheck"               -> "Check the strandedness of the data. Note that if the stranded option is set incorrectly, this tool will automatically print a warning to that effect."),
+                      ("writeKnownSplices"         -> "Write known splice junction counts."),
+                      ("writeNovelSplices"         -> "Write novel splice junction counts."),
+                      ("writeJunctionSeqCounts"    -> "Write counts file designed for use with JunctionSeq (contains known splice junctions, gene counts, and exon counts)."),
+                      ("writeDESeq"                -> "Write gene-level read/read-pair counts file, suitable for use with DESeq, EdgeR, etc."),
+                      ("writeDEXSeq"               -> "Write exon-level read/read-pair counts file, designed for use with DEXSeq."),
+                      ("writeGeneBody"             -> "Write gene-body distribution file."),
+                      ("writeGenewiseGeneBody"     -> "Write file containing gene-body distributions for each (non-overlapping) gene."),
+                      ("writeGeneCounts"           -> "Write extended gene-level read/read-pair counts file (includes counts for CDS/UTR, ambiguous regions, etc)."),
+                      ("writeClippedNVC"           -> "Write NVC file containing clipped sequences."),
+                      ("chromCounts"               -> "Calculate chromosome counts")
+  );
+  
+  final val QC_DEFAULT_OFF_FUNCTION_MAP : scala.collection.immutable.Map[String,String] = Map(
+                      ("FPKM"                      -> "Write FPKM values. Note: FPKMs are generally NOT the recommended normalization method. We recommend using a more advanced normalization as provided by DESeq, edgeR, CuffLinks, or similar (default: OFF)"),
+                      ("annotatedSpliceExonCounts" -> "Write counts for exons, known-splice-junctions, and genes, with annotation columns indicating chromosome, etc (default: OFF)"),
+                      ("makeWiggles"               -> "Write \"wiggle\" coverage files with 100-bp window size. Note: this REQUIRES that the --chromSizes parameter be included! (default: OFF)"),
+                      ("makeJunctionBed"           -> "Write splice-junction count \"bed\" files. (default: OFF)"),
+                      ("makeAllBrowserTracks"      -> "Write both the \"wiggle\" and the splice-junction bed files (default: OFF)"),
+                      ("cigarMatch"                -> "Work-In-Progress: this function is a placeholder for future functionality, and is not intended for use at this time. (default: OFF)"),
+                      ("cigarLocusCounts"          -> "BETA: This function is still undergoing basic testing. It is not intended for production use at this time. (default: OFF)"),
+                      ("writeSpliceExon"           -> "Synonym for function \"writeJunctionSeqCounts\" (for backwards-compatibility)")
+  );
+  
+  final val QC_DEFAULT_ON_FUNCTION_LIST  : scala.collection.immutable.Set[String] = QC_DEFAULT_ON_FUNCTION_MAP.keySet;
+  final val QC_DEFAULT_OFF_FUNCTION_LIST  : scala.collection.immutable.Set[String] = QC_DEFAULT_OFF_FUNCTION_MAP.keySet;
+  
+  /*final val QC_DEFAULT_ON_FUNCTION_LIST  : scala.collection.immutable.Set[String] = scala.collection.immutable.Set("InsertSize",
                                                              "NVC",
                                                              "CigarOpDistribution",
                                                              "QualityScoreDistribution",
@@ -49,11 +84,12 @@ object runAllQC {
                                                              "makeWiggles",
                                                              "makeJunctionBed",
                                                              "makeAllBrowserTracks", 
-                                                             "cigarMatch");
+                                                             "cigarMatch",
+                                                             "cigarLocusCounts");*/
   final val QC_FUNCTION_LIST : scala.collection.immutable.Set[String] = QC_DEFAULT_ON_FUNCTION_LIST ++ QC_DEFAULT_OFF_FUNCTION_LIST;
   final val COMPLETED_OK_FILENAME = ".QORTS_COMPLETED_OK";
   final val COMPLETED_WARN_FILENAME = ".QORTS_COMPLETED_WARN";
-  final val MASTERLEVEL_FUNCTION_LIST = List[String]("GeneCalcs", "InsertSize","NVC","CigarOpDistribution","QualityScoreDistribution","GCDistribution","JunctionCalcs","StrandCheck","chromCounts","cigarMatch","makeWiggles");
+  //final val MASTERLEVEL_FUNCTION_LIST = List[String]("GeneCalcs", "InsertSize","NVC","CigarOpDistribution","QualityScoreDistribution","GCDistribution","JunctionCalcs","StrandCheck","chromCounts","cigarMatch","makeWiggles");
   
   
   final val QC_INCOMPATIBLE_WITH_SINGLE_END_FUNCTION_LIST : scala.collection.immutable.Set[String] = scala.collection.immutable.Set(
@@ -63,19 +99,20 @@ object runAllQC {
   //"InsertSize","NVC","CigarOpDistribution","QualityScoreDistribution","GCDistribution","GeneCalcs",
   //"JunctionCounts", "StrandCheck", "writeKnownSplices","writeNovelSplices","writeSpliceExon", 
   //"writeDESeq","writeDEXSeq","writeGenewiseGeneBody", "writeGeneCounts"
-  final val QC_FUNCTION_DEPENDANCIES : Map[String,String] = Map[String,String](
-      ("writeDESeq" -> "GeneCalcs"),
-      ("writeGeneCounts" -> "GeneCalcs"),
-      ("writeGenewiseGeneBody" -> "writeGeneBody"),
-      ("writeGenewiseGeneBody" -> "GeneCalcs"),
-      ("writeGeneBody" -> "GeneCalcs"),
-      ("writeDEXSeq" -> "JunctionCalcs"),
-      ("writeSpliceExon" -> "JunctionCalcs"),
-      ("writeKnownSplices" -> "JunctionCalcs"),
-      ("writeNovelSplices" -> "JunctionCalcs"),
-      ("annotatedSpliceExonCounts" -> "JunctionCalcs"),
-      ("writeClippedNVC" -> "NVC"),
-      ("makeAllBrowserTracks" -> "makeJunctionBed")
+  final val QC_FUNCTION_DEPENDANCIES : Map[String,Set[String]] = Map[String,Set[String]](
+      ("writeDESeq" -> Set("GeneCalcs")),
+      ("writeGeneCounts" -> Set("GeneCalcs")),
+      ("writeGenewiseGeneBody" -> Set("writeGeneBody")),
+      ("writeGenewiseGeneBody" -> Set("GeneCalcs")),
+      ("writeGeneBody" -> Set("GeneCalcs")),
+      ("writeDEXSeq" -> Set("JunctionCalcs")),
+      ("writeJunctionSeqCounts" -> Set("writeSpliceExon")), //backwards compatible synonym "writeSpliceExon"
+      ("writeSpliceExon" -> Set("JunctionCalcs")),
+      ("writeKnownSplices" -> Set("JunctionCalcs")),
+      ("writeNovelSplices" -> Set("JunctionCalcs")),
+      ("annotatedSpliceExonCounts" -> Set("JunctionCalcs")),
+      ("writeClippedNVC" -> Set("NVC")),
+      ("makeAllBrowserTracks" -> Set("makeJunctionBed","makeWiggles"))
   );
   
   final val SAM_PEEK_LINECT = 10000;
@@ -184,19 +221,19 @@ object runAllQC {
                     new BinaryArgument[List[String]](   name = "skipFunctions",
                                                         arg = List("--skipFunctions"),  
                                                         valueName = "func1,func2,...", 
-                                                        argDesc = "A comma-delimited list of functions to skip. Important: No whitespace! The default-on functions are: "+QC_DEFAULT_ON_FUNCTION_LIST.mkString(", "), 
+                                                        argDesc = "A list of functions to skip (comma-delimited, no whitespace). See the sub-functions list, below. The default-on functions are: "+QC_DEFAULT_ON_FUNCTION_LIST.mkString(", "), 
                                                         defaultValue = Some(List[String]())
                                                         ) ::
                     new BinaryArgument[List[String]](name = "addFunctions",
                                                         arg = List("--addFunctions"),  
                                                         valueName = "func1,func2,...", 
-                                                        argDesc = "A list of functions to add. This can be used to add functions that are off by default. Followed by a comma delimited list, with no internal whitespace. The default-off functions are: "+QC_DEFAULT_OFF_FUNCTION_LIST.mkString(", "), 
+                                                        argDesc = "A list of functions to add (comma-delimited, no whitespace). This can be used to add functions that are off by default. Followed by a comma delimited list, with no internal whitespace. See the sub-functions list, below. The default-off functions are: "+QC_DEFAULT_OFF_FUNCTION_LIST.mkString(", "), 
                                                         defaultValue = Some(List[String]())
                                                         ) :: 
                     new BinaryArgument[List[String]](name = "runFunctions",
                                                         arg = List("--runFunctions"),  
                                                         valueName = "func1,func2,...", 
-                                                        argDesc = "The complete list of functions to run. Setting this option runs ONLY for the functions explicitly requested here (along with any dependancy functions). The list should be formatted as a comma delimited list, with no internal whitespace. Allowed options are: "+QC_FUNCTION_LIST.mkString(", "), 
+                                                        argDesc = "The complete list of functions to run  (comma-delimited, no whitespace). Setting this option runs ONLY for the functions explicitly requested here (along with any functions upon which the assigned functions are dependent). See the sub-functions list, below. Allowed options are: "+QC_FUNCTION_LIST.mkString(", "), 
                                                         defaultValue = Some(List[String]())
                                                         ) :: 
                     new BinaryOptionArgument[Int](
@@ -280,7 +317,33 @@ object runAllQC {
                                        ) ::
                                        
 //BETA OPTIONS:
-                      new BinaryOptionArgument[String](
+                    /* Impossible: requires foreknowledge of top genes...
+                     * new BinaryOptionArgument[Double](
+                                         name = "ignoreTopQuantileGenes", 
+                                         arg = List("--ignoreTopQuantileGenes"), 
+                                         valueName = "val",  
+                                         argDesc =  "If this option is set, almost all analyses will ignore reads that appear to map to genes in the upper "+
+                                                    "quantile. The supplied value specifies the proportion of genes that should be ignored. This option overrides the \"--restrictToGeneList\" and \"--dropGeneList\" options.\n"+
+                                                    "WARNING: This feature is still EXPERIMENTAL, and is not yet fully tested or ready for production use."+
+                                                    ""+
+                                                    ""+
+                                                    ""+
+                                                    ""+
+                                                    ""+
+                                                    ""
+                                        ) ::*/
+                    new BinaryOptionArgument[String](
+                                         name = "extractReadsByMetric", 
+                                         arg = List("--extractReadsByMetric"), 
+                                         valueName = "metric=value",  
+                                         argDesc =  "THIS OPTIONAL PARAMETER IS STILL UNDER BETA TESTING. This parameter allows "+
+                                                    "the user to extract anomalous reads that showed up in previous QoRTs runs. "+
+                                                    "Currently reads can be extracted based on the following metrics: StrandTestStatus, InsertSize and GCcount."+
+                                                    ""+
+                                                    ""+
+                                                    ""
+                                        ) ::
+                    new BinaryOptionArgument[String](
                                          name = "restrictToGeneList", 
                                          arg = List("--restrictToGeneList"), 
                                          valueName = "geneList.txt",  
@@ -365,7 +428,18 @@ object runAllQC {
                                          name = "outdir",
                                          valueName = "qcDataDir",
                                          argDesc = "The output directory." // description
-                                        ) :: internalUtils.commandLineUI.CLUI_UNIVERSAL_ARGS
+                                        ) :: internalUtils.commandLineUI.CLUI_UNIVERSAL_ARGS,
+         manualExtras = QC_DEFAULT_ON_FUNCTION_MAP.foldLeft("DEFAULT SUB-FUNCTIONS\n")((soFar,curr) => {
+           soFar + "    "+curr._1+"\n"+wrapLineWithIndent(curr._2,internalUtils.commandLineUI.CLUI_CONSOLE_LINE_WIDTH,8)+"\n";
+         }) + QC_DEFAULT_OFF_FUNCTION_MAP.foldLeft("NON-DEFAULT SUB-FUNCTIONS\n")((soFar,curr) => {
+           soFar + "    "+curr._1+"\n"+wrapLineWithIndent(curr._2,internalUtils.commandLineUI.CLUI_CONSOLE_LINE_WIDTH,8)+"\n";
+         }),
+         markdownManualExtras = QC_DEFAULT_ON_FUNCTION_MAP.foldLeft("## DEFAULT SUB-FUNCTIONS:\n")((soFar,curr) => {
+           //"### "+(getFullSyntax()).replaceAll("_","\\\\_")+":\n\n> "+(describe()).replaceAll("_","\\\\_")+ (" ("+argType+")\n\n").replaceAll("_","\\\\_");
+           soFar + "* " + curr._1 + ": " + curr._2 + "\n\n";
+         }) + QC_DEFAULT_OFF_FUNCTION_MAP.foldLeft("## NON-DEFAULT SUB-FUNCTIONS:\n")((soFar,curr) => {
+           soFar + "* " + curr._1 + ": " + curr._2 + "\n\n";
+         })
       );
     
     def run(args : Array[String]){
@@ -401,7 +475,8 @@ object runAllQC {
           parser.get[String]("title"),
           parser.get[Boolean]("generatePlots") | parser.get[Boolean]("generateMultiPlot"),
           parser.get[Boolean]("generatePlots") | parser.get[Boolean]("generateSeparatePlots"),
-          parser.get[Boolean]("generatePlots") | parser.get[Boolean]("generatePdfReport")
+          parser.get[Boolean]("generatePlots") | parser.get[Boolean]("generatePdfReport"),
+          parser.get[Option[String]]("extractReadsByMetric")
       );
       }
     }
@@ -436,8 +511,9 @@ object runAllQC {
           trackTitlePrefix : String,
           generateMultiPlot : Boolean,
           generateSeparatePlots : Boolean,
-          generatePdfReport : Boolean){
-
+          generatePdfReport : Boolean,
+          extractReadsByMetric : Option[String]){
+    
     val outDirFile = new File(outdir);
     if(! outDirFile.exists()){
       reportln("Creating Directory: "+ outdir,"note");
@@ -477,7 +553,7 @@ object runAllQC {
       reportln("Note: read-sorting is irrelevant in single-ended mode.","note");
     } else {
       reportln("QoRTs is Running in paired-end mode.","note");
-      if(unsorted) reportln("QoRTs is Running in coordinate-sorted mode.","note");
+      if(unsorted) reportln("QoRTs is Running in any-sorted mode.","note");
       else         reportln("QoRTs is Running in name-sorted mode.","note");
     }
     
@@ -497,9 +573,33 @@ object runAllQC {
       runFunctions.toSet -- dropFunctions.toSet;
     }
     
-    val runFuncTEMP : scala.collection.immutable.Set[String] = (if(restrictToGeneList.isEmpty & dropGeneList.isEmpty) scala.collection.immutable.Set[String]() else scala.collection.immutable.Set[String]("GeneCalcs"));
-    val runFuncTEMP2 = (runFunc_initial ++ runFuncTEMP).foldLeft(runFunc_initial ++ runFuncTEMP)((soFar,currFunc) => {
+    val runFuncTEMP : scala.collection.immutable.Set[String] = (if(restrictToGeneList.isEmpty & dropGeneList.isEmpty) scala.collection.immutable.Set[String]() else {
+      reportln("NOTE: Options \"--restrictToGeneList\" and \"--dropGeneList\" require function \"GeneCalcs\". Adding \"GeneCalcs\" to the active function list...","note")
+      scala.collection.immutable.Set[String]("GeneCalcs");
+    });
+    
+    def addDependencies(currFunc : String, soFar : scala.collection.immutable.Set[String]) : scala.collection.immutable.Set[String] = {
       QC_FUNCTION_DEPENDANCIES.get(currFunc) match {
+        case Some(reqFuncSet) => {
+          val addFunc = reqFuncSet -- soFar;
+          addFunc.foreach((rf) => { reportln("NOTE: Function \"" + currFunc +"\" requires function \"" + rf + "\". Adding \""+rf+"\" to the active function list...","note") });
+          val newFuncSet = soFar ++ addFunc;
+          
+          addFunc.foldLeft(newFuncSet)((sf, cf) => {
+            addDependencies(cf,sf);
+          });
+        }
+        case None => {
+          soFar;
+        }
+      }
+    }
+    
+    //val runFuncTEMP2 = 
+    
+    val runFuncTEMP2 = (runFunc_initial ++ runFuncTEMP).foldLeft(runFunc_initial ++ runFuncTEMP)((soFar,currFunc) => {
+      addDependencies(currFunc,soFar);
+      /*QC_FUNCTION_DEPENDANCIES.get(currFunc) match {
         case Some(reqFunc) => {
           if(soFar.contains(reqFunc)){
             soFar;
@@ -511,7 +611,7 @@ object runAllQC {
         case None => {
           soFar;
         }
-      }
+      }*/
     });
     val runFunc = if(! isSingleEnd) runFuncTEMP2 else {
       runFuncTEMP2 -- QC_INCOMPATIBLE_WITH_SINGLE_END_FUNCTION_LIST;
@@ -564,6 +664,50 @@ object runAllQC {
     setQcOptions(noGzipOutput);
     val anno_holder = new qcGtfAnnotationBuilder(gtffile , flatgtffile , stranded , stdGtfCodes, flatGtfCodes);
     
+    //Add extract genes by metric function:
+    //StrandTestStatus, InsertSize and GCcount
+    val extractReadsFunction : Option[((String, Int, (Int,Int)) => Boolean)] = extractReadsByMetric match {
+      case Some(erbm) => {
+        val f = erbm.split(",").map((metricString : String) => {
+          val metricArray = metricString.split("=");
+          if(metricArray.length != 2) {
+            error("Badly formatted extractReadsByMetric parameter");
+          }
+          if(metricArray(0) == "StrandTestStatus"){
+            (st : String, insertSize : Int, gc : (Int,Int)) => {
+              st == metricArray(1);
+            }; 
+          } else if(metricArray(0) == "InsertSize"){
+            val targetSize = string2int(metricArray(1));
+            (st : String, insertSize : Int, gc : (Int,Int)) => {
+              insertSize == targetSize;
+            }; 
+          } else if(metricArray(0) == "GCcount"){
+            val target = string2int(metricArray(1));
+            (st : String, insertSize : Int, gc : (Int,Int)) => {
+              target == gc._1 + gc._2;
+            }; 
+          } else {
+            error("Badly formatted extractReadsByMetric parameter. Unreciognized metric: " + metricArray(0));
+            (st : String, insertSize : Int, gc : (Int,Int)) => {
+              false;
+            }; 
+          }
+        });
+        
+        Some(f.tail.foldLeft(f.head)((soFar,curr) => {
+          (st : String, insertSize : Int, gc : (Int,Int)) => {
+            soFar(st,insertSize,gc) && curr(st,insertSize,gc);
+          };
+        }));
+      }
+      case None => {
+        None;
+      }
+    }
+    
+    
+    
     if(parallelFileRead){
       reportln("ERROR ERROR ERROR: parallel file read is NOT IMPLEMENTED AT THIS TIME!","warn");
       //runOnSeqFile_PAR(initialTimeStamp = initialTimeStamp, infile = infile, outfile = outfile, anno_holder = anno_holder, testRun = testRun, runFunc = runFunc, stranded = stranded, fr_secondStrand = fr_secondStrand, dropChrom = dropChrom, keepMultiMapped = keepMultiMapped, noMultiMapped = noMultiMapped, numThreads = numThreads, readGroup )
@@ -577,7 +721,8 @@ object runAllQC {
           outdir = outdir,
           generateMultiPlot = generateMultiPlot,
           generateSeparatePlots=generateSeparatePlots,
-          generatePdfReport=generatePdfReport)
+          generatePdfReport=generatePdfReport,
+          extractReadsFunction = extractReadsFunction)
     }
   }
   
@@ -606,7 +751,8 @@ object runAllQC {
                    outdir : String,
                    generateMultiPlot : Boolean,
                    generateSeparatePlots : Boolean,
-                   generatePdfReport : Boolean){
+                   generatePdfReport : Boolean,
+                   extractReadsFunction : Option[((String, Int, (Int,Int)) => Boolean)]){
     
     val inputReadCt : Option[Int] = seqReadCt match {
       case Some(ct) => Some(ct);
@@ -714,22 +860,41 @@ object runAllQC {
     //"writeKnownSplices","writeNovelSplices","writeSpliceExon", "writeDESeq","writeDEXSeq","writeGenewiseGeneBody"
     //  final val QC_FUNCTION_LIST : Seq[String] = Seq("InsertSize","NVC","CigarOpDistribution","QualityScoreDistribution","GCDistribution","GeneCounts","JunctionCounts");
     val qcGGC:  QCUtility[String] =   if(runFunc.contains("GeneCalcs"))                 new qcGetGeneCounts(stranded,fr_secondStrand,anno_holder,coda,coda_options,40, runFunc.contains("FPKM"), runFunc.contains("writeGenewiseGeneBody"), runFunc.contains("writeDESeq"), runFunc.contains("writeGeneCounts"), runFunc.contains("writeGeneBody"), geneKeepFunc) else QCUtility.getBlankStringUtil;
-    val qcIS :  QCUtility[Unit]   =   if(runFunc.contains("InsertSize"))                new qcInnerDistance(anno_holder, stranded, fr_secondStrand, readLength)        else QCUtility.getBlankUnitUtil;
+    val qcIS :  QCUtility[Int]    =   if(runFunc.contains("InsertSize"))                new qcInnerDistance(anno_holder, stranded, fr_secondStrand, readLength)        else QCUtility.getBlankIntUtil;
     val qcCS :  QCUtility[Unit]   =   if(runFunc.contains("NVC"))                       new qcNVC(isSingleEnd, readLength, runFunc.contains("writeClippedNVC"))                     else QCUtility.getBlankUnitUtil;
     val qcJD :  QCUtility[Unit]   =   if(runFunc.contains("CigarOpDistribution"))       new qcCigarDistribution(isSingleEnd, readLength)                                            else QCUtility.getBlankUnitUtil;
     val qcQSC : QCUtility[Unit]   =   if(runFunc.contains("QualityScoreDistribution"))  new qcQualityScoreCounter(isSingleEnd, readLength, qcQualityScoreCounter.MAX_QUALITY_SCORE) else QCUtility.getBlankUnitUtil;
-    val qcGC :  QCUtility[Unit]   =   if(runFunc.contains("GCDistribution"))            new qcGCContentCount(isSingleEnd, readLength)                                               else QCUtility.getBlankUnitUtil;
+    val qcGC :  QCUtility[(Int,Int)]= if(runFunc.contains("GCDistribution"))      new qcGCContentCount(isSingleEnd, readLength)                                               else QCUtility.getBlankIntPairUtil;
     val qcJC :  QCUtility[Unit]   =   if(runFunc.contains("JunctionCalcs"))             new qcJunctionCounts(anno_holder, stranded, fr_secondStrand, runFunc.contains("writeDEXSeq"), runFunc.contains("writeSpliceExon"), runFunc.contains("writeKnownSplices"), runFunc.contains("writeNovelSplices"), runFunc.contains("annotatedSpliceExonCounts"))                   else QCUtility.getBlankUnitUtil;
-    val qcST :  QCUtility[Unit]   =   if(runFunc.contains("StrandCheck"))               new qcStrandTest(isSingleEnd, anno_holder, stranded, fr_secondStrand)                       else QCUtility.getBlankUnitUtil;
-    val qcCC :  QCUtility[Unit]   =   if(runFunc.contains("chromCounts"))               new qcChromCount(isSingleEnd, fr_secondStrand)                                              else QCUtility.getBlankUnitUtil;
+    val qcST :  QCUtility[String] =   if(runFunc.contains("StrandCheck"))               new qcStrandTest(isSingleEnd, anno_holder, stranded, fr_secondStrand)                       else QCUtility.getBlankStringUtil;
+    val qcCC :  QCUtility[String] =   if(runFunc.contains("chromCounts"))               new qcChromCount(isSingleEnd, fr_secondStrand)                                              else QCUtility.getBlankStringUtil;
     val qcCM :  QCUtility[Unit]   =   if(runFunc.contains("cigarMatch"))                new qcCigarMatch(readLength)                                                   else QCUtility.getBlankUnitUtil;
+    val qcCLC : QCUtility[(Int,Int)]= if(runFunc.contains("cigarLocusCounts"))      new qcCigarLocusCounts(stranded,fr_secondStrand,true,true,5)                                    else QCUtility.getBlankIntPairUtil;
     val qcWIG : QCUtility[Unit]   =   if(runFunc.contains("makeWiggles"))               new fileConversionUtils.bamToWiggle.QcBamToWig(trackTitlePrefix,
                                                                                                                    chromSizes.get,false,100,
                                                                                                                    isSingleEnd, stranded, fr_secondStrand, 
                                                                                                                    1.0, true, true, true, None, "") else QCUtility.getBlankUnitUtil;
     
+    val extractWriter : Option[WriterUtil] = extractReadsFunction match {
+      case Some(f) => Some(openWriter(outfile + ".extractedReads.sam"));
+      case None => None;
+    }
+    val writeExtractedReads = ((r1 : SAMRecord, r2 : SAMRecord) => {
+      extractWriter match {
+        case Some(w) => {
+          w.write(r1.getSAMString+"\n");
+          w.write(r2.getSAMString+"\n");
+        }
+        case None => {
+          reportln("Warning: impossible state.\n","warn");
+          //Do nothing? This should never happen.
+        }
+      }
+    });
+    
+    
     //val qcALL = parConvert(Vector(qcGGC, qcIS, qcCS, qcJD, qcQSC, qcGC, qcJC, qcST, qcCC, qcCM), numThreads);
-    val qcALL = Vector(qcGGC, qcIS, qcCS, qcJD, qcQSC, qcGC, qcJC, qcST, qcCC, qcCM);
+    val qcALL = Vector(qcGGC, qcIS, qcCS, qcJD, qcQSC, qcGC, qcJC, qcST, qcCC, qcCM, qcCLC);
     
     reportln("QC Utilities Generated!","note");
     standardStatusReport(initialTimeStamp);
@@ -747,21 +912,44 @@ object runAllQC {
           val gene = qcGGC.runOnReadPair(r1,r2,readNum);
           if( geneKeepFunc(gene) ){
           //if( geneListKeep.get.contains(gene) ){
-            qcIS.runOnReadPair(r1,r2,readNum);
+            val ins = qcIS.runOnReadPair(r1,r2,readNum);
             qcCS.runOnReadPair(r1,r2,readNum);
             qcJD.runOnReadPair(r1,r2,readNum);
             qcQSC.runOnReadPair(r1,r2,readNum);
-            qcGC.runOnReadPair(r1,r2,readNum);
+            val gc = qcGC.runOnReadPair(r1,r2,readNum);
             qcJC.runOnReadPair(r1,r2,readNum);
-            qcST.runOnReadPair(r1,r2,readNum);
+            val st = qcST.runOnReadPair(r1,r2,readNum);
             qcCC.runOnReadPair(r1,r2,readNum);
             qcCM.runOnReadPair(r1,r2,readNum);
+            qcCLC.runOnReadPair(r1,r2,readNum);
             qcWIG.runOnReadPair(r1,r2,readNum);
             useReadNum += 1;
+            
+            val extract = extractReadsFunction match {
+              case Some(erf) => {
+                erf(st,ins,gc);
+              }
+              case None => {
+                false;
+              }
+            }
+            if(extract) {
+              writeExtractedReads(r1,r2);
+            }
+            
             if(internalUtils.commonSeqUtils.isReadMultiMapped(r1) || internalUtils.commonSeqUtils.isReadMultiMapped(r2)){
               keptMultiMappedCt += 1;
             }
           }
+      }
+    }
+    
+    extractWriter match {
+      case Some(w) => {
+        w.close();
+      }
+      case None => {
+        //Do nothing.
       }
     }
     

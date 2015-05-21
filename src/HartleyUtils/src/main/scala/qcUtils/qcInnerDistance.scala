@@ -348,7 +348,7 @@ object qcInnerDistance {
 
 }
 
-class qcInnerDistance(annoHolder : qcGtfAnnotationBuilder, stranded : Boolean, fr_secondStrand : Boolean, readLength : Int)  extends QCUtility[Unit] {
+class qcInnerDistance(annoHolder : qcGtfAnnotationBuilder, stranded : Boolean, fr_secondStrand : Boolean, readLength : Int)  extends QCUtility[Int] {
   reportln("> Init InsertSize Utility","debug");
   val spliceAnnotation : GenMap[(String,Char),TreeSet[(Int,Int)]] = annoHolder.spliceJunctionTreeMap;
   
@@ -362,7 +362,7 @@ class qcInnerDistance(annoHolder : qcGtfAnnotationBuilder, stranded : Boolean, f
   val insertSizeMap_partialOverlap : scala.collection.mutable.Map[Int,Int] = scala.collection.mutable.Map[Int,Int]().withDefault(i => 0);
   val insertSizeMap_staggeredOverlap : scala.collection.mutable.Map[Int,Int] = scala.collection.mutable.Map[Int,Int]().withDefault(i => 0);
   
-  def runOnReadPair(r1 : SAMRecord, r2 : SAMRecord, readNum : Int){
+  def runOnReadPair(r1 : SAMRecord, r2 : SAMRecord, readNum : Int) : Int = {
     val inSize = qcInnerDistance.getInsertSize(r1,r2, spliceAnnotation, stranded, fr_secondStrand);
     //reportln("InsertSize = " + inSize + "\n################################################","note");
     insertSizeMap(inSize._1) += 1;
@@ -378,6 +378,7 @@ class qcInnerDistance(annoHolder : qcGtfAnnotationBuilder, stranded : Boolean, f
       insertSizeMap_partialOverlap(inSize._1) += 1;
       //insertSizeMap_partialOverlap = insertSizeMap_partialOverlap.updated(inSize._1, insertSizeMap_partialOverlap(inSize._1) + 1);
     }
+    return(inSize._1);
   }
   
   def writeOutput(outfile : String, summaryWriter : WriterUtil){

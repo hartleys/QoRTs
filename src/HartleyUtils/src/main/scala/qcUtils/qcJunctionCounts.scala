@@ -79,7 +79,7 @@ object qcJunctionCounts {
     })
   }
   
-}
+} 
 //runFunc.contains("writeDEXSeq"), runFunc.contains("writeSpliceExon"), runFunc.contains("writeKnownSplices"), runFunc.contains("writeNovelSplices")
 class qcJunctionCounts(anno_holder : qcGtfAnnotationBuilder, stranded : Boolean, fr_secondStrand : Boolean, 
                        writeDEXSeq : Boolean, writeSpliceExon : Boolean, writeKnownSplices : Boolean, writeNovelSplices : Boolean, annotatedSpliceExonCounts : Boolean,

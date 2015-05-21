@@ -49,4 +49,77 @@ object genomicUtils {
     }
   }
   
+  case class CigarBlock(refStart : Int, refEnd : Int, readStart : Int, readEnd : Int, op : CigarOperator, len : Int){
+    
+  }
+  //FIX ME FIX ME FIX ME!
+  def getCigarBlocksFromRead(r : SAMRecord) : Iterator[CigarBlock] = {
+    val out = new Iterator[CigarBlock](){
+      var currReadPos = 0;
+      var currRefPos = r.getAlignmentStart() - 1;
+      val cigIter = r.getCigar().getCigarElements.iterator;
+      
+      def next : CigarBlock = {
+        val ce : CigarElement = cigIter.next;
+        val op = ce.getOperator();
+        val len = ce.getLength();
+        
+        val refEnd = if(op.consumesReferenceBases()) currRefPos + len else currRefPos;
+        val readEnd = if(op.consumesReadBases()) currReadPos + len else currReadPos;
+        currReadPos = readEnd;
+        currRefPos = refEnd; 
+        
+        CigarBlock(currRefPos, refEnd, currReadPos, readEnd, op, len);
+      }
+      def hasNext : Boolean = cigIter.hasNext;
+    }
+    
+    if(r.getReadNegativeStrandFlag()){
+      return out
+      //FIX ME FIX ME FIX ME!
+    } else {
+      return out;
+    }
+
+  }
+  
+  /*def getBasePositionsFromRead(r : SAMRecord) : Iterator[(Int, Int, CigarOperator)] = {
+    val cb = getCigarBlocksFromRead(r);
+    //val cb = cbAll.filter(_.op.consumesReadBases());
+    
+    cb.foldLeft(Iterator[(Int,CigarOperator)]())((soFar, b) => {
+      if(b.op.consumesReadBases){
+        soFar ++ (b.refStart until b.refEnd).zip(b.readStart until b.readEnd).iterator.map( (_,b.op) );
+      } else {
+        soFar;
+      }
+    });
+  }*/
+  def getAlignedBasePositionsFromRead(r : SAMRecord) : Vector[(Int, Int)] = {
+    val cb = getCigarBlocksFromRead(r);
+    //val cb = cbAll.filter(_.op.consumesReadBases());
+    
+    cb.filter(_.op.equals(CigarOperator.MATCH_OR_MISMATCH)).foldLeft(Vector[(Int,Int)]())((soFar, b) => {
+      soFar ++ (b.refStart until b.refEnd).zip((b.readStart until b.readEnd)).toVector;
+    });
+  }
+  
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

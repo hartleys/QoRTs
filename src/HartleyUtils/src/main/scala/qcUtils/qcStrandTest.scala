@@ -57,7 +57,7 @@ object qcStrandTest {
   
 }
 
-class qcStrandTest(isSingleEnd : Boolean, anno_holder : qcGtfAnnotationBuilder, stranded : Boolean, fr_secondStrand_bool : Boolean) extends QCUtility[Unit] {
+class qcStrandTest(isSingleEnd : Boolean, anno_holder : qcGtfAnnotationBuilder, stranded : Boolean, fr_secondStrand_bool : Boolean) extends QCUtility[String] {
   reportln("> Init StrandCheck Utility","debug");
 
   val strandedGeneArray = anno_holder.strandedGeneArray;
@@ -68,31 +68,43 @@ class qcStrandTest(isSingleEnd : Boolean, anno_holder : qcGtfAnnotationBuilder, 
   var ambig_noFeature = 0;
   var ambig_other = 0;
   
-  def runOnReadPair(r1 : SAMRecord, r2 : SAMRecord, readNum : Int){
+  def runOnReadPair(r1 : SAMRecord, r2 : SAMRecord, readNum : Int) : String = {
     if(! isSingleEnd){
       val (r1t, r2t) = qcStrandTest.strandTestPair(r1,r2,strandedGeneArray);
     
       if( r1t == 1 && r2t == 2){
         fr_secondStrand += 1;
+        return("fr_secondStrand");
       } else if(r1t == 2 && r2t == 1){
         fr_firstStrand += 1;
+        return("fr_firstStrand");
       } else if(r1t == 3 || r2t == 3){
         ambig_featuresFoundOnBothStrands += 1;
+        return("ambig_featuresFoundOnBothStrands");
       } else if(r1t == 0 || r2t == 0){
         ambig_noFeature += 1;
+        return("ambig_noFeature");
       } else {
         ambig_other += 1;
+        return("ambig_other");
       }
     } else {
       val r1t = qcStrandTest.strandTestSingleRead(r1, strandedGeneArray);
       if(r1t == 1){
         fr_secondStrand += 1;
+        return("fr_secondStrand");
       } else if(r1t == 2){
         fr_firstStrand += 1;
+        return("fr_firstStrand");
       } else if(r1t == 3){
         ambig_featuresFoundOnBothStrands += 1;
+        return("ambig_featuresFoundOnBothStrands");
       } else if(r1t == 0){
         ambig_noFeature += 1;
+        return("ambig_noFeature");
+      } else {
+        ambig_other += 1;
+        return("ambig_other");
       }
     }
   }

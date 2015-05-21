@@ -562,11 +562,11 @@ $external_latex_labels{$key} = q|1|;
 $noresave{$key} = "$nosave";
 
 $key = q/figure_indivPlot-5/;
-$external_latex_labels{$key} = q|12|; 
+$external_latex_labels{$key} = q|13|; 
 $noresave{$key} = "$nosave";
 
 $key = q/subsec:plotDesc-8/;
-$external_latex_labels{$key} = q|7.4.8|; 
+$external_latex_labels{$key} = q|7.4.5|; 
 $noresave{$key} = "$nosave";
 
 $key = q/sec:memUsage/;
@@ -658,7 +658,7 @@ $external_latex_labels{$key} = q|7.4.22|;
 $noresave{$key} = "$nosave";
 
 $key = q/indivPlot-8-fig/;
-$external_latex_labels{$key} = q|15|; 
+$external_latex_labels{$key} = q|12|; 
 $noresave{$key} = "$nosave";
 
 $key = q/subsec:plotDesc-14/;
@@ -754,7 +754,7 @@ $external_latex_labels{$key} = q|9|;
 $noresave{$key} = "$nosave";
 
 $key = q/subsec:plotDesc-6/;
-$external_latex_labels{$key} = q|7.4.6|; 
+$external_latex_labels{$key} = q|7.4.8|; 
 $noresave{$key} = "$nosave";
 
 $key = q/subsec:plotDesc-14d/;
@@ -786,7 +786,7 @@ $external_latex_labels{$key} = q|25|;
 $noresave{$key} = "$nosave";
 
 $key = q/indivPlot-5-fig/;
-$external_latex_labels{$key} = q|12|; 
+$external_latex_labels{$key} = q|13|; 
 $noresave{$key} = "$nosave";
 
 $key = q/figure_compileSummaryPlots1/;
@@ -850,7 +850,7 @@ $external_latex_labels{$key} = q|7.4.11|;
 $noresave{$key} = "$nosave";
 
 $key = q/figure_indivPlot-8/;
-$external_latex_labels{$key} = q|15|; 
+$external_latex_labels{$key} = q|12|; 
 $noresave{$key} = "$nosave";
 
 $key = q/indivPlot-2-fig/;
@@ -890,7 +890,7 @@ $external_latex_labels{$key} = q|21|;
 $noresave{$key} = "$nosave";
 
 $key = q/indivPlot-6-fig/;
-$external_latex_labels{$key} = q|13|; 
+$external_latex_labels{$key} = q|15|; 
 $noresave{$key} = "$nosave";
 
 $key = q/figure_indivPlot-12/;
@@ -926,7 +926,7 @@ $external_latex_labels{$key} = q|4|;
 $noresave{$key} = "$nosave";
 
 $key = q/figure_indivPlot-6/;
-$external_latex_labels{$key} = q|13|; 
+$external_latex_labels{$key} = q|15|; 
 $noresave{$key} = "$nosave";
 
 $key = q/sec:quickstart/;
@@ -950,7 +950,7 @@ $external_latex_labels{$key} = q|7.4.25|;
 $noresave{$key} = "$nosave";
 
 $key = q/subsec:plotDesc-5/;
-$external_latex_labels{$key} = q|7.4.5|; 
+$external_latex_labels{$key} = q|7.4.6|; 
 $noresave{$key} = "$nosave";
 
 $key = q/sec:recs/;

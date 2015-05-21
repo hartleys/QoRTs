@@ -13,7 +13,7 @@ object qcGCContentCount {
 
 }
 
-class qcGCContentCount(isSingleEnd : Boolean, readLength : Int) extends QCUtility[Unit] {
+class qcGCContentCount(isSingleEnd : Boolean, readLength : Int) extends QCUtility[(Int,Int)] {
   reportln("> Init GC counts Utility","debug");
   val readLen = readLength;
   val gcContentCounts : Array[Int] = Array.ofDim[Int](2 * readLen + 1);
@@ -26,7 +26,7 @@ class qcGCContentCount(isSingleEnd : Boolean, readLength : Int) extends QCUtilit
   val gcContentCounts_byLength : Array[Array[Int]] =  Array.ofDim[Int](readLen + 1,readLen + 1);
   //val gcContentCountsR2_byLength : Array[Array[Int]] =  Array.ofDim[Int](readLen + 1,readLen + 1);
 
-  def runOnReadPair(r1 : SAMRecord, r2 : SAMRecord, readNum : Int){
+  def runOnReadPair(r1 : SAMRecord, r2 : SAMRecord, readNum : Int) : (Int,Int) = {
     val r1c = countGCs(r1);
     val r2c = countGCs(r2);
     val gcCount = r1c + r2c;
@@ -47,6 +47,8 @@ class qcGCContentCount(isSingleEnd : Boolean, readLength : Int) extends QCUtilit
     
     gcContentCounts_byLength(len1 - r1n)(r1c) += 1;
     gcContentCounts_byLength(len2 - r2n)(r2c) += 1;
+    
+    return (r1c,r2c);
   }
   
   def writeOutput(outfile : String, summaryWriter : WriterUtil){

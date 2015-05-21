@@ -19,13 +19,39 @@ object QCUtility {
   def getBlankStringUtil : QCUtility[String] = {
     new blankStringQCUtility;
   }
+  def getBlankIntUtil : QCUtility[Int] = {
+    new blankIntQCUtility;
+  }
+  
   def getBlankUnitUtil : QCUtility[Unit] = {
     new blankUnitQCUtility;
   }
+  def getBlankIntPairUtil : QCUtility[(Int,Int)] = new blankIntPairQCUtility;
+  
   
   //def getBlankUtil[T] : QCUtility[T] = {
     
   //}
+  
+  class blankIntPairQCUtility extends QCUtility[(Int,Int)] {
+    def runOnReadPair(r1 : SAMRecord, r2 : SAMRecord, readNum : Int) : (Int,Int) = {
+      (-1, -1);
+    }
+    def writeOutput(outfile : String, summaryWriter : WriterUtil){
+      //do nothing!
+    }
+    def getUtilityName : String = "blankIntPairQCUtility";
+  }
+  
+  class blankIntQCUtility extends QCUtility[Int] {
+    def runOnReadPair(r1 : SAMRecord, r2 : SAMRecord, readNum : Int) : Int = {
+      -1;
+    }
+    def writeOutput(outfile : String, summaryWriter : WriterUtil){
+      //do nothing!
+    }
+    def getUtilityName : String = "blankIntQCUtility";
+  }
   
   class blankStringQCUtility extends QCUtility[String] {
     def runOnReadPair(r1 : SAMRecord, r2 : SAMRecord, readNum : Int) : String = {
