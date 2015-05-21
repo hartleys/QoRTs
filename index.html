@@ -1,13 +1,42 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
-<html><head><title>R: Quality of RNA-seq Tool</title>
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-<link rel="stylesheet" type="text/css" href="R.css">
-</head>
-<body>
-<h1>QoRTs: Quality of RNA-seq Tool-Set</h1>
+<!DOCTYPE html>
 
-<p>v0.2.17
-Revised Tue Apr 14 13:54:48 EDT 2015</p>
+<html>
+		<head>
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="chrome=1">
+		<title>QoRTs: Quality of RNA-Seq Toolset</title>
+
+		<link rel="stylesheet" href="stylesheets/styles.css">
+		<link rel="stylesheet" href="stylesheets/pygment_trac.css">
+		<script src="javascripts/scale.fix.js"></script>
+		<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+
+		<!--[if lt IE 9]>
+		<script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+		<![endif]-->
+</head>
+
+<body>
+<div class="wrapper">
+
+
+<header>
+			<h1><a href="index.html">QoRTs</a></h1>
+			<p>Quality of RNA-seq Toolset</p>
+			<p class="view"><a href="https://github.com/hartleys/QoRTs">View the Project on GitHub <small>Stephen Hartley</small></a></p>
+			<ul>
+				<li><a href="https://github.com/hartleys/QoRTs/releases/latest">Latest <strong>Release</strong></a></li>
+				<li><a href="https://github.com/hartleys/QoRTs/zipball/master">Download <strong>ZIP File</strong></a></li>
+				<li><a href="https://github.com/hartleys/QoRTs/tarball/master">Download <strong>TAR Ball</strong></a></li>
+				<li><a href="https://github.com/hartleys/QoRTs">View On <strong>GitHub</strong></a></li>
+			</ul>
+</header>
+
+
+<section><h1>QoRTs: Quality of RNA-seq Tool-Set</h1>
+
+<p>v0.3.3
+Revised Thu May 21 12:39:22 EDT 2015</p>
 
 <p>The QoRTs software package is a fast, efficient, and portable multifunction toolkit designed to assist in
 the analysis, quality control, and data management of RNA-Seq datasets. Its primary function is to aid
@@ -20,7 +49,7 @@ files suitable for use with the UCSC genome browser (or any compatible browser).
 
 <p>The most recent release of QoRTs is available on the <a href="http://github.com/hartleys/QoRTs">QoRTs github page</a>. Additional help and documentation is available online <a href="http://hartleys.github.io/QoRTs/index.html">here</a>.</p>
 
-<h2>Help Index:</h2>
+</section> <h2>Help Index:</h2> <section>
 
 <ul>
 <li>QoRTs vignette. User manual and general how-to. Available as a <a href="doc/QoRTs-vignette.pdf">pdf</a> or <a href="QoRTs-vignette/index.html">on the web</a>.</li>
@@ -32,43 +61,41 @@ files suitable for use with the UCSC genome browser (or any compatible browser).
 <li><a href="doc/QoRTs-manual.pdf">QoRTs reference manual.</a> Extended documentation of all available methods. For advanced users.</li>
 </ul>
 
-<h2>INSTALLATION:</h2>
+</section> <h2>INSTALLATION:</h2> <section>
 
 <p>The R package can be installed in R using the command:</p>
 
-<pre><code>&gt; install.packages("QoRTs_0.2.17.tar.gz", repos = NULL, type="source")
+<pre><code>&gt; install.packages("QoRTs_0.3.3.tar.gz", repos = NULL, type="source")
 </code></pre>
 
 <p>or using the command-line:</p>
 
-<pre><code>R CMD INSTALL QoRTs_0.2.17.tar.gz
+<pre><code>R CMD INSTALL QoRTs_0.3.3.tar.gz
 </code></pre>
 
-<p>The java jar file does not need to be installed.
+<p>The java jar file does not need to be installed. 
 Just execute it using the java command:</p>
 
 <pre><code>java -jar /path/to/jarfile/QoRTs.jar QC input.bam anno.gtf.gz /output/dir/
 </code></pre>
 
-<h2>EXAMPLE DATA:</h2>
+</section> <h2>EXAMPLE DATA:</h2> <section>
 
 <p>The example QC output can be found on the github main page, and installed
 with the command:</p>
 
-<pre><code>install.packages("QoRTsExampleData_0.2.17.tar.gz", repos = NULL, type="source")
+<pre><code>install.packages("QoRTsExampleData_0.3.3.tar.gz", repos = NULL, type="source")
 </code></pre>
 
-<p>The original bam files are too large to upload to github.
-These files, along with a comprehensive walkthrough demonstrating
+<p>The original bam files are too large to upload to github. 
+These files, along with a comprehensive walkthrough demonstrating 
 how all analysis can be run on them, can be found <a href="
-https://dl.dropboxusercontent.com/u/103621176/qorts/exData/QoRTsFullExampleData.zip">here</a>.
+https://dl.dropboxusercontent.com/u/103621176/qorts/exData/QoRTsFullExampleData.zip">here</a>. 
 (File is ~1.5gb)</p>
 
-<h2>MORE INFORMATION:</h2>
+</section> <h2>COMMAND-LINE HELP:</h2> <section>
 
-<p>For more information, see the QoRTs vignette, QoRTs-vignette.pdf</p>
-
-<p>Additional options and syntax information for the main QC java utility
+<p>Additional options and syntax information for the main QC java utility 
 can be found using the command:</p>
 
 <pre><code>java -jar /path/to/jarfile/QoRTs.jar QC --man
@@ -95,29 +122,39 @@ can be found using the command:</p>
 <pre><code>&gt; help(package="QoRTs");
 </code></pre>
 
-<h2>LEGAL:</h2>
+</section> <h2>LEGAL:</h2> <section>
 
-<p>This software is "United States Government Work" under the terms of the United
-States Copyright Act. It was written as part of the authors’ official duties
-for the United States Government and thus QoRT Package User Manual cannot be
-copyrighted. This software is freely available to the public for use without a
+<p>This software is "United States Government Work" under the terms of the United 
+States Copyright Act. It was written as part of the authors’ official duties 
+for the United States Government and thus QoRT Package User Manual cannot be 
+copyrighted. This software is freely available to the public for use without a 
 copyright notice. Restrictions cannot be placed on its present or future use.</p>
 
-<p>Although all reasonable efforts have been taken to ensure the accuracy and
-reliability of the software and data, the National Human Genome Research
-Institute (NHGRI) and the U.S. Government does not and cannot warrant the
-performance or results that may be obtained by using this software or data.
-NHGRI and the U.S. Government disclaims all warranties as to performance,
+<p>Although all reasonable efforts have been taken to ensure the accuracy and 
+reliability of the software and data, the National Human Genome Research 
+Institute (NHGRI) and the U.S. Government does not and cannot warrant the 
+performance or results that may be obtained by using this software or data. 
+NHGRI and the U.S. Government disclaims all warranties as to performance, 
 merchantability or fitness for any particular purpose.</p>
 
-<p>In any work or product derived from this material, proper attribution of the
-authors as the source of the software or data should be made, using "NHGRI
+<p>In any work or product derived from this material, proper attribution of the 
+authors as the source of the software or data should be made, using "NHGRI 
 Genome Technology Branch" as the citation.</p>
 
-<p>NOTE: The scala package includes (internally) the sam-JDK library
-(sam-1.113.jar), from picard tools, which is covered under the MIT license.
+<p>NOTE: The scala package includes (internally) the sam-JDK library 
+(sam-1.113.jar), from picard tools, which is covered under the MIT license. 
 The MIT license and copyright information can be accessed using the command:
 java -jar /path/to/jarfile/QoRTs.jar --man samjdkinfo</p>
 
-</body>
-</html>
+</section>
+
+
+
+</div>
+
+		<footer> <small>
+		<p>Project maintained by <a href="https://github.com/hartleys/QoRTs">Stephen Hartley</a></p>
+		<p>Hosted on GitHub Pages &mdash; Theme by <a href="https://github.com/orderedlist">orderedlist</a> (modified)</p>
+		</small> </footer>
+
+</body></html>

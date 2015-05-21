@@ -1,7 +1,7 @@
 <h1>QoRTs: Quality Of Rna-seq Tool Set</h1>
 
 <blockquote>
-  <p>Version 0.2.17 (Updated Tue Apr 14 13:54:48 EDT 2015)</p>
+  <p>Version 0.3.3 (Updated Thu May 21 12:39:22 EDT 2015)</p>
 
 <p>(<a href="../index.html">back to main</a>) (<a href="index.html">back to java-utility help</a>)</p>
 </blockquote>
@@ -109,19 +109,19 @@ If the filename ends with ".gz" or ".zip", the file will be parsed using the app
 <h3>--skipFunctions func1,func2,...:</h3>
 
 <blockquote>
-  <p>A comma-delimited list of functions to skip. Important: No whitespace! The default-on functions are: NVC, GCDistribution, GeneCalcs, QualityScoreDistribution, writeKnownSplices, writeNovelSplices, writeClippedNVC, CigarOpDistribution, InsertSize, chromCounts, writeSpliceExon, writeGenewiseGeneBody, JunctionCalcs, writeGeneCounts, writeDESeq, writeDEXSeq, writeGeneBody, StrandCheck (CommaDelimitedListOfStrings)</p>
+  <p>A list of functions to skip (comma-delimited, no whitespace). See the sub-functions list, below. The default-on functions are: NVC, GCDistribution, GeneCalcs, QualityScoreDistribution, writeJunctionSeqCounts, writeKnownSplices, writeNovelSplices, writeClippedNVC, CigarOpDistribution, InsertSize, chromCounts, writeGenewiseGeneBody, JunctionCalcs, writeGeneCounts, writeDESeq, writeDEXSeq, writeGeneBody, StrandCheck (CommaDelimitedListOfStrings)</p>
 </blockquote>
 
 <h3>--addFunctions func1,func2,...:</h3>
 
 <blockquote>
-  <p>A list of functions to add. This can be used to add functions that are off by default. Followed by a comma delimited list, with no internal whitespace. The default-off functions are: annotatedSpliceExonCounts, FPKM, cigarMatch, makeJunctionBed, makeWiggles, makeAllBrowserTracks (CommaDelimitedListOfStrings)</p>
+  <p>A list of functions to add (comma-delimited, no whitespace). This can be used to add functions that are off by default. Followed by a comma delimited list, with no internal whitespace. See the sub-functions list, below. The default-off functions are: annotatedSpliceExonCounts, FPKM, cigarMatch, cigarLocusCounts, writeSpliceExon, makeJunctionBed, makeWiggles, makeAllBrowserTracks (CommaDelimitedListOfStrings)</p>
 </blockquote>
 
 <h3>--runFunctions func1,func2,...:</h3>
 
 <blockquote>
-  <p>The complete list of functions to run. Setting this option runs ONLY for the functions explicitly requested here (along with any dependancy functions). The list should be formatted as a comma delimited list, with no internal whitespace. Allowed options are: NVC, annotatedSpliceExonCounts, GCDistribution, GeneCalcs, FPKM, cigarMatch, QualityScoreDistribution, writeKnownSplices, writeNovelSplices, writeClippedNVC, CigarOpDistribution, InsertSize, chromCounts, writeSpliceExon, writeGenewiseGeneBody, JunctionCalcs, writeGeneCounts, makeJunctionBed, writeDESeq, writeDEXSeq, makeWiggles, writeGeneBody, StrandCheck, makeAllBrowserTracks (CommaDelimitedListOfStrings)</p>
+  <p>The complete list of functions to run  (comma-delimited, no whitespace). Setting this option runs ONLY for the functions explicitly requested here (along with any functions upon which the assigned functions are dependent). See the sub-functions list, below. Allowed options are: NVC, annotatedSpliceExonCounts, GCDistribution, GeneCalcs, FPKM, cigarMatch, QualityScoreDistribution, writeJunctionSeqCounts, writeKnownSplices, writeNovelSplices, writeClippedNVC, CigarOpDistribution, cigarLocusCounts, InsertSize, chromCounts, writeSpliceExon, writeGenewiseGeneBody, JunctionCalcs, writeGeneCounts, makeJunctionBed, writeDESeq, writeDEXSeq, makeWiggles, writeGeneBody, StrandCheck, makeAllBrowserTracks (CommaDelimitedListOfStrings)</p>
 </blockquote>
 
 <h3>--seqReadCt val:</h3>
@@ -173,6 +173,12 @@ If the filename ends with ".gz" or ".zip", the file will be parsed using the app
 
 <blockquote>
   <p>Generate a pdf report. (Note: this requires that R be installed and in the PATH, and that QoRTs be installed on that R installation) (flag)</p>
+</blockquote>
+
+<h3>--extractReadsByMetric metric=value:</h3>
+
+<blockquote>
+  <p>THIS OPTIONAL PARAMETER IS STILL UNDER BETA TESTING. This parameter allows the user to extract anomalous reads that showed up in previous QoRTs runs. Currently reads can be extracted based on the following metrics: StrandTestStatus, InsertSize and GCcount. (String)</p>
 </blockquote>
 
 <h3>--restrictToGeneList geneList.txt:</h3>
@@ -232,6 +238,42 @@ If a large fraction of the read-pairs are mapped to extremely distant loci (or t
 <blockquote>
   <p>Flag to indicate that only errors and warnings should be sent to stderr. (flag)</p>
 </blockquote>
+
+<h2>DEFAULT SUB-FUNCTIONS:</h2>
+
+<ul>
+<li><p>NVC: Nucleotide-vs-Cycle counts.</p></li>
+<li><p>GCDistribution: Calculate GC content distribution.</p></li>
+<li><p>GeneCalcs: Find gene assignment and gene body calculations.</p></li>
+<li><p>QualityScoreDistribution: Calculate quality scores by cycle.</p></li>
+<li><p>writeJunctionSeqCounts: Write counts file designed for use with JunctionSeq (contains known splice junctions, gene counts, and exon counts).</p></li>
+<li><p>writeKnownSplices: Write known splice junction counts.</p></li>
+<li><p>writeNovelSplices: Write novel splice junction counts.</p></li>
+<li><p>writeClippedNVC: Write NVC file containing clipped sequences.</p></li>
+<li><p>CigarOpDistribution: Cigar operation rates by cycle and cigar operation length rates (deletions, insertions, splicing, clipping, etc).</p></li>
+<li><p>InsertSize: Insert size distribution (paired-end data only).</p></li>
+<li><p>chromCounts: Calculate chromosome counts</p></li>
+<li><p>writeGenewiseGeneBody: Write file containing gene-body distributions for each (non-overlapping) gene.</p></li>
+<li><p>JunctionCalcs: Find splice junctions (both novel and annotated).</p></li>
+<li><p>writeGeneCounts: Write extended gene-level read/read-pair counts file (includes counts for CDS/UTR, ambiguous regions, etc).</p></li>
+<li><p>writeDESeq: Write gene-level read/read-pair counts file, suitable for use with DESeq, EdgeR, etc.</p></li>
+<li><p>writeDEXSeq: Write exon-level read/read-pair counts file, designed for use with DEXSeq.</p></li>
+<li><p>writeGeneBody: Write gene-body distribution file.</p></li>
+<li><p>StrandCheck: Check the strandedness of the data. Note that if the stranded option is set incorrectly, this tool will automatically print a warning to that effect.</p></li>
+</ul>
+
+<h2>NON-DEFAULT SUB-FUNCTIONS:</h2>
+
+<ul>
+<li><p>annotatedSpliceExonCounts: Write counts for exons, known-splice-junctions, and genes, with annotation columns indicating chromosome, etc (default: OFF)</p></li>
+<li><p>FPKM: Write FPKM values. Note: FPKMs are generally NOT the recommended normalization method. We recommend using a more advanced normalization as provided by DESeq, edgeR, CuffLinks, or similar (default: OFF)</p></li>
+<li><p>cigarMatch: Work-In-Progress: this function is a placeholder for future functionality, and is not intended for use at this time. (default: OFF)</p></li>
+<li><p>cigarLocusCounts: BETA: This function is still undergoing basic testing. It is not intended for production use at this time. (default: OFF)</p></li>
+<li><p>writeSpliceExon: Synonym for function "writeJunctionSeqCounts" (for backwards-compatibility)</p></li>
+<li><p>makeJunctionBed: Write splice-junction count "bed" files. (default: OFF)</p></li>
+<li><p>makeWiggles: Write "wiggle" coverage files with 100-bp window size. Note: this REQUIRES that the --chromSizes parameter be included! (default: OFF)</p></li>
+<li><p>makeAllBrowserTracks: Write both the "wiggle" and the splice-junction bed files (default: OFF)</p></li>
+</ul>
 
 <h2>AUTHORS:</h2>
 

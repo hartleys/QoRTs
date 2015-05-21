@@ -24,28 +24,28 @@ original version by:  Nikos Drakos, CBLU, University of Leeds
 <LINK REL="next" HREF="node4.html">
 </HEAD>
 
-<BODY >
+<BODY > <div id=wrap>
 <!--Navigation Panel-->
-<A NAME="tex2html189"
+<A NAME="tex2html188"
   HREF="node4.html">
 <IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next" SRC="next.png"></A> 
-<A NAME="tex2html185"
+<A NAME="tex2html184"
   HREF="QoRTs-vignette.html">
 <IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up" SRC="up.png"></A> 
-<A NAME="tex2html179"
+<A NAME="tex2html178"
   HREF="node2.html">
 <IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous" SRC="prev.png"></A> 
-<A NAME="tex2html187"
+<A NAME="tex2html186"
   HREF="node1.html">
 <IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents" SRC="contents.png"></A>  
 <BR>
-<B> Next:</B> <A NAME="tex2html190"
+<B> Next:</B> <A NAME="tex2html189"
   HREF="node4.html">Preparations</A>
-<B> Up:</B> <A NAME="tex2html186"
+<B> Up:</B> <A NAME="tex2html185"
   HREF="QoRTs-vignette.html">QoRTs Package User Manual</A>
-<B> Previous:</B> <A NAME="tex2html180"
+<B> Previous:</B> <A NAME="tex2html179"
   HREF="node2.html">Overview</A>
- &nbsp; <B>  <A NAME="tex2html188"
+ &nbsp; <B>  <A NAME="tex2html187"
   HREF="node1.html">Contents</A></B> 
 <BR>
 <BR>
@@ -54,7 +54,7 @@ original version by:  Nikos Drakos, CBLU, University of Leeds
 <A NAME="CHILD_LINKS"><STRONG>Subsections</STRONG></A>
 
 <UL>
-<LI><A NAME="tex2html191"
+<LI><A NAME="tex2html190"
   HREF="node3.html#SECTION00031000000000000000">Recommendations</A>
 </UL>
 <!--End of Table of Child-Links-->
@@ -69,12 +69,12 @@ Requirements
 <I>Hardware:</I> The java utility performs the bulk of the data processing, and will generally require at least 4gb of RAM. In general at least 8gb is recommended if available. The R package is only responsible for some light data processing and for plotting/visualization, and thus has much lower resource requirements. It should run adequately on any reasonably-powerful workstation.
 
 <P>
-<I>Software:</I> The QoRTs software package requires R version 3.0.2 or higher, as well as java 6 or higher.
+<I>Software:</I> The QoRTs software package requires http://www.r-project.org/R version 3.0.2 or higher, as well as https://www.java.comjava 6 or higher. It is strongly recommended that a 64-bit version of java be used, as the 32-bit versions generally cannot allocate sufficient RAM.
 
 <P>
-<I>Annotation:</I> QoRTs requires transcript annotations in the form of a gtf file. If you are using a annotation guided aligner (which is STRONGLY recommended) it is likely you already have a transcript gtf file for your reference genome. We recommend you use the same annotation gtf for alignment, QC, and downstream analysis. We have found the Ensembl "Gene Sets" gtf<A NAME="tex2html6"
-  HREF="footnode.html#foot1334"><SUP>3</SUP></A> suitable for these purposes. However, any format that adheres to the gtf file specification<A NAME="tex2html8"
-  HREF="footnode.html#foot1335"><SUP>4</SUP></A> will work.
+<I>Annotation:</I> QoRTs requires transcript annotations in the form of a gtf file. If you are using a annotation-guided aligner (which is STRONGLY recommended) it is likely you already have a transcript gtf file for your reference genome. We recommend you use the same annotation gtf for alignment, QC, and downstream analysis. We have found the Ensembl "Gene Sets" gtf<A NAME="tex2html6"
+  HREF="footnode.html#foot1429"><SUP>3</SUP></A> suitable for these purposes. However, any format that adheres to the gtf file specification<A NAME="tex2html8"
+  HREF="footnode.html#foot1430"><SUP>4</SUP></A> will work.
 
 <P>
 <I>Dataset:</I> QoRTs requires aligned RNA-Seq data. Data can be paired-end or single-end, unstranded or stranded (using either strandedness rule, see Section <A HREF="node7.html#sec:initialProcessing">6</A>). It is strongly recommended, but not explicitly required, that the SAM/BAM files be sorted (either by name or position). QoRTs can use additional metadata (such as technical replicate status, case/control status, batch id, etc) to produce comparisons between these replicate groups, but this information is optional.
@@ -95,31 +95,31 @@ Recommendations
 <P>
 <HR>
 <!--Navigation Panel-->
-<A NAME="tex2html189"
+<A NAME="tex2html188"
   HREF="node4.html">
 <IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next" SRC="next.png"></A> 
-<A NAME="tex2html185"
+<A NAME="tex2html184"
   HREF="QoRTs-vignette.html">
 <IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up" SRC="up.png"></A> 
-<A NAME="tex2html179"
+<A NAME="tex2html178"
   HREF="node2.html">
 <IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous" SRC="prev.png"></A> 
-<A NAME="tex2html187"
+<A NAME="tex2html186"
   HREF="node1.html">
 <IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents" SRC="contents.png"></A>  
 <BR>
-<B> Next:</B> <A NAME="tex2html190"
+<B> Next:</B> <A NAME="tex2html189"
   HREF="node4.html">Preparations</A>
-<B> Up:</B> <A NAME="tex2html186"
+<B> Up:</B> <A NAME="tex2html185"
   HREF="QoRTs-vignette.html">QoRTs Package User Manual</A>
-<B> Previous:</B> <A NAME="tex2html180"
+<B> Previous:</B> <A NAME="tex2html179"
   HREF="node2.html">Overview</A>
- &nbsp; <B>  <A NAME="tex2html188"
+ &nbsp; <B>  <A NAME="tex2html187"
   HREF="node1.html">Contents</A></B> 
 <!--End of Navigation Panel-->
 <ADDRESS>
 Dr Stephen William Hartley
-2015-04-14
+2015-05-21
 </ADDRESS>
-</BODY>
+</div></BODY>
 </HTML>
