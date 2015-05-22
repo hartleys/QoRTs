@@ -172,6 +172,8 @@ device.limits <- function(){
     return(out);
 }
 
+
+
 nonsimple.replace <- function(n, replacement){
   ifelse(is.simple.number(n), n, replacement)
 }
