@@ -1,5 +1,5 @@
 Package: QoRTs
-Version: 0.3.4
+Version: 0.3.5
 Date: 2015-05-22
 Title: Quality of RNA-seq Tool
 Authors@R: c(person("Stephen Hartley, PhD", "Developer", role = c("aut", "cre"),
@@ -14,4 +14,4 @@ License: file LICENSE
 VignetteBuilder: knitr
 URL: https://github.com/hartleys/QoRTs
 BugReports: https://github.com/hartleys/QoRTs
-Packaged: 2015-05-22 14:51:50 UTC; hartleys
+Packaged: 2015-05-22 18:35:14 UTC; hartleys
