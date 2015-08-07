@@ -134,7 +134,6 @@ object addNovelSplices {
      mergeNovelHelper(infileDir , sampleSF , flatlines, outfileDir , stranded, minCount ,noGzipOutput , noGzipInput, minSpan);
   }
   
-  //INCOMPLETE!!!!!!!!!!!!!!!!
   
   def mergeNovelHelper(infileDir : String, sampleSF : Seq[(String,Double)], flatgff : IndexedSeq[FlatGtfLine], outfileDir : String, 
                        stranded : Boolean, minCount : Double, noGzipOutput : Boolean, noGzipInput : Boolean, minSpan : Int){
@@ -145,6 +144,10 @@ object addNovelSplices {
     val novel_gff_suffix = "/withNovel.forJunctionSeq.gff" + (if(noGzipOutput){""} else {".gz"});
     val novel_gff_file = outfileDir + novel_gff_suffix; 
     
+    val orphan_Splice_suffix = "/QC.spliceJunctionCounts.orphanSplices.txt" + (if(noGzipOutput){""} else {".gz"});
+    val orphan_gff_suffix = "/orphanSplices.gff" + (if(noGzipOutput){""} else {".gz"});
+    val orphan_gff_file = outfileDir + orphan_gff_suffix; 
+
     
     //Make a gene map out of aggregate genes.
     val geneArray : GenomicArrayOfSets[String] = buildGenomicArrayOfSets_fromGtf(stranded , (() => flatgff.iterator),  (g : FlatGtfLine) => g.isAggregateGene, (g : FlatGtfLine) => g.getFeatureAggregateGene)
@@ -195,6 +198,8 @@ object addNovelSplices {
     var addedSplices = 0;
     var dropped_orphanSplices = 0;
     var dropped_ambigSplices = 0;
+    val unknownGeneSplices : scala.collection.mutable.Map[GenomicInterval, (Set[String], String)] = scala.collection.mutable.AnyRefMap[GenomicInterval, (Set[String], String)]();
+    
     
     for((iv, counts) <- pfSpliceMap){
       val intersectingGenes : Set[String] = geneArray.findIntersectingSteps(iv).foldLeft(Set[String]())( (soFar, curr) => soFar ++ curr._2);
@@ -203,8 +208,10 @@ object addNovelSplices {
         geneNovelSplices.update(gene, geneNovelSplices(gene) + iv  );
         addedSplices += 1;
       } else if(intersectingGenes.size == 0){
+        unknownGeneSplices.update(iv, (intersectingGenes, "orphan_" + dropped_orphanSplices));
         dropped_orphanSplices += 1;
       } else {
+        unknownGeneSplices.update(iv, (intersectingGenes, "ambig_" + dropped_ambigSplices));
         dropped_ambigSplices += 1;
       }
     }
@@ -269,10 +276,48 @@ object addNovelSplices {
         reportln("Successfully Created Directory: " + outDirFile, "note");
       }
       
-      makeJunctionCountsWithNovel(inDir + Splice_suffix, inDir + NovelSplice_suffix, outDir + WithNovel_Splice_suffix, gffLines );
+      makeJunctionCountsWithNovel(inDir + Splice_suffix, inDir + NovelSplice_suffix, outDir + WithNovel_Splice_suffix, gffLines ); 
     }
     
+    //////////////////////////////////////////////////////////////////////////////////////////////
+    //New Section: output orphaned junctions:
     
+    reportln("Writing orphaned/ambiguous junctions:","note");
+    val writer2 = openWriterSmart(orphan_gff_file);
+    var elementCt = 1;
+    for(iv <- unknownGeneSplices.keySet.toVector.sorted){
+      val (intersectingGeneSet, id) = unknownGeneSplices(iv);
+      val intersectingGeneString = if(intersectingGeneSet.size == 0){
+        "NO_KNOWN_GENE";
+      } else {
+        intersectingGeneSet.toVector.sorted.mkString("|");
+      }
+      
+      val newGffLine = new OutputGtfLine(in_chromName = iv.chromName, 
+                                     in_featureSource = "QoRTs", 
+                                     in_featureType = "orphan_novel_splice_site", 
+                                     in_start = iv.start, 
+                                     in_end = iv.end, 
+                                     in_score = "1000", 
+                                     in_strand = iv.strand, 
+                                     in_attributeMap = Map[String,String](("id",id),("geneSet",intersectingGeneString)), 
+                                     in_gtfFmt_attributeBreak = " ",
+                                     in_stranded = stranded);
+      writer2.write(newGffLine.str + "\n");
+      elementCt += 1;
+    }
+    close(writer2);
+    
+    reportln("Writing orphaned/ambiguous junction counts:","note");
+    for(i <- 0 until sampleSF.length){
+      val (name,sf) = sampleSF(i);
+      
+      val inDir = infileDir + "/" + name + "/";
+      val outDir = outfileDir + "/" + name + "/";
+      //val outDirFile = new java.io.File(outDir);
+      
+      makeOrphanJunctionCounts( inDir + NovelSplice_suffix, outDir + orphan_Splice_suffix, unknownGeneSplices);
+    }
     reportln("Done.","debug");
   }
   
@@ -288,6 +333,46 @@ object addNovelSplices {
       }
     }
     return geneArray.finalizeStepVectors;
+  }
+  
+def makeOrphanJunctionCounts(infileNovel : String, outfile : String, unknownGeneSplices : scala.collection.mutable.Map[GenomicInterval, (Set[String],String)]){
+    //val Splice_suffix = "/QC.spliceJunctionAndExonCounts.forSpliceSeq.txt.gz";
+    //val NovelSplice_suffix = "/QC.spliceJunctionCounts.novelSplices.txt.gz";
+    //val WithNovel_Splice_suffix = "/QC.spliceJunctionAndExonCounts.withNovel.forSpliceSeq.txt.gz";
+    
+    reportln("=====> Running on file:"+infileNovel+"","debug");
+    
+    //val countMap = scala.collection.mutable.AnyRefMap[String,Int]().withDefault(str => 0);
+
+    //Read in novel junctionSeq counts.
+    val writer = openWriterSmart(outfile);
+    val novelLines = getLinesSmartUnzip(infileNovel);
+    novelLines.next;
+    //writer.write("chrom\tstrand\tstart\tend\tCT\tjunctionID\tgeneIDs\n");
+    for(line <- novelLines){
+      val cells = line.split("\t");
+      val ct = string2int(cells(4));
+      val iv = GenomicInterval(cells(0), cells(1).charAt(0), string2int(cells(2)), string2int(cells(3)));
+      
+      if(unknownGeneSplices.contains(iv)){
+        val (intersectingGenes,id) = unknownGeneSplices(iv);
+        //countMap.update(featureID, ct);
+        val intersectingGeneString = if(intersectingGenes.size == 0){
+          "NO_KNOWN_GENE";
+        } else {
+          intersectingGenes.toVector.sorted.mkString("|");
+        }
+        writer.write(id +"\t"+ ct + "\t" + iv.chromName +"\t"+iv.strand + "\t" + iv.start +"\t"+iv.end + "\t" + intersectingGeneString +"\n");
+      }
+    }
+    close(writer);
+    //reportln("       "+countMap.size+" orphaned/ambig features.","debug");
+    //output JunctionSeq counts.
+    //for(iv <- unknownGeneSplices.keySet.toVector.sorted){
+    //  val (intersectingGeneSet, id) = unknownGeneSplices(iv);
+      // val iv = GenomicInterval(cells(0), cells(1).charAt(0), string2int(cells(2)), string2int(cells(3)));
+    //}
+    
   }
   
   def makeJunctionCountsWithNovel(infileJS : String, infileNovel : String, outfile : String, flatgff : IndexedSeq[FlatGtfLine]){

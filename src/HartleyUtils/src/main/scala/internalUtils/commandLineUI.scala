@@ -351,7 +351,7 @@ List(
     def argMasterType : String;
     def argSubType : String;
     def argType : String;
-    
+     
     def apply() : T = getValue();
     def getFullDescription() : String = {
       "    "+getFullSyntax()+"\n"+wrapLineWithIndent(describe(),CLUI_CONSOLE_LINE_WIDTH,8)+"\n        ("+argType+")";

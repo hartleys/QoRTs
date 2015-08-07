@@ -2,45 +2,45 @@
 
 manual <- 
 "
-####################################################################
-#
-# This R script is made to take a set of QC output from the QoRTs
-#    QC Utility, run across multiple replicates, and generate
-#    a battery of cross-comparison reports, organizing replicates
-#    by sample, lane, and group.ID. 
-#
-# This script assumes that the QC statistics have already been 
-#    calculated for each replicate by the (java .jar file) QC 
-#    utility. See the documentation for more details at 
-#    https://github.com/hartleys/QoRTs
-# 
-# The syntax is:
-# Rscript qortsGenMultiQC.R infile/dir/ decoderFile.txt outfile/dir/
-# 
-# The decoder must be a tab-delimited text file with one row per 
-#    sample (plus a title row).
-#
-# It must contain a column titled \"unique.ID\". This defines a 
-#    name for each replicate. ALL OTHER COLUMNS ARE OPTIONAL.
-# If there are multiple (technical) replicates per sample, there 
-#    must also be a column titled \"sample.ID\", which lists the 
-#    sample ID of each replicate.
-# By default, each replicate's QC data is assumed to be in a 
-#    sub-directory of the supplied qcdata base dir with the same 
-#    name as the replicate's unique.ID. If this is not the case,
-#    then the path to the replicate's qc data must be included in
-#    a column titled \"qc.data.dir\"
-#
-# Optional additional columns:
-# group.ID: the biological group for the replicate.
-# lane.ID: the sequencer lane/run for the replicate. 
-# input.read.pair.count: If the --seqReadCt or --rawfastq parameters 
-#    were  not used in the QC step, then QoRTs needs some way to 
-#    know how many reads were generated for each replicate, before 
-#    alignment. You can set  this value using this optional column. 
-#    If this is left out, then mapping rates will be skipped. 
-#
-####################################################################
+#################################################################### \n
+# \n
+# This R script is made to take a set of QC output from the QoRTs \n
+#    QC Utility, run across multiple replicates, and generate \n
+#    a battery of cross-comparison reports, organizing replicates \n
+#    by sample, lane, and group.ID.  \n
+# \n
+# This script assumes that the QC statistics have already been \n
+#    calculated for each replicate by the (java .jar file) QC \n
+#    utility. See the documentation for more details at \n
+#    https://github.com/hartleys/QoRTs\n
+# \n
+# The syntax is: \n
+# Rscript qortsGenMultiQC.R infile/dir/ decoderFile.txt outfile/dir/ \n
+# \n
+# The decoder must be a tab-delimited text file with one row per  \n
+#    sample (plus a title row). \n
+# \n
+# It must contain a column titled \"unique.ID\". This defines a  \n
+#    name for each replicate. ALL OTHER COLUMNS ARE OPTIONAL. \n
+# If there are multiple (technical) replicates per sample, there  \n
+#    must also be a column titled \"sample.ID\", which lists the \n
+#    sample ID of each replicate. \n
+# By default, each replicate's QC data is assumed to be in a  \n
+#    sub-directory of the supplied qcdata base dir with the same \n
+#    name as the replicate's unique.ID. If this is not the case, \n
+#    then the path to the replicate's qc data must be included in \n
+#    a column titled \"qc.data.dir\" \n
+# \n
+# Optional additional columns: \n
+# group.ID: the biological group for the replicate. \n
+# lane.ID: the sequencer lane/run for the replicate.  \n
+# input.read.pair.count: If the --seqReadCt or --rawfastq parameters  \n
+#    were  not used in the QC step, then QoRTs needs some way to \n
+#    know how many reads were generated for each replicate, before \n
+#    alignment. You can set  this value using this optional column.  \n
+#    If this is left out, then mapping rates will be skipped. \n
+#\n
+####################################################################\n
 "
 
 
@@ -104,11 +104,14 @@ get.summary.table(res, outfile = paste0(output.dir,"summaryTable.txt"));
 
 message("generating png QC multiplots...");
 makeMultiPlot.all(res, outfile.dir = output.dir);
+message("done.");
+
 
 message("generating pdf QC reports...");
-makeMultiPlot.all(res, outfile.dir = output.dir);
+makeMultiPlot.all(res, outfile.dir = output.dir, plot.device.name = "pdf");
+message("done.");
 
-message("DONE!");
+message("ALL DONE!");
 
 
 

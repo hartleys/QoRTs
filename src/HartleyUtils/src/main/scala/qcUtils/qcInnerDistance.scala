@@ -140,7 +140,7 @@ object qcInnerDistance {
   
   val STAGGERED_ADAPTOR_ALIGNMENT_LIMIT = 5;
   
-  def getInsertSize(r1 : SAMRecord, r2 : SAMRecord, spliceAnnotation : GenMap[(String,Char),TreeSet[(Int,Int)]], stranded : Boolean, fr_secondStrand : Boolean) : (Int, Int) = {
+  def getInsertSize(r1 : SAMRecord, r2 : SAMRecord, spliceAnnotation : GenMap[(String,Char),TreeSet[(Int,Int)]], stranded : Boolean, fr_secondStrand : Boolean, jumpSplices : Boolean = true) : (Int, Int) = {
     val (rf,rr) = if(r1.getReadNegativeStrandFlag) ((r2,r1)) else ((r1,r2));
     
     //CHECK FOR OFF-BY-ONE ERRORS!
@@ -151,7 +151,7 @@ object qcInnerDistance {
       return (STAGGERED_NO_OVERLAP,  2);
     } else if(getAlignmentEnd(rf) <= getAlignmentStart(rr)){
       //reportln("Method Entry: getInnerDistance_noOverlap: ","note");
-      return (getInsertSize_noOverlap(rf,rr, spliceAnnotation, stranded, fr_secondStrand), 1);
+      return (getInsertSize_noOverlap(rf,rr, spliceAnnotation, stranded, fr_secondStrand, jumpSplices), 1);
     } else if(getAlignmentStart(rf) >= getAlignmentStart(rr)){
       //reportln("Method Entry: getInnerDistance_staggeredOverlap: ","note");
       val insertSize = getInsertSize_staggeredOverlap(rf,rr);
@@ -165,7 +165,7 @@ object qcInnerDistance {
   var DEBUG_INTERNAL_InnerDistanceCalc_reportct = 0;
   var DEBUG_INTERNAL_InnerDistanceCalc_reportLimit = 10000;
   
-  def getInsertSize_noOverlap(rf : SAMRecord,rr : SAMRecord, spliceAnnotation : GenMap[(String,Char),TreeSet[(Int,Int)]], stranded : Boolean, fr_secondStrand : Boolean) : Int = {
+  def getInsertSize_noOverlap(rf : SAMRecord,rr : SAMRecord, spliceAnnotation : GenMap[(String,Char),TreeSet[(Int,Int)]], stranded : Boolean, fr_secondStrand : Boolean, jumpSplices : Boolean = true) : Int = {
     val endF = getAlignmentEnd(rf);
     val startR = getAlignmentStart(rr);
 
@@ -175,7 +175,11 @@ object qcInnerDistance {
 
     //report("noOverlap: clipF="+clipF+", clipR="+clipR+", endF="+endF+", startR="+startR +", maxDistance="+ (startR - endF) ,"note");
     
-    val (minDistance, debugString) = findShortestPath(stranded, rf.getReferenceName(), getStrand(rf,stranded,fr_secondStrand), endF,startR,spliceAnnotation);
+    val (minDistance, debugString) = if(jumpSplices){
+      findShortestPath(stranded, rf.getReferenceName(), getStrand(rf,stranded,fr_secondStrand), endF,startR,spliceAnnotation);
+    } else {
+      (endF - startR, "NO_SPLICING");
+    }
     //findShortestPath(stranded : Boolean, chromName : String, strand : Char, start : Int, end : Int, spliceAnnotation : HashMap[(String,Char),TreeSet[(Int,Int)]])
     
     val insertSize = rf.getReadLength() + rr.getReadLength() + minDistance - clipF - clipR 
@@ -348,7 +352,7 @@ object qcInnerDistance {
 
 }
 
-class qcInnerDistance(annoHolder : qcGtfAnnotationBuilder, stranded : Boolean, fr_secondStrand : Boolean, readLength : Int)  extends QCUtility[Int] {
+class qcInnerDistance(annoHolder : qcGtfAnnotationBuilder, stranded : Boolean, fr_secondStrand : Boolean, readLength : Int, jumpSplices : Boolean = true)  extends QCUtility[Int] {
   reportln("> Init InsertSize Utility","debug");
   val spliceAnnotation : GenMap[(String,Char),TreeSet[(Int,Int)]] = annoHolder.spliceJunctionTreeMap;
   
@@ -363,7 +367,7 @@ class qcInnerDistance(annoHolder : qcGtfAnnotationBuilder, stranded : Boolean, f
   val insertSizeMap_staggeredOverlap : scala.collection.mutable.Map[Int,Int] = scala.collection.mutable.Map[Int,Int]().withDefault(i => 0);
   
   def runOnReadPair(r1 : SAMRecord, r2 : SAMRecord, readNum : Int) : Int = {
-    val inSize = qcInnerDistance.getInsertSize(r1,r2, spliceAnnotation, stranded, fr_secondStrand);
+    val inSize = qcInnerDistance.getInsertSize(r1,r2, spliceAnnotation, stranded, fr_secondStrand, jumpSplices);
     //reportln("InsertSize = " + inSize + "\n################################################","note");
     insertSizeMap(inSize._1) += 1;
     //insertSizeMap = insertSizeMap.updated(inSize._1, insertSizeMap(inSize._1) + 1);
@@ -371,13 +375,21 @@ class qcInnerDistance(annoHolder : qcGtfAnnotationBuilder, stranded : Boolean, f
     if(inSize._2 == 1){
       insertSizeMap_noOverlap(inSize._1) += 1;
       //insertSizeMap_noOverlap = insertSizeMap_noOverlap.updated(inSize._1, insertSizeMap_noOverlap(inSize._1) + 1);
-    } else if(inSize._2 == 2){
+    } else if(inSize._2 == 0 || inSize._2 == 2){
       insertSizeMap_staggeredOverlap(inSize._1) += 1;
       //insertSizeMap_staggeredOverlap = insertSizeMap_staggeredOverlap.updated(inSize._1, insertSizeMap_staggeredOverlap(inSize._1) + 1);
     } else {
       insertSizeMap_partialOverlap(inSize._1) += 1;
       //insertSizeMap_partialOverlap = insertSizeMap_partialOverlap.updated(inSize._1, insertSizeMap_partialOverlap(inSize._1) + 1);
     }
+    
+    //DEBUGGING:
+    //if(inSize._1 == 101){
+    //  report("r1  " + r1.getSAMString,"debug");
+    //  report("r2  " + r2.getSAMString,"debug");
+   // }
+    
+    
     return(inSize._1);
   }
   

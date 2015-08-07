@@ -18,7 +18,7 @@ object Reporter {
         report_basefunction(str + "\n");
       }
     } 
-    
+     
     def startReport(str : String, verb : String){
       if(isWorthy(verb)){
         freshenLine;

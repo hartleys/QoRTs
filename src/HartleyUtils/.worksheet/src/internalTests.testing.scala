@@ -14,7 +14,9 @@ object testing {;import org.scalaide.worksheet.runtime.library.WorksheetSupport.
   
   x;System.out.println("""res0: scala.collection.mutable.Map[internalUtils.commonSeqUtils.GenomicInterval,Int] = """ + $show(res$0));$skip(14); val res$1 = 
   
-  x.keySet;System.out.println("""res1: scala.collection.Set[internalUtils.commonSeqUtils.GenomicInterval] = """ + $show(res$1));$skip(429); val res$2 = 
+  x.keySet;System.out.println("""res1: scala.collection.Set[internalUtils.commonSeqUtils.GenomicInterval] = """ + $show(res$1));$skip(22); 
+  
+  val line = "x	y";System.out.println("""line  : String = """ + $show(line ));$skip(429); val res$2 = 
   
   /*
   def escapeToMarkdown(s : String) : String = {

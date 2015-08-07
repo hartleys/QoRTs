@@ -22,6 +22,8 @@ object testing {
   x.keySet                                        //> res1: scala.collection.Set[internalUtils.commonSeqUtils.GenomicInterval] = S
                                                   //| et(GenomicInterval(chrX,+,10,100))
   
+  val line = "x	y"                                //> line  : String = x	y
+  
   /*
   def escapeToMarkdown(s : String) : String = {
     escapifyString(s, List("`","\\*","_","\\{","\\}","\\[","\\]","\\(","\\)","\\#","\\+","-","\\.","!"));

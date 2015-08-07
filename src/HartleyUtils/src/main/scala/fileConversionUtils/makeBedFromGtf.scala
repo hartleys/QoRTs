@@ -13,10 +13,10 @@ import internalUtils.commandLineUI._;
 
 object makeBedFromGtf {
 
-class converter extends CommandLineRunUtil {
+  class converter extends CommandLineRunUtil {
      val parser : CommandLineArgParser = 
        new CommandLineArgParser(
-          command = "makeBedFromGtf", 
+          command = "gtf2bed", 
           quickSynopsis = "", 
           synopsis = "", 
           description = "This simple utility converts a gtf transcript annotation file into a .bed transcript annotation file."+

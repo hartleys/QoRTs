@@ -62,11 +62,8 @@ BiocStyle::latex()
 \title{QoRTs Package User Manual}
 \author{Stephen Hartley\\
 National Human Genome Research Institute\\
-National Institutes of Health}
-\date{August 8 2014\\
-May 22, 2015 %REPLACE_THIS_LINE_WITH_REVISION_DATE
-\\
-v0.3.5 %REPLACE_THIS_LINE_WITH_VERSION_NUMBER
+National Institutes of Health\\
+v0.3.9 %REPLACE_THIS_LINE_WITH_VERSION_NUMBER
 }
 
 \begin{document}
@@ -368,7 +365,6 @@ QoRTs includes automated methods for organizing and plotting the results in nume
 
 All plotting functions in QoRTs require a \Robject{QoRTs\_Plotter} object. A \Robject{QoRTs\_Plotter} is a \Robject{RefClass} object that contains all the QC data along with a set of parameters that determine how to color and draw each replicate's data. A full accounting of all possible options available in the is beyond the scope of this manual, but can be found in the help docs for the \Robject{QoRTs\_Plotter} class.
 
-\pagebreak
 %----------
 \subsubsection{Summary Plots} \label{subsec:plotterDesc1}
 %----------
@@ -1006,12 +1002,14 @@ makePlot.gene.assignment.rates(byLane.plotter);
 \subsubsection{Splice Junction Loci} \label{subsec:plotDesc-13}
 %----------
 
-\myincfig{indivPlot-13}{0.55\textwidth}{Splice junction loci}
+\myincfig{indivPlot-13}{0.4\textwidth}{Splice junction loci}
 
+{ \small
 For each replicate, Figure \ref{indivPlot-13-fig} displays the number (y-axis) of splice junction \emph{loci} of each type that appear in the replicate's reads. Splice junctions are split into 4 groups, first by whether the splice junction appears in the transcript annotation gtf ("known" vs "novel"), and then by whether the splice junction has 4 or more reads covering it or 1-3 reads.
 
 The six categories of splice junction locus are:
-      \begin{itemize} \small
+}
+      \begin{itemize} \footnotesize
         \item Known: The splice junction locus is found in the supplied transcript annotation gtf file.
         \item Novel: The splice junction locus is NOT found in the supplied transcript annotation gtf file.
         \item Known, 1-3 reads: The locus is known, and is only covered by 1-3 read-pairs.
@@ -1020,8 +1018,9 @@ The six categories of splice junction locus are:
         \item Novel, 4+ reads: The locus is novel, and is covered by 4 or more read-pairs.
       \end{itemize}
 
+{ \small
 This plot can be generated individually with the command:
-
+}
 <<indivPlot-13,results="hide">>=
 makePlot.splice.junction.loci.counts(byLane.plotter);
 @
@@ -1032,13 +1031,13 @@ makePlot.splice.junction.loci.counts(byLane.plotter);
 Abnormalities in the splice junction rates are generally a symptom of larger issues which will generally be picked up by other metrics. Numerous factors can reduce the efficacy by which aligners map across splice junctions, and as such these plots become very important if the intended downstream analyses include transcript assembly, transcript deconvolution, differential splicing, or any other form of analysis that in some way involves the splice junctions themselves. These plots can be used to assess whether other minor abnormalities observed in the other plots are of sufficient severity to impact splice junction mapping and thus potentially compromise such analyses.
 \end{framed}
 
-\pagebreak
 %----------
 \subsubsection{Number of Splice Junction Events} \label{subsec:plotDesc-14d}
 %----------
 
 \myincfig{indivPlot-14d}{0.65\textwidth}{Number of splice junction events}
 
+{ \small
 For each replicate, Figure \ref{indivPlot-14d-fig} displays the number (y-axis) of all splice junction events falling into each of the six junction categories. A splice junction "event" is one instance of a read-pair bridging a splice junction. Some reads may contain multiple splice junction events, some may contain none. If a splice junction appears on both reads of a read-pair, this is still only counted as a single "event".
 
 Note that because different samples/runs may have different total read counts and/or library sizes, this function is generally not the best for comparing between samples. In general, the event rates per read-pair should be used, see the next section, \ref{subsec:plotDesc-14}.
@@ -1046,15 +1045,15 @@ Note that because different samples/runs may have different total read counts an
 This plot is used to detect whether sample-specific or batch effects have a substantial or biased effect on splice junction appearance, either due to differences in the original RNA, or due to artifacts that alter the rate at which the aligner maps across splice junctions.
 
 This plot can be generated individually with the command:
-
+}
 <<indivPlot-14d,results="hide">>=
 makePlot.splice.junction.event.counts(byLane.plotter);
 @
 
 \begin{framed} \small
-\emph{What it means and what to look for:} This plot is useful for identifying mapping and/or annotation issues, and can indicate the comprehensiveness the genome annotation. Replicates that are obvious outliers may have sequencing/technical issues causing false detection of splice junctions.
+\emph{What it means and what to look for:} This plot is useful for identifying mapping and/or annotation issues, and can indicate the comprehensiveness the genome annotation. Replicates that are obvious outliers may have sequencing/technical issues causing false detection of splice junctions. 
 
-Abnormalities in the splice junction rates are generally a symptom of larger issues which will generally be picked up by other metrics. Numerous factors can reduce the efficacy by which aligners map across splice junctions, and as such these plots become very important if the intended downstream analyses include transcript assembly, transcript deconvolution, differential splicing, or any other form of analysis that in some way involves the splice junctions themselves. These plots can be used to assess whether other minor abnormalities observed in the other plots are of sufficient severity to impact splice junction mapping and thus potentially compromise such analyses.
+In general, abnormalities in the splice junction rates are generally a symptom of larger issues which will often be picked up by other metrics. See Section \ref{subsec:plotDesc-13}.
 \end{framed}
 
 \pagebreak
@@ -1063,6 +1062,7 @@ Abnormalities in the splice junction rates are generally a symptom of larger iss
 %----------
 
 \myincfig{indivPlot-14}{0.65\textwidth}{Splice junction events}
+
 
 For each replicate, Figure \ref{indivPlot-14-fig} displays the rate, per read-pair, (y-axis) at which each type of splice junction events appear. This is equivalent to the results seen in \ref{subsec:plotDesc-14d}, except that each sample is scaled by the number of reads belonging to that sample.
 
@@ -1073,9 +1073,9 @@ makePlot.splice.junction.event.ratesPerRead(byLane.plotter);
 @
 
 \begin{framed} \small
-\emph{What it means and what to look for:} This plot is used to detect whether sample-specific or batch effects have a substantial or biased effect on splice junction appearance, either due to differences in the original RNA, or due to artifacts that alter the rate at which the aligner maps across splice junctions. It can assist in identifying mapping and/or annotation issues, and can indicate the comprehensiveness the genome annotation. Replicates that are obvious outliers may have sequencing/technical issues causing false detection of splice junctions.
+\emph{What it means and what to look for:} This plot is used to detect whether sample-specific or batch effects have a substantial or biased effect on splice junction appearance, either due to differences in the original RNA, or due to artifacts that alter the rate at which the aligner maps across splice junctions. It can assist in identifying mapping and/or annotation issues, and can indicate the comprehensiveness the genome annotation. Replicates that are obvious outliers may have sequencing/technical issues causing false detection of splice junctions.  
 
-Abnormalities in the splice junction rates are generally a symptom of larger issues which will generally be picked up by other metrics. Numerous factors can reduce the efficacy by which aligners map across splice junctions, and as such these plots become very important if the intended downstream analyses include transcript assembly, transcript deconvolution, differential splicing, or any other form of analysis that in some way involves the splice junctions themselves. These plots can be used to assess whether other minor abnormalities observed in the other plots are of sufficient severity to impact splice junction mapping and thus potentially compromise such analyses.
+In general, abnormalities in the splice junction rates are generally a symptom of larger issues which will often be picked up by other metrics. See Section \ref{subsec:plotDesc-13}.
 \end{framed}
 
 \pagebreak
@@ -1084,21 +1084,22 @@ Abnormalities in the splice junction rates are generally a symptom of larger iss
 %----------
 
 \myincfig{indivPlot-14c}{0.65\textwidth}{Proportions of splice junction events}
-
+{ \small
 For each replicate, Figure \ref{indivPlot-14c-fig} displays the proportion of all splice junctions events that bridge splice junctions of each of the six splice junction types.
 
 This plot is used to detect whether sample-specific or batch effects have a substantial or biased effect on splice junction appearance, either due to differences in the original RNA, or due to artifacts that alter the rate at which the aligner maps across splice junctions.
 
 This plot can be generated individually with the command:
+}
 
 <<indivPlot-14c,results="hide">>=
 makePlot.splice.junction.event.proportions(byLane.plotter);
 @
 
 \begin{framed} \small
-\emph{What it means and what to look for:} This plot is used to detect whether sample-specific or batch effects have a substantial or biased effect on splice junction appearance, either due to differences in the original RNA, or due to artifacts that alter the rate at which the aligner maps across splice junctions. This plot is useful for identifying mapping and/or annotation issues, and can indicate the comprehensiveness the genome annotation. Replicates that are obvious outliers may have sequencing/technical issues causing false detection of splice junctions.
+\emph{What it means and what to look for:} This plot is used to detect whether sample-specific or batch effects have a substantial or biased effect on splice junction appearance, either due to differences in the original RNA, or due to artifacts that alter the rate at which the aligner maps across splice junctions. This plot is useful for identifying mapping and/or annotation issues, and can indicate the comprehensiveness the genome annotation. Replicates that are obvious outliers may have sequencing/technical issues causing false detection of splice junctions.  
 
-Abnormalities in the splice junction rates are generally a symptom of larger issues which will generally be picked up by other metrics. Numerous factors can reduce the efficacy by which aligners map across splice junctions, and as such these plots become very important if the intended downstream analyses include transcript assembly, transcript deconvolution, differential splicing, or any other form of analysis that in some way involves the splice junctions themselves. These plots can be used to assess whether other minor abnormalities observed in the other plots are of sufficient severity to impact splice junction mapping and thus potentially compromise such analyses.
+In general, abnormalities in the splice junction rates are generally a symptom of larger issues which will often be picked up by other metrics. See Section \ref{subsec:plotDesc-13}.
 \end{framed}
 
 \pagebreak
@@ -1117,9 +1118,9 @@ makePlot.splice.junction.event.proportionsByType(byLane.plotter);
 @
 
 \begin{framed} \small
-\emph{What it means and what to look for:} This plot is useful for identifying mapping and/or annotation issues, and can indicate the comprehensiveness the genome annotation. Replicates that are obvious outliers may have sequencing/technical issues causing false detection of splice junctions.
+\emph{What it means and what to look for:} This plot is useful for identifying mapping and/or annotation issues, and can indicate the comprehensiveness the genome annotation. Replicates that are obvious outliers may have sequencing/technical issues causing false detection of splice junctions.  
 
-Abnormalities in the splice junction rates are generally a symptom of larger issues which will generally be picked up by other metrics. Numerous factors can reduce the efficacy by which aligners map across splice junctions, and as such these plots become very important if the intended downstream analyses include transcript assembly, transcript deconvolution, differential splicing, or any other form of analysis that in some way involves the splice junctions themselves. These plots can be used to assess whether other minor abnormalities observed in the other plots are of sufficient severity to impact splice junction mapping and thus potentially compromise such analyses.
+In general, abnormalities in the splice junction rates are generally a symptom of larger issues which will often be picked up by other metrics. See Section \ref{subsec:plotDesc-13}.
 \end{framed}
 
 \pagebreak

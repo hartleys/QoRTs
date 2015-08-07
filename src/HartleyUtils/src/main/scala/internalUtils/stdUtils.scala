@@ -397,7 +397,7 @@ object stdUtils {
       return firstLineIndent + firstLine + "\n" + wrapLinesWithIndent_tailRecursive(Seq(), paraRemainder, width, indent).mkString("\n");
     }
   }
-  
+   
   def wrapLineWithIndent(line : String, width : Int, indent : Int) : String = {
     wrapLinesWithIndent(line, width, whiteSpaceString.substring(0,indent), false);
   } 

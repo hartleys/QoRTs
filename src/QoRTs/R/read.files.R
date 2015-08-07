@@ -679,9 +679,6 @@ calc.samplewise.norm.factors <- function(res, calc.DESeq2 , calc.edgeR ){
 
         tryCatch({
           norm.factors$Norm_Geo <- estimateSizeFactorsForMatrix(count.matrix);
-        }, warning = function(w){
-          message("WARNING: DESeq2::estimateSizeFactorsForMatrix threw warnings: ");
-          message(w);
         }, error = function(e){
           message("WARNING: DESeq2::estimateSizeFactorsForMatrix failed. Skipping DESeq2 normalization.",e);
           #norm.factors[,Norm_Geo:=NULL];

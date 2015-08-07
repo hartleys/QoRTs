@@ -388,7 +388,11 @@ object makeSpliceJunctionBed {
     });
     reportln("> makeSpliceJunctionBed: calculated final counts.","note");
 
-    writeBed(title, counts, outfile , rgb, sjmap , includeFullSpliceNames, digits, trackDefLine = trackDefLine, skipAnnotatedJunctions = skipAnnotatedJunctions, skipNovelJunctions = skipNovelJunctions);
+    writeBed(title, counts, outfile , rgb, sjmap , 
+             includeFullSpliceNames, digits, 
+             trackDefLine = trackDefLine, 
+             skipAnnotatedJunctions = skipAnnotatedJunctions, 
+             skipNovelJunctions = skipNovelJunctions);
     //convert(infile,outfile, rgb, countFilter, scoreFunction, sizeFactor, includeSpliceNames);
   }
   
