@@ -1,4 +1,4 @@
-This is pdfeTeX, Version 3.141592-1.21a-2.2 (Web2C 7.5.4) (format=latex 2015.4.23)  22 MAY 2015 14:39
+This is pdfeTeX, Version 3.141592-1.21a-2.2 (Web2C 7.5.4) (format=latex 2015.4.23)  7 AUG 2015 12:17
 entering extended mode
 **./images.tex
 (./images.tex
@@ -248,34 +248,34 @@ Package: inputenc 2004/02/05 v1.0d Input encoding file
 (./images.aux)
 \openout1 = `images.aux'.
 
-LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 225.
-LaTeX Font Info:    ... okay on input line 225.
-LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 225.
-LaTeX Font Info:    ... okay on input line 225.
-LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 225.
-LaTeX Font Info:    ... okay on input line 225.
-LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 225.
-LaTeX Font Info:    ... okay on input line 225.
-LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 225.
-LaTeX Font Info:    ... okay on input line 225.
-LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 225.
-LaTeX Font Info:    ... okay on input line 225.
-LaTeX Font Info:    Checking defaults for PD1/pdf/m/n on input line 225.
-LaTeX Font Info:    ... okay on input line 225.
-LaTeX Font Info:    Checking defaults for TS1/cmr/m/n on input line 225.
-LaTeX Font Info:    Try loading font information for TS1+cmr on input line 225.
+LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 222.
+LaTeX Font Info:    ... okay on input line 222.
+LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 222.
+LaTeX Font Info:    ... okay on input line 222.
+LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 222.
+LaTeX Font Info:    ... okay on input line 222.
+LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 222.
+LaTeX Font Info:    ... okay on input line 222.
+LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 222.
+LaTeX Font Info:    ... okay on input line 222.
+LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 222.
+LaTeX Font Info:    ... okay on input line 222.
+LaTeX Font Info:    Checking defaults for PD1/pdf/m/n on input line 222.
+LaTeX Font Info:    ... okay on input line 222.
+LaTeX Font Info:    Checking defaults for TS1/cmr/m/n on input line 222.
+LaTeX Font Info:    Try loading font information for TS1+cmr on input line 222.
 
 (/usr/share/texmf/tex/latex/base/ts1cmr.fd
 File: ts1cmr.fd 1999/05/25 v2.5h Standard LaTeX font definitions
 )
-LaTeX Font Info:    ... okay on input line 225.
-Package hyperref Info: Link coloring ON on input line 225.
+LaTeX Font Info:    ... okay on input line 222.
+Package hyperref Info: Link coloring ON on input line 222.
 (/usr/share/texmf/tex/latex/hyperref/nameref.sty
 Package: nameref 2003/12/03 v2.21 Cross-referencing by name of section
 \c@section@level=\count97
 )
-LaTeX Info: Redefining \ref on input line 225.
-LaTeX Info: Redefining \pageref on input line 225.
+LaTeX Info: Redefining \ref on input line 222.
+LaTeX Info: Redefining \pageref on input line 222.
 \openout3 = `images.out'.
 
 -------------------- Geometry parameters
@@ -318,7 +318,7 @@ driver: pdftex
 (1in=72.27pt, 1cm=28.45pt)
 -----------------------
 
-(/home/hartleys/UTILS/BuildRelease/QoRTs_0.3.5/QoRTs/vignettes/QoRTs-vignette.a
+(/home/hartleys/UTILS/BuildRelease/QoRTs_0.3.9/QoRTs/vignettes/QoRTs-vignette.a
 ux
 
 LaTeX Warning: Label `sec:praeludium' multiply defined.
@@ -745,16 +745,16 @@ latex2htmlLength evensidemargin=-15.36449pt
 
 
 LaTeX Font Warning: Font shape `OT1/cmss/m/it' in size <12> not available
-(Font)              Font shape `OT1/cmss/m/sl' tried instead on input line 272.
+(Font)              Font shape `OT1/cmss/m/sl' tried instead on input line 269.
 
 
-LaTeX Font Info:    Try loading font information for TS1+cmss on input line 276
+LaTeX Font Info:    Try loading font information for TS1+cmss on input line 273
 .
 (/usr/share/texmf/tex/latex/base/ts1cmss.fd
 File: ts1cmss.fd 1999/05/25 v2.5h Standard LaTeX font definitions
 )
-*** image for framed756 is too tall at 724.18344pt, reducing to .95 vsize ***
-l2hSize :framed756:647.48763pt::0.0pt::349.0pt.
+*** image for framed755 is too tall at 724.18344pt, reducing to .95 vsize ***
+l2hSize :framed755:647.48763pt::0.0pt::349.0pt.
 [1
 Non-PDF special ignored!
 Non-PDF special ignored!
@@ -777,10 +777,10 @@ Non-PDF special ignored!
 Non-PDF special ignored!]
 
 LaTeX Font Warning: Font shape `OT1/cmss/m/it' in size <10.95> not available
-(Font)              Font shape `OT1/cmss/m/sl' tried instead on input line 310.
+(Font)              Font shape `OT1/cmss/m/sl' tried instead on input line 307.
 
 
-l2hSize :framed804:97.14166pt::0.0pt::349.0pt.
+l2hSize :framed803:97.14166pt::0.0pt::349.0pt.
 [2
 Non-PDF special ignored!
 Non-PDF special ignored!
@@ -788,7 +788,7 @@ Non-PDF special ignored!
 
 Non-PDF special ignored!
 Non-PDF special ignored!]
-l2hSize :framed821:83.54166pt::0.0pt::349.0pt.
+l2hSize :framed820:83.54166pt::0.0pt::349.0pt.
 [3
 Non-PDF special ignored!
 Non-PDF special ignored!
@@ -796,7 +796,7 @@ Non-PDF special ignored!
 
 Non-PDF special ignored!
 Non-PDF special ignored!]
-l2hSize :framed839:69.18124pt::0.0pt::349.0pt.
+l2hSize :framed838:69.18124pt::0.0pt::349.0pt.
 [4
 Non-PDF special ignored!
 Non-PDF special ignored!
@@ -804,7 +804,7 @@ Non-PDF special ignored!
 
 Non-PDF special ignored!
 Non-PDF special ignored!]
-l2hSize :framed866:185.9917pt::0.0pt::349.0pt.
+l2hSize :framed865:185.9917pt::0.0pt::349.0pt.
 [5
 Non-PDF special ignored!
 Non-PDF special ignored!
@@ -814,7 +814,7 @@ Non-PDF special ignored!
 Non-PDF special ignored!
 Non-PDF special ignored!
 Non-PDF special ignored!]
-l2hSize :framed890:108.00418pt::0.0pt::349.0pt.
+l2hSize :framed889:108.00418pt::0.0pt::349.0pt.
 [6
 Non-PDF special ignored!
 Non-PDF special ignored!
@@ -824,7 +824,7 @@ Non-PDF special ignored!
 Non-PDF special ignored!
 Non-PDF special ignored!
 Non-PDF special ignored!]
-l2hSize :framed913:123.73335pt::0.0pt::349.0pt.
+l2hSize :framed912:123.73335pt::0.0pt::349.0pt.
 [7
 Non-PDF special ignored!
 Non-PDF special ignored!
@@ -832,7 +832,7 @@ Non-PDF special ignored!
 
 Non-PDF special ignored!
 Non-PDF special ignored!]
-l2hSize :framed930:121.60419pt::0.0pt::349.0pt.
+l2hSize :framed929:121.60419pt::0.0pt::349.0pt.
 [8
 Non-PDF special ignored!
 Non-PDF special ignored!
@@ -840,7 +840,7 @@ Non-PDF special ignored!
 
 Non-PDF special ignored!
 Non-PDF special ignored!]
-l2hSize :framed952:226.79173pt::0.0pt::349.0pt.
+l2hSize :framed951:226.79173pt::0.0pt::349.0pt.
 [9
 Non-PDF special ignored!
 Non-PDF special ignored!
@@ -848,12 +848,12 @@ Non-PDF special ignored!
 
 Non-PDF special ignored!
 Non-PDF special ignored!]
-Underfull \hbox (badness 1253) in paragraph at lines 421--422
+Underfull \hbox (badness 1253) in paragraph at lines 418--419
 []\OT1/cmss/m/n/10.95 Or tech-ni-cal is-sues: These plots will of-ten re-veal i
 n-ef-fi-ciency of
  []
 
-l2hSize :framed969:206.8417pt::0.0pt::349.0pt.
+l2hSize :framed968:206.8417pt::0.0pt::349.0pt.
 [10
 Non-PDF special ignored!
 Non-PDF special ignored!
@@ -861,7 +861,7 @@ Non-PDF special ignored!
 
 Non-PDF special ignored!
 Non-PDF special ignored!]
-l2hSize :framed987:69.33333pt::0.0pt::349.0pt.
+l2hSize :framed986:69.33333pt::0.0pt::349.0pt.
 [11
 Non-PDF special ignored!
 Non-PDF special ignored!
@@ -869,7 +869,7 @@ Non-PDF special ignored!
 
 Non-PDF special ignored!
 Non-PDF special ignored!]
-l2hSize :framed1007:82.93333pt::0.0pt::349.0pt.
+l2hSize :framed1006:82.93333pt::0.0pt::349.0pt.
 [12
 Non-PDF special ignored!
 Non-PDF special ignored!
@@ -877,7 +877,7 @@ Non-PDF special ignored!
 
 Non-PDF special ignored!
 Non-PDF special ignored!]
-l2hSize :framed1036:42.13332pt::0.0pt::349.0pt.
+l2hSize :framed1035:42.13332pt::0.0pt::349.0pt.
 [13
 Non-PDF special ignored!
 Non-PDF special ignored!
@@ -885,7 +885,7 @@ Non-PDF special ignored!
 
 Non-PDF special ignored!
 Non-PDF special ignored!]
-l2hSize :framed1096:69.33333pt::0.0pt::349.0pt.
+l2hSize :framed1095:69.33333pt::0.0pt::349.0pt.
 [14
 Non-PDF special ignored!
 Non-PDF special ignored!
@@ -901,39 +901,47 @@ Non-PDF special ignored!
 
 Non-PDF special ignored!
 Non-PDF special ignored!]
-l2hSize :framed1134:226.1834pt::0.0pt::349.0pt.
+l2hSize :framed1134:128.85419pt::0.0pt::349.0pt.
 [16
 Non-PDF special ignored!
 Non-PDF special ignored!
 
 
 Non-PDF special ignored!
+Non-PDF special ignored!
+Non-PDF special ignored!
 Non-PDF special ignored!]
-l2hSize :framed1152:266.98341pt::0.0pt::349.0pt.
+l2hSize :framed1153:169.6542pt::0.0pt::349.0pt.
 [17
 Non-PDF special ignored!
 Non-PDF special ignored!
 
 
 Non-PDF special ignored!
+Non-PDF special ignored!
+Non-PDF special ignored!
 Non-PDF special ignored!]
-l2hSize :framed1204:69.33333pt::0.0pt::349.0pt.
+l2hSize :framed1171:169.6542pt::0.0pt::349.0pt.
 [18
 Non-PDF special ignored!
 Non-PDF special ignored!
 
 
 Non-PDF special ignored!
+Non-PDF special ignored!
+Non-PDF special ignored!
 Non-PDF special ignored!]
-l2hSize :framed1224:55.73332pt::0.0pt::349.0pt.
+l2hSize :framed1189:128.85419pt::0.0pt::349.0pt.
 [19
 Non-PDF special ignored!
 Non-PDF special ignored!
 
 
 Non-PDF special ignored!
+Non-PDF special ignored!
+Non-PDF special ignored!
 Non-PDF special ignored!]
-l2hSize :framed1243:110.13335pt::0.0pt::349.0pt.
+l2hSize :framed1208:69.33333pt::0.0pt::349.0pt.
 [20
 Non-PDF special ignored!
 Non-PDF special ignored!
@@ -941,7 +949,7 @@ Non-PDF special ignored!
 
 Non-PDF special ignored!
 Non-PDF special ignored!]
-l2hSize :framed1262:55.73332pt::0.0pt::349.0pt.
+l2hSize :framed1228:55.73332pt::0.0pt::349.0pt.
 [21
 Non-PDF special ignored!
 Non-PDF special ignored!
@@ -949,7 +957,7 @@ Non-PDF special ignored!
 
 Non-PDF special ignored!
 Non-PDF special ignored!]
-l2hSize :framed1281:42.13332pt::0.0pt::349.0pt.
+l2hSize :framed1247:110.13335pt::0.0pt::349.0pt.
 [22
 Non-PDF special ignored!
 Non-PDF special ignored!
@@ -957,7 +965,7 @@ Non-PDF special ignored!
 
 Non-PDF special ignored!
 Non-PDF special ignored!]
-l2hSize :framed1298:40.00415pt::0.0pt::349.0pt.
+l2hSize :framed1266:55.73332pt::0.0pt::349.0pt.
 [23
 Non-PDF special ignored!
 Non-PDF special ignored!
@@ -965,8 +973,24 @@ Non-PDF special ignored!
 
 Non-PDF special ignored!
 Non-PDF special ignored!]
-l2hSize :framed1427:43.21664pt::0.0pt::349.0pt.
+l2hSize :framed1285:42.13332pt::0.0pt::349.0pt.
 [24
+Non-PDF special ignored!
+Non-PDF special ignored!
+
+
+Non-PDF special ignored!
+Non-PDF special ignored!]
+l2hSize :framed1302:40.00415pt::0.0pt::349.0pt.
+[25
+Non-PDF special ignored!
+Non-PDF special ignored!
+
+
+Non-PDF special ignored!
+Non-PDF special ignored!]
+l2hSize :framed1431:43.21664pt::0.0pt::349.0pt.
+[26
 Non-PDF special ignored!
 Non-PDF special ignored!
 
@@ -980,17 +1004,20 @@ LaTeX Warning: There were multiply-defined labels.
 
  ) 
 Here is how much of TeX's memory you used:
- 3989 strings out of 94501
- 56928 string characters out of 1176789
- 112261 words of memory out of 1000000
+ 3992 strings out of 94501
+ 56962 string characters out of 1176789
+ 112243 words of memory out of 1000000
  7088 multiletter control sequences out of 10000+50000
  6763 words of font info for 24 fonts, out of 500000 for 2000
  580 hyphenation exceptions out of 1000
  34i,7n,45p,719b,362s stack positions out of 1500i,500n,5000p,200000b,5000s
 PDF statistics:
- 129 PDF objects out of 300000
- 27 named destinations out of 131072
+ 143 PDF objects out of 300000
+ 30 named destinations out of 131072
  17 words of extra memory for PDF output out of 65536
+
+! pdfTeX warning (dest): name{subsubsection.7.4.15} has been referenced but doe
+s not exist, replaced by a fixed one
 
 ! pdfTeX warning (dest): name{subsubsection.7.4.4} has been referenced but does
  not exist, replaced by a fixed one
@@ -1003,4 +1030,4 @@ e1/bluesky/cm/cmssi10.pfb></usr/share/texmf/fonts/type1/bluesky/cm/cmss10.pfb><
 /usr/share/texmf/fonts/type1/bluesky/cm/cmssbx10.pfb> </var/lib/texmf/pk/ljfour
 /jknappen/tc/tcss1095.600pk></usr/share/texmf/fonts/type1/bluesky/cm/cmss12.pfb
 ></usr/share/texmf/fonts/type1/bluesky/cm/cmssi12.pfb>
-Output written on images.pdf (24 pages, 73464 bytes).
+Output written on images.pdf (26 pages, 76327 bytes).
