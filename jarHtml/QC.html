@@ -72,6 +72,8 @@ If the filename ends with ".gz" or ".zip", the file will be parsed using the app
   <p>Sets the maximum read length. For unclipped datasets this option is not necessary since the read length can be determined from the data. By default, QoRTs will attempt to determine the max read length by examining the first 1000 reads. If your data is hard-clipped prior to alignment, then it is strongly recommended that this option be included, or else an error may occur. Note that hard-clipping data prior to alignment is generally not recommended, because this makes it difficult (or impossible) to determine the sequencer read-cycle of each nucleotide base. This may obfuscate cycle-specific artifacts, trends, or errors, the detection of which is one of the primary purposes of QoRTs! In addition, hard clipping (whether before or after alignment) removes quality score data, and thus quality score metrics may be misleadingly optimistic. A MUCH preferable method of removing undesired sequence is to replace such sequence with N's, which preserves the quality score and the sequencer cycle information while still removing undesired sequence.  (Int)</p>
 </blockquote>
 
+<h3>--minMAPQ num:</h3>
+
 <blockquote>
   <p>Filter out reads with less than the given MAPQ. Most RNA-Seq aligners use the MAPQ field
      to differentiate uniquely-mapped and multi-mapped reads. However, different aligners
@@ -95,7 +97,6 @@ If the filename ends with ".gz" or ".zip", the file will be parsed using the app
   <p>Flag to indicate that only the first 100k reads should be read in. Used for testing. (flag)</p>
 </blockquote>
 
-<h3>--minMAPQ num:</h3>
 
 
 
