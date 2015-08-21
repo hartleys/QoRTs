@@ -35,8 +35,8 @@
 
 <section><h1>QoRTs: Quality of RNA-seq Tool-Set</h1>
 
-<p>v0.3.9
-Revised Fri Aug  7 12:09:07 EDT 2015</p>
+<p>v0.3.14
+Revised Fri Aug 21 11:07:55 EDT 2015</p>
 
 <p>The QoRTs software package is a fast, efficient, and portable multifunction toolkit designed to assist in
 the analysis, quality control, and data management of RNA-Seq datasets. Its primary function is to aid
@@ -47,7 +47,7 @@ files suitable for use with the UCSC genome browser (or any compatible browser).
 
 <p>The entire QoRTs toolkit can be used in almost any operating system that supports java and R.</p>
 
-<p>The most recent release of QoRTs is available on the <a href="http://github.com/hartleys/QoRTs">QoRTs github page</a>. Additional help and documentation is available online <a href="http://hartleys.github.io/QoRTs/index.html">here</a>.  The creator and maintainer of QoRTs can be reached by emailing "QoRTs.contact" (at) gmail.</p>
+<p>The most recent release of QoRTs is available on the <a href="http://github.com/hartleys/QoRTs">QoRTs github page</a>. Additional help and documentation is available online <a href="http://hartleys.github.io/QoRTs/index.html">here</a>. The creator and maintainer of QoRTs can be reached by emailing "QoRTs.contact" (at) gmail.</p>
 
 </section> <h2>Help Index:</h2> <section>
 
@@ -59,21 +59,26 @@ files suitable for use with the UCSC genome browser (or any compatible browser).
 <li><a href="https://dl.dropboxusercontent.com/u/103621176/qorts/exData/QoRTsExampleData.tar.gz">Example QC data.</a> This example dataset, formatted as an R package, containing only the QC data from a QoRTs run. It is used in the vignette.</li>
 <li><a href="https://dl.dropboxusercontent.com/u/103621176/qorts/exData/QoRTsFullExampleData.zip">Full example dataset and walkthrough.</a> This example dataset includes the raw bam files, along with all output produced in the example walkthrough.</li>
 <li><a href="doc/QoRTs-manual.pdf">QoRTs reference manual.</a> Extended documentation of all available methods. For advanced users.</li>
+<li><a href="FAQ.html">Frequently Asked Questions</a>  Check here if you run into problems!</li>
+
 </ul>
+
+</section> <h2>CITING QoRTs:</h2> <section>
+If you use QoRTs and find it helpful, you can cite it in your publications as:<br>
+
+Hartley SW, Mullikin JC. <b><a href="http://www.ncbi.nlm.nih.gov/pmc/articles/PMC4506620/">QoRTs: a comprehensive toolset for quality control and data processing of RNA-Seq experiments.</a></b> <i><a href="http://www.biomedcentral.com/bmcbioinformatics">BMC Bioinformatics.</a></i> doi: 10.1186/s12859-015-0670-5
 
 </section> <h2>INSTALLATION:</h2> <section>
 
 <p>The R package can be installed in R using the command:</p>
 
-<pre><code>&gt; install.packages("QoRTs_0.3.9.tar.gz", repos = NULL, type="source")
+<pre><code>&gt; install.packages("QoRTs_0.3.14.tar.gz", repos = NULL, type="source")
 </code></pre>
 
 <p>or using the command-line:</p>
 
-<pre><code>R CMD INSTALL QoRTs_0.3.9.tar.gz
+<pre><code>R CMD INSTALL QoRTs_0.3.14.tar.gz
 </code></pre>
-
-Note that you must use the R package archive in the code above, which is named "QoRTs_0.3.9.tar.gz", not the the entire github archive (which contains the java utility, source code, etc).
 
 <p>The java jar file does not need to be installed.
 Just execute it using the java command:</p>
@@ -86,7 +91,7 @@ Just execute it using the java command:</p>
 <p>The example QC output can be found on the github main page, and installed
 with the command:</p>
 
-<pre><code>install.packages("QoRTsExampleData_0.3.9.tar.gz", repos = NULL, type="source")
+<pre><code>install.packages("QoRTsExampleData_0.3.14.tar.gz", repos = NULL, type="source")
 </code></pre>
 
 <p>The original bam files are too large to upload to github.
