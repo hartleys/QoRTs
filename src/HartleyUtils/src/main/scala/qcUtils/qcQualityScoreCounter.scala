@@ -44,7 +44,10 @@ class qcQualityScoreCounter(isSingleEnd : Boolean, readLength : Int, maxQualScor
   val qualByPos_r2 : Array[Array[Int]] = Array.ofDim[Int](readLength,maxQualScore + 1);
   //var readPairCt = 0;
   //val max = 41;
-
+  
+  //reportln("   DEBUG: qualByPos_r1 dim: (" + qualByPos_r1.length + ","+ qualByPos_r1(0).length +")","debug");
+  //reportln("   DEBUG: qualByPos_r2 dim: (" + qualByPos_r2.length + ","+ qualByPos_r2(0).length +")","debug");
+  
   def runOnReadPair(r1 : SAMRecord, r2 : SAMRecord, readNum : Int){
     if(isSingleEnd){
       runOnRead_helper(r1,true);

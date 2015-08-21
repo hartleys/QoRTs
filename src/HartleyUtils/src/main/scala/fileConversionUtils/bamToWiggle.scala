@@ -302,7 +302,12 @@ object bamToWiggle {
                    unsorted : Boolean){
     
     val peekCt = 2000;
-    val (samFileAttributes, recordIter) = initSamRecordIterator(infile, peekCt);
+    val reader : SAMFileReader = if(infile == "-"){
+      new SAMFileReader(System.in);
+    } else {
+      new SAMFileReader(new File(infile));
+    }
+    val (samFileAttributes, recordIter) = initSamRecordIterator(reader, peekCt);
     
     val pairedIter : Iterator[(SAMRecord,SAMRecord)] = 
       if(isSingleEnd){
@@ -384,7 +389,12 @@ object bamToWiggle {
   
   
   def runOnFile(infile : String, qcBTW : QcBamToWig, testRun : Boolean, isSingleEnd : Boolean, keepMultiMapped : Boolean, readGroup : Option[String]){
-    val (samFileAttributes, recordIter) = initSamRecordIterator(infile);
+    val reader : SAMFileReader = if(infile == "-"){
+      new SAMFileReader(System.in);
+    } else {
+      new SAMFileReader(new File(infile));
+    }
+    val (samFileAttributes, recordIter) = initSamRecordIterator(reader);
     val pairedIter : Iterator[(SAMRecord,SAMRecord)] = 
       if(isSingleEnd){
         if(testRun) samRecordPairIterator_withMulti_singleEnd(recordIter, true, 200000) else samRecordPairIterator_withMulti_singleEnd(recordIter);

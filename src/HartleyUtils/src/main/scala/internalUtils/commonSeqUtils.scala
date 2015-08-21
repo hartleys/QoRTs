@@ -12,9 +12,16 @@ import scala.collection.JavaConversions._
 
 object commonSeqUtils {
   
+  
+  
   /******************************************************************************************************
-   * Minor Utilities:
+   * Minor Utilities / picard wrappers:
    */
+  
+  //wrap flags to turn off errors:
+  def getMateUnmappedFlag(r : SAMRecord) : Boolean = {
+    r.getReadPairedFlag() && r.getMateUnmappedFlag();
+  }
   
   //0-based alignment start (inclusive)
   def getAlignmentStart(r : SAMRecord) : Int = {
@@ -380,14 +387,46 @@ object commonSeqUtils {
                                allReadsMarkedPaired : Boolean,
                                allReadsMarkedSingle : Boolean,
                                mixedSingleAndPaired : Boolean,
-                               minReadLength : Int);
+                               minReadLength : Int,
+                               numPeekReads : Int,
+                               numPeekReadsMapped : Int,
+                               numPeekReadsPaired : Int,
+                               numPeekReadsPairMapped : Int,
+                               numPeekPairs : Int,
+                               numPeekPairsMatched : Int,
+                               malformedPairNameCt : Int,
+                               malformedPairNames : Boolean,
+                               perfectPairing : Boolean,
+                               simpleMaxReadLength : Int,
+                               simpleMinReadLength : Int
+                               );
   
-  def initSamRecordIterator(infile : String, peekCount : Int = 1000, bufferSize : Int = 10000) : (SamFileAttributes, Iterator[SAMRecord]) = {
-    val reader : SAMFileReader = if(infile == "-"){
-      new SAMFileReader(System.in);
-    } else {
-      new SAMFileReader(new File(infile));
+  def initSamRecordIterator(reader : SAMFileReader, peekCount : Int = 1000, bufferSize : Int = 10000) : (SamFileAttributes, Iterator[SAMRecord]) = {
+    
+    val header = reader.getFileHeader();
+    
+    // Check alignment software
+    val alignmentProgramList : List[SAMProgramRecord] = header.getProgramRecords().toList;
+    
+    //Check for tophat 2, print note:
+    alignmentProgramList.find( (pr : SAMProgramRecord) => pr.getId() == "TopHat" ) match {
+      case Some(pr) => {
+        reportln("   Note: Detected TopHat Alignment Program.","note");
+        val tophatVer = pr.getProgramVersion();
+        reportln("         Version: \""+tophatVer+"\"","note");
+        if(tophatVer.substring(0,1) == "2"){
+          reportln("   IMPORTANT NOTE: Detected TopHat Alignment Program, version > 2. \n"+
+                   "       TopHat v2+ uses a different MAPQ convention than most aligners. \n"+
+                   "       Make sure you set the --minMAPQ parameter to 50 if you want to ignore \n"+
+                   "       multi-mapped reads.","note");
+        }
+      }
+      case None => {
+        //Do nothing.
+      }
     }
+    
+    
     val iter : Iterator[SAMRecord] = reader.iterator();
     var peekRecords = Seq[SAMRecord]();
      
@@ -403,7 +442,23 @@ object commonSeqUtils {
         //do nothing!
       }
     }
-     
+    val maxQual = qcUtils.qcQualityScoreCounter.MAX_QUALITY_SCORE.toByte;
+    val minQual = 0.toByte;
+    val isPhred33 : Boolean = peekRecords.forall(r => {
+       r.getBaseQualities().forall(q => {
+         q <= maxQual && q >= minQual;
+       })
+    })
+    if(! isPhred33) {
+      reportln("WARNING WARNING WARNING: \n"+
+               "   SAM format chastity warning:\n"+
+               "      Base Qualities are not "+minQual+" <= Q <= " + maxQual +"!\n"+
+               "      The SAM file specification requires that Phred Quality scores \n"+
+               "      be formatted in Phred+33 format! Errors WILL follow if further\n"+
+               "      anaylses/functions use quality scores for anything.","warn");
+    }
+    
+    
     //val isSortedByName : Boolean = (Iterator.from(1,2).takeWhile(_ < peekRecords.size).map(peekRecords(_))).zip( (Iterator.from(0,2).takeWhile(_ < peekRecords.size).map(peekRecords(_))) ).forall( (r12) => r12._1.getReadName == r12._2.getReadName );
     val isSortedByNameLexicographically : Boolean = seqIsSortedBy(peekRecords, (r1 : SAMRecord, r2 : SAMRecord) => {
         val n1 = r1.getReadName();
@@ -415,6 +470,7 @@ object commonSeqUtils {
     //val readLength = peekRecords.maxBy( _.getReadLength ).getReadLength;
     
     val allReadLengths = peekRecords.map( (r : SAMRecord) => getUnclippedReadLength(r));
+    val allSimpleReadLengths = peekRecords.map( (r : SAMRecord) => r.getReadLength());
     
     
     //val allReadLengths = peekRecords.map( (r : SAMRecord) => {  
@@ -430,6 +486,8 @@ object commonSeqUtils {
     //});
     val readLength = allReadLengths.max;
     val minReadLength = allReadLengths.min;
+    val simpleMaxReadLength = allSimpleReadLengths.max;
+    val simpleMinReadLength = allSimpleReadLengths.min;
     
     val isSortedByPosition : Boolean = seqIsSortedBy(peekRecords, (r1 : SAMRecord, r2 : SAMRecord) => {
         val start1 = r1.getAlignmentStart();
@@ -443,15 +501,27 @@ object commonSeqUtils {
         }
     })
     
+    val peekPrimary : Seq[SAMRecord] = peekRecords.filter(r => ! (r.getReadUnmappedFlag() || r.getNotPrimaryAlignmentFlag())).toVector;
+    val peekPairMapped : Seq[SAMRecord] = peekPrimary.filter(r => r.getReadPairedFlag() && (! getMateUnmappedFlag(r))).toVector;
+    
+    val numPeekReads : Int = peekRecords.length;
+    val numPeekReadsPrimary : Int = peekPrimary.length;
+    val numPeekReadsPaired : Int = peekRecords.count(r => r.getReadPairedFlag());
+    val numPeekReadsPairMapped : Int = peekPairMapped.length;
+    val peekReadNameSet : Set[String] = peekPairMapped.map(_.getReadName()).toSet;
+    val numPeekPairs : Int = peekReadNameSet.size();
+    val numPeekPairsMatched : Int = peekReadNameSet.count( id => {
+      peekPairMapped.count(r => r.getReadName() == id) == 2;
+    });
+    
+    val evenMappedPairs = zipIteratorWithCount(peekPairMapped.iterator).filter(x => x._2 % 2 == 0).map(x => x._1);
+    val oddMappedPairs = zipIteratorWithCount(peekPairMapped.iterator).filter(x => x._2 % 2 != 0).map(x => x._1);
+    val perfectPairing : Boolean = evenMappedPairs.zip(oddMappedPairs).forall( r12 => {
+        val (r1,r2) = r12;
+        r1.getReadName() == r2.getReadName();
+    });
     
     
-    //val isSortedByPosition : Boolean = (peekRecords).zip(peekRecords.tail).forall( r12 => {
-    //    val (r1 : SAMRecord,r2 : SAMRecord) = r12;
-    //    
-    //    val iv1 = internalUtils.genomicUtils.getGenomicIntervalsFromRead(r1, true, false).next;
-    //    val iv2 = internalUtils.genomicUtils.getGenomicIntervalsFromRead(r2, true, false).next;
-    //    GenomicInterval.compare(iv1,iv2) > 0;
-    //});
     //val minReadLength : Int = peekRecords.minBy( _.getReadLength ).getReadLength;
     
     val outIter = if(bufferSize == 0){ 
@@ -463,8 +533,43 @@ object commonSeqUtils {
     val allReadsMarkedPaired : Boolean = peekRecords.forall( _.getReadPairedFlag);
     val allReadsMarkedSingle : Boolean = peekRecords.forall(! _.getReadPairedFlag);
     val mixedSingleAndPaired : Boolean = ! (allReadsMarkedPaired | allReadsMarkedSingle);
-
-    return ((SamFileAttributes(readLength, isSortedByNameLexicographically, isSortedByPosition, isDefinitelyPairedEnd, allReadsMarkedPaired, allReadsMarkedSingle, mixedSingleAndPaired, minReadLength), outIter));
+    
+    //Check for malformed pair ID's:
+    val malformedPairNameCt : Int = if( numPeekPairsMatched > 0 || 
+                                        peekReadNameSet.exists(_.length < 2) ||
+                                        (! allReadsMarkedPaired)
+                                      ) {
+      0;
+    } else {
+      peekReadNameSet.count( (n1) => {
+                                       (n1.substring(n1.length-1,n1.length) == "1") &&
+                                       (peekReadNameSet.contains( n1.substring(0,n1.length-1) + "2" ))
+                                       }
+                            );
+    }
+    
+    val malformedPairNames : Boolean = malformedPairNameCt > 0;
+    
+    return ((SamFileAttributes(readLength, 
+                               isSortedByNameLexicographically, 
+                               isSortedByPosition, 
+                               isDefinitelyPairedEnd, 
+                               allReadsMarkedPaired, 
+                               allReadsMarkedSingle, 
+                               mixedSingleAndPaired, 
+                               minReadLength,
+                               numPeekReads,
+                               numPeekReadsPrimary,
+                               numPeekReadsPaired,
+                               numPeekReadsPairMapped,
+                               numPeekPairs,
+                               numPeekPairsMatched,
+                               malformedPairNameCt,
+                               malformedPairNames,
+                               perfectPairing,
+                               simpleMaxReadLength,
+                               simpleMinReadLength), 
+            outIter));
   }
   
   //def samRecordPairIterator_allPossibleSituations(iter : Iterator[SAMRecord], attr : SamFileAttributes, verbose : Boolean = true, testCutoff : Int = Int.MaxValue) : Iterator[(SAMRecord,SAMRecord)] = {
@@ -475,7 +580,7 @@ object commonSeqUtils {
 
     if(ignoreSecondary){
        presetProgressReporters.wrapIterator_readPairs(getSRPairIterUnsorted(iter.filter((read : SAMRecord) => {
-           (! read.getNotPrimaryAlignmentFlag()) & (! read.getMateUnmappedFlag()) & (! read.getReadUnmappedFlag())
+           (! read.getNotPrimaryAlignmentFlag()) && (! getMateUnmappedFlag(read)) && (! read.getReadUnmappedFlag())
          })), verbose, testCutoff);
     } else {
       error("FATAL ERROR: Using non-primary read mappings is not currently implemented!");
@@ -485,7 +590,7 @@ object commonSeqUtils {
   def samRecordPairIterator_withMulti(iter : Iterator[SAMRecord], verbose : Boolean = true, testCutoff : Int = -1, ignoreSecondary : Boolean = true) : Iterator[(SAMRecord,SAMRecord)] = {
     if(ignoreSecondary){
       presetProgressReporters.wrapIterator_readPairs(getSRPairIter(iter.filter((read : SAMRecord) => {
-        (! read.getNotPrimaryAlignmentFlag()) & (! read.getMateUnmappedFlag()) & (! read.getReadUnmappedFlag())
+        (! read.getNotPrimaryAlignmentFlag()) && (! getMateUnmappedFlag(read)) && (! read.getReadUnmappedFlag())
       })), verbose, testCutoff);
     } else {
       error("FATAL ERROR: Using non-primary read mappings is not currently implemented!");
@@ -573,7 +678,7 @@ object commonSeqUtils {
   }
   
   private def getSRPairIterUnsorted(iter : Iterator[SAMRecord]) : Iterator[(SAMRecord,SAMRecord)] = {
-    val initialPairContainerWarningSize = 50000;
+    val initialPairContainerWarningSize = 100000;
     val warningSizeMultiplier = 2;
     
     return new Iterator[(SAMRecord,SAMRecord)] {
@@ -587,25 +692,27 @@ object commonSeqUtils {
         
         while((! pairContainer.contains(curr.getReadName())) && iter.hasNext) {
           pairContainer(curr.getReadName()) = curr;
+          if(pairContainerWarningSize < pairContainer.size){
+              reportln("NOTE: Unmatched Read Buffer Size > "+pairContainerWarningSize+" [Mem usage:"+MemoryUtil.memInfo+"]","note");
+              if(pairContainerWarningSize == initialPairContainerWarningSize){
+                reportln("    (This is generally not a problem, but if this increases further then OutOfMemoryExceptions\n"+
+                         "    may occur.\n"+
+                         "    If memory errors do occur, either increase memory allocation or sort the bam-file by name\n"+
+                         "    and rerun with the '--nameSorted' option.\n"+
+                         "    This might also indicate that your dataset contains an unusually large number of\n"+
+                         "    chimeric read-pairs. Or it could occur simply due to the presence of genomic\n"+
+                         "    loci with extremly high coverage. It may also indicate a SAM/BAM file that \n"+
+                         "    does not adhere to the standard SAM specification.)", "note");
+              }
+              pairContainerWarningSize = pairContainerWarningSize * warningSizeMultiplier;
+          }
           curr = iter.next;
         }
         
         if(! pairContainer.contains(curr.getReadName()) ){
-          reportln("WARNING WARNING WARNING: Reached end of bam file, there are "+(pairContainer.size+1)+" orphaned reads, which are marked as having a mapped pair, but no corresponding pair is found in the bam file. \n(Example Orphaned Read Name: "+curr.getReadName()+")","warn");
+          internalUtils.Reporter.error("ERROR ERROR ERROR: Reached end of bam file, there are "+(pairContainer.size+1)+" orphaned reads, which are marked as having a mapped pair, but no corresponding pair is found in the bam file. \n(Example Orphaned Read Name: "+curr.getReadName()+")");
         }
-        if(pairContainerWarningSize < pairContainer.size){
-          reportln("NOTE: Unmatched Read Buffer Size > "+pairContainerWarningSize+" [Mem usage:"+MemoryUtil.memInfo+"]","note");
-          if(pairContainerWarningSize == initialPairContainerWarningSize){
-            reportln("    (This is generally not a problem, but if this increases further then OutOfMemoryExceptions\n"+
-                     "    may occur.\n"+
-                     "    If memory errors do occur, either increase memory allocation or sort the bam-file by name\n"+
-                     "    and rerun without the '--coordSorted' option.\n"+
-                     "    This might also indicate that your dataset contains an unusually large number of\n"+
-                     "    chimeric read-pairs. Or it could occur simply due to the presence of genomic\n"+
-                     "    loci with extremly high coverage.)", "note");
-          }
-          pairContainerWarningSize = pairContainerWarningSize * warningSizeMultiplier;
-        }
+
         
         val rB = pairContainer.remove(curr.getReadName()).get;
         if(curr.getFirstOfPairFlag()) return((curr, rB));

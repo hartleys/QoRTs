@@ -1,5 +1,5 @@
-# QoRTs v0.3.9
-(Compiled Fri Aug  7 12:09:07 EDT 2015)
+# QoRTs v0.3.14
+(Compiled Fri Aug 21 11:07:55 EDT 2015)
 
 The QoRTs software package is a fast, efficient, and portable multifunction toolkit designed to assist in
 the analysis, quality control, and data management of RNA-Seq datasets. Its primary function is to aid
@@ -10,22 +10,27 @@ files suitable for use with the UCSC genome browser (or any compatible browser).
 
 The entire QoRTs toolkit can be used in almost any operating system that supports java and R.
 
-The most recent release of QoRTs is available on the [QoRTs project page](http://hartleys.github.io/QoRTs/index.html).
+The most recent release of QoRTs is available on the [QoRTs project page](http://hartleys.github.io/QoRTs/index.html). 
 
 ##HELP AND DOCUMENTATION:
 Additional help and documentation is available online 
-[here](http://hartleys.github.io/QoRTs/index.html). 
+[here](http://hartleys.github.io/QoRTs/index.html). The creator and maintainer of QoRTs can be reached by emailing "QoRTs.contact" (at) gmail.
 
-Issues, bug reports, or feature requests can be posted to the [github issues page](https://github.com/hartleys/QoRTs/issues). The creator and maintainer of QoRTs can be reached by emailing "QoRTs.contact" (at) gmail.
+Issues, bug reports, or feature requests can be posted to the [github issues page](https://github.com/hartleys/QoRTs/issues).
+
+##Citing QoRTs:
+If you use QoRTs and find it helpful, you can cite it in your publications as:
+
+Hartley SW, Mullikin JC. [**QoRTs: a comprehensive toolset for quality control and data processing of RNA-Seq experiments.**](http://www.ncbi.nlm.nih.gov/pmc/articles/PMC4506620/) *BMC Bioinformatics.*](http://www.biomedcentral.com/bmcbioinformatics) doi: 10.1186/s12859-015-0670-5
 
 ##INSTALLATION:
 The R package can be installed in R using the command:
 
-    > install.packages("QoRTs_0.3.9.tar.gz", repos = NULL, type="source")
+    > install.packages("QoRTs_0.3.14.tar.gz", repos = NULL, type="source")
 
 or using the command-line:
     
-    R CMD INSTALL QoRTs_0.3.9.tar.gz
+    R CMD INSTALL QoRTs_0.3.14.tar.gz
 
 The java jar file does not need to be installed. 
 Just execute it using the java command:
@@ -36,7 +41,7 @@ Just execute it using the java command:
 The example QC output can be found on the github main page, and installed
 with the command:
     
-    install.packages("QoRTsExampleData_0.3.9.tar.gz", repos = NULL, type="source")
+    install.packages("QoRTsExampleData_0.3.14.tar.gz", repos = NULL, type="source")
 
 The original bam files are too large to upload to github. 
 These files, along with a comprehensive walkthrough demonstrating 

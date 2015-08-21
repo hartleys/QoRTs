@@ -145,8 +145,8 @@ object qcInnerDistance {
     
     //CHECK FOR OFF-BY-ONE ERRORS!
     //reportln("rf: ["+getAlignmentStart(rf)+","+getAlignmentEnd(rf)+")\nrr: ["+getAlignmentStart(rr)+","+getAlignmentEnd(rr)+")","note");
-
-    if(getAlignmentStart(rf) > getAlignmentEnd(rr)){
+    
+    if(getAlignmentStart(rf) >= getAlignmentEnd(rr)){
       //reportln("Method Exit: STAGGERED_BAD! ","note");
       return (STAGGERED_NO_OVERLAP,  2);
     } else if(getAlignmentEnd(rf) <= getAlignmentStart(rr)){
@@ -200,8 +200,11 @@ object qcInnerDistance {
     val startR = getAlignmentStart(rr);
     
     val lengthToIntersect = getReadLengthToIntersect(rr,rf);
-
-    if(lengthToIntersect - clipF > STAGGERED_ADAPTOR_ALIGNMENT_LIMIT ){
+    
+    
+    if(lengthToIntersect == OVERLAP_CIGAR_MISMATCH_INTERNAL){
+      return OVERLAP_CIGAR_MISMATCH_PARTIAL_OVERLAP;
+    } else if(lengthToIntersect - clipF > STAGGERED_ADAPTOR_ALIGNMENT_LIMIT ){
       return STAGGERED_TOO_MUCH_ADAPTOR_ALIGNED
       //return (STAGGERED_TOO_MUCH_ADAPTOR_ALIGNED, 2, lengthToIntersect - clipF);
     } else {
@@ -210,7 +213,7 @@ object qcInnerDistance {
       //return (insertSize,2,-1);
     }
     
-    //return insertSize;
+    //return insertSize; 
     
     //OLD VERSION:
     //val rrFirstBlockEnd = rr.getAlignmentBlocks.head.getReferenceStart() - 1 + rr.getAlignmentBlocks.head.getLength();
