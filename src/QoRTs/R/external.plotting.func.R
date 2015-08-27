@@ -14,8 +14,18 @@ makePlot.qual.pair <- function(plotter, y.name, r2.buffer = NULL, debugMode = DE
    } else { stop("FATAL ERROR: y.name must be one of: min,max,lowerQuartile,upperQuartile,median"); }
 
    if(debugMode) message("Starting: ",plot.name," plot."); 
-
+   
    res <- plotter$res;
+   defaultPhredMax <- 41;
+   phredMax <- max(sapply(res@qc.data[["summary"]], FUN = function(td){
+     idx <- which(td$FIELD == "maxLegalPhredScore");
+     if(length(idx) == 1){
+       as.numeric(as.character(td$COUNT[idx]));
+     } else {
+       defaultPhredMax;
+     }
+   }));
+   
    plot.name <- paste0(plot.name," Phred Quality Score");
    plotter.error.wrapper(plot.name, plotterFcn = function(){
      if(debugMode){ ts <- timestamp() }
@@ -34,7 +44,7 @@ makePlot.qual.pair <- function(plotter, y.name, r2.buffer = NULL, debugMode = DE
                                norm.x=FALSE,
                                avg.y=FALSE,plot.type = "lines",
                                xlim=xlim,
-                               ylim=c(0,42), 
+                               ylim=c(0,phredMax), 
                                vert.offset=1, 
                                draw.horiz.lines = TRUE,
                                override.lty = 1,
@@ -49,7 +59,7 @@ makePlot.qual.pair <- function(plotter, y.name, r2.buffer = NULL, debugMode = DE
                                norm.x=FALSE,
                                avg.y=FALSE,plot.type = "lines",
                                xlim=xlim,
-                               ylim=c(0,42), 
+                               ylim=c(0,phredMax), 
                                vert.offset=1, 
                                draw.horiz.lines = TRUE,
                                override.lty = 1,

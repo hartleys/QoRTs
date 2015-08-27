@@ -323,8 +323,29 @@ object runAllQC {
                                                  ""+
                                                  ""
                                        ) ::
-                                       
-//BETA OPTIONS:
+
+                    new BinaryArgument[Int](   name = "adjustPhredScore",
+                                                        arg = List("--adjustPhredScore"),  
+                                                        valueName = "val", 
+                                                        argDesc = "QoRTs expects input files to conform to the SAM format specification, "+
+                                                                  "which requires all Phred scores to be in Phred+33 encoding. However "+
+                                                                  "some older tools produce SAM files with nonstandard encodings. To read such data, "+
+                                                                  "you can set this parameter to subtract from the apparent (phred+33) phred score. Thus, to read "+
+                                                                  "Phred+64 data (produced by Illumina v1.3-1.7), set this parameter to 31. Note: QoRTs does not support "+
+                                                                  "negative Phred scores. NOTE: THIS OPTION IS EXPERIMENTAL!", 
+                                                        defaultValue = Some(0)
+                                                        ) ::
+                    new BinaryArgument[Int](   name = "maxPhredScore",
+                                                        arg = List("--maxPhredScore"),  
+                                                        valueName = "val", 
+                                                        argDesc = "According to the standard FASTQ and SAM format specification, Phred "+
+                                                                  "quality scores are supposed to range from 0 to 41. However, certain sequencing machines "+
+                                                                  "such as the HiSeq4000 supposedly produce occasional quality scores as high as 45. If your dataset "+
+                                                                  "contains quality scores in excess of 41, then you must use this option to set the maximum legal quality "+
+                                                                  "score. Otherwise, QoRTs will throw an error.", 
+                                                        defaultValue = Some(41)
+                                                        ) ::
+                   //BETA OPTIONS:
                     /* Impossible: requires foreknowledge of top genes...
                      * new BinaryOptionArgument[Double](
                                          name = "ignoreTopQuantileGenes", 
@@ -340,7 +361,8 @@ object runAllQC {
                                                     ""+
                                                     ""
                                         ) ::*/
-                    new BinaryOptionArgument[String](
+
+                   new BinaryOptionArgument[String](
                                          name = "extractReadsByMetric", 
                                          arg = List("--extractReadsByMetric"), 
                                          valueName = "metric=value",  
@@ -484,7 +506,9 @@ object runAllQC {
           parser.get[Boolean]("generatePlots") | parser.get[Boolean]("generateMultiPlot"),
           parser.get[Boolean]("generatePlots") | parser.get[Boolean]("generateSeparatePlots"),
           parser.get[Boolean]("generatePlots") | parser.get[Boolean]("generatePdfReport"),
-          parser.get[Option[String]]("extractReadsByMetric")
+          parser.get[Option[String]]("extractReadsByMetric"),
+          parser.get[Int]("adjustPhredScore"),
+          parser.get[Int]("maxPhredScore")
       );
       }
     }
@@ -520,7 +544,9 @@ object runAllQC {
           generateMultiPlot : Boolean,
           generateSeparatePlots : Boolean,
           generatePdfReport : Boolean,
-          extractReadsByMetric : Option[String]){
+          extractReadsByMetric : Option[String],
+          adjustPhredScore : Int,
+          maxPhredScore : Int){
     
     val outDirFile = new File(outdir);
     if(! outDirFile.exists()){
@@ -730,7 +756,9 @@ object runAllQC {
           generateMultiPlot = generateMultiPlot,
           generateSeparatePlots=generateSeparatePlots,
           generatePdfReport=generatePdfReport,
-          extractReadsFunction = extractReadsFunction)
+          extractReadsFunction = extractReadsFunction,
+          adjustPhredScore = adjustPhredScore,
+          maxPhredScore = maxPhredScore)
     }
   }
   
@@ -760,7 +788,9 @@ object runAllQC {
                    generateMultiPlot : Boolean,
                    generateSeparatePlots : Boolean,
                    generatePdfReport : Boolean,
-                   extractReadsFunction : Option[((String, Int, (Int,Int)) => Boolean)]){
+                   extractReadsFunction : Option[((String, Int, (Int,Int)) => Boolean)],
+                   adjustPhredScore : Int,
+                   maxPhredScore : Int){
     
     val inputReadCt : Option[Int] = seqReadCt match {
       case Some(ct) => Some(ct);
@@ -834,6 +864,17 @@ object runAllQC {
     reportln("        Read Seq length:          " + samFileAttributes.simpleMinReadLength + " to " + samFileAttributes.simpleMaxReadLength,"debug");
     reportln("        Unclipped Read length:    " + samFileAttributes.minReadLength + " to " + samFileAttributes.readLength,"debug");
     reportln("        Final maxReadLength:      " + readLength,"debug");
+    reportln("        maxPhredScore:            " + samFileAttributes.maxObservedQual,"debug");
+    reportln("        minPhredScore:            " + samFileAttributes.minObservedQual,"debug");
+    
+    if(samFileAttributes.maxObservedQual > maxPhredScore){
+            reportln("WARNING WARNING WARNING: \n"+
+               "   SAM format check:\n"+
+               "      Phred Qual > "+maxPhredScore+"!\n"+
+               "      You will need to set either --adjustPhredScores or --maxPhredScores\n"+
+               "      in order to compute Phred quality metrics! QoRTs WILL throw an error\n"+
+               "      if quality metrics are attempted!","warn");
+    }
     
     if(readLength != minReadLength){reportln("NOTE: Read length is not consistent.\n"+
                                              "   In the first "+peekCt+" reads, read length varies from "+minReadLength+" to " +maxObservedReadLength+" (param maxReadLength="+readLength+")\n"+
@@ -858,13 +899,15 @@ object runAllQC {
     
     if(! isSingleEnd){ 
       reportln("   Note: Data appears to be paired-ended.","debug");
-      if(samFileAttributes.perfectPairing & (! isSortedByPosition)) reportln("   Note: Reads appear to be grouped by read-pair, probably sorted by name (this is fine).","note");
-      if(((! isSortedByPosition) & ( unsorted ))){ reportln("   Note: Sam lines do not appear to be sorted by read position (this is fine).","note"); }
+      
+      var sortWarning = false;
+      
       if( ! (samFileAttributes.perfectPairing || isSortedByPosition) ){
         reportln("   WARNING: Reads do not appear to be sorted by coordinate or by name. Sorting input data is STRONGLY recommended, but not technically required.","warn");
+        sortWarning = true;
       }
       if(samFileAttributes.numPeekPairsMatched == 0){
-        reportln("   Warning: Have not found any matched read-pairs in the first "+peekCt+" reads. Is data paired-end? Use option --singleEnd for single-end data.","warn"); 
+        reportln("   Warning: Have not found any matched read-pairs in the first "+peekCt+" reads. Is data paired-end? Is data sorted?","warn"); 
         if(samFileAttributes.malformedPairNameCt > 0){
           reportln("   WARNING: No read-pairs found, but there are reads that match exactly\n"+
                    "            except for the last character, which is \"1\" in one read \n"+
@@ -874,10 +917,30 @@ object runAllQC {
                    "            reads MUST have the EXACT SAME first column.",
                    "warn");
         }
+        sortWarning = true;
       }
-      if( (! isDefinitelyPairedEnd)){ reportln("   Warning: Have not found any matched read pairs in the first "+peekCt+" reads. Is data paired-end? Use option --singleEnd for single-end data.","warn"); }
-      if( isSortedByPosition & (! unsorted )){ reportln("   Warning: SAM/BAM file appears to be sorted by read position, but you are running in --nameSorted mode.\n"+
-                                                        "            If this is so, you should probably omit the '--nameSorted' option, as errors may follow.","warn"); }
+      if( (! isDefinitelyPairedEnd)){ 
+        reportln("   Warning: Have not found any matched read pairs in the first "+peekCt+" reads. Is data paired-end? Use option --singleEnd for single-end data.","warn");
+        sortWarning = true;
+      }
+      if( isSortedByPosition & (! unsorted )){ 
+        reportln("   Warning: SAM/BAM file appears to be sorted by read position, but you are running in --nameSorted mode.\n"+
+                 "            If this is so, you should probably omit the '--nameSorted' option, as errors may follow.","warn"); 
+        sortWarning = true;
+      }
+      
+      val isOkNote = if(! sortWarning){"(This is OK)."} else {""}
+      if(samFileAttributes.perfectPairing){
+        reportln("   Sorting Note: Reads appear to be grouped by read-pair, probably sorted by name"+isOkNote,"note");
+      } else {
+        reportln("   Sorting Note: Reads are not sorted by name "+isOkNote,"note");
+      }
+      if(isSortedByPosition){
+        reportln("   Sorting Note: Reads are sorted by position "+isOkNote,"note");
+      } else {
+        reportln("   Sorting Note: Reads are not sorted by position "+isOkNote,"note");
+      }
+      
       //Samtools sorts in an odd way! Delete name sort check:
       //if( ((! isSortedByNameLexicographically) & (! unsorted ))) reportln("Note: SAM/BAM file does not appear to be sorted lexicographically by name (based on the first "+peekCt+" reads). It is (hopefully) sorted by read name using the samtools method.","debug");
     }
@@ -916,7 +979,7 @@ object runAllQC {
     val qcIS :  QCUtility[Int]    =   if(runFunc.contains("InsertSize"))                new qcInnerDistance(anno_holder, stranded, fr_secondStrand, readLength)        else QCUtility.getBlankIntUtil;
     val qcCS :  QCUtility[Unit]   =   if(runFunc.contains("NVC"))                       new qcNVC(isSingleEnd, readLength, runFunc.contains("writeClippedNVC"))                     else QCUtility.getBlankUnitUtil;
     val qcJD :  QCUtility[Unit]   =   if(runFunc.contains("CigarOpDistribution"))       new qcCigarDistribution(isSingleEnd, readLength)                                            else QCUtility.getBlankUnitUtil;
-    val qcQSC : QCUtility[Unit]   =   if(runFunc.contains("QualityScoreDistribution"))  new qcQualityScoreCounter(isSingleEnd, readLength, qcQualityScoreCounter.MAX_QUALITY_SCORE) else QCUtility.getBlankUnitUtil;
+    val qcQSC : QCUtility[Unit]   =   if(runFunc.contains("QualityScoreDistribution"))  new qcQualityScoreCounter(isSingleEnd, readLength, maxPhredScore, adjustPhredScore) else QCUtility.getBlankUnitUtil;
     val qcGC :  QCUtility[(Int,Int)]= if(runFunc.contains("GCDistribution"))      new qcGCContentCount(isSingleEnd, readLength)                                               else QCUtility.getBlankIntPairUtil;
     val qcJC :  QCUtility[Unit]   =   if(runFunc.contains("JunctionCalcs"))             new qcJunctionCounts(anno_holder, stranded, fr_secondStrand, runFunc.contains("writeDEXSeq"), runFunc.contains("writeSpliceExon"), runFunc.contains("writeKnownSplices"), runFunc.contains("writeNovelSplices"), runFunc.contains("annotatedSpliceExonCounts"))                   else QCUtility.getBlankUnitUtil;
     val qcST :  QCUtility[String] =   if(runFunc.contains("StrandCheck"))               new qcStrandTest(isSingleEnd, anno_holder, stranded, fr_secondStrand)                       else QCUtility.getBlankStringUtil;
@@ -1037,6 +1100,7 @@ object runAllQC {
     summaryWriter.write("KEPT_NOT_UNIQUE_ALIGNMENT	"+keptMultiMappedCt+"\n");
     summaryWriter.write("minObservedReadLength  "+minObsReadLength + "\n");
     summaryWriter.write("maxObservedReadLength  "+minObsReadLength + "\n");
+    summaryWriter.write("maxLegalPhredScore  "+maxPhredScore + "\n");
     
     if(isSingleEnd){
       summaryWriter.write("IS_SINGLE_END	1\n");

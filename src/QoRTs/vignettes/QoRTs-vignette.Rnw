@@ -63,7 +63,7 @@ BiocStyle::latex()
 \author{Stephen Hartley\\
 National Human Genome Research Institute\\
 National Institutes of Health\\
-v0.3.14 %REPLACE_THIS_LINE_WITH_VERSION_NUMBER
+v0.3.17 %REPLACE_THIS_LINE_WITH_VERSION_NUMBER
 }
 
 \begin{document}

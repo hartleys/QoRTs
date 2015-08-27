@@ -398,7 +398,9 @@ object commonSeqUtils {
                                malformedPairNames : Boolean,
                                perfectPairing : Boolean,
                                simpleMaxReadLength : Int,
-                               simpleMinReadLength : Int
+                               simpleMinReadLength : Int,
+                               maxObservedQual : Int,
+                               minObservedQual : Int
                                );
   
   def initSamRecordIterator(reader : SAMFileReader, peekCount : Int = 1000, bufferSize : Int = 10000) : (SamFileAttributes, Iterator[SAMRecord]) = {
@@ -444,18 +446,29 @@ object commonSeqUtils {
     }
     val maxQual = qcUtils.qcQualityScoreCounter.MAX_QUALITY_SCORE.toByte;
     val minQual = 0.toByte;
+    
+    val minObservedQual = peekRecords.map(r => {
+      r.getBaseQualities.min
+    }).min;
+    val maxObservedQual = peekRecords.map(r => {
+      r.getBaseQualities.max
+    }).max;
+    
     val isPhred33 : Boolean = peekRecords.forall(r => {
        r.getBaseQualities().forall(q => {
          q <= maxQual && q >= minQual;
        })
     })
     if(! isPhred33) {
-      reportln("WARNING WARNING WARNING: \n"+
-               "   SAM format chastity warning:\n"+
+      reportln("NOTE: \n"+
+               "   SAM format check:\n"+
                "      Base Qualities are not "+minQual+" <= Q <= " + maxQual +"!\n"+
                "      The SAM file specification requires that Phred Quality scores \n"+
-               "      be formatted in Phred+33 format! Errors WILL follow if further\n"+
-               "      anaylses/functions use quality scores for anything.","warn");
+               "      be formatted in Phred+33 format, and the scores are (usually) supposed \n"+
+               "      to fall in this range. Make sure you have properly set the \n "+
+               "      --adjustPhredScore and/or --maxPhredScore parameters. \n"+
+               "      If these parameters are not properly set, then errors may follow if further\n"+
+               "      anaylses/functions use quality scores for anything.","note");
     }
     
     
@@ -568,7 +581,9 @@ object commonSeqUtils {
                                malformedPairNames,
                                perfectPairing,
                                simpleMaxReadLength,
-                               simpleMinReadLength), 
+                               simpleMinReadLength,
+                               maxObservedQual,
+                               minObservedQual), 
             outIter));
   }
   

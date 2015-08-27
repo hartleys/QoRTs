@@ -103,7 +103,7 @@ class genSimplePlots extends CommandLineRunUtil {
     
     reportln(" > Starting R execution. (generating plots)","note");
     try{
-      val exitcode = scala.sys.process.Process("Rscript --no-save --no-restore " + qcdir + "QC.makeMultiplot.R").!(rlogger);
+      val exitcode = scala.sys.process.Process("Rscript --no-save --no-restore " + qcdir + "/QC.makeMultiplot.R").!(rlogger);
     } catch {
       case e : Exception => {
         reportln("##########################","warn");

@@ -31,7 +31,7 @@ object qcQualityScoreCounter {
   val MAX_QUALITY_SCORE = 41;
 }
 
-class qcQualityScoreCounter(isSingleEnd : Boolean, readLength : Int, maxQualScore : Int) extends QCUtility[Unit] {
+class qcQualityScoreCounter(isSingleEnd : Boolean, readLength : Int, maxQualScore : Int, adjustPhredScore : Int) extends QCUtility[Unit] {
   reportln("> Init QualityScoreDistribution Utility","debug");
   
   //var minQualByPos_r1 : Array[Byte] = new Array[Byte](readLen);
@@ -56,25 +56,47 @@ class qcQualityScoreCounter(isSingleEnd : Boolean, readLength : Int, maxQualScor
       runOnRead_helper(r2,r2.getFirstOfPairFlag());
     }
   }
-  
+   
   def runOnRead_helper(r : SAMRecord, isFirstRead : Boolean){
     val ((leadHardClip, leadSoftClip),(tailHardClip, tailSoftClip)) = getAllClipLengthsSimple(r);
-    val baseQuals = r.getBaseQualities();
+    val adjustPhred : Byte = adjustPhredScore.toByte;
+    val baseQuals : Seq[Byte] = if(adjustPhredScore == 0){
+         r.getBaseQualities().toSeq;
+       } else {
+         r.getBaseQualities().toSeq.map((b : Byte) => (b -  adjustPhred).toByte)
+       }
     val qualIndices = if(r.getReadNegativeStrandFlag()){
       (leadHardClip until (leadHardClip + baseQuals.length)).reverse;
     } else {
       (leadHardClip until (leadHardClip + baseQuals.length));
     }
     
-    if(isFirstRead){
-        r.getBaseQualities().zip(qualIndices).map((qi : (Byte, Int)) => {
-           qualByPos_r1(qi._2)(qi._1.toInt) += 1;
-        });
-    } else {
-        r.getBaseQualities().zip(qualIndices).map((qi : (Byte, Int)) => {
-           qualByPos_r2(qi._2)(qi._1.toInt) += 1;
-        });
+    try{
+      if(isFirstRead){
+          baseQuals.zip(qualIndices).map((qi : (Byte, Int)) => {
+             qualByPos_r1(qi._2)(qi._1.toInt) += 1;
+          });
+      } else {
+          baseQuals.zip(qualIndices).map((qi : (Byte, Int)) => {
+             qualByPos_r2(qi._2)(qi._1.toInt) += 1;
+          });
+      }
+    }  catch {
+      case e : ArrayIndexOutOfBoundsException => {
+        internalUtils.Reporter.reportln("ERROR! ArrayIndexOutOfBoundsException caught while attempting to store quality score metrics.\n" + 
+                                        "       Most likely cause: quality score found above "+maxQualScore+"!\n"+
+                                        "       You must use the --maxPhredScore parameter to set the maximum legal quality score!\n"+
+                                        "       Alternatively, maybe you used the --adjustPhredScore parameter and accidently generated\n"+
+                                        "       negative Phred scores?","warn");
+        internalUtils.Reporter.reportln("The offending Phred quality score string is:\n"+
+                                        "    "+r.getBaseQualityString(),"warn");
+        throw e;
+      }
+      case e : Exception => {
+        throw e;
+      }
     }
+    
     //readPairCt += 1;
   }
   
