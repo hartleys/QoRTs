@@ -79,7 +79,7 @@ java -jar /path/to/jarfile/QoRTs.jar QC \
 </FONT></FONT></FONT>
 <P>
 <FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858">The bam processing tool includes numerous options. A full description of these options can be found in the online documentation of the jar utility<A NAME="tex2html12"
-  HREF="footnode.html#foot1458"><SUP>6</SUP></A>, or by entering the command:
+  HREF="footnode.html#foot1459"><SUP>6</SUP></A>, or by entering the command:
 </FONT></FONT></FONT><PRE>
 java -jar /path/to/jarfile/QoRTs.jar QC --man
 </PRE><FONT COLOR="#585858"><FONT COLOR="#585858"></FONT></FONT>
@@ -89,6 +89,8 @@ java -jar /path/to/jarfile/QoRTs.jar QC --man
 <P>
 <FONT COLOR="#585858"><FONT COLOR="#585858"></FONT></FONT>
 <UL>
+<LI><I>MAPQ filter:</I> Most aligners designed for RNA-Seq use the MAPQ field to define whether or not a read is multi-mapped. However, different aligners use different conventions. By default QoRTs assumes the RNA-STAR convention in which a MAPQ of 255 indicates a unique alignment. For TopHat, the <code>--minMAPQ</code> parameter must be set to 50. For GSNAP, the MAPQ behavior is not well documented (or at least I have been unable to find such documentation), but a MAPQ filtering threshold of 30 appears to work.
+</LI>
 <LI><I>Stranded Data:</I> By default, QoRTs assumes that the data is <I>NOT</I> strand-specific. For strand-specific data, the <code>--stranded</code> option must be used.
 </LI>
 <LI><I>Stranded Library Type:</I> The <code>--fr_secondStrand</code> option may be required depending on the stranded library type. QoRTs does not attempt to automatically detect the platform and protocol used for stranded data. There are two types of strand-specific protocols, which are described by the TopHat/CuffLinks documentation at <TT><A NAME="tex2html14"
@@ -96,9 +98,9 @@ java -jar /path/to/jarfile/QoRTs.jar QC --man
 </LI>
 <LI><I>Read Groups:</I> Depending on the production pipeline, each biological sample may be run across multiple sequencer lanes. These seperate files can be merged together either before or after analysis with QoRTs (and maybe even before alignment). However, if the merger occurs before analysis with QoRTs, then each bam file will consist of multiple seperate lanes or runs. In this case, it is STRONGLY recommended that seperate QC runs be performed on each "read group", using the <code>--readGroup</code> option. This will prevent run- or lane-specific biases, artifacts, or errors from being obfuscated.
 </LI>
-<LI><I>Read Sorting:</I> For paired-end data reads must be sorted. By default, QoRTs can accept files sorted by name OR by position.
+<LI><I>Read Sorting:</I> For paired-end data reads must be sorted. By default, QoRTs can accept files sorted by name OR by position. Technically QoRTs will accept unsorted data, but the memory usage will be greatly increased.
 </LI>
-<LI><I>Single-end vs paired-end:</I> By default, QoRTs assumes the input bam file consists of paired-end data. For single-end data, the <code>--isSingleEnd</code> option must be used.
+<LI><I>Single-end vs paired-end:</I> By default, QoRTs assumes the input bam file consists of paired-end data. For single-end data, the <code>--singleEnded</code> option must be used.
   
 </LI>
 </UL><FONT COLOR="#585858"><FONT COLOR="#585858"></FONT></FONT>
@@ -171,7 +173,7 @@ java -Xmx16G -jar /path/to/jarfile/QoRTs.jar QC \
 <!--End of Navigation Panel-->
 <ADDRESS>
 Dr Stephen William Hartley
-2015-08-07
+2015-08-27
 </ADDRESS>
 </div></BODY>
 </HTML>

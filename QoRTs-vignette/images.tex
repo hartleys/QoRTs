@@ -107,7 +107,7 @@
 \author{Stephen Hartley\\
 National Human Genome Research Institute\\
 National Institutes of Health\\
-v0.3.9 %REPLACE_THIS_LINE_WITH_VERSION_NUMBER
+v0.3.17 %REPLACE_THIS_LINE_WITH_VERSION_NUMBER
 }
 \IfFileExists{upquote.sty}{\usepackage{upquote}}{}
 
@@ -121,7 +121,7 @@ v0.3.9 %REPLACE_THIS_LINE_WITH_VERSION_NUMBER
 
 \makeatletter
 \AtBeginDocument{\makeatletter
-\input /home/hartleys/UTILS/BuildRelease/QoRTs_0.3.9/QoRTs/vignettes/QoRTs-vignette.aux
+\input /home/hartleys/UTILS/BuildRelease/QoRTs_0.3.17/QoRTs/vignettes/QoRTs-vignette.aux
 \makeatother
 }
 
@@ -264,7 +264,7 @@ v0.3.9 %REPLACE_THIS_LINE_WITH_VERSION_NUMBER
 \stepcounter{subsubsection}
 \stepcounter{subsection}
 {\newpage\clearpage
-\lthtmlfigureA{framed755}%
+\lthtmlfigureA{framed756}%
 \begin{framed}
 \emph{What it means and what to look for:} 
 \par
@@ -302,7 +302,7 @@ unexplained abnormalities are discovered in their dataset.
 
 \stepcounter{subsubsection}
 {\newpage\clearpage
-\lthtmlfigureA{framed803}%
+\lthtmlfigureA{framed804}%
 \begin{framed} \small
 \emph{What it means and what to look for:} These plots can be used to detect sequencer problems, bad lanes, or similar hardware-level artifacts and errors. Look for spikes or shelves, and ensure that the quality score is relatively consistent across samples and lanes, and that any differences that do exist are not disproportionate with respect to the study condition (or "group.ID").
 \end{framed}%
@@ -311,7 +311,7 @@ unexplained abnormalities are discovered in their dataset.
 
 \stepcounter{subsubsection}
 {\newpage\clearpage
-\lthtmlfigureA{framed820}%
+\lthtmlfigureA{framed821}%
 \begin{framed} \small
 \emph{What it means and what to look for:} GC bias has been indicated as a potential driver of false discoveries. Under certain circumstances the GC bias may vary by batch or by sample. If this is apparent in your dataset, particularly if it is associated with study conditions, one may need to apply a GC bias correction method (such as CQN).
 \end{framed}%
@@ -320,7 +320,7 @@ unexplained abnormalities are discovered in their dataset.
 
 \stepcounter{subsubsection}
 {\newpage\clearpage
-\lthtmlfigureA{framed838}%
+\lthtmlfigureA{framed839}%
 \begin{framed} \small
 \emph{What it means and what to look for:} Abnormalities ("spikes", "shelves", or cases where sample groups are visibly different) in these plots can be caused by adaptor sequencing, gene fusions, mutations, population stratification, or differences in insert size.
 \end{framed}%
@@ -329,9 +329,9 @@ unexplained abnormalities are discovered in their dataset.
 
 \stepcounter{subsubsection}
 {\newpage\clearpage
-\lthtmlfigureA{framed865}%
+\lthtmlfigureA{framed866}%
 \begin{framed}
-% latex2html id marker 865
+% latex2html id marker 866
  \small
 \emph{What it means and what to look for:} These plots are most 
 often used in conjuction with the plots in Section \ref{subsec:plotDesc-8}. 
@@ -352,9 +352,9 @@ frequency of deletions/insertions.
 
 \stepcounter{subsubsection}
 {\newpage\clearpage
-\lthtmlfigureA{framed889}%
+\lthtmlfigureA{framed890}%
 \begin{framed}
-% latex2html id marker 889
+% latex2html id marker 890
  \small
 \emph{What it means and what to look for:} These plots are most often used in 
 conjuction with the plots in Section \ref{subsec:plotDesc-4}. They can elucidate 
@@ -368,7 +368,7 @@ further investigation is likely merited, to confirm that this is the case.
 
 \stepcounter{subsubsection}
 {\newpage\clearpage
-\lthtmlfigureA{framed912}%
+\lthtmlfigureA{framed913}%
 \begin{framed} \small
 \emph{What it means and what to look for:} Spikes in the insert size are common, 
 generally the result of short, highly-expressed (often mitochondrial) transcripts. 
@@ -383,7 +383,7 @@ bias that could drive the false discovery of differential effects.
 
 \stepcounter{subsubsection}
 {\newpage\clearpage
-\lthtmlfigureA{framed929}%
+\lthtmlfigureA{framed930}%
 \begin{framed} \small
 \emph{What it means and what to look for:} A number of potential sequencer issues 
 can cause an abrupt "spike" or "shelf" in this plot. In one real sample assessed 
@@ -398,7 +398,7 @@ affected reads were identified and removed.
 
 \stepcounter{subsubsection}
 {\newpage\clearpage
-\lthtmlfigureA{framed951}%
+\lthtmlfigureA{framed952}%
 \begin{framed} \small
 \emph{What it means and what to look for:} When run on degraded RNA and/or when using poly-A selection, RNA-Seq often tends to have "3' bias", in which read coverage is higher on the 3' end of transcripts. The degree of this 3' bias tends to be dependent on the degree of degradation. Many analysis tools are robust against this issue when it occurs uniformly across the dataset; However, if some samples are substantially more degraded than others then this may cause problems downstream, particularly if RNA degradation is associated to the experimental condition(s). When studying this plot, check to make sure the gene-body coverage is consistant and/or matches your expectations.
 \par
@@ -409,7 +409,7 @@ Note that the overall gene-body coverage may be strongly influenced by extreme h
 
 \stepcounter{subsubsection}
 {\newpage\clearpage
-\lthtmlfigureA{framed968}%
+\lthtmlfigureA{framed969}%
 \begin{framed} \small
 \emph{What it means and what to look for:} This plot can reveal a number of phenomena. First of all: if the top few genes dominate a sample (representing a large percentage of the total reads), oddities may appear in many of the other plots produced by QoRTs, as traits specific to these particular genes are dominant over the variation found across the genome. 
 \par
@@ -422,7 +422,7 @@ Or technical issues: These plots will often reveal inefficiency of hemoglobin or
 
 \stepcounter{subsubsection}
 {\newpage\clearpage
-\lthtmlfigureA{framed986}%
+\lthtmlfigureA{framed987}%
 \begin{framed} \small
 \emph{What it means and what to look for:} This can reveal sequence-specific biases such as hexamer or primer bias. Additionally, it can reveal adaptor sequencing. Such issues are generally not a problem as long as they are consistent across samples and groups.
 \end{framed}%
@@ -431,7 +431,7 @@ Or technical issues: These plots will often reveal inefficiency of hemoglobin or
 
 \stepcounter{subsubsection}
 {\newpage\clearpage
-\lthtmlfigureA{framed1006}%
+\lthtmlfigureA{framed1007}%
 \begin{framed} \small
 \emph{What it means and what to look for:} This can reveal sequence-specific biases such as hexamer or primer bias. Such issues are generally not a problem as long as they are consistent across samples and groups. Unlike the raw NVC plot, adaptor sequence will generally be absent from this plot as it usually will not align to the reference.
 \end{framed}%
@@ -440,7 +440,7 @@ Or technical issues: These plots will often reveal inefficiency of hemoglobin or
 
 \stepcounter{subsubsection}
 {\newpage\clearpage
-\lthtmlfigureA{framed1035}%
+\lthtmlfigureA{framed1036}%
 \begin{framed} \small
 \emph{What it means and what to look for:} If a large proportion of the reads are shorter than the read length then this can reveal the adaptor sequence.
 \end{framed}%
@@ -450,7 +450,7 @@ Or technical issues: These plots will often reveal inefficiency of hemoglobin or
 \stepcounter{subsubsection}
 \stepcounter{subsubsection}
 {\newpage\clearpage
-\lthtmlfigureA{framed1095}%
+\lthtmlfigureA{framed1096}%
 \begin{framed} \small
 \emph{What it means and what to look for:} Outliers in these plots can indicate biological variations or the presence of large mapping problems. They may also suggest the presence of large, highly-expressed, unannotated transcripts or genes.
 \end{framed}%
@@ -459,7 +459,7 @@ Or technical issues: These plots will often reveal inefficiency of hemoglobin or
 
 \stepcounter{subsubsection}
 {\newpage\clearpage
-\lthtmlfigureA{framed1116}%
+\lthtmlfigureA{framed1117}%
 \begin{framed} \small
 \emph{What it means and what to look for:} This plot can be used to detect a number of anomalies. For example: whether mapping or sequencing artifacts caused a disproportionate discovery of novel splice junctions in one sample or batch. It can also be used as an indicator of the comprehensiveness the genome annotation. Replicates that are obvious outliers may have sequencing/technical issues causing false detection of splice junctions.
 \par
@@ -470,9 +470,9 @@ Abnormalities in the splice junction rates are generally a symptom of larger iss
 
 \stepcounter{subsubsection}
 {\newpage\clearpage
-\lthtmlfigureA{framed1134}%
+\lthtmlfigureA{framed1135}%
 \begin{framed}
-% latex2html id marker 1134
+% latex2html id marker 1135
  \small
 \emph{What it means and what to look for:} This plot is useful for identifying mapping and/or annotation issues, and can indicate the comprehensiveness the genome annotation. Replicates that are obvious outliers may have sequencing/technical issues causing false detection of splice junctions. 
 \par
@@ -483,9 +483,9 @@ In general, abnormalities in the splice junction rates are generally a symptom o
 
 \stepcounter{subsubsection}
 {\newpage\clearpage
-\lthtmlfigureA{framed1153}%
+\lthtmlfigureA{framed1154}%
 \begin{framed}
-% latex2html id marker 1153
+% latex2html id marker 1154
  \small
 \emph{What it means and what to look for:} This plot is used to detect whether sample-specific or batch effects have a substantial or biased effect on splice junction appearance, either due to differences in the original RNA, or due to artifacts that alter the rate at which the aligner maps across splice junctions. It can assist in identifying mapping and/or annotation issues, and can indicate the comprehensiveness the genome annotation. Replicates that are obvious outliers may have sequencing/technical issues causing false detection of splice junctions.  
 \par
@@ -496,9 +496,9 @@ In general, abnormalities in the splice junction rates are generally a symptom o
 
 \stepcounter{subsubsection}
 {\newpage\clearpage
-\lthtmlfigureA{framed1171}%
+\lthtmlfigureA{framed1172}%
 \begin{framed}
-% latex2html id marker 1171
+% latex2html id marker 1172
  \small
 \emph{What it means and what to look for:} This plot is used to detect whether sample-specific or batch effects have a substantial or biased effect on splice junction appearance, either due to differences in the original RNA, or due to artifacts that alter the rate at which the aligner maps across splice junctions. This plot is useful for identifying mapping and/or annotation issues, and can indicate the comprehensiveness the genome annotation. Replicates that are obvious outliers may have sequencing/technical issues causing false detection of splice junctions.  
 \par
@@ -509,9 +509,9 @@ In general, abnormalities in the splice junction rates are generally a symptom o
 
 \stepcounter{subsubsection}
 {\newpage\clearpage
-\lthtmlfigureA{framed1189}%
+\lthtmlfigureA{framed1190}%
 \begin{framed}
-% latex2html id marker 1189
+% latex2html id marker 1190
  \small
 \emph{What it means and what to look for:} This plot is useful for identifying mapping and/or annotation issues, and can indicate the comprehensiveness the genome annotation. Replicates that are obvious outliers may have sequencing/technical issues causing false detection of splice junctions.  
 \par
@@ -522,7 +522,7 @@ In general, abnormalities in the splice junction rates are generally a symptom o
 
 \stepcounter{subsubsection}
 {\newpage\clearpage
-\lthtmlfigureA{framed1208}%
+\lthtmlfigureA{framed1209}%
 \begin{framed} \small
 \emph{What it means and what to look for:} This plot can indicate the efficiency of the strand-specific selection protocol, and reveal variations in such efficiency. They can also be used to determine the "strandedness rule", which is required by many downstream analysis tools.
 \end{framed}%
@@ -531,7 +531,7 @@ In general, abnormalities in the splice junction rates are generally a symptom o
 
 \stepcounter{subsubsection}
 {\newpage\clearpage
-\lthtmlfigureA{framed1228}%
+\lthtmlfigureA{framed1229}%
 \begin{framed} \small
 \emph{What it means and what to look for:} Presence of outliers in the mapping rate statistics may be an indicator of large sample-prep, library-prep, or sequencer errors.
 \end{framed}%
@@ -540,7 +540,7 @@ In general, abnormalities in the splice junction rates are generally a symptom o
 
 \stepcounter{subsubsection}
 {\newpage\clearpage
-\lthtmlfigureA{framed1247}%
+\lthtmlfigureA{framed1248}%
 \begin{framed} \small
 \emph{What it means and what to look for:} Presence of outliers in these plots may point to variable inefficiency in a ribosomal/mitochondrial depletion protocol. In most datasets the Y chromosome counts can be used to determine sample sex (but not in this case, since the Y chromosome is not included in the example dataset's genome assembly). The raw metrics generated by QoRTs can also be used to generate counts for the ERCC spike-ins or similar.
 \end{framed}%
@@ -549,7 +549,7 @@ In general, abnormalities in the splice junction rates are generally a symptom o
 
 \stepcounter{subsubsection}
 {\newpage\clearpage
-\lthtmlfigureA{framed1266}%
+\lthtmlfigureA{framed1267}%
 \begin{framed} \small
 \emph{What it means and what to look for:} These normalization factors can be used for a number of downstream analyses, including the generation of summary browser tracks.
 \end{framed}%
@@ -558,7 +558,7 @@ In general, abnormalities in the splice junction rates are generally a symptom o
 
 \stepcounter{subsubsection}
 {\newpage\clearpage
-\lthtmlfigureA{framed1285}%
+\lthtmlfigureA{framed1286}%
 \begin{framed} \small
 \emph{What it means and what to look for:} Large variations in these ratios can indicate large-scale differences between the samples.
 \end{framed}%
@@ -567,7 +567,7 @@ In general, abnormalities in the splice junction rates are generally a symptom o
 
 \stepcounter{subsubsection}
 {\newpage\clearpage
-\lthtmlfigureA{framed1302}%
+\lthtmlfigureA{framed1303}%
 \begin{framed} \small
 \emph{What it means and what to look for:} This can be used to assess the occurrance rates of a number of failure modes. 
 \end{framed}%
@@ -590,7 +590,7 @@ In general, abnormalities in the splice junction rates are generally a symptom o
 \stepcounter{section}
 \stepcounter{section}
 {\newpage\clearpage
-\lthtmlfigureA{framed1431}%
+\lthtmlfigureA{framed1432}%
 \begin{framed} \begin{verbatim}
 
 java -jar /path/to/jarfile/QoRTs.jar "?" samjdkinfo\end{verbatim}

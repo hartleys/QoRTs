@@ -35,29 +35,27 @@
 
 <section><h1>Frequently Asked Questions</h1>
 
-<p>v0.3.14
-Revised Fri Aug 21 11:07:55 EDT 2015</p>
+<p>v0.3.17
+Revised Thu Aug 27 13:53:48 EDT 2015</p>
 
 </section> <h2>What if none of these answers solve my problem?</h2> <section>
 
-No problem. Just email me at qorts.contact at gmail dot com. If possible attach the output from QoRTs, and run QoRTs with the "--verbose" option to maximize the debugging information.
+<p>No problem. Just email me at qorts.contact at gmail dot com. If possible attach the output from QoRTs, and run QoRTs with the "--verbose" option to maximize the debugging information.</p>
 
 </section> <h2>Using QoRTs with different aligners:</h2> <section>
 
-
-Different aligners often use different conventions, in particular with regards to the MAPQ field which is often used to differentiate multi-mapped and uniquely-mapped reads.
+<p>Different aligners often use different conventions, in particular with regards to the MAPQ field which is often used to differentiate multi-mapped and uniquely-mapped reads.</p>
 
 <ul>
-<li> <b>RNA-STAR</b>: QoRTs is designed to work with RNA-STAR without any special options. </li>
-<li> <b>TopHat1</b>: Prior to version 2.0.0, TopHat used the same MAPQ convention as RNA-STAR now uses. Thus, no special options are needed. </li>
-<li> <b>TopHat2</b>: TopHat2 uses a MAPQ of 50 to mark reads that are uniquely aligned. Thus, when using TopHat2 aligned data, you must set the --minMAPQ parameter to 50. </li>
-<li> <b>MapSplice</b>: Under many test conditions MapSplice produces malformed SAM files that violate the current SAM format specification. As such, QoRTs may not be able to properly assess MapSplice output, particularly for paired-ended data. </li>
-<li> <b>GSNAP</b>: I have been unable to find documentation describing exactly what the MAPQ field means in GSNAP output. However, setting the --minMAPQ parameter to 20 seems to work. </li>
-<li> <b>BowTie, BowTie2, BWA, NOVOALIGN, BLAT, BLAST, or ELEND</b>: The use of older aligners or aligners not specifically designed for use with RNA-Seq data is NOT recommended or supported. You MIGHT be able to get these alignments to work using --minMAPQ 0. </li>
+<li><strong>RNA-STAR</strong>: QoRTs is designed to work with RNA-STAR without any special options.</li>
+<li><strong>TopHat1</strong>: Prior to version 2.0.0, TopHat used the same MAPQ convention as RNA-STAR now uses. Thus, no special options are needed.</li>
+<li><strong>TopHat2</strong>: TopHat2 uses a MAPQ of 50 to mark reads that are uniquely aligned. Thus, when using TopHat2 aligned data, you must set the --minMAPQ parameter to 50.</li>
+<li><strong>MapSplice</strong>: Under many test conditions MapSplice produces malformed SAM files that violate the <a href="https://samtools.github.io/hts-specs/SAMv1.pdf">current SAM format specification</a>. As such, QoRTs may not be able to properly assess MapSplice output, particularly for paired-ended data.</li>
+<li><strong>GSNAP</strong>: I have been unable to find documentation describing exactly what the MAPQ field means in GSNAP output. However, setting the --minMAPQ parameter to 20 seems to work.</li>
+<li><strong>BowTie, BowTie2, BWA, NOVOALIGN, BLAT, BLAST, or ELEND</strong>: The use of older aligners or aligners not specifically designed for use with RNA-Seq data is NOT recommended or supported. You MIGHT be able to get these alignments to work using --minMAPQ 0.</li>
 </ul>
 
-
-</section> <h2>Problems with Installation:</h2> <section>
+</section> <h2>How do I install QoRTs?</h2> <section>
 
 <p>The R package can be installed in R using the command:</p>
 
@@ -69,67 +67,65 @@ Different aligners often use different conventions, in particular with regards t
 <pre><code>R CMD INSTALL QoRTs_0.3.14.tar.gz
 </code></pre>
 
-Note: If you run into an error that looks like this:
-<pre><code>
-ERROR: cannot extract package from ‘QoRTs_0.3.9.tar.gz’
-</code></pre>
-then you may be attempting to install the github repository tar.gz archive, rather than the actual R package archive. Download the QoRTs_0.3.9.zip file from <a href="https://github.com/hartleys/QoRTs/releases/latest">the most recent release</a>, unzip it, and use the file "QoRTs_(versionNumber)tar.gz" to install the R package.
+<p>Note: If you run into an error that looks like this:</p>
 
-<p>The java jar file does not need to be installed.
+<pre><code>ERROR: cannot extract package from '0.3.9.tar.gz'
+</code></pre>
+
+<p>Then you may be attempting to install the entire github repository archive, rather than the actual R package archive. Download the QoRTs_0.3.9.zip file from <a href="https://github.com/hartleys/QoRTs/releases/latest">the most recent release</a>, unzip it, and use the file "QoRTs_0.3.9.tar.gz" to install the R package. Do NOT attempt to install the full repository source in R!</p>
+
+<p>The java jar file does not need to be installed. 
 Just execute it using the java command:</p>
 
 <pre><code>java -jar /path/to/jarfile/QoRTs.jar QC input.bam anno.gtf.gz /output/dir/
 </code></pre>
 
-</section> <h2>EXAMPLE DATA:</h2> <section>
+</section> <h2>Non-standard Phred scores</h2> <section>
 
-<p>The example QC output can be found on the github main page, and installed
-with the command:</p>
+<p>If you see an warning that looks like this:</p>
 
-<pre><code>install.packages("QoRTsExampleData_0.3.14.tar.gz", repos = NULL, type="source")
+<pre><code>WARNING WARNING WARNING: 
+SAM format check:
+    Phred Qual &gt; 41!
+    You will need to set either --adjustPhredScores or --maxPhredScores
+    in order to compute Phred quality metrics! QoRTs WILL throw an error
+    if quality metrics are attempted!
 </code></pre>
 
-<p>The original bam files are too large to upload to github.
-These files, along with a comprehensive walkthrough demonstrating
-how all analysis can be run on them, can be found <a href="
-https://dl.dropboxusercontent.com/u/103621176/qorts/exData/QoRTsFullExampleData.zip">here</a>.
-(File is ~1.5gb)</p>
+<p>Followed by an error that looks like this:</p>
+
+<pre><code>ERROR! ArrayIndexOutOfBoundsException caught while attempting to store quality score metrics.
+       Most likely cause: quality score found above 41!
+</code></pre>
+
+<p>Then you may have a problem with your Phred score encoding. This can be caused
+by one of two possibilities:</p>
+
+<p>(1) Certain newer Illumina platforms (reportedly) produce Phred scores in excess of 41. 
+While not explicitly forbidden by the Phred encoding specification (such as it is), 
+this is very uncommon at the current time. However, if a Phred score in excess of
+41 is encountered then QoRTs will throw a descriptive error like this:</p>
+
+<p>In this case, you will need to use the "--maxPhredScore" parameter, set to the maximum expected
+Phred score. According to one (secondhand) report, Illumina stated that the absolute maximum 
+(as of August 2015) was 45.</p>
+
+<p>(2) Certain older Illumina platforms (~1.3-1.7) used Phred+64 encoding for their phred scores. 
+While technically SAM files should always be converted to Phred+33, QoRTs does offer 
+optional support for reading such malformed input files. Use the "--adjustPhredScore 31"
+option to automatically subtract 31 from all phred scores, thus converting Phred+64 to Phred+33.
+Note that negative Phred scores are NOT supported by QoRTs, and they WILL throw an error.
+See the <a href="https://en.wikipedia.org/wiki/FASTQ_format#Encoding">related wikipedia article</a> for more information. </p>
 
 </section> <h2>How do I cite QoRTs?</h2> <section>
-If you use QoRTs and find it helpful, you can cite it in your publications as:<br>
 
-Hartley SW, Mullikin JC. <b><a href="http://www.ncbi.nlm.nih.gov/pmc/articles/PMC4506620/">QoRTs: a comprehensive toolset for quality control and data processing of RNA-Seq experiments.</a></b> <i><a href="http://www.biomedcentral.com/bmcbioinformatics">BMC Bioinformatics.</a></i> doi: 10.1186/s12859-015-0670-5
+<p>If you use QoRTs and find it helpful, you can cite it in your publications as:</p>
 
-</section> <h2>How do I access the internal command-line help?</h2> <section>
-
-<p>Additional options and syntax information for the main QC java utility
-can be found using the command:</p>
-
-<pre><code>java -jar /path/to/jarfile/QoRTs.jar QC --man
-</code></pre>
-
-<p>Options and information about other sub-utilities within the java package
-can be found using the command:</p>
-
-<pre><code>java -jar /path/to/jarfile/QoRTs.jar --man
-</code></pre>
-
-<p>And for each sub-utility:</p>
-
-<pre><code>java -jar /path/to/jarfile/QoRTs.jar utilname --man
-</code></pre>
-
-<p>For help with individual R functions in the R utility, use the R command:</p>
-
-<pre><code>&gt; help(functionname);
-</code></pre>
-
-<p>For a full listing of all help topics for the R utility, use the R command: </p>
-
-<pre><code>&gt; help(package="QoRTs");
-</code></pre>
+<p>Hartley SW, Mullikin JC. <a href="http://www.ncbi.nlm.nih.gov/pmc/articles/PMC4506620/"><strong>QoRTs: a comprehensive toolset for quality control and data processing of RNA-Seq experiments.</strong></a> <em>BMC Bioinformatics.</em>](http://www.biomedcentral.com/bmcbioinformatics) doi: 10.1186/s12859-015-0670-5</p>
 
 </section>
+
+
 
 </div>
 

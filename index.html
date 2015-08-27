@@ -35,8 +35,8 @@
 
 <section><h1>QoRTs: Quality of RNA-seq Tool-Set</h1>
 
-<p>v0.3.14
-Revised Fri Aug 21 11:07:55 EDT 2015</p>
+<p>v0.3.17
+Revised Thu Aug 27 13:53:48 EDT 2015</p>
 
 <p>The QoRTs software package is a fast, efficient, and portable multifunction toolkit designed to assist in
 the analysis, quality control, and data management of RNA-Seq datasets. Its primary function is to aid
@@ -55,32 +55,33 @@ files suitable for use with the UCSC genome browser (or any compatible browser).
 <li>QoRTs vignette. User manual and general how-to. Available as a <a href="doc/QoRTs-vignette.pdf">pdf</a> or <a href="QoRTs-vignette/index.html">on the web</a>.</li>
 <li><a href="jarHtml/index.html">Java jar utility help index.</a> The Java utility is responsible for the bulk of the data processing, and contains a number of useful tools. It must be run on all replicates.</li>
 <li><a href="Rhtml/index.html">R package help.</a> The R package is responsible for producing visualizations, graphs, plots, and summary tables.</li>
+<li><a href="faq.html">Frequently Asked Questions.</a> A list of common questions. If you encounter an error running or installing QoRTs, check here!</li>
 <li><a href="doc/example-walkthrough.pdf">Example walkthrough.</a></li>
-<li><a href="https://dl.dropboxusercontent.com/u/103621176/qorts/exData/QoRTsExampleData.tar.gz">Example QC data.</a> This example dataset, formatted as an R package, containing only the QC data from a QoRTs run. It is used in the vignette.</li>
+<li><a href="QoRTsExampleData.tar.gz">Example QC data.</a> This example dataset, formatted as an R package, containing only the QC data from a QoRTs run. It is used in the vignette.</li>
 <li><a href="https://dl.dropboxusercontent.com/u/103621176/qorts/exData/QoRTsFullExampleData.zip">Full example dataset and walkthrough.</a> This example dataset includes the raw bam files, along with all output produced in the example walkthrough.</li>
 <li><a href="doc/QoRTs-manual.pdf">QoRTs reference manual.</a> Extended documentation of all available methods. For advanced users.</li>
-<li><a href="FAQ.html">Frequently Asked Questions</a>  Check here if you run into problems!</li>
-
+<li><a href="FAQ.html">Frequently Asked Questions</a>: Check here if you run into problems!</li>
 </ul>
 
-</section> <h2>CITING QoRTs:</h2> <section>
-If you use QoRTs and find it helpful, you can cite it in your publications as:<br>
+</section> <h2>Citing QoRTs:</h2> <section>
 
-Hartley SW, Mullikin JC. <b><a href="http://www.ncbi.nlm.nih.gov/pmc/articles/PMC4506620/">QoRTs: a comprehensive toolset for quality control and data processing of RNA-Seq experiments.</a></b> <i><a href="http://www.biomedcentral.com/bmcbioinformatics">BMC Bioinformatics.</a></i> doi: 10.1186/s12859-015-0670-5
+<p>If you use QoRTs and find it helpful, you can cite it in your publications as:</p>
+
+<p>Hartley SW, Mullikin JC. <a href="http://www.ncbi.nlm.nih.gov/pmc/articles/PMC4506620/"><strong>QoRTs: a comprehensive toolset for quality control and data processing of RNA-Seq experiments.</strong></a> <em>BMC Bioinformatics.</em>](http://www.biomedcentral.com/bmcbioinformatics) doi: 10.1186/s12859-015-0670-5</p>
 
 </section> <h2>INSTALLATION:</h2> <section>
 
 <p>The R package can be installed in R using the command:</p>
 
-<pre><code>&gt; install.packages("QoRTs_0.3.14.tar.gz", repos = NULL, type="source")
+<pre><code>&gt; install.packages("QoRTs_0.3.17.tar.gz", repos = NULL, type="source")
 </code></pre>
 
 <p>or using the command-line:</p>
 
-<pre><code>R CMD INSTALL QoRTs_0.3.14.tar.gz
+<pre><code>R CMD INSTALL QoRTs_0.3.17.tar.gz
 </code></pre>
 
-<p>The java jar file does not need to be installed.
+<p>The java jar file does not need to be installed. 
 Just execute it using the java command:</p>
 
 <pre><code>java -jar /path/to/jarfile/QoRTs.jar QC input.bam anno.gtf.gz /output/dir/
@@ -91,18 +92,18 @@ Just execute it using the java command:</p>
 <p>The example QC output can be found on the github main page, and installed
 with the command:</p>
 
-<pre><code>install.packages("QoRTsExampleData_0.3.14.tar.gz", repos = NULL, type="source")
+<pre><code>install.packages("QoRTsExampleData_0.3.17.tar.gz", repos = NULL, type="source")
 </code></pre>
 
-<p>The original bam files are too large to upload to github.
-These files, along with a comprehensive walkthrough demonstrating
+<p>The original bam files are too large to upload to github. 
+These files, along with a comprehensive walkthrough demonstrating 
 how all analysis can be run on them, can be found <a href="
-https://dl.dropboxusercontent.com/u/103621176/qorts/exData/QoRTsFullExampleData.zip">here</a>.
+https://dl.dropboxusercontent.com/u/103621176/qorts/exData/QoRTsFullExampleData.zip">here</a>. 
 (File is ~1.5gb)</p>
 
 </section> <h2>COMMAND-LINE HELP:</h2> <section>
 
-<p>Additional options and syntax information for the main QC java utility
+<p>Additional options and syntax information for the main QC java utility 
 can be found using the command:</p>
 
 <pre><code>java -jar /path/to/jarfile/QoRTs.jar QC --man
@@ -131,25 +132,25 @@ can be found using the command:</p>
 
 </section> <h2>LEGAL:</h2> <section>
 
-<p>This software is "United States Government Work" under the terms of the United
-States Copyright Act. It was written as part of the authors' official duties
-for the United States Government and thus QoRT Package User Manual cannot be
-copyrighted. This software is freely available to the public for use without a
+<p>This software is "United States Government Work" under the terms of the United 
+States Copyright Act. It was written as part of the authors' official duties 
+for the United States Government and thus QoRT Package User Manual cannot be 
+copyrighted. This software is freely available to the public for use without a 
 copyright notice. Restrictions cannot be placed on its present or future use.</p>
 
-<p>Although all reasonable efforts have been taken to ensure the accuracy and
-reliability of the software and data, the National Human Genome Research
-Institute (NHGRI) and the U.S. Government does not and cannot warrant the
-performance or results that may be obtained by using this software or data.
-NHGRI and the U.S. Government disclaims all warranties as to performance,
+<p>Although all reasonable efforts have been taken to ensure the accuracy and 
+reliability of the software and data, the National Human Genome Research 
+Institute (NHGRI) and the U.S. Government does not and cannot warrant the 
+performance or results that may be obtained by using this software or data. 
+NHGRI and the U.S. Government disclaims all warranties as to performance, 
 merchantability or fitness for any particular purpose.</p>
 
-<p>In any work or product derived from this material, proper attribution of the
-authors as the source of the software or data should be made, using "NHGRI
+<p>In any work or product derived from this material, proper attribution of the 
+authors as the source of the software or data should be made, using "NHGRI 
 Genome Technology Branch" as the citation.</p>
 
-<p>NOTE: The scala package includes (internally) the sam-JDK library
-(sam-1.113.jar), from picard tools, which is covered under the MIT license.
+<p>NOTE: The scala package includes (internally) the sam-JDK library 
+(sam-1.113.jar), from picard tools, which is covered under the MIT license. 
 The MIT license and copyright information can be accessed using the command:
 java -jar /path/to/jarfile/QoRTs.jar --man samjdkinfo</p>
 

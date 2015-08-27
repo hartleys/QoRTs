@@ -1,6 +1,6 @@
 # QoRTs: Quality of RNA-seq Tool-Set
-v0.3.14
-Revised Fri Aug 21 11:07:55 EDT 2015
+v0.3.17
+Revised Thu Aug 27 13:53:48 EDT 2015
 
 The QoRTs software package is a fast, efficient, and portable multifunction toolkit designed to assist in
 the analysis, quality control, and data management of RNA-Seq datasets. Its primary function is to aid
@@ -18,8 +18,9 @@ The most recent release of QoRTs is available on the [QoRTs github page](http://
 * QoRTs vignette. User manual and general how-to. Available as a [pdf](doc/QoRTs-vignette.pdf) or [on the web](QoRTs-vignette/index.html).
 * [Java jar utility help index.](jarHtml/index.html) The Java utility is responsible for the bulk of the data processing, and contains a number of useful tools. It must be run on all replicates.
 * [R package help.](Rhtml/index.html) The R package is responsible for producing visualizations, graphs, plots, and summary tables.
+* [Frequently Asked Questions.](faq.html) A list of common questions. If you encounter an error running or installing QoRTs, check here!
 * [Example walkthrough.](doc/example-walkthrough.pdf)
-* [Example QC data.](https://dl.dropboxusercontent.com/u/103621176/qorts/exData/QoRTsExampleData.tar.gz) This example dataset, formatted as an R package, containing only the QC data from a QoRTs run. It is used in the vignette.
+* [Example QC data.](QoRTsExampleData.tar.gz) This example dataset, formatted as an R package, containing only the QC data from a QoRTs run. It is used in the vignette.
 * [Full example dataset and walkthrough.](https://dl.dropboxusercontent.com/u/103621176/qorts/exData/QoRTsFullExampleData.zip) This example dataset includes the raw bam files, along with all output produced in the example walkthrough.
 * [QoRTs reference manual.](doc/QoRTs-manual.pdf) Extended documentation of all available methods. For advanced users.
 * [Frequently Asked Questions](FAQ.html): Check here if you run into problems!
@@ -32,11 +33,11 @@ Hartley SW, Mullikin JC. [**QoRTs: a comprehensive toolset for quality control a
 ##INSTALLATION:
 The R package can be installed in R using the command:
 
-    > install.packages("QoRTs_0.3.14.tar.gz", repos = NULL, type="source")
+    > install.packages("QoRTs_0.3.17.tar.gz", repos = NULL, type="source")
 
 or using the command-line:
     
-    R CMD INSTALL QoRTs_0.3.14.tar.gz
+    R CMD INSTALL QoRTs_0.3.17.tar.gz
 
 The java jar file does not need to be installed. 
 Just execute it using the java command:
@@ -47,7 +48,7 @@ Just execute it using the java command:
 The example QC output can be found on the github main page, and installed
 with the command:
     
-    install.packages("QoRTsExampleData_0.3.14.tar.gz", repos = NULL, type="source")
+    install.packages("QoRTsExampleData_0.3.17.tar.gz", repos = NULL, type="source")
 
 The original bam files are too large to upload to github. 
 These files, along with a comprehensive walkthrough demonstrating 
