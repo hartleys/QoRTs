@@ -20,7 +20,9 @@ Different aligners often use different conventions, in particular with regards t
 ##How do I install QoRTs?
 The easiest way to install QoRTs is using the R command:
 
-    > install.packages("http://hartleys.github.io/QoRTs/QoRTs_LATEST.tar.gz",repos=NULL, type="source");
+    > install.packages("http://hartleys.github.io/QoRTs/QoRTs_LATEST.tar.gz",
+                       repos=NULL, 
+                       type="source");
 
 
 ##Manual Installation
@@ -49,7 +51,10 @@ If, during package installation, you encounter an error like:
 
 Then you may not have write permissions for your package directory. You can install QoRTs to a different directory using the R command:
 
-    > install.packages("http://hartleys.github.io/QoRTs/QoRTs_LATEST.tar.gz",repos=NULL, type="source", lib="path/to/package/dir");
+    > install.packages("http://hartleys.github.io/QoRTs/QoRTs_LATEST.tar.gz",
+                       repos=NULL, 
+                       type="source", 
+                       lib="path/to/package/dir");
 
 Make sure the "path/to/package/dir" directory exists and is writable. Then you can load this local copy of QoRTs using the R command:
 

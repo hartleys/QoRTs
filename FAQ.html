@@ -59,7 +59,9 @@ Revised Thu Aug 27 13:53:48 EDT 2015</p>
 
 <p>The easiest way to install QoRTs is using the R command:</p>
 
-<pre><code>&gt; install.packages("http://hartleys.github.io/QoRTs/QoRTs_LATEST.tar.gz",repos=NULL, type="source");
+<pre><code>&gt; install.packages("http://hartleys.github.io/QoRTs/QoRTs_LATEST.tar.gz",
+                   repos=NULL, 
+                   type="source");
 </code></pre>
 
 </section> <h2>Manual Installation</h2> <section>
@@ -92,7 +94,10 @@ Just execute it using the java command:</p>
 
 <p>Then you may not have write permissions for your package directory. You can install QoRTs to a different directory using the R command:</p>
 
-<pre><code>&gt; install.packages("http://hartleys.github.io/QoRTs/QoRTs_LATEST.tar.gz",repos=NULL, type="source", lib="path/to/package/dir");
+<pre><code>&gt; install.packages("http://hartleys.github.io/QoRTs/QoRTs_LATEST.tar.gz",
+                   repos=NULL, 
+                   type="source", 
+                   lib="path/to/package/dir");
 </code></pre>
 
 <p>Make sure the "path/to/package/dir" directory exists and is writable. Then you can load this local copy of QoRTs using the R command:</p>
