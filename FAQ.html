@@ -129,7 +129,7 @@ by one of two possibilities:</p>
 <p>(1) Certain newer Illumina platforms (reportedly) produce Phred scores in excess of 41. 
 While not explicitly forbidden by the Phred encoding specification (such as it is), 
 this is very uncommon at the current time. However, if a Phred score in excess of
-41 is encountered then QoRTs will throw a descriptive error like this:</p>
+41 is encountered then QoRTs will throw a descriptive error like the one above.</p>
 
 <p>In this case, you will need to use the "--maxPhredScore" parameter, set to the maximum expected
 Phred score. According to one (secondhand) report, Illumina stated that the absolute maximum 
@@ -146,7 +146,31 @@ See the <a href="https://en.wikipedia.org/wiki/FASTQ_format#Encoding">related wi
 
 <p>If you use QoRTs and find it helpful, you can cite it in your publications as:</p>
 
-<p>Hartley SW, Mullikin JC. <a href="http://www.ncbi.nlm.nih.gov/pmc/articles/PMC4506620/"><strong>QoRTs: a comprehensive toolset for quality control and data processing of RNA-Seq experiments.</strong></a> <em>BMC Bioinformatics.</em>](http://www.biomedcentral.com/bmcbioinformatics) doi: 10.1186/s12859-015-0670-5</p>
+<p>Hartley SW, Mullikin JC. <a href="http://www.ncbi.nlm.nih.gov/pmc/articles/PMC4506620/"><strong>QoRTs: a comprehensive toolset for quality control and data processing of RNA-Seq experiments.</strong></a> <a href="http://www.biomedcentral.com/bmcbioinformatics"><em>BMC Bioinformatics.</em></a> doi: 10.1186/s12859-015-0670-5</p>
+
+</section> <h2>LEGAL:</h2> <section>
+
+<p>This software is "United States Government Work" under the terms of the United 
+States Copyright Act. It was written as part of the authors' official duties 
+for the United States Government and thus QoRT Package User Manual cannot be 
+copyrighted. This software is freely available to the public for use without a 
+copyright notice. Restrictions cannot be placed on its present or future use.</p>
+
+<p>Although all reasonable efforts have been taken to ensure the accuracy and 
+reliability of the software and data, the National Human Genome Research 
+Institute (NHGRI) and the U.S. Government does not and cannot warrant the 
+performance or results that may be obtained by using this software or data. 
+NHGRI and the U.S. Government disclaims all warranties as to performance, 
+merchantability or fitness for any particular purpose.</p>
+
+<p>In any work or product derived from this material, proper attribution of the 
+authors as the source of the software or data should be made, using "NHGRI 
+Genome Technology Branch" as the citation.</p>
+
+<p>NOTE: The scala package includes (internally) the sam-JDK library 
+(sam-1.113.jar), from picard tools, which is covered under the MIT license. 
+The MIT license and copyright information can be accessed using the command:
+java -jar /path/to/jarfile/QoRTs.jar --man samjdkinfo</p>
 
 </section>
 
