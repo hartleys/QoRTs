@@ -33,13 +33,9 @@ Hartley SW, Mullikin JC. [**QoRTs: a comprehensive toolset for quality control a
 ##INSTALLATION:
 The R package can be installed in R using the command:
 
-    > install.packages("QoRTs_0.3.17.tar.gz", repos = NULL, type="source")
+    > install.packages("http://hartleys.github.io/QoRTs/QoRTs_LATEST.tar.gz",repos=NULL, type="source");
 
-or using the command-line:
-    
-    R CMD INSTALL QoRTs_0.3.17.tar.gz
-
-The java jar file does not need to be installed. 
+The java jar file does not need to be installed, it can simply be downloaded and used directly.
 Just execute it using the java command:
     
     java -jar /path/to/jarfile/QoRTs.jar QC input.bam anno.gtf.gz /output/dir/
@@ -48,7 +44,7 @@ Just execute it using the java command:
 The example QC output can be found on the github main page, and installed
 with the command:
     
-    install.packages("QoRTsExampleData_0.3.17.tar.gz", repos = NULL, type="source")
+    install.packages("http://hartleys.github.io/QoRTs/QoRTsExampleData_LATEST.tar.gz", repos = NULL, type="source")
 
 The original bam files are too large to upload to github. 
 These files, along with a comprehensive walkthrough demonstrating 

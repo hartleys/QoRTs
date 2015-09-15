@@ -38,15 +38,10 @@ files suitable for use with the UCSC genome browser (or any compatible browser).
 
 <p>The R package can be installed in R using the command:</p>
 
-<pre><code>&gt; install.packages("QoRTs_0.3.17.tar.gz", repos = NULL, type="source")
+<pre><code>&gt; install.packages("http://hartleys.github.io/QoRTs/QoRTs_LATEST.tar.gz",repos=NULL, type="source");
 </code></pre>
 
-<p>or using the command-line:</p>
-
-<pre><code>R CMD INSTALL QoRTs_0.3.17.tar.gz
-</code></pre>
-
-<p>The java jar file does not need to be installed. 
+<p>The java jar file does not need to be installed, it can simply be downloaded and used directly.
 Just execute it using the java command:</p>
 
 <pre><code>java -jar /path/to/jarfile/QoRTs.jar QC input.bam anno.gtf.gz /output/dir/
@@ -57,7 +52,7 @@ Just execute it using the java command:</p>
 <p>The example QC output can be found on the github main page, and installed
 with the command:</p>
 
-<pre><code>install.packages("QoRTsExampleData_0.3.17.tar.gz", repos = NULL, type="source")
+<pre><code>install.packages("http://hartleys.github.io/QoRTs/QoRTsExampleData_LATEST.tar.gz", repos = NULL, type="source")
 </code></pre>
 
 <p>The original bam files are too large to upload to github. 

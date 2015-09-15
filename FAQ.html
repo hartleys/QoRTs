@@ -57,27 +57,47 @@ Revised Thu Aug 27 13:53:48 EDT 2015</p>
 
 </section> <h2>How do I install QoRTs?</h2> <section>
 
-<p>The R package can be installed in R using the command:</p>
+<p>The easiest way to install QoRTs is using the R command:</p>
 
-<pre><code>&gt; install.packages("QoRTs_0.3.14.tar.gz", repos = NULL, type="source")
+<pre><code>&gt; install.packages("http://hartleys.github.io/QoRTs/QoRTs_LATEST.tar.gz",repos=NULL, type="source");
 </code></pre>
 
-<p>or using the command-line:</p>
+</section> <h2>Manual Installation</h2> <section>
 
-<pre><code>R CMD INSTALL QoRTs_0.3.14.tar.gz
+<p>Alternatively you can download QoRTs directly from the <a href="https://github.com/hartleys/QoRTs/releases/latest">release page</a>, and install using the command:</p>
+
+<pre><code>&gt; install.packages("QoRTs_0.3.17.tar.gz",repos=NULL, type="source");
 </code></pre>
 
 <p>Note: If you run into an error that looks like this:</p>
 
-<pre><code>ERROR: cannot extract package from '0.3.9.tar.gz'
+<pre><code>ERROR: cannot extract package from '0.3.17.tar.gz'
 </code></pre>
 
 <p>Then you may be attempting to install the entire github repository archive, rather than the actual R package archive. Download the QoRTs_0.3.9.zip file from <a href="https://github.com/hartleys/QoRTs/releases/latest">the most recent release</a>, unzip it, and use the file "QoRTs_0.3.9.tar.gz" to install the R package. Do NOT attempt to install the full repository source in R!</p>
 
-<p>The java jar file does not need to be installed. 
+<p>The java jar file does not need to be installed. It can be downloaded from the <a href="https://github.com/hartleys/QoRTs/releases/latest">release page</a>.
 Just execute it using the java command:</p>
 
 <pre><code>java -jar /path/to/jarfile/QoRTs.jar QC input.bam anno.gtf.gz /output/dir/
+</code></pre>
+
+</section> <h2>Permission errors on installation:</h2> <section>
+
+<p>If, during package installation, you encounter an error like:</p>
+
+<pre><code>&gt; Warning in install.packages("QoRTs", lib = "~/.R/library") :
+&gt;  'lib = "~/.R/library"' is not writable
+</code></pre>
+
+<p>Then you may not have write permissions for your package directory. You can install QoRTs to a different directory using the R command:</p>
+
+<pre><code>&gt; install.packages("http://hartleys.github.io/QoRTs/QoRTs_LATEST.tar.gz",repos=NULL, type="source", lib="path/to/package/dir");
+</code></pre>
+
+<p>Make sure the "path/to/package/dir" directory exists and is writable. Then you can load this local copy of QoRTs using the R command:</p>
+
+<pre><code>&gt; library("QoRTs",lib.loc="path/to/package/dir/")
 </code></pre>
 
 </section> <h2>Non-standard Phred scores</h2> <section>

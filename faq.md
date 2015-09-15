@@ -18,24 +18,42 @@ Different aligners often use different conventions, in particular with regards t
 * **BowTie, BowTie2, BWA, NOVOALIGN, BLAT, BLAST, or ELEND**: The use of older aligners or aligners not specifically designed for use with RNA-Seq data is NOT recommended or supported. You MIGHT be able to get these alignments to work using --minMAPQ 0.
 
 ##How do I install QoRTs?
-The R package can be installed in R using the command:
+The easiest way to install QoRTs is using the R command:
 
-    > install.packages("QoRTs_0.3.14.tar.gz", repos = NULL, type="source")
+    > install.packages("http://hartleys.github.io/QoRTs/QoRTs_LATEST.tar.gz",repos=NULL, type="source");
 
-or using the command-line:
-    
-    R CMD INSTALL QoRTs_0.3.14.tar.gz
+
+##Manual Installation
+
+Alternatively you can download QoRTs directly from the [release page](https://github.com/hartleys/QoRTs/releases/latest), and install using the command:
+
+    > install.packages("QoRTs_0.3.17.tar.gz",repos=NULL, type="source");
 
 Note: If you run into an error that looks like this:
 
-    ERROR: cannot extract package from '0.3.9.tar.gz'
+    ERROR: cannot extract package from '0.3.17.tar.gz'
 
 Then you may be attempting to install the entire github repository archive, rather than the actual R package archive. Download the QoRTs\_0.3.9.zip file from <a href="https://github.com/hartleys/QoRTs/releases/latest">the most recent release</a>, unzip it, and use the file "QoRTs\_0.3.9.tar.gz" to install the R package. Do NOT attempt to install the full repository source in R!
 
-The java jar file does not need to be installed. 
+The java jar file does not need to be installed. It can be downloaded from the [release page](https://github.com/hartleys/QoRTs/releases/latest).
 Just execute it using the java command:
     
     java -jar /path/to/jarfile/QoRTs.jar QC input.bam anno.gtf.gz /output/dir/
+
+##Permission errors on installation:
+
+If, during package installation, you encounter an error like:
+
+    > Warning in install.packages("QoRTs", lib = "~/.R/library") :
+    >  'lib = "~/.R/library"' is not writable
+
+Then you may not have write permissions for your package directory. You can install QoRTs to a different directory using the R command:
+
+    > install.packages("http://hartleys.github.io/QoRTs/QoRTs_LATEST.tar.gz",repos=NULL, type="source", lib="path/to/package/dir");
+
+Make sure the "path/to/package/dir" directory exists and is writable. Then you can load this local copy of QoRTs using the R command:
+
+    > library("QoRTs",lib.loc="path/to/package/dir/")
 
 ##Non-standard Phred scores
 
