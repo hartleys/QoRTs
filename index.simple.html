@@ -1,7 +1,7 @@
 <h1>QoRTs: Quality of RNA-seq Tool-Set</h1>
 
-<p>v0.3.17
-Revised Thu Aug 27 13:53:48 EDT 2015</p>
+<p>v0.3.18
+Revised Thu Oct  1 15:12:10 EDT 2015</p>
 
 <p>The QoRTs software package is a fast, efficient, and portable multifunction toolkit designed to assist in
 the analysis, quality control, and data management of RNA-Seq datasets. Its primary function is to aid
@@ -19,12 +19,10 @@ files suitable for use with the UCSC genome browser (or any compatible browser).
 <ul>
 <li>QoRTs vignette. User manual and general how-to. Available as a <a href="doc/QoRTs-vignette.pdf">pdf</a> or <a href="QoRTs-vignette/index.html">on the web</a>.</li>
 <li><a href="jarHtml/index.html">Java jar utility help index.</a> The Java utility is responsible for the bulk of the data processing, and contains a number of useful tools. It must be run on all replicates.</li>
-<li><a href="Rhtml/index.html">R package help.</a> The R package is responsible for producing visualizations, graphs, plots, and summary tables.</li>
-<li><a href="faq.html">Frequently Asked Questions.</a> A list of common questions. If you encounter an error running or installing QoRTs, check here!</li>
-<li><a href="doc/example-walkthrough.pdf">Example walkthrough.</a></li>
-<li><a href="QoRTsExampleData.tar.gz">Example QC data.</a> This example dataset, formatted as an R package, containing only the QC data from a QoRTs run. It is used in the vignette.</li>
-<li><a href="https://dl.dropboxusercontent.com/u/103621176/qorts/exData/QoRTsFullExampleData.zip">Full example dataset and walkthrough.</a> This example dataset includes the raw bam files, along with all output produced in the example walkthrough.</li>
-<li><a href="doc/QoRTs-manual.pdf">QoRTs reference manual.</a> Extended documentation of all available methods. For advanced users.</li>
+<li><a href="Rhtml/index.html">R package help.</a> The R package is responsible for producing visualizations, graphs, plots, and summary tables. (also available as a <a href="doc/QoRTs-manual.pdf">pdf</a>)</li>
+<li>A <a href="http://hartleys.github.io/QoRTs/doc/example-walkthrough.pdf">comprehensive walkthrough</a> of the entire analysis pipeline, run on a different <a href="https://dl.dropboxusercontent.com/u/103621176/pipelineWalkthrough/QoRTsPipelineWalkthrough.zip">example dataset</a></li>
+<li>The raw <a href="https://dl.dropboxusercontent.com/u/103621176/pipelineWalkthrough/bamfiles.zip">bam files</a> for the example walkthough (File is ~1.1gb).</li>
+<li>The <a href="QoRTsExampleData_LATEST.tar.gz">Example QC data</a> used in the vignette.</li>
 <li><a href="FAQ.html">Frequently Asked Questions</a>: Check here if you run into problems!</li>
 </ul>
 
@@ -53,7 +51,7 @@ Just execute it using the java command:</p>
 
 <h2>EXAMPLE DATA:</h2>
 
-<p>The example QC output can be found on the github main page, and installed
+<p>The example QC output used in the vignette can be found on the github main page, and installed
 with the command:</p>
 
 <pre><code>install.packages("http://hartleys.github.io/QoRTs/QoRTsExampleData_LATEST.tar.gz", 
@@ -62,10 +60,14 @@ with the command:</p>
 </code></pre>
 
 <p>The original bam files are too large to upload to github. 
-These files, along with a comprehensive walkthrough demonstrating 
-how all analysis can be run on them, can be found <a href="
+These files can be found <a href="
 https://dl.dropboxusercontent.com/u/103621176/qorts/exData/QoRTsFullExampleData.zip">here</a>. 
 (File is ~1.5gb)</p>
+
+<p>There is also a <a href="http://hartleys.github.io/JunctionSeq/doc/example-walkthrough.pdf">comprehensive walkthrough</a> of 
+the entire analysis pipeline, run on a different 
+<a href="https://dl.dropboxusercontent.com/u/103621176/pipelineWalkthrough/QoRTsPipelineWalkthrough.zip">example dataset</a> with 
+<a href="https://dl.dropboxusercontent.com/u/103621176/pipelineWalkthrough/bamfiles.zip">example bam files</a>.</p>
 
 <h2>COMMAND-LINE HELP:</h2>
 

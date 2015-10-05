@@ -1,6 +1,6 @@
 # QoRTs: Quality of RNA-seq Tool-Set
-v0.3.17
-Revised Thu Aug 27 13:53:48 EDT 2015
+v0.3.18
+Revised Thu Oct  1 15:12:10 EDT 2015
 
 The QoRTs software package is a fast, efficient, and portable multifunction toolkit designed to assist in
 the analysis, quality control, and data management of RNA-Seq datasets. Its primary function is to aid
@@ -17,18 +17,17 @@ The most recent release of QoRTs is available on the [QoRTs github page](http://
 
 * QoRTs vignette. User manual and general how-to. Available as a [pdf](doc/QoRTs-vignette.pdf) or [on the web](QoRTs-vignette/index.html).
 * [Java jar utility help index.](jarHtml/index.html) The Java utility is responsible for the bulk of the data processing, and contains a number of useful tools. It must be run on all replicates.
-* [R package help.](Rhtml/index.html) The R package is responsible for producing visualizations, graphs, plots, and summary tables.
-* [Frequently Asked Questions.](faq.html) A list of common questions. If you encounter an error running or installing QoRTs, check here!
-* [Example walkthrough.](doc/example-walkthrough.pdf)
-* [Example QC data.](QoRTsExampleData.tar.gz) This example dataset, formatted as an R package, containing only the QC data from a QoRTs run. It is used in the vignette.
-* [Full example dataset and walkthrough.](https://dl.dropboxusercontent.com/u/103621176/qorts/exData/QoRTsFullExampleData.zip) This example dataset includes the raw bam files, along with all output produced in the example walkthrough.
-* [QoRTs reference manual.](doc/QoRTs-manual.pdf) Extended documentation of all available methods. For advanced users.
+* [R package help.](Rhtml/index.html) The R package is responsible for producing visualizations, graphs, plots, and summary tables. (also available as a [pdf](doc/QoRTs-manual.pdf))
+* A [comprehensive walkthrough](http://hartleys.github.io/QoRTs/doc/example-walkthrough.pdf) of the entire analysis pipeline, run on a different [example dataset](https://dl.dropboxusercontent.com/u/103621176/pipelineWalkthrough/QoRTsPipelineWalkthrough.zip)
+* The raw [bam files](https://dl.dropboxusercontent.com/u/103621176/pipelineWalkthrough/bamfiles.zip) for the example walkthough (File is ~1.1gb).
+* The [Example QC data](QoRTsExampleData_LATEST.tar.gz) used in the vignette.
 * [Frequently Asked Questions](FAQ.html): Check here if you run into problems!
 
 ##Citing QoRTs:
 If you use QoRTs and find it helpful, you can cite it in your publications as:
 
 Hartley SW, Mullikin JC. [**QoRTs: a comprehensive toolset for quality control and data processing of RNA-Seq experiments.**](http://www.ncbi.nlm.nih.gov/pmc/articles/PMC4506620/) [*BMC Bioinformatics.*](http://www.biomedcentral.com/bmcbioinformatics) doi: 10.1186/s12859-015-0670-5
+
 
 ##INSTALLATION:
 The R package can be installed in R using the command:
@@ -45,7 +44,7 @@ Just execute it using the java command:
 See the [FAQ](FAQ.html) if you have trouble installing QoRTs.
 
 ##EXAMPLE DATA:
-The example QC output can be found on the github main page, and installed
+The example QC output used in the vignette can be found on the github main page, and installed
 with the command:
     
     install.packages("http://hartleys.github.io/QoRTs/QoRTsExampleData_LATEST.tar.gz", 
@@ -53,10 +52,14 @@ with the command:
                      type="source")
 
 The original bam files are too large to upload to github. 
-These files, along with a comprehensive walkthrough demonstrating 
-how all analysis can be run on them, can be found [here](
+These files can be found [here](
 https://dl.dropboxusercontent.com/u/103621176/qorts/exData/QoRTsFullExampleData.zip). 
 (File is ~1.5gb)
+
+There is also a [comprehensive walkthrough](http://hartleys.github.io/JunctionSeq/doc/example-walkthrough.pdf) of 
+the entire analysis pipeline, run on a different 
+[example dataset](https://dl.dropboxusercontent.com/u/103621176/pipelineWalkthrough/QoRTsPipelineWalkthrough.zip) with 
+[example bam files](https://dl.dropboxusercontent.com/u/103621176/pipelineWalkthrough/bamfiles.zip).
 
 ##COMMAND-LINE HELP:
 Additional options and syntax information for the main QC java utility 
