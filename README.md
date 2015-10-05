@@ -1,5 +1,5 @@
-# QoRTs v0.3.17
-(Compiled Thu Aug 27 13:53:48 EDT 2015)
+# QoRTs v0.3.18
+(Compiled Thu Oct  1 15:12:10 EDT 2015)
 
 The QoRTs software package is a fast, efficient, and portable multifunction toolkit designed to assist in
 the analysis, quality control, and data management of RNA-Seq datasets. Its primary function is to aid
@@ -26,28 +26,34 @@ Issues, bug reports, or feature requests can be posted to the [github issues pag
 ##INSTALLATION:
 The R package can be installed in R using the command:
 
-    > install.packages("QoRTs_0.3.17.tar.gz", repos = NULL, type="source")
+    > install.packages("http://hartleys.github.io/QoRTs/QoRTs_LATEST.tar.gz",
+                       repos=NULL, 
+                       type="source");
 
-or using the command-line:
-    
-    R CMD INSTALL QoRTs_0.3.17.tar.gz
-
-The java jar file does not need to be installed. 
+The java jar file does not need to be installed, it can simply be downloaded and used directly.
 Just execute it using the java command:
     
     java -jar /path/to/jarfile/QoRTs.jar QC input.bam anno.gtf.gz /output/dir/
+
+See the [FAQ](http://hartleys.github.io/QoRTs/FAQ.html) if you have trouble installing QoRTs.
 
 ##EXAMPLE DATA:
 The example QC output can be found on the github main page, and installed
 with the command:
     
-    install.packages("QoRTsExampleData_0.3.17.tar.gz", repos = NULL, type="source")
+    install.packages("http://hartleys.github.io/QoRTs/QoRTsExampleData_LATEST.tar.gz", 
+                     repos = NULL, 
+                     type="source")
 
 The original bam files are too large to upload to github. 
-These files, along with a comprehensive walkthrough demonstrating 
-how all analysis can be run on them, can be found [here](
+These files can be found [here](
 https://dl.dropboxusercontent.com/u/103621176/qorts/exData/QoRTsFullExampleData.zip). 
 (File is ~1.5gb)
+
+There is also a [comprehensive walkthrough](http://hartleys.github.io/JunctionSeq/doc/example-walkthrough.pdf) of 
+the entire analysis pipeline, run on a different 
+[example dataset](https://dl.dropboxusercontent.com/u/103621176/pipelineWalkthrough/QoRTsPipelineWalkthrough.zip) with 
+[example bam files](https://dl.dropboxusercontent.com/u/103621176/pipelineWalkthrough/bamfiles.zip).
 
 ##MORE INFORMATION:
 For more information, see the [QoRTs vignette](http://hartleys.github.io/QoRTs/doc/QoRTs-vignette.pdf) or the [QoRTs help and documentation page](http://hartleys.github.io/QoRTs/index.html).

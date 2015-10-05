@@ -814,11 +814,11 @@ INTERNAL.plot.summaries.pdf <- function(res, plotter,
   plot.new();
   
   layout(matrix(c(1,1,2,2,3,4),3,2,byrow=TRUE));
-  makePlot.NVC.lead.clip(plotter, clip.amt = 12, points.highlighted = TRUE, debugMode = debugMode, rasterize.plotting.area = rasterize.large.plots, raster.height = raster.height, raster.width = raster.width, ...); plot.corner.label(30);
-  makePlot.NVC.tail.clip(plotter, clip.amt = 12, points.highlighted = TRUE, debugMode = debugMode, rasterize.plotting.area = rasterize.large.plots, raster.height = raster.height, raster.width = raster.width, ...); plot.corner.label(31);
-  makePlot.raw.NVC(plotter, points.highlighted = TRUE, debugMode = debugMode, rasterize.plotting.area = rasterize.large.plots, raster.height = raster.height, raster.width = 2 * raster.width, ...); plot.corner.label(32);
-  makePlot.minus.clipping.NVC(plotter, points.highlighted = TRUE, debugMode = debugMode, rasterize.plotting.area = rasterize.large.plots, raster.height = raster.height, raster.width = 2 * raster.width, ...); plot.corner.label(33);
-  
+  makePlot.raw.NVC(plotter, points.highlighted = TRUE, debugMode = debugMode, rasterize.plotting.area = rasterize.large.plots, raster.height = raster.height, raster.width = 2 * raster.width, ...); plot.corner.label(30);
+  makePlot.minus.clipping.NVC(plotter, points.highlighted = TRUE, debugMode = debugMode, rasterize.plotting.area = rasterize.large.plots, raster.height = raster.height, raster.width = 2 * raster.width, ...); plot.corner.label(31);
+  makePlot.NVC.lead.clip(plotter, clip.amt = 12, points.highlighted = TRUE, debugMode = debugMode, rasterize.plotting.area = rasterize.large.plots, raster.height = raster.height, raster.width = raster.width, ...); plot.corner.label(32);
+  makePlot.NVC.tail.clip(plotter, clip.amt = 12, points.highlighted = TRUE, debugMode = debugMode, rasterize.plotting.area = rasterize.large.plots, raster.height = raster.height, raster.width = raster.width, ...); plot.corner.label(33);
+
   #makePlot.cigarMismatch(plotter, debugMode = debugMode, ...); plot.corner.label(33);
 
   if(verbose) {message(paste0("Finished all plots"));}

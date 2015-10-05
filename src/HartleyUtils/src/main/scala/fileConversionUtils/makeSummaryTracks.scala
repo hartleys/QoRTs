@@ -56,7 +56,7 @@ object makeSummaryTracks {
                                                    "In particular it MUST have two specific columns: \n"+
                                                    "\"sample.ID\" This utility will merge the count data output from all bamfiles that have the same sample.ID"+
                                                    "\nand\n"+
-                                                   "\"qc.data.dir\" This must be the file path to the output data directory, from the infileDir file location." // description
+                                                   "\"group.ID\" This must be the name of the experimental condition group." // description
                                         ) ::
                     new FinalArgument[String](
                                          name = "outfile",
@@ -180,6 +180,8 @@ object makeSummaryTracks {
     }
     
   }
+  
+  
   
   def makeSummaryTracksFromSet(infilePathPrefix : String, infilePrefix : String = "/",
                               decoder : Seq[(String,Double)], mergeList : List[String] = DEFAULT_MERGE_FILE_LIST,

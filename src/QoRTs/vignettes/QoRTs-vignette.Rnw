@@ -59,11 +59,19 @@ BiocStyle::latex()
   \end{figure}
 }
 
+\let\olditemize\itemize
+\renewcommand{\itemize}{
+  \olditemize
+  \setlength{\itemsep}{1pt}
+  \setlength{\parskip}{0pt}
+  \setlength{\parsep}{0pt}
+}
+
 \title{QoRTs Package User Manual}
 \author{Stephen Hartley\\
 National Human Genome Research Institute\\
 National Institutes of Health\\
-v0.3.17 %REPLACE_THIS_LINE_WITH_VERSION_NUMBER
+v0.3.18 %REPLACE_THIS_LINE_WITH_VERSION_NUMBER
 }
 
 \begin{document}

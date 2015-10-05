@@ -112,21 +112,53 @@ object prepFlatGtfFile {
   //  return gtfLine.getAttributeOrDie(GtfCodes.STD_TX_ID_ATTRIBUTE_KEY);
   //}
   
-  private def buildGenomicArrayOfSets_Tx_and_Map(stranded : Boolean, gtffile : String, codes : GtfCodes = new GtfCodes()) : (GenomicArrayOfSets[String], Map[String,String]) = {
+  /*
+       val geneStrandMap = scala.collection.mutable.AnyRefMap[String,Char]();
+       val strandedGtfReader = GtfReader.getStdGtfReader(infile, true, true, "\\s+", new GtfCodes());
+       
+       for(gtfLine <- strandedGtfReader){
+         if(gtfLine.isExon){
+           val tx : String = gtfLine.getTxID;
+           val gene : String = gtfLine.getGeneID;
+           val strand : Char = gtfLine.strand;
+           geneStrandMap += (gene,strand);
+           //txStrandMap += (tx, strand);
+         }
+       }
+   */
+  
+  private def buildGenomicArrayOfSets_Tx_and_Map(stranded : Boolean, gtffile : String, codes : GtfCodes = new GtfCodes()) : (GenomicArrayOfSets[String], Map[String,String], Map[String,(Char,Map[String,Char])]) = {
     val txArray : GenomicArrayOfSets[String] = GenomicArrayOfSets[String](stranded);
     val gtfReader = GtfReader.getStdGtfReader(gtffile, stranded, true, "\\s+", codes);
     var txMap : Map[String,String] = Map[String,String]();
+    var geneInfoMap = Map[String,(Char,Map[String,Char])]();
+    
     
     for(gtfLine <- gtfReader){
       if(gtfLine.isExon){
         val tx = gtfLine.getTxID;
         val gene = gtfLine.getGeneID;
+        val strandedStrand : Char = gtfLine.strandedStrand;
         txMap += (tx -> gene);
         txArray.addSpan(gtfLine.getGenomicInterval, tx);
+        
+        if(geneInfoMap.containsKey(gene)){
+          val (geneStrand, geneTxSet) = geneInfoMap(gene);
+          val newStrand = if(geneStrand != strandedStrand){
+            '.';
+          } else {
+            geneStrand;
+          }
+          
+          if(! geneTxSet.containsKey(tx) ){
+            geneInfoMap += ((gene, (newStrand, geneTxSet.updated(tx,strandedStrand))))
+          }
+        } else {
+          geneInfoMap += ((gene, (strandedStrand, Map[String,Char]( (tx,strandedStrand) )  )))
+        }
       }
     }
-    
-    return ((txArray.finalizeStepVectors, txMap));
+    return ((txArray.finalizeStepVectors, txMap, geneInfoMap));
   }
   
   private def buildSpliceJunctionMap(txArray : GenomicArrayOfSets[String]) : (Map[GenomicInterval, Set[String]]) = {
@@ -177,6 +209,8 @@ object prepFlatGtfFile {
   }
   
   private def buildFeatures2(stranded : Boolean, 
+                             aggregateInfoMap : scala.collection.mutable.AnyRefMap[String, (Char, Int, Map[String,Char])],
+                             //txStrandMap : scala.collection.mutable.AnyRefMap[String,Char],
                              txArray : GenomicArrayOfSets[String], 
                              txMap : Map[String,String], 
                              spliceJunctionMap : Map[GenomicInterval,Set[String]], 
@@ -189,7 +223,7 @@ object prepFlatGtfFile {
     
     //var aggregateIntervalMap : Map[String,GenomicInterval] = Map[String,GenomicInterval]();
 
-    reportln("FlatteningGtf: Iterating through the step-vector...("+getDateAndTimeString+")","debug");
+    reportln("    FlatteningGtf: Iterating through the step-vector...("+getDateAndTimeString+")","debug");
     val featureListMap = txArray.getSteps.foldLeft( Map[String,IndexedSeq[FlatGtfLine]]().withDefault( (k) => IndexedSeq[FlatGtfLine]() ) )( (soFar, pair) =>{
       val (iv,txSet) = pair;
       if(! txSet.isEmpty){
@@ -204,16 +238,20 @@ object prepFlatGtfFile {
         soFar;
       }
     });
+
     
-    reportln("FlatteningGtf: Adding the aggregate genes themselves...("+getDateAndTimeString+")","debug");
+    reportln("    FlatteningGtf: Adding the aggregate genes themselves...("+getDateAndTimeString+")","debug");
     val featureListMap2 = aggregateSet.foldLeft(featureListMap)((soFar, aggregateGene) =>{
       val features = soFar(aggregateGene);
       val iv = new GenomicInterval(features.head.chromName, features.head.strand, features.head.start - 1, features.last.end);
-      val gtfLine = FlatOutputGtfLine.makeFlatGtfLine_aggregateGene(iv, stranded , aggregateGene , gtfCodes);
+      
+      val (geneStrand, geneCt, txInfoMap) = aggregateInfoMap(aggregateGene);
+        
+      val gtfLine = FlatOutputGtfLine.makeFlatGtfLine_aggregateGene(iv, stranded , aggregateGene , geneStrand, geneCt, txInfoMap, gtfCodes);
       soFar.updated(aggregateGene, gtfLine +: features);
     });
     
-    reportln("FlatteningGtf: Iterating through the splice junctions...("+getDateAndTimeString+")","debug");
+    reportln("    FlatteningGtf: Iterating through the splice junctions...("+getDateAndTimeString+")","debug");
     val featureListMapFinal = spliceJunctionMap.keys.toSeq.sorted.foldLeft(featureListMap2)( (soFar, iv) =>{
       val txSet : Set[String] = spliceJunctionMap(iv);
       val geneSet : Set[String] = txSet.map(tx => txMap(tx));
@@ -224,7 +262,7 @@ object prepFlatGtfFile {
       soFar.updated(aggregateGene, features :+ gtfLine);
     })
     
-    reportln("FlatteningGtf: Sorting the aggregate genes...("+getDateAndTimeString+")","debug");
+    reportln("    FlatteningGtf: Sorting the aggregate genes...("+getDateAndTimeString+")","debug");
     val aggregateGeneList = featureListMapFinal.keys.toSeq.sortBy((ag) => featureListMapFinal(ag).head.getGenomicInterval );
     
     //return new Iterator[GtfLine]{
@@ -242,7 +280,7 @@ object prepFlatGtfFile {
     //    }
     //  }
     //}
-    reportln("FlatteningGtf: Folding the FlatGtfLine iterator...("+getDateAndTimeString+")","debug");
+    reportln("    FlatteningGtf: Folding the FlatGtfLine iterator...("+getDateAndTimeString+")","debug");
     return aggregateGeneList.foldLeft( Iterator[FlatGtfLine]() )((soFar, curr) =>{
       soFar ++ featureListMapFinal(curr).iterator;
     });
@@ -310,18 +348,43 @@ object prepFlatGtfFile {
   
   private def getFlatGtfIterator(infile : String, stranded : Boolean) : Iterator[FlatGtfLine] = {
     reportln("FlatteningGtf: starting...("+getDateAndTimeString+")","debug");
-    val (txArray, txMap) : (GenomicArrayOfSets[String], Map[String,String]) = buildGenomicArrayOfSets_Tx_and_Map(stranded,infile);
-    reportln("FlatteningGtf: gtf file read complete.("+getDateAndTimeString+")","debug");
+    val (txArray, txMap, geneInfoMap) : (GenomicArrayOfSets[String], Map[String,String], Map[String, (Char, Map[String,Char])]) = buildGenomicArrayOfSets_Tx_and_Map(stranded,infile);
+    
+    //val txStrandMap = scala.collection.mutable.AnyRefMap[String,Char]();
+    
+    reportln("    FlatteningGtf: gtf file read complete.("+getDateAndTimeString+")","debug");
     val spliceJunctionMap : Map[GenomicInterval, Set[String]] = buildSpliceJunctionMap(txArray);
-    reportln("FlatteningGtf: Splice Junction Map read.("+getDateAndTimeString+")","debug");
+    reportln("    FlatteningGtf: Splice Junction Map read.("+getDateAndTimeString+")","debug");
     val geneSets : Map[String,Set[String]] = buildGeneSets(txArray, txMap);
-    reportln("FlatteningGtf: gene Sets generated.("+getDateAndTimeString+")","debug");
+    reportln("    FlatteningGtf: gene Sets generated.("+getDateAndTimeString+")","debug");
     val (aggregateGeneMap, aggregateSet) : (Map[String,String],Set[String]) = buildAggregateGeneMap(geneSets);
-    reportln("FlatteningGtf: Aggregate Sets built.","debug");
+    reportln("    FlatteningGtf: Aggregate Sets built.","debug");
 
+    //val aggregateStrandMap = scala.collection.mutable.AnyRefMap[String,Char]();
+    
+    reportln("    FlatteningGtf: Compiling Aggregate Info . . . ("+getDateAndTimeString+")","debug");
+    val aggregateInfoMap = scala.collection.mutable.AnyRefMap[String, (Char, Int, Map[String,Char])]();
+    for((g,a) <- aggregateGeneMap){
+       if(aggregateInfoMap.containsKey(a)){
+         val (geneStrand, geneTxMap) = geneInfoMap(g);
+         val (aggregateStrand, geneCt, aggregateTxMap) = aggregateInfoMap(a);
+         val newAggregateStrand = if(geneStrand != aggregateStrand){
+           '.';
+         } else {
+           aggregateStrand;
+         }
+         val newAggregateTxMap = aggregateTxMap ++ geneTxMap;
+         aggregateInfoMap.update(a, (newAggregateStrand, geneCt + 1,newAggregateTxMap))
+       } else {
+         val (geneStrand, geneTxMap) = geneInfoMap(g);
+         aggregateInfoMap += ((a, (geneStrand,1,geneTxMap)));
+       }
+    }
+    reportln("    FlatteningGtf: Finished Compiling Aggregate Info. ("+getDateAndTimeString+")","debug");
+    
     //val sortedFeatureList = buildFeatures(stranded, txArray, txMap , spliceJunctionMap , aggregateGeneMap , aggregateSet );
-    val sortedFeatureIterator = buildFeatures2(stranded, txArray, txMap , spliceJunctionMap , aggregateGeneMap , aggregateSet);
-    reportln("FlatteningGtf: Features Built.("+getDateAndTimeString+")","debug");
+    val sortedFeatureIterator : Iterator[internalUtils.GtfTool.FlatGtfLine] = buildFeatures2(stranded,  aggregateInfoMap, txArray, txMap , spliceJunctionMap , aggregateGeneMap , aggregateSet);
+    reportln("    FlatteningGtf: Features Built.("+getDateAndTimeString+")","debug");
     return(sortedFeatureIterator);
   }
   

@@ -62,6 +62,11 @@ object GtfTool {
      val JS_FEATURETYPE_EXON = "exonic_part";
      val JS_FEATURETYPE_KNOWNSPLICE = "splice_site";
      val JS_FEATURETYPE_NOVELSPLICE = "novel_splice_site";
+     val JS_AGGREGATEGENE_STRAND = "aggregateGeneStrand";
+     val JS_AGGREGATEGENE_CT = "geneCt";
+     val JS_AGGREGATEGENE_TXLIST = "tx_set";
+     val JS_AGGREGATEGENE_TXCT = "tx_ct";
+     val JS_AGGREGATEGENE_TXSTRANDS = "tx_strands";
      
      val JS_FEATURETYPE_CODEMAP = Map(JS_FEATURETYPE_GENE -> "A", JS_FEATURETYPE_EXON -> "E", JS_FEATURETYPE_KNOWNSPLICE -> "J", JS_FEATURETYPE_NOVELSPLICE -> "N");
      
@@ -89,7 +94,23 @@ object GtfTool {
                        JS_FEATURETYPE_EXON : String = defaultGtfCodes.JS_FEATURETYPE_EXON,
                        JS_FEATURETYPE_KNOWNSPLICE : String = defaultGtfCodes.JS_FEATURETYPE_KNOWNSPLICE,
                        JS_FEATURETYPE_NOVELSPLICE : String = defaultGtfCodes.JS_FEATURETYPE_NOVELSPLICE,
-                       JS_FEATURETYPE_CODEMAP : Map[String,String] = defaultGtfCodes.JS_FEATURETYPE_CODEMAP) {
+                       JS_FEATURETYPE_CODEMAP : Map[String,String] = defaultGtfCodes.JS_FEATURETYPE_CODEMAP,
+                       JS_AGGREGATEGENE_STRAND : String = defaultGtfCodes.JS_AGGREGATEGENE_STRAND,
+                       JS_AGGREGATEGENE_CT : String = defaultGtfCodes.JS_AGGREGATEGENE_CT,
+                       JS_AGGREGATEGENE_TXCT : String = defaultGtfCodes.JS_AGGREGATEGENE_TXCT,
+                       JS_AGGREGATEGENE_TXSTRANDS : String = defaultGtfCodes.JS_AGGREGATEGENE_TXSTRANDS
+                       ) {
+     
+     val KEY_SORTING : List[String] = List[String](GENE_ID_ATTRIBUTE_KEY, 
+                                                     STD_TX_ID_ATTRIBUTE_KEY,
+                                                     JS_TX_ID_ATTRIBUTE_KEY,
+                                                     JS_EXONIC_PART_NUMBER_ATTRIBUTE_KEY,
+                                                     JS_GENE_SET_ATTRIBUTE_KEY,
+                                                     JS_AGGREGATEGENE_STRAND,
+                                                     JS_AGGREGATEGENE_CT,
+                                                     JS_AGGREGATEGENE_TXCT,
+                                                     JS_AGGREGATEGENE_TXSTRANDS
+                                                     );
    }
    
    
@@ -115,6 +136,7 @@ object GtfTool {
      def end : Int;
      def score : String;
      def strand : Char;
+     def strandedStrand : Char;
      def attr : String;
      def attributeArray : Array[String];
      def attributeMap : Map[String,String];
@@ -139,11 +161,18 @@ object GtfTool {
      val DEXSEQ_EXONIC_PART_NUMBER_ATTRIBUTE_KEY = "exonic_part_number";
      
      def makeFlatGtfLine(iv : internalUtils.commonSeqUtils.GenomicInterval, featureType : String, attributeMap : Map[String,String], stranded : Boolean, codes : GtfCodes) : FlatOutputGtfLine = {
-       new FlatOutputGtfLine(iv.chromName, DEF_FEATURESOURCE, featureType, iv.start + 1, iv.end, DEF_SCORE, iv.strand, attributeMap, DEF_ATTRBREAK, stranded, codes);
+       new FlatOutputGtfLine(iv.chromName, DEF_FEATURESOURCE, featureType, iv.start + 1, iv.end, DEF_SCORE, iv.strand, attributeMap, DEF_ATTRBREAK, stranded, Some(codes.KEY_SORTING), codes);
      }
      
-     def makeFlatGtfLine_aggregateGene(iv : internalUtils.commonSeqUtils.GenomicInterval, stranded : Boolean, aggregateGene : String, codes : GtfCodes = new GtfCodes()) : FlatOutputGtfLine = {
-       val attributeMap = Map[String,String](codes.GENE_ID_ATTRIBUTE_KEY -> aggregateGene, codes.JS_EXONIC_PART_NUMBER_ATTRIBUTE_KEY -> "000");
+     def makeFlatGtfLine_aggregateGene(iv : internalUtils.commonSeqUtils.GenomicInterval, stranded : Boolean, aggregateGene : String, geneStrand : Char, geneCt : Int, txInfoMap : Map[String,Char], codes : GtfCodes = new GtfCodes()) : FlatOutputGtfLine = {
+       val attributeMap = Map[String,String](codes.GENE_ID_ATTRIBUTE_KEY -> aggregateGene, 
+                                             codes.JS_EXONIC_PART_NUMBER_ATTRIBUTE_KEY -> "000", 
+                                             codes.JS_AGGREGATEGENE_STRAND -> geneStrand.toString,
+                                             codes.JS_AGGREGATEGENE_CT -> geneCt.toString,
+                                             codes.JS_AGGREGATEGENE_TXCT -> txInfoMap.keySet.size.toString,
+                                             codes.JS_TX_ID_ATTRIBUTE_KEY -> txInfoMap.keySet.toVector.sorted.mkString("+"),
+                                             codes.JS_AGGREGATEGENE_TXSTRANDS -> txInfoMap.keySet.toVector.sorted.map(txInfoMap(_).toString).mkString(",")
+                                             );
        return makeFlatGtfLine(iv,codes.JS_FEATURETYPE_GENE, attributeMap, stranded, codes);
      }
      
@@ -159,7 +188,8 @@ object GtfTool {
 
    }
    
-   class OutputGtfLine(in_chromName : String, in_featureSource : String, in_featureType : String, in_start : Int, in_end : Int, in_score : String, in_strand : Char, in_attributeMap : Map[String,String], in_gtfFmt_attributeBreak : String, in_stranded : Boolean, in_codes : GtfCodes = new GtfCodes()) extends GtfLine {
+   var ERROR_COUNT_SORTING = 0;
+   class OutputGtfLine(in_chromName : String, in_featureSource : String, in_featureType : String, in_start : Int, in_end : Int, in_score : String, in_strand : Char, in_attributeMap : Map[String,String], in_gtfFmt_attributeBreak : String, in_stranded : Boolean, attribute_sorting : Option[List[String]] = None, in_codes : GtfCodes = new GtfCodes()) extends GtfLine {
      def codes = in_codes;
      def chromName = in_chromName;
      def featureSource = in_featureSource;
@@ -168,6 +198,7 @@ object GtfTool {
      def end = in_end;
      def score = in_score;
      def strand = if(stranded) in_strand else '.';
+     def strandedStrand : Char = in_strand;
      def attributeMap = in_attributeMap;
      def gtfFmt_attributeBreak = in_gtfFmt_attributeBreak;
 
@@ -187,7 +218,22 @@ object GtfTool {
      def attributeArray : Array[String] = lz_attributeArray;
      
      lazy val lz_attr : String = {
-       lz_attributeArray.mkString("; ");
+       attribute_sorting match {
+         case Some(sortList) => {
+           if(! attributeMap.keySet.forall(attribName => sortList.contains(attribName))){
+             if(ERROR_COUNT_SORTING < 5){
+               reportln("Internal GFF Builder warning: attribute sorting discrepancy (this will not affect results).","warn");
+               ERROR_COUNT_SORTING += 1;
+             }
+             lz_attributeArray.mkString("; ");
+           } else {
+             sortList.filter(attributeMap.contains(_)).map(attribName => attribName + gtfFmt_attributeBreak + attributeMap(attribName)).mkString("; ");
+           }
+         }
+         case None => {
+           lz_attributeArray.mkString("; ");
+         }
+       }
      }
      def attr : String = lz_attr;
      
@@ -236,6 +282,8 @@ object GtfTool {
      def score : String = lz_score;
      lazy val lz_strand = if(stranded) cells(6).trim().charAt(0) else '.';
      def strand : Char = lz_strand;
+     lazy val lz_strandedStrand = cells(6).trim().charAt(0);
+     def strandedStrand : Char = lz_strandedStrand;
      lazy val lz_attr = cells(8).trim;
      def attr : String = lz_attr;
      
@@ -329,8 +377,8 @@ object GtfTool {
    class StdInputGtfLine(in_str : String, in_stranded : Boolean, in_gtfFmt_attributeBreak : String , in_codes : GtfCodes = new GtfCodes()) extends InputGtfLine(in_str : String, in_stranded : Boolean, in_gtfFmt_attributeBreak : String , in_codes : GtfCodes) with StdGtfLine;
    class FlatInputGtfLine(in_str : String, in_stranded : Boolean, in_gtfFmt_attributeBreak : String , in_codes : GtfCodes = new GtfCodes()) extends InputGtfLine(in_str : String, in_stranded : Boolean, in_gtfFmt_attributeBreak : String , in_codes : GtfCodes) with FlatGtfLine;
    
-   class StdOutputGtfLine(in_chromName : String, in_featureSource : String, in_featureType : String, in_start : Int, in_end : Int, in_score : String, in_strand : Char, in_attributeMap : Map[String,String], in_gtfFmt_attributeBreak : String, in_stranded : Boolean, in_codes : GtfCodes = new GtfCodes()) extends OutputGtfLine(in_chromName : String, in_featureSource : String, in_featureType : String, in_start : Int, in_end : Int, in_score : String, in_strand : Char, in_attributeMap : Map[String,String], in_gtfFmt_attributeBreak : String, in_stranded : Boolean, in_codes : GtfCodes) with StdGtfLine;
-   class FlatOutputGtfLine(in_chromName : String, in_featureSource : String, in_featureType : String, in_start : Int, in_end : Int, in_score : String, in_strand : Char, in_attributeMap : Map[String,String], in_gtfFmt_attributeBreak : String, in_stranded : Boolean, in_codes : GtfCodes = new GtfCodes()) extends OutputGtfLine(in_chromName : String, in_featureSource : String, in_featureType : String, in_start : Int, in_end : Int, in_score : String, in_strand : Char, in_attributeMap : Map[String,String], in_gtfFmt_attributeBreak : String, in_stranded : Boolean, in_codes : GtfCodes) with FlatGtfLine;
+   class StdOutputGtfLine(in_chromName : String, in_featureSource : String, in_featureType : String, in_start : Int, in_end : Int, in_score : String, in_strand : Char, in_attributeMap : Map[String,String], in_gtfFmt_attributeBreak : String, in_stranded : Boolean, attribute_sorting : Option[List[String]] = None, in_codes : GtfCodes = new GtfCodes()) extends OutputGtfLine(in_chromName : String, in_featureSource : String, in_featureType : String, in_start : Int, in_end : Int, in_score : String, in_strand : Char, in_attributeMap : Map[String,String], in_gtfFmt_attributeBreak : String, in_stranded : Boolean, attribute_sorting : Option[List[String]], in_codes : GtfCodes) with StdGtfLine;
+   class FlatOutputGtfLine(in_chromName : String, in_featureSource : String, in_featureType : String, in_start : Int, in_end : Int, in_score : String, in_strand : Char, in_attributeMap : Map[String,String], in_gtfFmt_attributeBreak : String, in_stranded : Boolean, attribute_sorting : Option[List[String]] = None, in_codes : GtfCodes = new GtfCodes()) extends OutputGtfLine(in_chromName : String, in_featureSource : String, in_featureType : String, in_start : Int, in_end : Int, in_score : String, in_strand : Char, in_attributeMap : Map[String,String], in_gtfFmt_attributeBreak : String, in_stranded : Boolean, attribute_sorting : Option[List[String]], in_codes : GtfCodes) with FlatGtfLine;
    
    /*
    case class GtfLine(str : String, stranded : Boolean, gtfFmt_attributeBreak : String){

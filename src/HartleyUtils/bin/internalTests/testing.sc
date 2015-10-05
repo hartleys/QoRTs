@@ -10,12 +10,17 @@ object testing {
   
      
 
+  def zeroPad(i : Int, cols : Int) : String = {
+    val s = i.toString;
+    return 0.toString * (cols - s.length) + s;
+  }                                               //> zeroPad: (i: Int, cols: Int)String
 
-
-
+   0.toString * -2                                //> res1: String = ""
+   
+   zeroPad(3000,3)                                //> res2: String = 3000
 
   internalUtils.stdUtils.zipIteratorWithCount(List("A","B","C","D","E","F","G").iterator).filter(x => x._2 % 2 == 0).toList
-                                                  //> res1: List[(String, Int)] = List((A,0), (C,2), (E,4), (G,6))
+                                                  //> res3: List[(String, Int)] = List((A,0), (C,2), (E,4), (G,6))
 
   val x = scala.collection.mutable.AnyRefMap[internalUtils.commonSeqUtils.GenomicInterval,Int]().withDefault(k => 0)
                                                   //> x  : scala.collection.mutable.Map[internalUtils.commonSeqUtils.GenomicInterv
@@ -27,10 +32,10 @@ object testing {
   
   x(giv) += 1
   
-  x                                               //> res2: scala.collection.mutable.Map[internalUtils.commonSeqUtils.GenomicInter
+  x                                               //> res4: scala.collection.mutable.Map[internalUtils.commonSeqUtils.GenomicInter
                                                   //| val,Int] = Map(GenomicInterval(chrX,+,10,100) -> 1)
   
-  x.keySet                                        //> res3: scala.collection.Set[internalUtils.commonSeqUtils.GenomicInterval] = S
+  x.keySet                                        //> res5: scala.collection.Set[internalUtils.commonSeqUtils.GenomicInterval] = S
                                                   //| et(GenomicInterval(chrX,+,10,100))
   
   val line = "x	y"                                //> line  : String = x	y
@@ -50,15 +55,15 @@ object testing {
   */
   
   
-(10 until 10).toVector                            //> res4: Vector[Int] = Vector()
+(10 until 10).toVector                            //> res6: Vector[Int] = Vector()
 
-Range(10, 1, -1).toVector                         //> res5: Vector[Int] = Vector(10, 9, 8, 7, 6, 5, 4, 3, 2)
+Range(10, 1, -1).toVector                         //> res7: Vector[Int] = Vector(10, 9, 8, 7, 6, 5, 4, 3, 2)
 val op = CigarOperator.SOFT_CLIP                  //> op  : net.sf.samtools.CigarOperator = S
 
-op.consumesReadBases()                            //> res6: Boolean = true
-op.consumesReferenceBases()                       //> res7: Boolean = false
+op.consumesReadBases()                            //> res8: Boolean = true
+op.consumesReferenceBases()                       //> res9: Boolean = false
 
-System.getProperty("sun.arch.data.model")         //> res8: String = 64
+System.getProperty("sun.arch.data.model")         //> res10: String = 64
   
   def escapeToMarkdown(s : String) : String = {
     escapifyString(s, List("`","\\*","_","\\{","\\}","\\[","\\]","\\(","\\)","\\#","\\+","-","\\.","!"));
@@ -81,25 +86,25 @@ System.getProperty("sun.arch.data.model")         //> res8: String = 64
   //writer.write(out2)
   //writer.close()
   
-  new java.io.File( "." ).getCanonicalPath        //> res9: String = C:\eclipseScalav400
+  new java.io.File( "." ).getCanonicalPath        //> res11: String = C:\eclipseScalav400
   
-  "test\\_string"                                 //> res10: String("test\\_string") = test\_string
+  "test\\_string"                                 //> res12: String("test\\_string") = test\_string
   
-  "test_string".replaceAll("_","\\\\_")           //> res11: String = test\_string
+  "test_string".replaceAll("_","\\\\_")           //> res13: String = test\_string
   
   
-  CigarOperator.SOFT_CLIP                         //> res12: net.sf.samtools.CigarOperator = S
+  CigarOperator.SOFT_CLIP                         //> res14: net.sf.samtools.CigarOperator = S
   
-  CigarOperator.SOFT_CLIP.consumesReadBases()     //> res13: Boolean = true
+  CigarOperator.SOFT_CLIP.consumesReadBases()     //> res15: Boolean = true
   
-  CigarOperator.SOFT_CLIP.consumesReferenceBases()//> res14: Boolean = false
+  CigarOperator.SOFT_CLIP.consumesReferenceBases()//> res16: Boolean = false
   
   
   
   val X = 10                                      //> X  : Int = 10
   val Y = 0                                       //> Y  : Int = 0
   
-  X.toDouble / Y.toDouble                         //> res15: Double = Infinity
+  X.toDouble / Y.toDouble                         //> res17: Double = Infinity
   
   
   
