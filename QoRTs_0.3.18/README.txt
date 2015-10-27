@@ -19,7 +19,7 @@ Hartley SW, Mullikin JC. [**QoRTs: a comprehensive toolset for quality control a
 
 ##HELP AND DOCUMENTATION:
 Additional help and documentation is available online 
-[here](http://hartleys.github.io/QoRTs/index.html). The creator and maintainer of QoRTs can be reached by emailing "QoRTs.contact" (at) gmail.
+[here](http://hartleys.github.io/QoRTs/index.html). The creator and maintainer of QoRTs can be reached by emailing "QoRTs-contact" (at) list.nih.gov.
 
 Issues, bug reports, or feature requests can be posted to the [github issues page](https://github.com/hartleys/QoRTs/issues).
 
