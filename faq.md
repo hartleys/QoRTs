@@ -4,7 +4,7 @@ Revised Thu Oct  1 15:12:10 EDT 2015
 
 ## What if none of these answers solve my problem?
 
-No problem. Just email me at qorts.contact at gmail dot com. If possible attach the output from QoRTs, and run QoRTs with the "--verbose" option to maximize the debugging information.
+No problem. Just email me at qorts-contact at list.nih.gov. If possible attach the output from QoRTs, and run QoRTs with the "--verbose" option to maximize the debugging information.
 
 ## Using QoRTs with different aligners:
 
