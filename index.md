@@ -11,7 +11,7 @@ files suitable for use with the UCSC genome browser (or any compatible browser).
 
 The entire QoRTs toolkit can be used in almost any operating system that supports java and R.
 
-The most recent release of QoRTs is available on the [QoRTs github page](http://github.com/hartleys/QoRTs). Additional help and documentation is available online [here](http://hartleys.github.io/QoRTs/index.html). The creator and maintainer of QoRTs can be reached by emailing "QoRTs.contact" (at) gmail.
+The most recent release of QoRTs is available on the [QoRTs github page](http://github.com/hartleys/QoRTs). Additional help and documentation is available online [here](http://hartleys.github.io/QoRTs/index.html). The creator and maintainer of QoRTs can be reached by emailing "QoRTs-contact" (at) list.nih.gov.
 
 ##Help Index:
 
