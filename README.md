@@ -1,16 +1,15 @@
 # QoRTs v0.3.18
 (Compiled Thu Oct  1 15:12:10 EDT 2015)
 
-The QoRTs software package is a fast, efficient, and portable multifunction toolkit designed to assist in
+The [QoRTs software package](http://hartleys.github.io/QoRTs/index.html) is a fast, efficient, and portable multifunction toolkit designed to assist in
 the analysis, quality control, and data management of RNA-Seq datasets. Its primary function is to aid
 in the detection and identification of errors, biases, and artifacts produced by paired-end high-throughput
 RNA-Seq technology. In addition, it can produce count data designed for use with differential expression
 and differential exon usage tools, as well as individual-sample and/or group-summary genome track
-files suitable for use with the UCSC genome browser (or any compatible browser).
+files suitable for use with the UCSC genome browser (or any compatible browser). The most recent release of QoRTs is available on the [QoRTs project page](http://hartleys.github.io/QoRTs/index.html). 
 
 The entire QoRTs toolkit can be used in almost any operating system that supports java and R.
 
-The most recent release of QoRTs is available on the [QoRTs project page](http://hartleys.github.io/QoRTs/index.html). 
 
 ##Citing QoRTs:
 If you use QoRTs and find it helpful, you can cite it in your publications as:
@@ -82,7 +81,7 @@ For a full listing of all help topics for the R utility, use the R command:
 
 ##LEGAL:
 This software is "United States Government Work" under the terms of the United 
-States Copyright Act. It was written as part of the authors’ official duties 
+States Copyright Act. It was written as part of the authorsâ€™ official duties 
 for the United States Government and thus QoRT Package User Manual cannot be 
 copyrighted. This software is freely available to the public for use without a 
 copyright notice. Restrictions cannot be placed on its present or future use.
