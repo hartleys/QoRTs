@@ -6,7 +6,7 @@ the analysis, quality control, and data management of RNA-Seq datasets. Its prim
 in the detection and identification of errors, biases, and artifacts produced by paired-end high-throughput
 RNA-Seq technology. In addition, it can produce count data designed for use with differential expression
 and differential exon usage tools, as well as individual-sample and/or group-summary genome track
-files suitable for use with the UCSC genome browser (or any compatible browser). The most recent release of QoRTs is available on the [QoRTs project page](http://hartleys.github.io/QoRTs/index.html). 
+files suitable for use with the UCSC genome browser (or any compatible browser). More information is available on the [QoRTs project page](http://hartleys.github.io/QoRTs/index.html). 
 
 The entire QoRTs toolkit can be used in almost any operating system that supports java and R.
 
