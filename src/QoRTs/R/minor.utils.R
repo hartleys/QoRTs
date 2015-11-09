@@ -2,6 +2,178 @@
 f.na <- function(x){
   ifelse(is.na(x),FALSE,x);
 }
+
+wordwrap.string <- function(s, width){
+  
+  if(nchar(s) > width){
+    curr <- s;
+    out <- c();
+    for(i in 1:floor(nchar(s) / width)){
+      temp <- substr(curr,1,width);
+      remainder <- substr(curr,width+1,nchar(curr));
+      out <- c(out,temp);
+      curr <- remainder;
+    }
+    out <- c(out,curr);
+    return(paste0(out,collapse='\n'));
+  } else {
+    return(s);
+  }
+}
+
+
+
+draw.logyaxis.stdScalePlot <- function(ylim, ylim.truncate, lwd, lwd.mini, tcl = -0.5, side = 2, label.style = c("base10","raw","none"),...){
+  label.style <- match.arg(label.style);
+  if(missing(ylim)){
+    ylim <- c(par("usr")[3], par("usr")[4]);
+  }
+  if(missing(lwd)){
+    lwd <- par("lwd");
+  }
+  if(missing(lwd.mini)){
+    lwd.mini <- lwd / 2;
+  }
+  decades_log10 <- (floor((ylim[1]))-1):(ceiling((ylim[2]))+1);
+  decades_unscaled <- 10 ^ decades_log10;
+  
+  ticks_unscaled <- c();
+  for(i in 1:length(decades_unscaled)){
+    ticks_unscaled <- c(ticks_unscaled,
+                        decades_unscaled[i]*2,
+                        decades_unscaled[i]*3,
+                        decades_unscaled[i]*4,
+                        decades_unscaled[i]*5,
+                        decades_unscaled[i]*6,
+                        decades_unscaled[i]*7,
+                        decades_unscaled[i]*8,
+                        decades_unscaled[i]*9
+                        );
+  }
+  ticks_log10 <- log10(ticks_unscaled);
+  
+  if(label.style == "base10"){
+      decade.labels <- c();
+      if(any(decades_log10 == 0)){
+        decade.labels <- c(expression(1));
+      }
+      if(any(decades_log10 == 1)){
+        decade.labels <- c(decade.labels,expression(10));
+      }
+      if(decades_log10[1] < 0){
+        decade.labels <- c(sapply(decades_log10[1]:(-1), function(X){
+                                    substitute(10 ^ x, list(x = X));
+                                 }), 
+                          decade.labels);
+      }
+      if(max(decades_log10) > 1){
+        decade.labels <- c(decade.labels,
+                          sapply(2:max(decades_log10), function(X){
+                                    substitute(10 ^ x, list(x = X));
+                                 })
+                          );
+      }
+  } else if(label.style == "raw"){
+    decade.labels <- decades_unscaled;
+  } else if(label.style == "none"){
+    decade.labels <- rep("",length(decades_log10));
+  }
+  
+  if(! missing(ylim.truncate)){
+    keep_decades <- decades_log10 >= ylim.truncate[1] & decades_log10 <= ylim.truncate[2];
+    decades_unscaled <- decades_unscaled[keep_decades];
+    decade.labels <- decade.labels[keep_decades];
+    decades_log10 <- decades_log10[keep_decades];
+    ticks_unscaled <- ticks_unscaled[ticks_log10 >= ylim.truncate[1] & ticks_log10 <= ylim.truncate[2]];
+    ticks_log10 <-  ticks_log10[ticks_log10 >= ylim.truncate[1] & ticks_log10 <= ylim.truncate[2]];
+  }
+  
+  axis(side, at = decades_log10, labels=decade.labels, lwd = -1, lwd.ticks = lwd, tcl = tcl, las = 1, ...);
+  axis(side, at = ticks_log10, labels=FALSE, lwd = -1, lwd.ticks = lwd.mini, tcl = tcl / 2, ...);
+}
+
+draw.yaxis.logScalePlot <- function(ylim, ylim.truncate, lwd, lwd.mini, tcl = -0.5, side = 2, label.style = c("base10","raw","none"),...){
+  label.style <- match.arg(label.style);
+  if(missing(ylim)){
+    ylim <- c(10^par("usr")[3], 10^par("usr")[4]);
+  }
+  if(missing(lwd)){
+    lwd <- par("lwd");
+  }
+  if(missing(lwd.mini)){
+    lwd.mini <- lwd / 2;
+  }
+  decades_log10 <- (floor(log10(ylim[1]))-1):(ceiling(log10(ylim[2]))+1);
+  decades_unscaled <- 10 ^ decades_log10;
+  
+  ticks_unscaled <- c();
+  for(i in 1:length(decades_unscaled)){
+    ticks_unscaled <- c(ticks_unscaled,
+                        decades_unscaled[i]*2,
+                        decades_unscaled[i]*3,
+                        decades_unscaled[i]*4,
+                        decades_unscaled[i]*5,
+                        decades_unscaled[i]*6,
+                        decades_unscaled[i]*7,
+                        decades_unscaled[i]*8,
+                        decades_unscaled[i]*9
+                        );
+  }
+  
+  if(label.style == "base10"){
+      decade.labels <- c(expression(1), expression(10));
+      if(decades_log10[1] < 0){
+        decade.labels <- c(sapply(decades_log10[1]:(-1), function(X){
+                                    substitute(10 ^ x, list(x = X));
+                                 }), 
+                          decade.labels);
+      }
+      if(max(decades_log10) > 1){
+        decade.labels <- c(decade.labels,
+                          sapply(2:max(decades_log10), function(X){
+                                    substitute(10 ^ x, list(x = X));
+                                 })
+                          );
+      }
+  } else if(label.style == "raw"){
+    decade.labels <- decades_unscaled;
+  } else if(label.style == "none"){
+    decade.labels <- rep("",length(decades_log10));
+  }
+  
+  if(! missing(ylim.truncate)){
+    keep_decades <- decades_unscaled >= ylim.truncate[1] & decades_unscaled <= ylim.truncate[2];
+    decades_unscaled <- decades_unscaled[keep_decades];
+    decade.labels <- decade.labels[keep_decades];
+    ticks_unscaled <- ticks_unscaled[ticks_unscaled >= ylim.truncate[1] & ticks_unscaled <= ylim.truncate[2]];
+  }
+  
+  axis(side, at = decades_unscaled, labels=decade.labels, lwd = -1, lwd.ticks = lwd, tcl = tcl, las = 1, ...);
+  axis(side, at = ticks_unscaled, labels=FALSE, lwd = -1, lwd.ticks = lwd.mini, tcl = tcl / 2, ...);
+}
+
+draw.decade.lines <- function(side = 2, lty = 3, col = "gray", ...){
+  if(side == 2){
+    if(par("ylog")){
+      ylim <- c(10^par("usr")[3], 10^par("usr")[4]);
+      abline(h= 10 ^ ((floor(log(ylim[1]))-1):(ceiling(log(ylim[2]))+1)), lty = lty, col = col, ...);
+    } else {
+      ylim <- c(par("usr")[3], par("usr")[4]);
+      abline(h=(floor(log(ylim[1]))-1):(ceiling(log(ylim[2]))+1), lty = lty, col = col, ...);
+    }
+  }
+  if(side == 1){
+    if(par("xlog")){
+      xlim <- c(10^par("usr")[1], 10^par("usr")[2]);
+      abline(h=10 ^ ((floor(log(xlim[1]))-1):(ceiling(log(xlim[2]))+1)), lty = lty, col = col, ...);
+    } else {
+      xlim <- c(par("usr")[1], par("usr")[2]);
+      abline(h=(floor(log(xlim[1]))-1):(ceiling(log(xlim[2]))+1), lty = lty, col = col, ...);
+    }
+  }
+}
+
+
 check.rasterize.or.warn <- function(varname = "rasterize.plotting.area"){
     if(! can.plot.raster()){
        message(paste0("cannot open raster images, because package \"png\" not found. Install package png (with command install.packages(\"png\")) or set ",varname," to FALSE!"));
@@ -364,3 +536,136 @@ fit.character.vector.helper <- function(strs, curr.cex, min.width, max.width, ma
 #     return(curr.cex);
 #   }
 #}
+
+
+#############################################
+
+#Expansion of axis.break from the plotrix package
+# adds the ability to modify additional graphical parameters, and fixes a bug where
+# this function globally overrides certain graphical parameters via par().
+
+qorts.axis.break <- function (axis = 1, breakpos = NULL, pos = NA, bgcol = "white", 
+    breakcol = "black", style = "slash", cex = 1, xw = NULL, yw = NULL, fill = FALSE,...) 
+{
+    brw <- strwidth("W",cex = cex, units="figure");
+    brh <- strheight("W",cex = cex, units="figure");
+    figxy <- par("usr")
+    xaxl <- par("xlog")
+    yaxl <- par("ylog")
+    if(is.null(xw)) xw <- (figxy[2] - figxy[1]) * brw
+    if(is.null(yw)) yw <- (figxy[4] - figxy[3]) * brh
+    if (!is.na(pos)) 
+        figxy <- rep(pos, 4)
+    if (is.null(breakpos)) 
+        breakpos <- ifelse(axis%%2, figxy[1] + xw * 2, figxy[3] + 
+            yw * 2)
+    if (xaxl && (axis == 1 || axis == 3)) 
+        breakpos <- log10(breakpos)
+    if (yaxl && (axis == 2 || axis == 4)) 
+        breakpos <- log10(breakpos)
+    switch(axis, 
+        br <- c(breakpos - xw/2, figxy[3] - yw/2, breakpos + xw/2, figxy[3] + yw/2), 
+        br <- c(figxy[1] - xw/2, breakpos - yw/2, figxy[1] + xw/2, breakpos + yw/2), 
+        br <- c(breakpos - xw/2, figxy[4] - yw/2, breakpos + xw/2, figxy[4] + yw/2), 
+        br <- c(figxy[2] - xw/2, breakpos - yw/2, figxy[2] + xw/2, breakpos + yw/2), 
+        stop("Improper axis specification."))
+    #old.xpd <- par("xpd")
+    #par(xpd = TRUE)
+    if (xaxl) 
+        br[c(1, 3)] <- 10^br[c(1, 3)]
+    if (yaxl) 
+        br[c(2, 4)] <- 10^br[c(2, 4)]
+    if (style == "gap") {
+        if (xaxl) {
+            figxy[1] <- 10^figxy[1]
+            figxy[2] <- 10^figxy[2]
+        }
+        if (yaxl) {
+            figxy[3] <- 10^figxy[3]
+            figxy[4] <- 10^figxy[4]
+        }
+        if (axis == 1 || axis == 3) {
+            rect(breakpos, figxy[3], breakpos + xw, figxy[4], 
+                col = bgcol, border = bgcol)
+            xbegin <- c(breakpos, breakpos + xw)
+            ybegin <- c(figxy[3], figxy[3])
+            xend <- c(breakpos, breakpos + xw)
+            yend <- c(figxy[4], figxy[4])
+            if (xaxl) {
+                xbegin <- 10^xbegin
+                xend <- 10^xend
+            }
+        }
+        else {
+            rect(figxy[1], breakpos, figxy[2], breakpos + yw, 
+                col = bgcol, border = bgcol)
+            xbegin <- c(figxy[1], figxy[1])
+            ybegin <- c(breakpos, breakpos + yw)
+            xend <- c(figxy[2], figxy[2])
+            yend <- c(breakpos, breakpos + yw)
+            if (xaxl) {
+                xbegin <- 10^xbegin
+                xend <- 10^xend
+            }
+        }
+        #par(xpd = TRUE)
+    }
+    else {
+        if(fill) rect(br[1], br[2], br[3], br[4], col = bgcol, border = bgcol)
+        if (style == "slash") {
+            if (axis == 1 || axis == 3) {
+                xbegin <- c(breakpos - xw, breakpos)
+                xend <- c(breakpos, breakpos + xw)
+                ybegin <- c(br[2], br[2])
+                yend <- c(br[4], br[4])
+                if (xaxl) {
+                  xbegin <- 10^xbegin
+                  xend <- 10^xend
+                }
+            }
+            else {
+                xbegin <- c(br[1], br[1])
+                xend <- c(br[3], br[3])
+                ybegin <- c(breakpos - yw, breakpos)
+                yend <- c(breakpos, breakpos + yw)
+                if (yaxl) {
+                  ybegin <- 10^ybegin
+                  yend <- 10^yend
+                }
+            }
+        }
+        else {
+            if (axis == 1 || axis == 3) {
+                xbegin <- c(breakpos - xw/2, breakpos - xw/4, 
+                  breakpos + xw/4)
+                xend <- c(breakpos - xw/4, breakpos + xw/4, breakpos + 
+                  xw/2)
+                ybegin <- c(ifelse(yaxl, 10^figxy[3 + (axis == 
+                  3)], figxy[3 + (axis == 3)]), br[4], br[2])
+                yend <- c(br[4], br[2], ifelse(yaxl, 10^figxy[3 + 
+                  (axis == 3)], figxy[3 + (axis == 3)]))
+                if (xaxl) {
+                  xbegin <- 10^xbegin
+                  xend <- 10^xend
+                }
+            }
+            else {
+                xbegin <- c(ifelse(xaxl, 10^figxy[1 + (axis == 
+                  4)], figxy[1 + (axis == 4)]), br[1], br[3])
+                xend <- c(br[1], br[3], ifelse(xaxl, 10^figxy[1 + 
+                  (axis == 4)], figxy[1 + (axis == 4)]))
+                ybegin <- c(breakpos - yw/2, breakpos - yw/4, 
+                  breakpos + yw/4)
+                yend <- c(breakpos - yw/4, breakpos + yw/4, breakpos + 
+                  yw/2)
+                if (yaxl) {
+                  ybegin <- 10^ybegin
+                  yend <- 10^yend
+                }
+            }
+        }
+    }
+    segments(xbegin, ybegin, xend, yend, col = breakcol, lty = 1, xpd = NA, ...)
+    
+    #par(xpd = FALSE)
+}

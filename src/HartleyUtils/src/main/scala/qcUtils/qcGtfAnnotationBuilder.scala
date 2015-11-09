@@ -46,6 +46,7 @@ class qcGtfAnnotationBuilder(gtffile : String, flatgtffile : Option[String], str
   lazy val geneLengthMap : GenMap[String,Int] = qcGtfAnnotationBuilder.getGeneLengthMap(geneArray);
   lazy val flatExonArray : GenomicArrayOfSets[String] = qcGtfAnnotationBuilder.makeFlatExonMap(stranded,makeFlatReader, flatCodes).finalizeStepVectors;
   lazy val flatGeneSet : Set[String] = qcGtfAnnotationBuilder.makeFlatGeneSet(flatExonArray);
+  lazy val geneBiotypeMap : Map[String,String] = qcGtfAnnotationBuilder.getGeneBiotypeMap(gtffile, stdCodes);
   
   lazy val strandedGeneArray = if(stranded) {
     geneArray; 
@@ -113,6 +114,7 @@ object qcGtfAnnotationBuilder {
     });
   }
   
+
   /*
    * Inner Distance:
    */
@@ -123,6 +125,41 @@ object qcGtfAnnotationBuilder {
         }
     )
   }
+  
+  private def getGeneBiotypeMap(gtffile : String, codes : GtfCodes) : Map[String,String] = {
+    reportln("      (DEBUG) Generating Biotype Map ["+getDateAndTimeString+"]","debug");
+    
+    val reader = GtfReader.getStdGtfReader(gtffile, true, true, "\\s+", codes);
+    var out = Map[String,String]();
+    var bioset = Set[String]();
+    
+    for(gtfLine <- reader){
+      val geneOpt = gtfLine.getAttribute(codes.GENE_ID_ATTRIBUTE_KEY);
+      //if(gtfLine.featureType == codes.STD_EXON_TYPE_CODE){
+      if(! geneOpt.isEmpty){
+        val geneID = geneOpt.get;
+        if(! out.containsKey(geneID)){
+          gtfLine.getAttribute(codes.BIOTYPE_ATTRIBUTE_KEY) match {
+            case Some(b) => {
+              bioset += b;
+              out += ((geneID,b));
+            }
+            case None => {
+              //do nothing.
+            }
+          }
+        }
+      }
+    }
+    
+    reportln("        (DEBUG) Extracted gene BioType using key \""+codes.BIOTYPE_ATTRIBUTE_KEY+"\".","debug");
+    reportln("                Found "+bioset.size+" types: ["+bioset.toList.mkString(",")+"]","debug");
+    
+    reportln("      (DEBUG) Finished Biotype Map ["+getDateAndTimeString+"]","debug");
+    return out.withDefault(x => "UNK");
+  }
+  
+  
   private def qcInnerDistance_readGtfLine(gtfLine : FlatGtfLine, acc :  Map[(String,Char),TreeSet[(Int,Int)]], codes : GtfCodes) : Map[(String,Char),TreeSet[(Int,Int)]] = {
     if(gtfLine.isSpliceJunction){
       acc.get((gtfLine.chromName, gtfLine.strand)) match {

@@ -43,7 +43,9 @@ object runAllQC {
                       ("writeGenewiseGeneBody"     -> "Write file containing gene-body distributions for each (non-overlapping) gene."),
                       ("writeGeneCounts"           -> "Write extended gene-level read/read-pair counts file (includes counts for CDS/UTR, ambiguous regions, etc)."),
                       ("writeClippedNVC"           -> "Write NVC file containing clipped sequences."),
-                      ("chromCounts"               -> "Calculate chromosome counts")
+                      ("writeBiotypeCounts"        -> "Write a table listing read counts for each gene BioType (uses the optional \"gene_biotype\" GTF attribute)."),
+                      ("chromCounts"               -> "Calculate chromosome counts"),
+                      ("writeSpliceExon"           -> "Synonym for function \"writeJunctionSeqCounts\" (for backwards-compatibility)")
   );
   
   final val QC_DEFAULT_OFF_FUNCTION_MAP : scala.collection.immutable.Map[String,String] = Map(
@@ -53,8 +55,7 @@ object runAllQC {
                       ("makeJunctionBed"           -> "Write splice-junction count \"bed\" files. (default: OFF)"),
                       ("makeAllBrowserTracks"      -> "Write both the \"wiggle\" and the splice-junction bed files (default: OFF)"),
                       ("cigarMatch"                -> "Work-In-Progress: this function is a placeholder for future functionality, and is not intended for use at this time. (default: OFF)"),
-                      ("cigarLocusCounts"          -> "BETA: This function is still undergoing basic testing. It is not intended for production use at this time. (default: OFF)"),
-                      ("writeSpliceExon"           -> "Synonym for function \"writeJunctionSeqCounts\" (for backwards-compatibility)")
+                      ("cigarLocusCounts"          -> "BETA: This function is still undergoing basic testing. It is not intended for production use at this time. (default: OFF)")
   );
   
   final val QC_DEFAULT_ON_FUNCTION_LIST  : scala.collection.immutable.Set[String] = QC_DEFAULT_ON_FUNCTION_MAP.keySet;
@@ -112,7 +113,8 @@ object runAllQC {
       ("writeNovelSplices" -> Set("JunctionCalcs")),
       ("annotatedSpliceExonCounts" -> Set("JunctionCalcs")),
       ("writeClippedNVC" -> Set("NVC")),
-      ("makeAllBrowserTracks" -> Set("makeJunctionBed","makeWiggles"))
+      ("makeAllBrowserTracks" -> Set("makeJunctionBed","makeWiggles")),
+      ("writeBiotypeCounts" -> Set("GeneCalcs"))
   );
   
   final val SAM_PEEK_LINECT = 10000;
@@ -460,15 +462,31 @@ object runAllQC {
                                          argDesc = "The output directory." // description
                                         ) :: internalUtils.commandLineUI.CLUI_UNIVERSAL_ARGS,
          manualExtras = QC_DEFAULT_ON_FUNCTION_MAP.foldLeft("DEFAULT SUB-FUNCTIONS\n")((soFar,curr) => {
-           soFar + "    "+curr._1+"\n"+wrapLineWithIndent(curr._2,internalUtils.commandLineUI.CLUI_CONSOLE_LINE_WIDTH,8)+"\n";
+           val depString = QC_FUNCTION_DEPENDANCIES.get(curr._1) match {
+             case Some(depset) => " [Depends: "+depset.toList.mkString(", ")+"]";
+             case None => "";
+           }
+           soFar + "    "+curr._1+"\n"+wrapLineWithIndent(curr._2 + depString,internalUtils.commandLineUI.CLUI_CONSOLE_LINE_WIDTH,8)+"\n";
          }) + QC_DEFAULT_OFF_FUNCTION_MAP.foldLeft("NON-DEFAULT SUB-FUNCTIONS\n")((soFar,curr) => {
-           soFar + "    "+curr._1+"\n"+wrapLineWithIndent(curr._2,internalUtils.commandLineUI.CLUI_CONSOLE_LINE_WIDTH,8)+"\n";
+           val depString = QC_FUNCTION_DEPENDANCIES.get(curr._1) match {
+             case Some(depset) => " [Depends: "+depset.toList.mkString(", ")+"]";
+             case None => "";
+           }
+           soFar + "    "+curr._1+"\n"+wrapLineWithIndent(curr._2+depString,internalUtils.commandLineUI.CLUI_CONSOLE_LINE_WIDTH,8)+"\n";
          }),
          markdownManualExtras = QC_DEFAULT_ON_FUNCTION_MAP.foldLeft("## DEFAULT SUB-FUNCTIONS:\n")((soFar,curr) => {
+           val depString = QC_FUNCTION_DEPENDANCIES.get(curr._1) match {
+             case Some(depset) => " [Depends: "+depset.toList.mkString(", ")+"]";
+             case None => "";
+           }
            //"### "+(getFullSyntax()).replaceAll("_","\\\\_")+":\n\n> "+(describe()).replaceAll("_","\\\\_")+ (" ("+argType+")\n\n").replaceAll("_","\\\\_");
-           soFar + "* " + curr._1 + ": " + curr._2 + "\n\n";
+           soFar + "* " + curr._1 + ": " + curr._2 + depString + "\n\n";
          }) + QC_DEFAULT_OFF_FUNCTION_MAP.foldLeft("## NON-DEFAULT SUB-FUNCTIONS:\n")((soFar,curr) => {
-           soFar + "* " + curr._1 + ": " + curr._2 + "\n\n";
+           val depString = QC_FUNCTION_DEPENDANCIES.get(curr._1) match {
+             case Some(depset) => " [Depends: "+depset.toList.mkString(", ")+"]";
+             case None => "";
+           }
+           soFar + "* " + curr._1 + ": " + curr._2 + depString + "\n\n";
          })
       );
     
@@ -554,7 +572,9 @@ object runAllQC {
       outDirFile.mkdir();
     }
     val outfile = outdir + "/" + "QC";
-    internalUtils.Reporter.init_completeLogFile(outfile + ".log");
+    val logfile = outfile +"."+ internalUtils.stdUtils.getRandomString(12) + ".log";
+    internalUtils.Reporter.init_completeLogFile(logfile);
+    reportln("Created Log File: " + logfile,"note");
     
     val gigsMaxMem = getMaxMemoryXmxInGigs;
     if(gigsMaxMem < 4){
@@ -975,7 +995,7 @@ object runAllQC {
     
     //"writeKnownSplices","writeNovelSplices","writeSpliceExon", "writeDESeq","writeDEXSeq","writeGenewiseGeneBody"
     //  final val QC_FUNCTION_LIST : Seq[String] = Seq("InsertSize","NVC","CigarOpDistribution","QualityScoreDistribution","GCDistribution","GeneCounts","JunctionCounts");
-    val qcGGC:  QCUtility[String] =   if(runFunc.contains("GeneCalcs"))                 new qcGetGeneCounts(stranded,fr_secondStrand,anno_holder,coda,coda_options,40, runFunc.contains("FPKM"), runFunc.contains("writeGenewiseGeneBody"), runFunc.contains("writeDESeq"), runFunc.contains("writeGeneCounts"), runFunc.contains("writeGeneBody"), geneKeepFunc) else QCUtility.getBlankStringUtil;
+    val qcGGC:  QCUtility[String] =   if(runFunc.contains("GeneCalcs"))                 new qcGetGeneCounts(stranded,fr_secondStrand,anno_holder,coda,coda_options,40, runFunc.contains("FPKM"), runFunc.contains("writeGenewiseGeneBody"), runFunc.contains("writeDESeq"), runFunc.contains("writeGeneCounts"), runFunc.contains("writeGeneBody"), runFunc.contains("writeBiotypeCounts"), geneKeepFunc) else QCUtility.getBlankStringUtil;
     val qcIS :  QCUtility[Int]    =   if(runFunc.contains("InsertSize"))                new qcInnerDistance(anno_holder, stranded, fr_secondStrand, readLength)        else QCUtility.getBlankIntUtil;
     val qcCS :  QCUtility[Unit]   =   if(runFunc.contains("NVC"))                       new qcNVC(isSingleEnd, readLength, runFunc.contains("writeClippedNVC"))                     else QCUtility.getBlankUnitUtil;
     val qcJD :  QCUtility[Unit]   =   if(runFunc.contains("CigarOpDistribution"))       new qcCigarDistribution(isSingleEnd, readLength)                                            else QCUtility.getBlankUnitUtil;

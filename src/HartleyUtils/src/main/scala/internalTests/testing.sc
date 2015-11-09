@@ -8,19 +8,27 @@ object testing {
 
   //val reader =  new SAMFileReader(new java.io.File("C:\\Users\\hartleys\\work\\nihwork\\home_copy\\projects\\ZZZ-ExampleDataset\\TestSets\\readLength50\\inputData\\fastq\\SAMP1_RG1.50bp.1.fq.gz"));
   
-     
+  scala.util.Random.alphanumeric.slice(0,12).toVector.mkString("");
+                                                  //> res1: String = io3Hwu0WstNz
+
+  print(Vector("Hello","World","How","Are","You"));
+                                                  //> Vector(Hello, World, How, Are, You)
 
   def zeroPad(i : Int, cols : Int) : String = {
     val s = i.toString;
     return 0.toString * (cols - s.length) + s;
   }                                               //> zeroPad: (i: Int, cols: Int)String
-
-   0.toString * -2                                //> res1: String = ""
    
-   zeroPad(3000,3)                                //> res2: String = 3000
+   0.toDouble / 0.toDouble                        //> res2: Double = NaN
+   
+   
+   
+   0.toString * -2                                //> res3: String = ""
+   
+   zeroPad(3000,3)                                //> res4: String = 3000
 
   internalUtils.stdUtils.zipIteratorWithCount(List("A","B","C","D","E","F","G").iterator).filter(x => x._2 % 2 == 0).toList
-                                                  //> res3: List[(String, Int)] = List((A,0), (C,2), (E,4), (G,6))
+                                                  //> res5: List[(String, Int)] = List((A,0), (C,2), (E,4), (G,6))
 
   val x = scala.collection.mutable.AnyRefMap[internalUtils.commonSeqUtils.GenomicInterval,Int]().withDefault(k => 0)
                                                   //> x  : scala.collection.mutable.Map[internalUtils.commonSeqUtils.GenomicInterv
@@ -32,11 +40,11 @@ object testing {
   
   x(giv) += 1
   
-  x                                               //> res4: scala.collection.mutable.Map[internalUtils.commonSeqUtils.GenomicInter
-                                                  //| val,Int] = Map(GenomicInterval(chrX,+,10,100) -> 1)
+  x                                               //> res6: scala.collection.mutable.Map[internalUtils.commonSeqUtils.GenomicInte
+                                                  //| rval,Int] = Map(GenomicInterval(chrX,+,10,100) -> 1)
   
-  x.keySet                                        //> res5: scala.collection.Set[internalUtils.commonSeqUtils.GenomicInterval] = S
-                                                  //| et(GenomicInterval(chrX,+,10,100))
+  x.keySet                                        //> res7: scala.collection.Set[internalUtils.commonSeqUtils.GenomicInterval] = 
+                                                  //| Set(GenomicInterval(chrX,+,10,100))
   
   val line = "x	y"                                //> line  : String = x	y
   
@@ -55,15 +63,15 @@ object testing {
   */
   
   
-(10 until 10).toVector                            //> res6: Vector[Int] = Vector()
+(10 until 10).toVector                            //> res8: Vector[Int] = Vector()
 
-Range(10, 1, -1).toVector                         //> res7: Vector[Int] = Vector(10, 9, 8, 7, 6, 5, 4, 3, 2)
+Range(10, 1, -1).toVector                         //> res9: Vector[Int] = Vector(10, 9, 8, 7, 6, 5, 4, 3, 2)
 val op = CigarOperator.SOFT_CLIP                  //> op  : net.sf.samtools.CigarOperator = S
 
-op.consumesReadBases()                            //> res8: Boolean = true
-op.consumesReferenceBases()                       //> res9: Boolean = false
+op.consumesReadBases()                            //> res10: Boolean = true
+op.consumesReferenceBases()                       //> res11: Boolean = false
 
-System.getProperty("sun.arch.data.model")         //> res10: String = 64
+System.getProperty("sun.arch.data.model")         //> res12: String = 64
   
   def escapeToMarkdown(s : String) : String = {
     escapifyString(s, List("`","\\*","_","\\{","\\}","\\[","\\]","\\(","\\)","\\#","\\+","-","\\.","!"));
@@ -86,25 +94,25 @@ System.getProperty("sun.arch.data.model")         //> res10: String = 64
   //writer.write(out2)
   //writer.close()
   
-  new java.io.File( "." ).getCanonicalPath        //> res11: String = C:\eclipseScalav400
+  new java.io.File( "." ).getCanonicalPath        //> res13: String = C:\eclipseScalav400
   
-  "test\\_string"                                 //> res12: String("test\\_string") = test\_string
+  "test\\_string"                                 //> res14: String("test\\_string") = test\_string
   
-  "test_string".replaceAll("_","\\\\_")           //> res13: String = test\_string
+  "test_string".replaceAll("_","\\\\_")           //> res15: String = test\_string
   
   
-  CigarOperator.SOFT_CLIP                         //> res14: net.sf.samtools.CigarOperator = S
+  CigarOperator.SOFT_CLIP                         //> res16: net.sf.samtools.CigarOperator = S
   
-  CigarOperator.SOFT_CLIP.consumesReadBases()     //> res15: Boolean = true
+  CigarOperator.SOFT_CLIP.consumesReadBases()     //> res17: Boolean = true
   
-  CigarOperator.SOFT_CLIP.consumesReferenceBases()//> res16: Boolean = false
+  CigarOperator.SOFT_CLIP.consumesReferenceBases()//> res18: Boolean = false
   
   
   
   val X = 10                                      //> X  : Int = 10
   val Y = 0                                       //> Y  : Int = 0
   
-  X.toDouble / Y.toDouble                         //> res17: Double = Infinity
+  X.toDouble / Y.toDouble                         //> res19: Double = Infinity
   
   
   

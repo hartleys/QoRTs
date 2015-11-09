@@ -26,7 +26,9 @@ DEFAULTDEBUGMODE <- TRUE;
 #           Other than these 3 required columns, it can have any other columns desired, as long as the column names are unique.
 #        OPTIONAL FIELDS:
 #           input.read.pair.count: the # of input reads. this must be included for mapping rate to be calculated.
-#           multi.mapped.read.pair.count: the # of reads that were multi mapped by the aligner. this must be included for multi-mapping rate to be calculated.
+#           multi.mapped.read.pair.count: the # of reads that were multi mapped by the aligner. 
+#                                         Depending on how your aligner implements multi-mapping, this might be required
+#                                         for multi-mapping rate to be calculated.
 #        RESERVED FIELDS: Do not name any field this:
 #           cycle.CT
 #           lanebam.ID (a synonym for unique.ID)
@@ -234,7 +236,7 @@ read.in.results.data.with.decoder <- function(decoder, infile.dir = "", calc.DES
   #  message("Note: successfully found input.read.pair.count column. This will be used to calculate mapping rates.");
   #}
   if( is.null(decoder$multi.mapped.read.pair.count)){
-    message("Note: no multi.mapped.read.pair.count column found. This column is optional, but without it multi-mapping rates cannot be plotted.");
+    message("Note: no multi.mapped.read.pair.count column found. This column is optional, but without it (depending on how your aligner implements multi-mapping) multi-mapping rates might not be plotted.");
   }# else {
   #  message("Note: successfully found multi.mapped.read.pair.count: column. This will be used to plot multi-mapping rates.");
   #}
@@ -287,7 +289,6 @@ read.in.results.data.with.decoder <- function(decoder, infile.dir = "", calc.DES
     res@qc.data <- c(res@qc.data,lapply(QC_INTERNAL_SCALAQC_FILE_LIST, FUN=read.scalaqc.file.helper));
   }
   res@calc.data <- list();
-
   
   message("calculating secondary data:");
   if(debugMode) ts <- timestamp();
@@ -325,7 +326,9 @@ QC_INTERNAL_SCALAQC_FILE_LIST <- list( gc.byPair = "QC.gc.byPair.txt.gz",
                                        NVC.tail.clip.R2 = "QC.NVC.tail.clip.R2.txt.gz",
                                        NVC.minus.clipping.R1 = "QC.NVC.minus.clipping.R1.txt.gz",
                                        NVC.minus.clipping.R2 = "QC.NVC.minus.clipping.R2.txt.gz",
-                                       chrom.counts = "QC.chromCount.txt.gz"
+                                       chrom.counts = "QC.chromCount.txt.gz",
+                                       biotype.counts = "QC.biotypeCounts.txt.gz",
+                                       geneBodyCoverage.pct = "QC.geneBodyCoverage.byExpr.avgPct.txt.gz"
                                        #,
                                        #spliceJunctionCounts.knownSplices = "scalaQC.spliceJunctionCounts.knownSplices.txt.gz"
                                        #spliceJunctionCounts.novelSplices = "scalaQC.spliceJunctionCounts.novelSplices.txt.gz"
@@ -344,7 +347,9 @@ QC_INTERNAL_SCALAQC_FILE_LIST_SINGLE_END <- list(
                                        NVC.lead.clip.R1 =      "QC.NVC.lead.clip.R1.txt.gz",
                                        NVC.tail.clip.R1 =      "QC.NVC.tail.clip.R1.txt.gz",
                                        NVC.minus.clipping.R1 = "QC.NVC.minus.clipping.R1.txt.gz",
-                                       chrom.counts = "QC.chromCount.txt.gz"
+                                       chrom.counts = "QC.chromCount.txt.gz",
+                                       biotype.counts = "QC.biotypeCounts.txt.gz",
+                                       geneBodyCoverage.pct = "QC.geneBodyCoverage.byExpr.avgPct.txt.gz"
                                        #,
                                        #spliceJunctionCounts.knownSplices = "scalaQC.spliceJunctionCounts.knownSplices.txt.gz"
                                        #spliceJunctionCounts.novelSplices = "scalaQC.spliceJunctionCounts.novelSplices.txt.gz"

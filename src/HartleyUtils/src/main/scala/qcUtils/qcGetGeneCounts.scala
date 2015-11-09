@@ -282,6 +282,37 @@ object qcGetGeneCounts {
       }).mkString("	") + "\n");
     }
     close(writer);
+    
+    val geneBody_CoveragePctArrays = sortedReadCountSeq.map(_._1).toList.map( g => {
+      val ctArray = geneBody_CoverageCountArrays.get(g).get;
+      val cts = ctArray.iterator.toVector;
+      val pct = cts.map(_.toDouble / cts.sum.toDouble);
+      (g, pct);
+    }).toMap;
+    
+    //calculate by percentile:
+    val totalGeneBodyCoverage_PCT = geneBody_CoveragePctArrays.foldLeft(repToSeq(0.toDouble,geneBody_IntervalCount))((sofar, currPair) =>{
+      (0 until sofar.length).map(i => {
+        sofar(i) + currPair._2(i).toDouble;
+      }).toSeq;
+    }).map( _ / sortedReadCountSeq.length);
+    val geneBodyByCoverageLevel_PCT = coverageLevelThresholds.zip(coverageSpans).map(cltpair => {
+      val ((coverName, coverLevel), (start,end)) = cltpair;
+      val sliceSize = end - start;
+      sortedReadCountSeq.slice(start,end).foldLeft(repToSeq(0.toDouble,geneBody_IntervalCount))((sofar, currPair) => {
+        val (geneID, geneCounts) = currPair;
+        val cca = geneBody_CoveragePctArrays(geneID);
+        sofar.zip(cca).map(p => p._1 + (p._2.toDouble / sliceSize.toDouble));
+      })
+    });
+    val writer2 = openWriterSmart_viaGlobalParam(outfile+".geneBodyCoverage.byExpr.avgPct.txt");
+    writer2.write("QUANTILE\t" +"TOTAL\t"+ coverageLevelThresholds.map(_._1).mkString("\t") + "\n");
+    for(i <- 0 until geneBody_IntervalCount){
+      writer2.write(geneBody_intervalBreaks.tail(i) + "\t" + totalGeneBodyCoverage_PCT(i) +"\t"+ (0 until coverageLevelThresholds.length).map(j => {
+        geneBodyByCoverageLevel_PCT(j)(i);
+      }).mkString("\t") + "\n");
+    }
+    close(writer2);
   }
   
   def pairIsNearFeatures(distance : Int, r1 : SAMRecord, r2 : SAMRecord, stranded : Boolean, fr_secondStrand : Boolean, featureArray : GenomicArrayOfSets[String]) : Boolean = {
@@ -330,6 +361,7 @@ class qcGetGeneCounts( stranded : Boolean,
                        coda_options : Array[Boolean] , 
                        geneBodyIntervalCount : Int, 
                        calcRPKM : Boolean, writeGenewiseGeneBody : Boolean, writeDESeq : Boolean, writeGeneCounts : Boolean, writeGeneBody : Boolean,
+                       writeBiotypeCounts : Boolean,
                        geneKeepFunc : (String => Boolean)) extends QCUtility[String] {
   
   reportln("> Init GeneCalcs Utility","debug");
@@ -349,7 +381,7 @@ class qcGetGeneCounts( stranded : Boolean,
   //val mapLocation_CDS : GenomicArrayOfSets[String]
   val geneArea_cdsArray = anno_holder.qcGetGeneCounts_cdsArray;
   val geneArea_intronsArray = anno_holder.qcGetGeneCounts_intronArray;
-
+  
   //INITIALIZE COUNTERS:
   val geneCounts : scala.collection.mutable.Map[String,Int] = qcGtfAnnotationBuilder.initializeCounter[String](geneArray.getValueSet);
   
@@ -494,7 +526,21 @@ class qcGetGeneCounts( stranded : Boolean,
       }
       writeGeneBodyCoverage_summaryByExpressionLevel(outfile);
     }
-
+    
+    if(writeBiotypeCounts){
+      val biotypeMap = anno_holder.geneBiotypeMap;
+      val biotypeSet = (biotypeMap.map(_._2).toSet + "UNK");
+      
+      val writer = openWriterSmart_viaGlobalParam(outfile + ".biotypeCounts.txt");
+      writer.write("BIOTYPE\tCOUNT\tCOUNT_AMBIG_GENE\tTOTAL\n");
+      
+      for(bt <- biotypeSet.toVector.sorted){
+        val count =       geneCounts.filter((x : (String,Int)) => biotypeMap(x._1) == bt).map(_._2).sum;
+        val ambig = geneCounts_ambig.filter((x : (String,Int)) => biotypeMap(x._1) == bt).map(_._2).sum;
+        writer.write(bt+"\t"+count+"\t"+ambig+"\t"+(count+ambig)+"\n");
+      }
+      writer.close();
+    }
     
     if(calcRPKM){
       val writerRPKM = openWriterSmart_viaGlobalParam(outfile + ".FPKM.txt");

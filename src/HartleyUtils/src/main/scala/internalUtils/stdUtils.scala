@@ -20,6 +20,10 @@ object stdUtils {
     else return Range(f, t-1, -1);
   }
   
+  def getRandomString(len : Int) : String = {
+    scala.util.Random.alphanumeric.slice(0,len).toVector.mkString("");
+  }
+  
   /**************************************************************************************************************************
    * timestamp / memory-usage utilities
    **************************************************************************************************************************/
@@ -107,6 +111,11 @@ object stdUtils {
   /**************************************************************************************************************************
    * Sequence/iterator utilities:
    **************************************************************************************************************************/
+  
+  def peekIterator[A](iter : Iterator[A]) : (A, Iterator[A]) = {
+    val peek : A = iter.next();
+    return ((peek, Iterator[A](peek) ++ iter  ));
+  }
   
   def bufferIterator[A](iter : Iterator[A], bufferSize : Int) : Iterator[A] = {
     return new Iterator[A](){

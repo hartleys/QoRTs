@@ -11,7 +11,7 @@ import internalUtils.GtfTool._;
 object makeSpliceJunctionBed {
 
   class converter extends CommandLineRunUtil { 
-     override def priority = 25;
+     override def priority = 26;
      val parser : CommandLineArgParser = 
        new CommandLineArgParser(
           command = "makeJunctionTrack", 
@@ -142,8 +142,6 @@ object makeSpliceJunctionBed {
                                                         argDesc = "The number of digits after the decimal to include for counts.", 
                                                         defaultValue = Some(2)
                                                         ) ::
-
-
 
                    new BinaryOptionArgument[String](
                                          name = "title", 

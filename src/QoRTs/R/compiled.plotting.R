@@ -713,6 +713,95 @@ INTERNAL.plot.summaries.advanced <- function(res, plotter,verbose = TRUE, cdf.by
   openFunc("dropped.rate",1); makePlot.dropped.rates(plotter, debugMode = debugMode, ...); plot.corner.label(14); devCloseFunct();
   openFunc("insert.size",1); makePlot.insert.size(plotter, debugMode = debugMode, ...); plot.corner.label(15); devCloseFunct();
   openFunc("gene.diversity",1); makePlot.gene.cdf(plotter, sampleWise = cdf.bySample, plot.intercepts = cdf.plotIntercepts, debugMode = debugMode, rasterize.plotting.area = rasterize.large.plots, raster.height = raster.height, raster.width = raster.width, ...); plot.corner.label(16); devCloseFunct();
+  
+  openFunc("genebody.coverage.allGenes",1); makePlot.genebody(plotter, geneset="Overall", debugMode = debugMode, ...); plot.corner.label(17); devCloseFunct();
+  openFunc("genebody.coverage.umquartileExpressionGenes",1); makePlot.genebody(plotter, geneset="50-75", debugMode = debugMode, ...); plot.corner.label(18); devCloseFunct();
+  openFunc("genebody.coverage.lowExpressionGenes",1); makePlot.genebody(plotter, geneset="0-50", debugMode = debugMode, ...); plot.corner.label(19); devCloseFunct();
+  #openFunc("genebody.coverage.allGenes",1); makePlot.genebody.coverage(plotter, debugMode = debugMode, ...); plot.corner.label(17); devCloseFunct();
+  #openFunc("genebody.coverage.umquartileExpressionGenes",1); makePlot.genebody.coverage.UMQuartile(plotter, debugMode = debugMode, ...); plot.corner.label(18); devCloseFunct();
+  #openFunc("genebody.coverage.lowExpressionGenes",1); makePlot.genebody.coverage.lowExpress(plotter, debugMode = debugMode, ...); plot.corner.label(19); devCloseFunct();
+  openFunc("geneAssignmentRates",1); makePlot.gene.assignment.rates(plotter, debugMode = debugMode, ...); plot.corner.label(20); devCloseFunct();
+  
+  openFunc("sj.locus.ct",1); makePlot.splice.junction.loci.counts(plotter, debugMode = debugMode, ...); plot.corner.label(21); devCloseFunct();
+  openFunc("sj.event.proportionByType",1); makePlot.splice.junction.event.proportionsByType(plotter, debugMode = debugMode, ...); plot.corner.label(22);  devCloseFunct();
+  openFunc("sj.event.rate",1); makePlot.splice.junction.event.ratesPerRead(plotter, debugMode = debugMode, ...); plot.corner.label(23); devCloseFunct();
+  openFunc("mapping.rates",1); makePlot.mapping.rates(plotter, debugMode = debugMode, ...); plot.corner.label(24); devCloseFunct();
+  openFunc("chrom.rates",1); makePlot.chrom.type.rates(plotter, chromosome.name.style = chromosome.name.style, exclude.autosomes = exclude.autosomes.chrom.rate.plot, debugMode = debugMode, ...); plot.corner.label(25); devCloseFunct();
+  openFunc("norm.factors",1); makePlot.norm.factors(plotter, debugMode = debugMode, ...); plot.corner.label(26); devCloseFunct();
+  openFunc("norm.vs.TC",1); makePlot.norm.factors.vs.TC(plotter, debugMode = debugMode, ...); plot.corner.label(27); devCloseFunct();
+  
+  openFunc("strandedness.test",1); makePlot.strandedness.test(plotter, debugMode = debugMode, ...); plot.corner.label(28); devCloseFunct();
+  openFunc("NVC.lead.clip",1); makePlot.NVC.lead.clip(plotter, clip.amt = 12, points.highlighted = nvc.highlight.points, debugMode = debugMode, rasterize.plotting.area = rasterize.large.plots, raster.height = raster.height, raster.width = raster.width, ...); plot.corner.label(29); devCloseFunct();
+  openFunc("NVC.tail.clip",1); makePlot.NVC.tail.clip(plotter, clip.amt = 12, points.highlighted = nvc.highlight.points, debugMode = debugMode, rasterize.plotting.area = rasterize.large.plots, raster.height = raster.height, raster.width = raster.width, ...); plot.corner.label(30); devCloseFunct();
+  openFunc("NVC.raw",2); makePlot.raw.NVC(plotter, points.highlighted = nvc.highlight.points, debugMode = debugMode, rasterize.plotting.area = rasterize.large.plots, raster.height = raster.height, raster.width = 2* raster.width, ...); plot.corner.label(31); devCloseFunct();
+  openFunc("NVC.aligned",2); makePlot.minus.clipping.NVC(plotter, points.highlighted = nvc.highlight.points, debugMode = debugMode, rasterize.plotting.area = rasterize.large.plots, raster.height = raster.height, raster.width = 2* raster.width, ...); plot.corner.label(32); devCloseFunct();
+  #makePlot.cigarMismatch(plotter, debugMode = debugMode, ...); plot.corner.label(33); devCloseFunct();
+
+  #openFunc("legend",1); makePlot.legend.box(plotter, debugMode = debugMode, ...);  devCloseFunct();
+
+  if(verbose) {message(paste0("Finished all plots"));}
+}
+
+
+INTERNAL.plot.summaries.GENERIC <- function(res, plotter,
+              
+              verbose = TRUE, cdf.bySample = TRUE, 
+              nvc.highlight.points = TRUE,
+              cdf.plotIntercepts = TRUE, debugMode, cex.corner.label = 2, 
+              rasterize.large.plots = FALSE, 
+              raster.height,
+              raster.width,
+              separatePlotFuncts,
+              exclude.autosomes.chrom.rate.plot = TRUE,
+              chromosome.name.style = "UCSC",
+              ...){
+  outfilePrefix <- separatePlotFuncts$outfilePrefix;
+  outfileExt <- separatePlotFuncts$outfileExt;
+  devOpenFunct <- separatePlotFuncts$devOpenFunct;
+  devCloseFunct <- separatePlotFuncts$devCloseFunct;
+  separatePlots <- separatePlotFuncts$separatePlots;
+  
+  openFunc <- function(n,w){
+    devOpenFunct(paste0(outfilePrefix,".",n,outfileExt), w);
+  }
+  
+#FIGURE OUT NEW LAYOUT!
+  layout(matrix(c(1:31,32,32,33,33), 5, 7, byrow = TRUE));
+  
+  if(verbose) {message(paste0("Starting compiled plot..."));}
+     ts <- timestamp();
+     
+  a.to.z <- c("a","b","c","d","e","f","g","h","i","j","k","l","m","n","o","p","q","r","s","t","u","v","w","x","y","z")
+  corner.labels <- c(a.to.z, paste0(a.to.z[1],a.to.z), paste0(a.to.z[2],a.to.z), paste0(a.to.z[3],a.to.z));
+  
+  plot.corner.label <- function(i){
+    if(separatePlots){
+      #do nothing!
+    } else {
+      devlim <- device.limits();
+      text(devlim[1],devlim[4], corner.labels[i] , cex = cex.corner.label, adj = c(-0.1,1.1),  xpd=T);
+    }
+  }
+  
+  openFunc("legend",1); makePlot.legend.box(plotter, debugMode = debugMode, ...); devCloseFunct();
+  openFunc("qual.pair.min",1); makePlot.qual.pair(plotter,"min", debugMode = debugMode, ...); plot.corner.label(1); devCloseFunct();
+  openFunc("qual.pair.lowerQuartile",1); makePlot.qual.pair(plotter,"lowerQuartile", debugMode = debugMode, ...); plot.corner.label(2); devCloseFunct();
+  openFunc("qual.pair.median",1); makePlot.qual.pair(plotter,"median", debugMode = debugMode, ...); plot.corner.label(3); devCloseFunct();
+  openFunc("qual.pair.upperQuartile",1); makePlot.qual.pair(plotter,"upperQuartile", debugMode = debugMode, ...); plot.corner.label(4); devCloseFunct();
+  openFunc("qual.pair.max",1); makePlot.qual.pair(plotter,"max", debugMode = debugMode, ...); plot.corner.label(5); devCloseFunct();
+  openFunc("clippingProfile",1); makePlot.clipping(plotter, debugMode = debugMode, ...); plot.corner.label(6); devCloseFunct();
+  
+  openFunc("DeletionProfile",1); makePlot.cigarOp.byCycle(plotter,"Del", debugMode = debugMode, ...); plot.corner.label(7); devCloseFunct();
+  openFunc("InsertionProfile",1); makePlot.cigarOp.byCycle(plotter,"Ins", debugMode = debugMode, ...); plot.corner.label(8); devCloseFunct();
+  openFunc("SpliceProfile",1); makePlot.cigarOp.byCycle(plotter,"Splice", debugMode = debugMode, ...); plot.corner.label(9); devCloseFunct();
+  openFunc("InsertionLengthHisto",1); makePlot.cigarLength.distribution(plotter,"Ins", log.y = TRUE, debugMode = debugMode, ...); plot.corner.label(10); devCloseFunct();
+  openFunc("DeletionLengthHisto",1); makePlot.cigarLength.distribution(plotter,"Del", log.y = TRUE, debugMode = debugMode, ...); plot.corner.label(11); devCloseFunct();
+  openFunc("gc",1); makePlot.gc(plotter, debugMode = debugMode, ...); plot.corner.label(12); devCloseFunct();
+  openFunc("missingness.rate",1); makePlot.missingness.rate(plotter, debugMode = debugMode, ...); plot.corner.label(13); devCloseFunct();
+  
+  openFunc("dropped.rate",1); makePlot.dropped.rates(plotter, debugMode = debugMode, ...); plot.corner.label(14); devCloseFunct();
+  openFunc("insert.size",1); makePlot.insert.size(plotter, debugMode = debugMode, ...); plot.corner.label(15); devCloseFunct();
+  openFunc("gene.diversity",1); makePlot.gene.cdf(plotter, sampleWise = cdf.bySample, plot.intercepts = cdf.plotIntercepts, debugMode = debugMode, rasterize.plotting.area = rasterize.large.plots, raster.height = raster.height, raster.width = raster.width, ...); plot.corner.label(16); devCloseFunct();
   openFunc("genebody.coverage.allGenes",1); makePlot.genebody.coverage(plotter, debugMode = debugMode, ...); plot.corner.label(17); devCloseFunct();
   openFunc("genebody.coverage.umquartileExpressionGenes",1); makePlot.genebody.coverage.UMQuartile(plotter, debugMode = debugMode, ...); plot.corner.label(18); devCloseFunct();
   openFunc("genebody.coverage.lowExpressionGenes",1); makePlot.genebody.coverage.lowExpress(plotter, debugMode = debugMode, ...); plot.corner.label(19); devCloseFunct();
@@ -737,7 +826,6 @@ INTERNAL.plot.summaries.advanced <- function(res, plotter,verbose = TRUE, cdf.by
 
   if(verbose) {message(paste0("Finished all plots"));}
 }
-
 
 
 INTERNAL.plot.summaries.pdf <- function(res, plotter,
@@ -795,11 +883,14 @@ INTERNAL.plot.summaries.pdf <- function(res, plotter,
   makePlot.dropped.rates(plotter, debugMode = debugMode, ...); plot.corner.label(15);
   makePlot.insert.size(plotter, debugMode = debugMode, ...); plot.corner.label(16);
   makePlot.gene.cdf(plotter, sampleWise = cdf.bySample, plot.intercepts = cdf.plotIntercepts, debugMode = debugMode, rasterize.plotting.area = rasterize.large.plots, raster.height = raster.height, raster.width = raster.width, ...); plot.corner.label(17);
-  makePlot.genebody.coverage(plotter, debugMode = debugMode, ...); plot.corner.label(18);
+  #makePlot.genebody.coverage(plotter, debugMode = debugMode, ...); plot.corner.label(18);
+  makePlot.genebody(plotter, geneset="Overall", debugMode = debugMode, ...); plot.corner.label(18);
   
   layout(matrix(1:6,3,2,byrow=TRUE));
-  makePlot.genebody.coverage.UMQuartile(plotter, debugMode = debugMode, ...); plot.corner.label(19);
-  makePlot.genebody.coverage.lowExpress(plotter, debugMode = debugMode, ...); plot.corner.label(20);
+  makePlot.genebody(plotter, geneset="50-75", debugMode = debugMode, ...); plot.corner.label(19);
+  makePlot.genebody(plotter, geneset="0-50", debugMode = debugMode, ...); plot.corner.label(20);
+  #makePlot.genebody.coverage.UMQuartile(plotter, debugMode = debugMode, ...); plot.corner.label(19);
+  #makePlot.genebody.coverage.lowExpress(plotter, debugMode = debugMode, ...); plot.corner.label(20);
   makePlot.gene.assignment.rates(plotter, debugMode = debugMode, ...); plot.corner.label(21);
   makePlot.splice.junction.loci.counts(plotter, debugMode = debugMode, ...); plot.corner.label(22);
   makePlot.splice.junction.event.proportionsByType(plotter, debugMode = debugMode, ...); plot.corner.label(23);

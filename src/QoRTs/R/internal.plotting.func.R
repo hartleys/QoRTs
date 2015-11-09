@@ -26,6 +26,7 @@ plotter.error.wrapper <- function(plot.name, plotterFcn, ...){
      plotterFcn();
    }, error = function(e){
      message("    (Skipped ",plot.name," due to encountering errors)");
+     message("     Error:\"",e,"\"");
    });
 }
 
@@ -1381,14 +1382,12 @@ merge.points.tf <- function(tf.list.1,tf.list.2){
   }));
 }
 
-
-
 makePlot.generic.points <- function(plot.name, tf.list, plotter, plot.type = "points", 
                                     ylim = NULL, leave.blank.cols = 0, label.y = TRUE, 
-                                    cex.x.axis = NULL, pre.plot.func = NULL, draw.lines = FALSE, ...){
+                                    cex.x.axis = NULL, pre.plot.func = NULL, draw.lines = FALSE,
+                                     ...){
 
   tryCatch({
-
     priorities <- sort(unique(plotter$lanebam.params$plot.priority));
 
     x.titles <- tf.list[[1]]$x.titles
@@ -1400,17 +1399,17 @@ makePlot.generic.points <- function(plot.name, tf.list, plotter, plot.type = "po
 
     #set Y-axis limits:
     if(is.null(ylim)){
-      ylim.max <- max(sapply(tf.list,function(dl){ max(as.numeric(dl$y)) }));
-      ylim.min <- min(sapply(tf.list,function(dl){ min(as.numeric(dl$y)) }));
-      if((! is.simple.number(ylim.max)) | (! is.simple.number(ylim.min) )){
-        ylim.max <- max(sapply(tf.list,function(dl){ max(  nonsimple.replace(as.numeric(dl$y),-Inf), na.rm = TRUE) }), na.rm = TRUE);
-        ylim.min <- min(sapply(tf.list,function(dl){ min(  nonsimple.replace(as.numeric(dl$y), Inf), na.rm = TRUE) }), na.rm = TRUE);
-      }
-      if(is.infinite(ylim.max) & is.infinite(ylim.min)){
-        ylim.min <- 0;
-        ylim.max <- 0;
-      }
-      ylim <- c(ylim.min,ylim.max);    
+        ylim.max <- max(sapply(tf.list,function(dl){ max(as.numeric(dl$y)) }));
+        ylim.min <- min(sapply(tf.list,function(dl){ min(as.numeric(dl$y)) }));
+        if((! is.simple.number(ylim.max)) | (! is.simple.number(ylim.min) )){
+          ylim.max <- max(sapply(tf.list,function(dl){ max(  nonsimple.replace(as.numeric(dl$y),-Inf), na.rm = TRUE) }), na.rm = TRUE);
+          ylim.min <- min(sapply(tf.list,function(dl){ min(  nonsimple.replace(as.numeric(dl$y), Inf), na.rm = TRUE) }), na.rm = TRUE);
+        }
+        if(is.infinite(ylim.max) & is.infinite(ylim.min)){
+          ylim.min <- 0;
+          ylim.max <- 0;
+        }
+        ylim <- c(ylim.min,ylim.max);
     } else {
       ylim.max <- ylim[2];
       ylim.min <- ylim[1];
@@ -1419,11 +1418,11 @@ makePlot.generic.points <- function(plot.name, tf.list, plotter, plot.type = "po
       ylim.max = ylim.min + 0.0001;
       ylim <- c(ylim.min,ylim.max);
     }
-
   }, error = function(e){ errorPlot(plot.name,e, code = 1); stop();});
   plot.new();
   
   tryCatch({
+    #logxy <- if(ylog){"y"}else{""};
     plot.window(xlim=xlim,ylim=ylim,...);
 
     #plot(0,0,col="transparent",main="",xlab="",ylab="",xlim=xlim,ylim=ylim,axes=F, ...);
@@ -1437,10 +1436,10 @@ makePlot.generic.points <- function(plot.name, tf.list, plotter, plot.type = "po
         curr.y <- curr.data$y
         curr.x <- curr.data$x
         if(plot.type == "points"){
-          points(curr.x, curr.y, pch = p.params$points.pch[j], col = p.params$points.col[j], lwd =  p.params$lines.lwd[j]);
+          points(curr.x, curr.y, pch = p.params$points.pch[j], col = p.params$points.col[j], lwd =  p.params$lines.lwd[j], ...);
         }
         if(draw.lines){
-          lines(curr.x, curr.y, lty = p.params$lines.lty[j], col = p.params$lines.col[j], lwd =  p.params$lines.lwd[j])
+          lines(curr.x, curr.y, lty = p.params$lines.lty[j], col = p.params$lines.col[j], lwd =  p.params$lines.lwd[j], ...)
         }
       }
     }
@@ -1452,17 +1451,21 @@ makePlot.generic.points <- function(plot.name, tf.list, plotter, plot.type = "po
       cex.x.axis <- par("cex.axis");
       cex.x.axis <- fit.character.vector.helper(x.titles, cex.x.axis, min.width = 0.6, max.width = 0.95, max.width.per.char = 0.15);
     }
+    
+    text(1:xlim.max,rep(y.abs.min,xlim.max),labels = x.titles, adj=c(0.5,1.05) , xpd=T, cex = cex.x.axis, ...);
 
-    text(1:xlim.max,rep(y.abs.min,xlim.max),labels = x.titles, adj=c(0.5,1.05) , xpd=T, cex = cex.x.axis);
+    axis(1,at=(1:xlim.max - 0.5),labels=F, lwd = -1, lwd.ticks = par("lwd"), ...);
+    axis(1,at=(1:xlim.max + 0.5),labels=F, lwd = -1, lwd.ticks = par("lwd"), ...);
 
-    axis(1,at=(1:xlim.max - 0.5),labels=F, lwd = -1, lwd.ticks = par("lwd"));
-    axis(1,at=(1:xlim.max + 0.5),labels=F, lwd = -1, lwd.ticks = par("lwd"));
-
-    if(label.y) axis(2, lwd = -1, lwd.ticks = par("lwd"));
+    if(label.y) {
+      axis(2, lwd = -1, lwd.ticks = par("lwd"), ...);
+    }
     box();
     return(TRUE);
   }, error = function(e){ errorPlot(plot.name, e, code = 2, newPlot = FALSE); stop();});
 }
+
+
 
 makePlot.generic.points.right <- function(plot.name, tf.list, plotter, plot.type = "points", section.offset = 0, 
                                           ylim.plot = NULL, ylim.data = NULL, label.y = TRUE, cex.x.axis = NULL, ...){

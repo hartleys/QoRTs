@@ -2,8 +2,117 @@
 
 DEFAULTDEBUGMODE <- TRUE;
 
+
+
+
+######################################################################################################################################################################
+########### New plots:
+
+
+
+makePlot.biotype.rates <- function(plotter, 
+                                   plot.rates = TRUE,
+                                   count.type = c("all","unambigOnly"),
+                                   log.y = TRUE,
+                                   return.table = FALSE, 
+                                   debugMode = DEFAULTDEBUGMODE,  
+                                   singleEndMode = plotter$res@singleEnd, ...){
+  plot.name <- "Biotype Rates";
+  count.type <- match.arg(count.type);
+  readLabel <- if(singleEndMode){ "Reads" } else {"Read-Pairs"}
+  
+  if(debugMode){ message("Starting: ",plot.name," plot."); }
+  plotter.error.wrapper(plot.name, plotterFcn = function(){
+    res <- plotter$res;
+    if(debugMode){ ts <- timestamp() }
+    if(is.null(plotter$res@qc.data[["biotype.counts"]])){
+      message(paste0("Warning: Skipping ",plot.name," plotting. Data not found!"));
+      blank.plot(c(plot.name,"Data Not Found\nSkipping..."));
+    } else {
+      tryCatch({
+        bt.cts <- plotter$res@qc.data[["biotype.counts"]];
+        pre.plot.func <- function(){
+          #do nothing!
+        }
+        
+        x.titles <- bt.cts[[1]]$BIOTYPE;
+        names(x.titles) <- x.titles;
+        x.titles <- sapply(x.titles, wordwrap.string, width = 8)
+        
+        tf.list <- lapply(1:length(bt.cts), function(i){
+           td <- bt.cts[[i]];
+           curr.summary <- plotter$res@qc.data[["summary"]][[i]];
+           
+           cts <- if(count.type == "all"){ td$TOTAL } else { td$COUNT }
+           if(plot.rates){
+             normCt <- as.numeric(curr.summary$COUNT[curr.summary$FIELD == "READ_PAIR_OK"]);
+             cts <- (cts / (normCt / 1000000));
+           }
+           
+           if(! all(td$BIOTYPE == names(x.titles))){
+             message("WARNING WARNING WARNING: Biotype list not identical across all samples!");
+             warning("WARNING WARNING WARNING: Biotype list not identical across all samples!");
+           }
+           
+           df <- data.frame( x = as.numeric(1:nrow(td)),y = as.numeric(cts), x.titles = x.titles, stringsAsFactors=F);
+           if(log.y){
+             df$y <- log10(df$y);
+           }
+           df$x <- df$x + plotter$lanebam.params$horiz.offsets[i] * 0.5;
+           df;
+        });
+        names(tf.list) <- names(bt.cts);
+        if(log.y){
+          min.y <- min(sapply(tf.list,function(td){ ifelse(is.infinite(td$y), Inf,td$y) }),na.rm=T);
+          max.y <- max(sapply(tf.list,function(td){ ifelse(is.infinite(td$y),-Inf,td$y) }),na.rm=T);
+          NINF.VALUE <- min.y - abs(max.y - min.y)*0.03;
+          tf.list <- lapply(tf.list, function(td){
+            td$y <- ifelse(td$y == -Inf, NINF.VALUE, td$y);
+            td;
+          });
+        }
+      }, error = function(e){ errorPlot(plot.name,e, code = 0); stop(e);});
+      makePlot.generic.points(plot.name,tf.list,plotter,pre.plot.func=pre.plot.func, label.y = F, ylim = c(min.y,max.y), family="mono",...)
+      
+      if(log.y){
+        abline(h=ceiling(min.y):ceiling(max.y), col="gray",lty=3,...);
+        abline(h=min.y, col="gray",lty=3,...);
+        abline(h=NINF.VALUE, col="gray",lty=3,...);
+        draw.logyaxis.stdScalePlot(  ylim.truncate = c(min.y,max.y)  );
+        qorts.axis.break(axis=2,breakpos = min.y - abs(min.y-NINF.VALUE)/2, fill = TRUE, cex = 0.75,...);
+        qorts.axis.break(axis=4,breakpos = min.y - abs(min.y-NINF.VALUE)/2, fill = TRUE, cex = 0.75,...);
+        axis(2,at=NINF.VALUE,labels=0, tcl = -0.5,lwd = -1, lwd.ticks = par("lwd"), las=2,...);
+      } else {
+        axis(2);
+      }
+      
+      
+      if(plot.rates){
+        title(ylab=paste0(readLabel," per Million"));
+        internal.plot.main.title("Coverage for each \"Biotype\"", plotter, ...);
+      } else {
+        title(ylab=paste0(readLabel));
+        internal.plot.main.title("Coverage for each \"Biotype\"", plotter, ...);
+      }
+      if(debugMode){ message("Finished: ",plot.name," plot.",getTimeAndDiff(ts)); }
+      
+      print("1:");
+      print(tf.list[[1]]);
+      print("2:");
+      print(tf.list[[2]]);
+
+    }
+  })
+}
+
+
 ######################################################################################################################################################################
 ########### Specific Plots:
+
+
+
+
+
 
 makePlot.qual.pair <- function(plotter, y.name, r2.buffer = NULL, debugMode = DEFAULTDEBUGMODE, singleEndMode = plotter$res@singleEnd, ...) {
    if(y.name == "min"){ plot.name <- "Minimum";
@@ -336,6 +445,156 @@ makePlot.insert.size <- function(plotter, calc.rate = TRUE, pct.cutoff = 0.98, p
 }
 
 
+
+makePlot.genebody <- function(plotter, 
+                  geneset = c("Overall","90-100","75-90","50-75","0-50"),
+                  avgMethod = c("TotalCounts", "AvgPercentile"), 
+                  plot.medians = NULL, 
+                  plot.means = TRUE, 
+                  debugMode = DEFAULTDEBUGMODE, 
+                  singleEndMode = plotter$res@singleEnd, ... ){
+  avgMethod <- match.arg(avgMethod);
+  geneset <- match.arg(geneset);
+  
+  if(avgMethod == "TotalCounts"){
+    if(geneset == "Overall"){
+      makePlot.genebody.coverage(plotter = plotter, plot.medians = plot.medians, plot.means=plot.means, debugMode=debugMode, singleEndMode=singleEndMode, ...);
+    } else {
+      makePlot.genebody.coverage.TC(plotter = plotter, geneset = geneset, plot.medians = plot.medians, plot.means = plot.means, debugMode = debugMode, singleEndMode=singleEndMode, ...);
+    }
+  } else {
+    makePlot.genebody.coverage.PCT(plotter = plotter, geneset = geneset, plot.medians = plot.medians, plot.means = plot.means, debugMode = debugMode, singleEndMode=singleEndMode, ...);
+  }
+  
+}
+
+makePlot.genebody.coverage.PCT <- function(plotter, 
+                    geneset = c("Overall","90-100","75-90","50-75","0-50"), 
+                    plot.meanPercentile = TRUE, 
+                    plot.medians = NULL, 
+                    plot.means = TRUE, 
+                    debugMode = DEFAULTDEBUGMODE, 
+                    singleEndMode = plotter$res@singleEnd, ... ){
+  geneset <- match.arg(geneset);
+  
+  if(geneset == "Overall"){
+    geneset.title <- "All";
+    df.ID <- "TOTAL";
+  } else if(geneset == "90-100"){
+    geneset.title <- "90th Percentile";
+    df.ID <- "X4.high";
+  } else if(geneset == "75-90"){
+    geneset.title <- "75-90 Percentile";
+    df.ID <- "X3.75to90";
+  } else if(geneset == "50-75"){
+    geneset.title <- "Upper Middle Quartile";
+    df.ID <- "X2.upperMidQuartile";
+  } else if(geneset == "0-50"){
+    geneset.title <- "Low Expression";
+    df.ID <- "X1.bottomHalf";
+  }
+  
+  plot.name <- paste0("Gene-Body Coverage, ",geneset.title," Genes");
+  if(debugMode){ message("Starting: ",plot.name," plot."); }
+    plotter.error.wrapper(plot.name, plotterFcn = function(){
+    res <- plotter$res;
+    if(debugMode){ ts <- timestamp() }
+    if(is.null(plotter$res@qc.data[["geneBodyCoverage.pct"]]) ){
+      message(paste0("Warning: Skipping ",plot.name," plotting. Data not found!"));
+      blank.plot(c(plot.name,"Data Not Found\nSkipping..."));
+    } else {
+      tryCatch({
+        if(is.null(plot.medians)){
+            plot.medians <- FALSE;
+        } else if(plot.means & plot.medians){
+            plot.means <- FALSE;
+        }
+        raw.data.list <- res@qc.data[["geneBodyCoverage.pct"]];
+        step.size <- raw.data.list[[1]]$QUANTILE[2] - raw.data.list[[1]]$QUANTILE[1];
+        #print(step.size);
+        data.list <- lapply(raw.data.list,function(df){
+          data.frame(Quantile = df$QUANTILE - (step.size / 2), GeneBodyCoverage = df[,df.ID]);
+        });
+      }, error = function(e){ errorPlot(plot.name,e, code = 0); stop(e);});
+      makePlot.generic(plot.name, data.list, plotter, 
+                   x.name = "Quantile",y.name = "GeneBodyCoverage", 
+                   norm.x = TRUE, avg.y = FALSE,
+                   plot.type = "lines", 
+                   plot.means = plot.means, plot.medians = plot.medians, ...);
+
+      internal.plot.main.title(plot.name, plotter, ...);
+      title(xlab = "Percentile of Gene Body (5\'->3\')");
+      title(ylab = "Avg Rate");
+      
+      if(debugMode){ message("Finished: ",plot.name," plot.",getTimeAndDiff(ts)); }
+    }
+  })
+}
+
+makePlot.genebody.coverage.TC <- function(plotter, 
+                    geneset = c("90-100","75-90","50-75","0-50"), 
+                    plot.meanPercentile = TRUE, 
+                    plot.medians = NULL, 
+                    plot.means = TRUE, 
+                    debugMode = DEFAULTDEBUGMODE, 
+                    singleEndMode = plotter$res@singleEnd, ... ){
+  geneset <- match.arg(geneset);
+  
+  if(geneset == "90-100"){
+    geneset.title <- "Top 10 Percentile";
+    df.ID <- "X4.high";
+  } else if(geneset == "75-90"){
+    geneset.title <- "75-90 Percentile";
+    df.ID <- "X3.75to90";
+  } else if(geneset == "50-75"){
+    geneset.title <- "Upper Middle Quartile";
+    df.ID <- "X2.upperMidQuartile";
+  } else if(geneset == "0-50"){
+    geneset.title <- "Low Expression";
+    df.ID <- "X1.bottomHalf";
+  }
+  readLabel <- if(singleEndMode){ "Reads" } else {"Read-Pairs"}
+  
+  plot.name <- paste0("Gene-Body Coverage, ",geneset.title," Genes");
+  
+  if(debugMode){ message("Starting: ",plot.name," plot."); }
+    plotter.error.wrapper(plot.name, plotterFcn = function(){
+    res <- plotter$res;
+    if(debugMode){ ts <- timestamp() }
+    if(is.null(plotter$res@qc.data[["geneBodyCoverage.by.expression.level"]]) ){
+      message(paste0("Warning: Skipping ",plot.name," plotting. Data not found!"));
+      blank.plot(c(plot.name,"Data Not Found\nSkipping..."));
+    } else {
+      tryCatch({
+        if(is.null(plot.medians)){
+            plot.medians <- FALSE;
+        } else if(plot.means & plot.medians){
+            plot.means <- FALSE;
+        }
+        raw.data.list <- res@qc.data[["geneBodyCoverage.by.expression.level"]];
+        step.size <- raw.data.list[[1]]$QUANTILE[2] - raw.data.list[[1]]$QUANTILE[1];
+        #print(step.size);
+        data.list <- lapply(raw.data.list,function(df){
+          data.frame(Quantile = df$QUANTILE - (step.size / 2), GeneBodyCoverage = df[,df.ID]);
+        });
+      }, error = function(e){ errorPlot(plot.name,e, code = 0); stop(e);});
+      makePlot.generic(plot.name, data.list, plotter, 
+                   x.name = "Quantile",y.name = "GeneBodyCoverage", 
+                   norm.x = TRUE, avg.y = TRUE,
+                   plot.type = "lines", 
+                   plot.means = plot.means, plot.medians = plot.medians, ...);
+
+      internal.plot.main.title(plot.name, plotter, ...);
+      title(xlab = "Percentile of Gene Body (5\'->3\')");
+      title(ylab = paste0("Proportion of ",readLabel));
+
+      if(debugMode){ message("Finished: ",plot.name," plot.",getTimeAndDiff(ts)); }
+    }
+  })
+}
+
+
+
 makePlot.genebody.coverage <- function(plotter, plot.medians = NULL, plot.means = TRUE, debugMode = DEFAULTDEBUGMODE, singleEndMode = plotter$res@singleEnd, ... ){
   plot.name <- "Gene-Body Coverage";
   if(debugMode){ message("Starting: ",plot.name," plot."); }
@@ -374,6 +633,10 @@ makePlot.genebody.coverage <- function(plotter, plot.medians = NULL, plot.means 
     }
   })
 }
+
+
+
+
 
 makePlot.genebody.coverage.UMQuartile <- function(plotter, plot.medians = NULL, plot.means = TRUE, debugMode = DEFAULTDEBUGMODE, singleEndMode = plotter$res@singleEnd, ... ){
   plot.name <- "Gene-Body Coverage, Upper Middle Quartile Genes";
@@ -1427,6 +1690,12 @@ makePlot.splice.junction.event.proportions <- function(plotter, high.low.cutoff 
                                      norm.by = norm.by,
                                      offset.horiz = 0.5,
                                      horiz.offsets = plotter$lanebam.params$horiz.offsets);
+                                     
+      #print("1:");
+      #print(tf.list[[1]]);
+      #print("2:");
+      #print(tf.list[[2]]);
+      
       }, error = function(e){ errorPlot(plot.name,e, code = 0); stop(e);});
       makePlot.generic.points(plot.name,tf.list,plotter,pre.plot.func=pre.plot.func,...)
 
@@ -2250,6 +2519,45 @@ get.summary.table <- function(res, outfile = NULL, debugMode = DEFAULTDEBUGMODE)
    
    return(out.table);
 }
+
+get.size.factors <- function(res, 
+                    sf.method = c("DESeq2","DESeq2_GEO","TC","edgeR","edgeR_TMM","edgeR_UQ","edgeR_RLE"), 
+                    outfile=NULL, debugMode = DEFAULTDEBUGMODE){
+  if(is.null(res@calc.data[["norm.factors.bySample"]])){
+    message("Size factor table not found! (Perhaps DESeq2 or edgeR is not installed)?");
+    return(NULL);
+  } else {
+    sf <- match.arg(sf.method);
+    
+    if(sf == "DESeq2" || sf == "DESeq2_GEO"){
+      sfid <- "Norm_Geo";
+    } else if(sf == "TC"){
+      sfid <- "Norm_TC";
+    } else if(sf == "edgeR" || sf == "edgeR_TMM"){
+      sfid <- "Norm_TMM";
+    } else if(sf == "edgeR_UQ"){
+      sfid <- "Norm_UQ";
+    } else if(sf == "edgeR_RLE"){
+      sfid <- "Norm_RLE";
+    }
+    
+    if(is.null(res@calc.data$norm.factors.bySample[[sfid]])){
+      message("Size factor type ",sf," not found in size factor table! (Perhaps DESeq2 or edgeR is not installed)?");
+      return(NULL);
+    }
+    
+    sizeFactors <- data.frame(
+      sample.ID = res@calc.data$norm.factors.bySample[["sample.ID"]], 
+      size.factor = res@calc.data$norm.factors.bySample[[sfid]], 
+      stringsAsFactors=F);
+    
+    if(! is.null(outfile)){
+      write.table(sizeFactors,outfile, row.names=F,col.names=T,quote=F, sep='\t');
+    }
+    return(sizeFactors);
+  }
+}
+
 
 
 

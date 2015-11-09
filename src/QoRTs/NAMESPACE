@@ -23,7 +23,8 @@ export(
  makePlot.clipping,
  makePlot.cigarOp.byCycle,
  makePlot.legend.box,
- makePlot.insert.size,
+ makePlot.insert.size, 
+ makePlot.genebody,
  makePlot.genebody.coverage,
  makePlot.genebody.coverage.UMQuartile,
  makePlot.genebody.coverage.lowExpress,
@@ -36,6 +37,7 @@ export(
  makePlot.NVC.tail.clip,
  makePlot.NVC.lead.clip.matchByClipPosition,
  makePlot.NVC.tail.clip.matchByClipPosition,
+ makePlot.biotype.rates,
  
  makePlot.gene.assignment.rates,
  
@@ -53,6 +55,7 @@ export(
  makePlot.norm.factors,
  makePlot.norm.factors.vs.TC,
  get.summary.table,
+ get.size.factors,
  
  #Multi-plots:
  makeMultiPlot.highlightSample.colorByLane.all,

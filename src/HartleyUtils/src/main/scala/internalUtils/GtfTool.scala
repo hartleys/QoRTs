@@ -50,7 +50,8 @@ object GtfTool {
    object defaultGtfCodes {
      val STD_EXON_TYPE_CODE = "exon";
      val STD_CDS_TYPE_CODE = "CDS";
-   
+     val BIOTYPE_ATTRIBUTE_KEY = "gene_biotype";
+     
      val GENE_ID_ATTRIBUTE_KEY = "gene_id";
      val STD_TX_ID_ATTRIBUTE_KEY = "transcript_id";
      
@@ -98,10 +99,11 @@ object GtfTool {
                        JS_AGGREGATEGENE_STRAND : String = defaultGtfCodes.JS_AGGREGATEGENE_STRAND,
                        JS_AGGREGATEGENE_CT : String = defaultGtfCodes.JS_AGGREGATEGENE_CT,
                        JS_AGGREGATEGENE_TXCT : String = defaultGtfCodes.JS_AGGREGATEGENE_TXCT,
-                       JS_AGGREGATEGENE_TXSTRANDS : String = defaultGtfCodes.JS_AGGREGATEGENE_TXSTRANDS
+                       JS_AGGREGATEGENE_TXSTRANDS : String = defaultGtfCodes.JS_AGGREGATEGENE_TXSTRANDS,
+                       BIOTYPE_ATTRIBUTE_KEY : String = defaultGtfCodes.BIOTYPE_ATTRIBUTE_KEY
                        ) {
      
-     val KEY_SORTING : List[String] = List[String](GENE_ID_ATTRIBUTE_KEY, 
+     val KEY_SORTING : List[String] = List[String](  GENE_ID_ATTRIBUTE_KEY, 
                                                      STD_TX_ID_ATTRIBUTE_KEY,
                                                      JS_TX_ID_ATTRIBUTE_KEY,
                                                      JS_EXONIC_PART_NUMBER_ATTRIBUTE_KEY,
@@ -109,7 +111,8 @@ object GtfTool {
                                                      JS_AGGREGATEGENE_STRAND,
                                                      JS_AGGREGATEGENE_CT,
                                                      JS_AGGREGATEGENE_TXCT,
-                                                     JS_AGGREGATEGENE_TXSTRANDS
+                                                     JS_AGGREGATEGENE_TXSTRANDS,
+                                                     BIOTYPE_ATTRIBUTE_KEY
                                                      );
    }
    
@@ -218,14 +221,24 @@ object GtfTool {
      def attributeArray : Array[String] = lz_attributeArray;
      
      lazy val lz_attr : String = {
+       //This complex mechanism is designed to ensure that GTF attributes always come in a consistent and defined ordering.
        attribute_sorting match {
          case Some(sortList) => {
            if(! attributeMap.keySet.forall(attribName => sortList.contains(attribName))){
+             val sp = attributeMap.keySet.span(attribName => sortList.contains(attribName));
              if(ERROR_COUNT_SORTING < 5){
-               reportln("Internal GFF Builder warning: attribute sorting discrepancy (this will not affect results).","warn");
+               val a = sp._1.toList.mkString(",");
+               val b = sp._2.toList.mkString(",");
+               reportln("         Debugging notice: Not all GTF features are annotated: ("+ a +")("+ b +"). (This is ok).","debug");
                ERROR_COUNT_SORTING += 1;
              }
              lz_attributeArray.mkString("; ");
+             //Sort the ones you recognize in the assigned order, the remainder go on the end in lexicographical order.
+             val sortedAttrKeys   = sortList.filter(sp._1.contains(_));
+             val unsortedAttrKeys = sp._2.toList.sorted;
+             val keySorting = sortedAttrKeys ++ unsortedAttrKeys;
+             
+             keySorting.map(attribName => attribName + gtfFmt_attributeBreak + attributeMap(attribName)).mkString("; ");
            } else {
              sortList.filter(attributeMap.contains(_)).map(attribName => attribName + gtfFmt_attributeBreak + attributeMap(attribName)).mkString("; ");
            }

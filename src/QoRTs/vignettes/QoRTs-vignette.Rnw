@@ -71,7 +71,7 @@ BiocStyle::latex()
 \author{Stephen Hartley\\
 National Human Genome Research Institute\\
 National Institutes of Health\\
-v0.3.18 %REPLACE_THIS_LINE_WITH_VERSION_NUMBER
+v0.3.26 %REPLACE_THIS_LINE_WITH_VERSION_NUMBER
 }
 
 \begin{document}
@@ -227,8 +227,8 @@ The separate R package \Rpackage{QoRTsExampleData} contains an example dataset w
 
 %
 <<GetExampleDataDirectory>>=
-directory <- system.file("extdata/", package="QoRTsExampleData", 
-                         mustWork=TRUE);
+directory <- paste0(system.file("extdata/", package="QoRTsExampleData", 
+                         mustWork=TRUE),"/");
 decoder.file <- system.file("extdata/decoder.txt", 
                             package="QoRTsExampleData", 
                             mustWork=TRUE);
@@ -845,9 +845,9 @@ For each replicate, the leftmost plot of Figure \ref{indivPlot-6-fig} displays t
 This plot can be generated individually with the command:
 
 <<indivPlot-6,results="hide">>=
-makePlot.genebody.coverage(byLane.plotter);
-makePlot.genebody.coverage.UMQuartile(byLane.plotter);
-makePlot.genebody.coverage.lowExpress(byLane.plotter);
+makePlot.genebody(byLane.plotter);
+makePlot.genebody(byLane.plotter, geneset="50-75");
+makePlot.genebody(byLane.plotter, geneset="0-50");
 @
 
 \begin{framed} \small
@@ -855,7 +855,6 @@ makePlot.genebody.coverage.lowExpress(byLane.plotter);
 
 Note that the overall gene-body coverage may be strongly influenced by extreme high-coverage genes (and potentially sequence-specific biases on those specific transcripts). Therefore the upper-middle-quartile plot is generally the preferred general metric for assessing overall gene-body coverage.
 \end{framed}
-
 
 \pagebreak
 %----------
@@ -981,7 +980,7 @@ Any integer can be used as the \verb|clip.amt| value.
 \subsubsection{Mapping location rates} \label{subsec:plotDesc-12}
 %----------
 
-\myincfig{indivPlot-12}{0.55\textwidth}{Gene assignment rates}
+\myincfig{indivPlot-12}{0.50\textwidth}{Gene assignment rates}
 
 For each replicate, Figure \ref{indivPlot-12-fig} displays the rate (y-axis) for which the replicate's read-pairs are assigned to the given categories.
 
@@ -1261,6 +1260,50 @@ makePlot.dropped.rates(byLane.plotter);
 \end{framed}
 
 \pagebreak
+%----------
+\subsubsection{Gene Biotype Rates} \label{subsec:plotDesc-25}
+%----------
+
+\myincfig{indivPlot-25}{0.8\textwidth}{Biotype Coverage}
+
+This plot is not in the standard battery of plots, as it requires special preparation to use. For each replicate, Figure \ref{indivPlot-25-fig} displays the proportion of gene-mapped reads that intersect with each gene "BioType" as listed in the original GTF annotation file.
+
+The "biotype" is pulled from the GTF annotation file using the optional "\verb|gene_biotype|" attribute tag. This is the tag identifier used by Ensembl in their annotations. This separates RNA transcripts into categories such as protein coding mRNAs, lncRNAs, rRNAs, and so on. Unfortunately there are 
+dozens if not hundreds of different ways to encode this sort information for various species and institutions, 
+and unlike many other features no common standard has yet appeared. If you need
+to include this sort of information, you will need to edit the annotation GTF file yourself. 
+You only need to mark the rRNA fields yourself. Any genes that do not have a \verb|gene_biotype| field will simply be assigned the "UNK" biotype, so you only need to add the 
+biotypes that you are interested in testing.
+
+This plot can be generated with the command:
+<<indivPlot-25,results="hide", fig.width=12, fig.height=7>>=
+makePlot.biotype.rates(byLane.plotter);
+@
+
+\begin{framed} \small
+\emph{What it means and what to look for:} With certain sample/library prep protocols there may be substantial risk of irregularities in the quantity of certain types of RNA.
+For example, flawed or insufficient ribo depletion may result in large quantities of rRNA.
+\end{framed}
+
+\pagebreak
+%----------
+\subsubsection{Summary Tables} \label{subsec:plotDesc-26}
+%----------
+
+In addition to plots, QoRTs can also compile a useful summary table, including summary information across many metrics:
+<<indivPlot-26A,results="hide">>=
+  get.summary.table(res, outfile = "summary.table.txt");
+@
+
+Additionally, size factors used for normalization can be outputted to file:
+<<indivPlot-26B>>=
+  get.size.factors(res, outfile="size.factors.txt");
+@
+Note that by default, \verb|get.size.factors| requires DESeq2. You can use simpler total-count-based size factors by setting sf.method to "TC".
+
+These size factors are used extensively in latter sections of this vignette to generate normalized coverage browser tracks.
+
+\pagebreak
 %-----------------------------------------------------------
 \section{Identifying Problems}  \label{sec:exampleBad}
 %-----------------------------------------------------------
@@ -1420,7 +1463,17 @@ wd.wig.gz \
 
 There are a number of other alternative parameterizations. The \verb|--sampleList| parameter (which can be either a comma-delimited list or a ".txt" file containing a list) can be used along with the \verb|--infilePrefix| and \verb|--infileSuffix| to specify the file names if all of the wiggle files are in the same parent directory. The size factors can also be provided in a tab-delimited file using the \verb|--sizeFactorFile| parameter. If the \verb|--sizeFactors| and \verb|--sizeFactorFile| parameters are omitted then the non-normalized sums/means will be calculated.
 
-% MORE INFO HERE
+For example, the following command will produce the exact same results as the previous command:
+\begin{verbatim}
+java -jar /path/to/jarfile/QoRTs.jar mergeWig \
+                --calcMean \
+                --infilePrefix outputData/countTables/ \
+                --infileSuffix /QC.wiggle.fwd.wig.gz \
+                --sampleList SAMP1,SAMP2,SAMP3 \
+                --sizeFactorFile outputData/size.factors.txt \
+                path/to/output/CASE.fwd.wig.gz
+\end{verbatim}
+\noindent (Note that this uses the size factor file generated in Section \ref{subsec:plotDesc-26})
 
 \noindent Common options and flags for this function include:
   \begin{description}
@@ -1481,6 +1534,31 @@ unctionAndExonCounts.withNovel.forJunctionSeq.txt.gz \
 \end{verbatim}
 
 As with the wiggle-file merge utility, there are a number of other alternative parameterizations. The \verb|--sampleList| parameter (which can be either a comma-delimited list or a ".txt" file containing a list) can be used along with the \verb|--infilePrefix| and \verb|--infileSuffix| to specify the file names if all of the wiggle files are in the same parent directory. The size factors can also be provided in a tab-delimited file using the \verb|--sizeFactorFile| parameter. If the \verb|--sizeFactors| and \verb|--sizeFactorFile| parameters are omitted then the non-normalized sums/means will be calculated.
+
+More information and a full accounting of all parameters and options can be found in the online documentation\footnote{Found here: \url{http://hartleys.github.io/QoRTs/jarHtml/makeJunctionTrack.html}}, or by using the command:
+\begin{verbatim}
+java -jar /path/to/jarfile/QoRTs.jar makeJunctionTrack --man
+\end{verbatim}
+
+%----------
+\subsubsection{Orphaned/Ambiguous junction tracks}
+
+The previous section only included novel splice junctions when they could be uniquely matched to a single gene or cluster of overlapping genes. When a splice junction 
+spans two or more disjointed genes, or is not near any gene at all, it is stored separately. These junctions can compiled their own merged bed browser track using
+the makeOrphanJunctionTrack command.
+
+\begin{verbatim}
+java -jar /path/to/jarfile/QoRTs.jar makeOrphanJunctionTrack  \
+                --calcMean \
+                --filenames  outputData/countTables/SAMP1/QC.spliceJunctionAndExonCo\
+unts.withNovel.forJunctionSeq.txt.gz,outputData/countTables/SAMP2/QC.spliceJunctionA\
+ndExonCounts.withNovel.forJunctionSeq.txt.gz,outputData/countTables/SAMP3/QC.spliceJ\
+unctionAndExonCounts.withNovel.forJunctionSeq.txt.gz \
+                --sizeFactors 1.057995,0.999932,1.015372 \
+                path/to/output/CASE-ORPHAN.bed.gz
+\end{verbatim}
+
+The same alternative parameterizations exist as for the makeJunctionTrack and mergeWig functions.
 
 More information and a full accounting of all parameters and options can be found in the online documentation\footnote{Found here: \url{http://hartleys.github.io/QoRTs/jarHtml/makeJunctionTrack.html}}, or by using the command:
 \begin{verbatim}
