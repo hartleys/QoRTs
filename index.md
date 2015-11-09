@@ -1,6 +1,6 @@
 # QoRTs: Quality of RNA-seq Tool-Set
-v0.3.18
-Revised Thu Oct  1 15:12:10 EDT 2015
+v0.3.26
+Revised Fri Nov  6 15:14:14 EST 2015
 
 The QoRTs software package is a fast, efficient, and portable multifunction toolkit designed to assist in
 the analysis, quality control, and data management of RNA-Seq datasets. Its primary function is to aid
@@ -18,7 +18,7 @@ The most recent release of QoRTs is available on the [QoRTs github page](http://
 * QoRTs vignette. User manual and general how-to. Available as a [pdf](doc/QoRTs-vignette.pdf) or [on the web](QoRTs-vignette/index.html).
 * [Java jar utility help index.](jarHtml/index.html) The Java utility is responsible for the bulk of the data processing, and contains a number of useful tools. It must be run on all replicates.
 * [R package help.](Rhtml/index.html) The R package is responsible for producing visualizations, graphs, plots, and summary tables. (also available as a [pdf](doc/QoRTs-manual.pdf))
-* A [comprehensive walkthrough](http://hartleys.github.io/QoRTs/doc/example-walkthrough.pdf) of the entire analysis pipeline, run on a different [example dataset](https://dl.dropboxusercontent.com/u/103621176/pipelineWalkthrough/QoRTsPipelineWalkthrough.zip)
+* A [comprehensive walkthrough](https://dl.dropboxusercontent.com/u/103621176/pipelineWalkthrough/example-walkthrough.pdf) of the entire analysis pipeline, run on a different [example dataset](https://dl.dropboxusercontent.com/u/103621176/pipelineWalkthrough/QoRTsPipelineWalkthrough.zip)
 * The raw [bam files](https://dl.dropboxusercontent.com/u/103621176/pipelineWalkthrough/bamfiles.zip) for the example walkthough (File is ~1.1gb).
 * The [Example QC data](QoRTsExampleData_LATEST.tar.gz) used in the vignette.
 * [Frequently Asked Questions](FAQ.html): Check here if you run into problems!
@@ -56,7 +56,7 @@ These files can be found [here](
 https://dl.dropboxusercontent.com/u/103621176/qorts/exData/QoRTsFullExampleData.zip). 
 (File is ~1.5gb)
 
-There is also a [comprehensive walkthrough](http://hartleys.github.io/JunctionSeq/doc/example-walkthrough.pdf) of 
+There is also a [comprehensive walkthrough](https://dl.dropboxusercontent.com/u/103621176/pipelineWalkthrough/example-walkthrough.pdf) of 
 the entire analysis pipeline, run on a different 
 [example dataset](https://dl.dropboxusercontent.com/u/103621176/pipelineWalkthrough/QoRTsPipelineWalkthrough.zip) with 
 [example bam files](https://dl.dropboxusercontent.com/u/103621176/pipelineWalkthrough/bamfiles.zip).

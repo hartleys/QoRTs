@@ -1,4 +1,4 @@
-This is pdfeTeX, Version 3.141592-1.21a-2.2 (Web2C 7.5.4) (format=latex 2015.4.23)  1 OCT 2015 15:20
+This is pdfeTeX, Version 3.141592-1.21a-2.2 (Web2C 7.5.4) (format=latex 2015.4.23)  6 NOV 2015 15:22
 entering extended mode
 **./images.tex
 (./images.tex
@@ -318,7 +318,7 @@ driver: pdftex
 (1in=72.27pt, 1cm=28.45pt)
 -----------------------
 
-(/home/hartleys/UTILS/BuildRelease/QoRTs_0.3.18/QoRTs/vignettes/QoRTs-vignette.
+(/home/hartleys/UTILS/BuildRelease/QoRTs_0.3.26/QoRTs/vignettes/QoRTs-vignette.
 aux
 
 LaTeX Warning: Label `sec:praeludium' multiply defined.
@@ -648,6 +648,18 @@ LaTeX Warning: Label `figure/indivPlot-20' multiply defined.
 LaTeX Warning: Label `indivPlot-20-fig' multiply defined.
 
 
+LaTeX Warning: Label `subsec:plotDesc-25' multiply defined.
+
+
+LaTeX Warning: Label `figure/indivPlot-25' multiply defined.
+
+
+LaTeX Warning: Label `indivPlot-25-fig' multiply defined.
+
+
+LaTeX Warning: Label `subsec:plotDesc-26' multiply defined.
+
+
 LaTeX Warning: Label `sec:exampleBad' multiply defined.
 
 
@@ -687,13 +699,10 @@ LaTeX Warning: Label `figure/CASE-tracks.png' multiply defined.
 LaTeX Warning: Label `CASE-tracks.png-fig' multiply defined.
 
 
-LaTeX Warning: Label `DESeq' multiply defined.
-
-
 LaTeX Warning: Label `sec:useWithOtherTools' multiply defined.
 
 
-LaTeX Warning: Label `sec:noteOnDex' multiply defined.
+LaTeX Warning: Label `DESeq' multiply defined.
 
 
 LaTeX Warning: Label `edgeR' multiply defined.
@@ -703,6 +712,9 @@ LaTeX Warning: Label `DEXSeq' multiply defined.
 
 
 LaTeX Warning: Label `STAR' multiply defined.
+
+
+LaTeX Warning: Label `sec:noteOnDex' multiply defined.
 
 
 LaTeX Warning: Label `GSNAP' multiply defined.
@@ -849,8 +861,8 @@ Underfull \hbox (badness 10000) detected at line 295
 [][]
  []
 
-*** image for framed763 is too tall at 663.93344pt, reducing to .95 vsize ***
-l2hSize :framed763:647.48763pt::0.0pt::349.0pt.
+*** image for framed770 is too tall at 663.93344pt, reducing to .95 vsize ***
+l2hSize :framed770:647.48763pt::0.0pt::349.0pt.
 [1
 Non-PDF special ignored!
 Non-PDF special ignored!
@@ -876,7 +888,7 @@ LaTeX Font Warning: Font shape `OT1/cmss/m/it' in size <10.95> not available
 (Font)              Font shape `OT1/cmss/m/sl' tried instead on input line 325.
 
 
-l2hSize :framed811:97.14166pt::0.0pt::349.0pt.
+l2hSize :framed818:97.14166pt::0.0pt::349.0pt.
 [2
 Non-PDF special ignored!
 Non-PDF special ignored!
@@ -884,7 +896,7 @@ Non-PDF special ignored!
 
 Non-PDF special ignored!
 Non-PDF special ignored!]
-l2hSize :framed828:83.54166pt::0.0pt::349.0pt.
+l2hSize :framed835:83.54166pt::0.0pt::349.0pt.
 [3
 Non-PDF special ignored!
 Non-PDF special ignored!
@@ -892,7 +904,7 @@ Non-PDF special ignored!
 
 Non-PDF special ignored!
 Non-PDF special ignored!]
-l2hSize :framed846:69.18124pt::0.0pt::349.0pt.
+l2hSize :framed853:69.18124pt::0.0pt::349.0pt.
 [4
 Non-PDF special ignored!
 Non-PDF special ignored!
@@ -900,7 +912,7 @@ Non-PDF special ignored!
 
 Non-PDF special ignored!
 Non-PDF special ignored!]
-l2hSize :framed873:178.7417pt::0.0pt::349.0pt.
+l2hSize :framed880:178.7417pt::0.0pt::349.0pt.
 [5
 Non-PDF special ignored!
 Non-PDF special ignored!
@@ -910,7 +922,7 @@ Non-PDF special ignored!
 Non-PDF special ignored!
 Non-PDF special ignored!
 Non-PDF special ignored!]
-l2hSize :framed897:108.00418pt::0.0pt::349.0pt.
+l2hSize :framed904:108.00418pt::0.0pt::349.0pt.
 [6
 Non-PDF special ignored!
 Non-PDF special ignored!
@@ -920,7 +932,7 @@ Non-PDF special ignored!
 Non-PDF special ignored!
 Non-PDF special ignored!
 Non-PDF special ignored!]
-l2hSize :framed920:123.73335pt::0.0pt::349.0pt.
+l2hSize :framed927:123.73335pt::0.0pt::349.0pt.
 [7
 Non-PDF special ignored!
 Non-PDF special ignored!
@@ -928,7 +940,7 @@ Non-PDF special ignored!
 
 Non-PDF special ignored!
 Non-PDF special ignored!]
-l2hSize :framed937:121.60419pt::0.0pt::349.0pt.
+l2hSize :framed944:121.60419pt::0.0pt::349.0pt.
 [8
 Non-PDF special ignored!
 Non-PDF special ignored!
@@ -936,7 +948,7 @@ Non-PDF special ignored!
 
 Non-PDF special ignored!
 Non-PDF special ignored!]
-l2hSize :framed959:219.54173pt::0.0pt::349.0pt.
+l2hSize :framed974:219.54173pt::0.0pt::349.0pt.
 [9
 Non-PDF special ignored!
 Non-PDF special ignored!
@@ -949,7 +961,7 @@ Underfull \hbox (badness 1253) in paragraph at lines 436--437
 n-ef-fi-ciency of
  []
 
-l2hSize :framed976:192.3417pt::0.0pt::349.0pt.
+l2hSize :framed991:192.3417pt::0.0pt::349.0pt.
 [10
 Non-PDF special ignored!
 Non-PDF special ignored!
@@ -957,7 +969,7 @@ Non-PDF special ignored!
 
 Non-PDF special ignored!
 Non-PDF special ignored!]
-l2hSize :framed994:69.33333pt::0.0pt::349.0pt.
+l2hSize :framed1009:69.33333pt::0.0pt::349.0pt.
 [11
 Non-PDF special ignored!
 Non-PDF special ignored!
@@ -965,7 +977,7 @@ Non-PDF special ignored!
 
 Non-PDF special ignored!
 Non-PDF special ignored!]
-l2hSize :framed1014:82.93333pt::0.0pt::349.0pt.
+l2hSize :framed1029:82.93333pt::0.0pt::349.0pt.
 [12
 Non-PDF special ignored!
 Non-PDF special ignored!
@@ -973,7 +985,7 @@ Non-PDF special ignored!
 
 Non-PDF special ignored!
 Non-PDF special ignored!]
-l2hSize :framed1043:42.13332pt::0.0pt::349.0pt.
+l2hSize :framed1058:42.13332pt::0.0pt::349.0pt.
 [13
 Non-PDF special ignored!
 Non-PDF special ignored!
@@ -981,7 +993,7 @@ Non-PDF special ignored!
 
 Non-PDF special ignored!
 Non-PDF special ignored!]
-l2hSize :framed1103:69.33333pt::0.0pt::349.0pt.
+l2hSize :framed1118:69.33333pt::0.0pt::349.0pt.
 [14
 Non-PDF special ignored!
 Non-PDF special ignored!
@@ -989,7 +1001,7 @@ Non-PDF special ignored!
 
 Non-PDF special ignored!
 Non-PDF special ignored!]
-l2hSize :framed1124:246.1334pt::0.0pt::349.0pt.
+l2hSize :framed1139:246.1334pt::0.0pt::349.0pt.
 [15
 Non-PDF special ignored!
 Non-PDF special ignored!
@@ -997,7 +1009,7 @@ Non-PDF special ignored!
 
 Non-PDF special ignored!
 Non-PDF special ignored!]
-l2hSize :framed1142:121.60419pt::0.0pt::349.0pt.
+l2hSize :framed1157:121.60419pt::0.0pt::349.0pt.
 [16
 Non-PDF special ignored!
 Non-PDF special ignored!
@@ -1007,7 +1019,7 @@ Non-PDF special ignored!
 Non-PDF special ignored!
 Non-PDF special ignored!
 Non-PDF special ignored!]
-l2hSize :framed1161:162.4042pt::0.0pt::349.0pt.
+l2hSize :framed1176:162.4042pt::0.0pt::349.0pt.
 [17
 Non-PDF special ignored!
 Non-PDF special ignored!
@@ -1017,7 +1029,7 @@ Non-PDF special ignored!
 Non-PDF special ignored!
 Non-PDF special ignored!
 Non-PDF special ignored!]
-l2hSize :framed1179:162.4042pt::0.0pt::349.0pt.
+l2hSize :framed1194:162.4042pt::0.0pt::349.0pt.
 [18
 Non-PDF special ignored!
 Non-PDF special ignored!
@@ -1027,7 +1039,7 @@ Non-PDF special ignored!
 Non-PDF special ignored!
 Non-PDF special ignored!
 Non-PDF special ignored!]
-l2hSize :framed1197:121.60419pt::0.0pt::349.0pt.
+l2hSize :framed1212:121.60419pt::0.0pt::349.0pt.
 [19
 Non-PDF special ignored!
 Non-PDF special ignored!
@@ -1037,7 +1049,7 @@ Non-PDF special ignored!
 Non-PDF special ignored!
 Non-PDF special ignored!
 Non-PDF special ignored!]
-l2hSize :framed1216:69.33333pt::0.0pt::349.0pt.
+l2hSize :framed1231:69.33333pt::0.0pt::349.0pt.
 [20
 Non-PDF special ignored!
 Non-PDF special ignored!
@@ -1045,7 +1057,7 @@ Non-PDF special ignored!
 
 Non-PDF special ignored!
 Non-PDF special ignored!]
-l2hSize :framed1236:55.73332pt::0.0pt::349.0pt.
+l2hSize :framed1251:55.73332pt::0.0pt::349.0pt.
 [21
 Non-PDF special ignored!
 Non-PDF special ignored!
@@ -1053,7 +1065,7 @@ Non-PDF special ignored!
 
 Non-PDF special ignored!
 Non-PDF special ignored!]
-l2hSize :framed1255:110.13335pt::0.0pt::349.0pt.
+l2hSize :framed1270:110.13335pt::0.0pt::349.0pt.
 [22
 Non-PDF special ignored!
 Non-PDF special ignored!
@@ -1061,7 +1073,7 @@ Non-PDF special ignored!
 
 Non-PDF special ignored!
 Non-PDF special ignored!]
-l2hSize :framed1274:55.73332pt::0.0pt::349.0pt.
+l2hSize :framed1289:55.73332pt::0.0pt::349.0pt.
 [23
 Non-PDF special ignored!
 Non-PDF special ignored!
@@ -1069,7 +1081,7 @@ Non-PDF special ignored!
 
 Non-PDF special ignored!
 Non-PDF special ignored!]
-l2hSize :framed1293:42.13332pt::0.0pt::349.0pt.
+l2hSize :framed1308:42.13332pt::0.0pt::349.0pt.
 [24
 Non-PDF special ignored!
 Non-PDF special ignored!
@@ -1077,7 +1089,7 @@ Non-PDF special ignored!
 
 Non-PDF special ignored!
 Non-PDF special ignored!]
-l2hSize :framed1310:40.00415pt::0.0pt::349.0pt.
+l2hSize :framed1325:40.00415pt::0.0pt::349.0pt.
 [25
 Non-PDF special ignored!
 Non-PDF special ignored!
@@ -1085,8 +1097,16 @@ Non-PDF special ignored!
 
 Non-PDF special ignored!
 Non-PDF special ignored!]
-l2hSize :framed1439:35.96664pt::0.0pt::349.0pt.
+l2hSize :framed1342:69.94167pt::0.0pt::349.0pt.
 [26
+Non-PDF special ignored!
+Non-PDF special ignored!
+
+
+Non-PDF special ignored!
+Non-PDF special ignored!]
+l2hSize :framed1508:35.96664pt::0.0pt::349.0pt.
+[27
 Non-PDF special ignored!
 Non-PDF special ignored!
 
@@ -1100,16 +1120,16 @@ LaTeX Warning: There were multiply-defined labels.
 
  ) 
 Here is how much of TeX's memory you used:
- 3971 strings out of 94501
- 56386 string characters out of 1176789
- 112273 words of memory out of 1000000
- 7071 multiletter control sequences out of 10000+50000
+ 3976 strings out of 94501
+ 56472 string characters out of 1176789
+ 112475 words of memory out of 1000000
+ 7075 multiletter control sequences out of 10000+50000
  6418 words of font info for 23 fonts, out of 500000 for 2000
  580 hyphenation exceptions out of 1000
  34i,7n,45p,719b,360s stack positions out of 1500i,500n,5000p,200000b,5000s
 PDF statistics:
- 142 PDF objects out of 300000
- 30 named destinations out of 131072
+ 146 PDF objects out of 300000
+ 31 named destinations out of 131072
  17 words of extra memory for PDF output out of 65536
 
 ! pdfTeX warning (dest): name{subsubsection.7.4.15} has been referenced but doe
@@ -1125,4 +1145,4 @@ s not exist, replaced by a fixed one
 e1/bluesky/cm/cmssi10.pfb></usr/share/texmf/fonts/type1/bluesky/cm/cmss10.pfb><
 /usr/share/texmf/fonts/type1/bluesky/cm/cmssbx10.pfb></usr/share/texmf/fonts/ty
 pe1/bluesky/cm/cmss12.pfb></usr/share/texmf/fonts/type1/bluesky/cm/cmssi12.pfb>
-Output written on images.pdf (26 pages, 75433 bytes).
+Output written on images.pdf (27 pages, 76463 bytes).

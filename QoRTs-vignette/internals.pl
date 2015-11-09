@@ -18,6 +18,10 @@ $key = q/subsec:plotDesc-1/;
 $ref_files{$key} = "$dir".q|node8.html|; 
 $noresave{$key} = "$nosave";
 
+$key = q/subsec:plotDesc-26/;
+$ref_files{$key} = "$dir".q|node8.html|; 
+$noresave{$key} = "$nosave";
+
 $key = q/subsec:plotDesc/;
 $ref_files{$key} = "$dir".q|node8.html|; 
 $noresave{$key} = "$nosave";
@@ -75,6 +79,10 @@ $ref_files{$key} = "$dir".q|node8.html|;
 $noresave{$key} = "$nosave";
 
 $key = q/subsec:plotDesc-3/;
+$ref_files{$key} = "$dir".q|node8.html|; 
+$noresave{$key} = "$nosave";
+
+$key = q/figure_indivPlot-25/;
 $ref_files{$key} = "$dir".q|node8.html|; 
 $noresave{$key} = "$nosave";
 
@@ -402,12 +410,12 @@ $key = q/subsec:plotDesc-14d/;
 $ref_files{$key} = "$dir".q|node8.html|; 
 $noresave{$key} = "$nosave";
 
-$key = q/figure_indivPlot-15/;
-$ref_files{$key} = "$dir".q|node8.html|; 
-$noresave{$key} = "$nosave";
-
 $key = q/cite_DEXSeq/;
 $ref_files{$key} = "$dir".q|node11.html|; 
+$noresave{$key} = "$nosave";
+
+$key = q/figure_indivPlot-15/;
+$ref_files{$key} = "$dir".q|node8.html|; 
 $noresave{$key} = "$nosave";
 
 $key = q/figure_plotterExamples-1/;
@@ -431,6 +439,10 @@ $ref_files{$key} = "$dir".q|node8.html|;
 $noresave{$key} = "$nosave";
 
 $key = q/figure_indivPlot-9/;
+$ref_files{$key} = "$dir".q|node8.html|; 
+$noresave{$key} = "$nosave";
+
+$key = q/subsec:plotDesc-25/;
 $ref_files{$key} = "$dir".q|node8.html|; 
 $noresave{$key} = "$nosave";
 
@@ -507,6 +519,10 @@ $ref_files{$key} = "$dir".q|node9.html|;
 $noresave{$key} = "$nosave";
 
 $key = q/figure_indivPlot-18/;
+$ref_files{$key} = "$dir".q|node8.html|; 
+$noresave{$key} = "$nosave";
+
+$key = q/indivPlot-25-fig/;
 $ref_files{$key} = "$dir".q|node8.html|; 
 $noresave{$key} = "$nosave";
 

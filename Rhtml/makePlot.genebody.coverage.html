@@ -19,12 +19,27 @@ Plot Gene-Body coverage distribution
 <h3>Usage</h3>
 
 <pre>
+  makePlot.genebody(plotter, 
+                  geneset = c("Overall","90-100","75-90","50-75","0-50"),
+                  avgMethod = c("TotalCounts", "AvgPercentile"), 
+                  plot.medians, 
+                  plot.means = TRUE, 
+                  debugMode, 
+                  singleEndMode, 
+                  ... )
+
+  #NOTE: The preferred method to access the below functions
+  #  is to use makeplot.genebody and set:
+  #  avgMethod = "TotalCounts"
+  #DEPRECIATED:
   makePlot.genebody.coverage(plotter, plot.medians,
                        plot.means = TRUE,  
                        debugMode, singleEndMode, ...)
+  #DEPRECIATED:
   makePlot.genebody.coverage.UMQuartile(plotter, plot.medians, 
                        plot.means = TRUE, 
                        debugMode, singleEndMode, ...)
+  #DEPRECIATED:
   makePlot.genebody.coverage.lowExpress(plotter, plot.medians, 
                        plot.means = TRUE, 
                        debugMode, singleEndMode, ...)
@@ -38,6 +53,32 @@ Plot Gene-Body coverage distribution
 <td>
 
 <p>A <code>QoRT_Plotter</code> reference object. See <code><a href="build.plotter.html">build.plotter</a></code>.
+</p>
+</td></tr>
+<tr valign="top"><td><code>geneset</code></td>
+<td>
+
+<p>The set of genes to plot the gene-body coverage over. Genes are grouped
+into four quantiles by their by their total read counts: the 90-100 quantile,
+the 75-90 quantile, the 50-75 quantile (or &quot;upper-middle quartile&quot;), and the
+0-50 quantile. By default it will plot the overall gene-body coverage across
+all genes.
+</p>
+</td></tr>
+<tr valign="top"><td><code>avgMethod</code></td>
+<td>
+
+<p>The method used to generate average gene body coverage. 
+</p>
+<p>The &quot;TotalCounts&quot; (default) method simply takes the sum of each bin across all genes in the geneset,
+then for each replicate normalizes the coverage into frequencies.
+</p>
+<p>The &quot;AvgPercentile&quot; calculates the coverage distribution across each percentile bin 
+and normalizes the counts so they add up to 1, FOR EACH GENE, and 
+THEN averages those values across all genes in the geneset. 
+</p>
+<p>The latter variant is experimental. the idea was for it to reduce the impact of 
+highly-expressed genes and gain a better estimate of the degree of 5'/3' bias.
 </p>
 </td></tr>
 <tr valign="top"><td><code>plot.medians</code></td>
@@ -98,5 +139,5 @@ genes' bodies.
 <p><code><a href="build.plotter.html">build.plotter</a></code>
 </p>
 
-<hr><div align="center">[Package <em>QoRTs</em> version 0.3.18 <a href="00Index.html">Index</a>]</div>
+<hr><div align="center">[Package <em>QoRTs</em> version 0.3.26 <a href="00Index.html">Index</a>]</div>
 </body></html>

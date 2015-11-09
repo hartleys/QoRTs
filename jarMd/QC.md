@@ -1,5 +1,5 @@
 # QoRTs: Quality Of Rna-seq Tool Set
-> Version 0.3.18 (Updated Thu Oct  1 15:12:52 EDT 2015)
+> Version 0.3.26 (Updated Fri Nov  6 15:15:18 EST 2015)
 
 > ([back to main](../index.html)) ([back to java-utility help](index.html))
 
@@ -79,15 +79,15 @@ If the filename ends with ".gz" or ".zip", the file will be parsed using the app
 
 ### --skipFunctions func1,func2,...:
 
-> A list of functions to skip (comma-delimited, no whitespace). See the sub-functions list, below. The default-on functions are: NVC, GCDistribution, GeneCalcs, QualityScoreDistribution, writeJunctionSeqCounts, writeKnownSplices, writeNovelSplices, writeClippedNVC, CigarOpDistribution, InsertSize, chromCounts, writeGenewiseGeneBody, JunctionCalcs, writeGeneCounts, writeDESeq, writeDEXSeq, writeGeneBody, StrandCheck (CommaDelimitedListOfStrings)
+> A list of functions to skip (comma-delimited, no whitespace). See the sub-functions list, below. The default-on functions are: NVC, GCDistribution, GeneCalcs, QualityScoreDistribution, writeJunctionSeqCounts, writeKnownSplices, writeNovelSplices, writeClippedNVC, CigarOpDistribution, InsertSize, chromCounts, writeSpliceExon, writeGenewiseGeneBody, JunctionCalcs, writeGeneCounts, writeBiotypeCounts, writeDESeq, writeDEXSeq, writeGeneBody, StrandCheck (CommaDelimitedListOfStrings)
 
 ### --addFunctions func1,func2,...:
 
-> A list of functions to add (comma-delimited, no whitespace). This can be used to add functions that are off by default. Followed by a comma delimited list, with no internal whitespace. See the sub-functions list, below. The default-off functions are: annotatedSpliceExonCounts, FPKM, cigarMatch, cigarLocusCounts, writeSpliceExon, makeJunctionBed, makeWiggles, makeAllBrowserTracks (CommaDelimitedListOfStrings)
+> A list of functions to add (comma-delimited, no whitespace). This can be used to add functions that are off by default. Followed by a comma delimited list, with no internal whitespace. See the sub-functions list, below. The default-off functions are: annotatedSpliceExonCounts, FPKM, cigarMatch, cigarLocusCounts, makeJunctionBed, makeWiggles, makeAllBrowserTracks (CommaDelimitedListOfStrings)
 
 ### --runFunctions func1,func2,...:
 
-> The complete list of functions to run  (comma-delimited, no whitespace). Setting this option runs ONLY for the functions explicitly requested here (along with any functions upon which the assigned functions are dependent). See the sub-functions list, below. Allowed options are: NVC, annotatedSpliceExonCounts, GCDistribution, GeneCalcs, FPKM, cigarMatch, QualityScoreDistribution, writeJunctionSeqCounts, writeKnownSplices, writeNovelSplices, writeClippedNVC, CigarOpDistribution, cigarLocusCounts, InsertSize, chromCounts, writeSpliceExon, writeGenewiseGeneBody, JunctionCalcs, writeGeneCounts, makeJunctionBed, writeDESeq, writeDEXSeq, makeWiggles, writeGeneBody, StrandCheck, makeAllBrowserTracks (CommaDelimitedListOfStrings)
+> The complete list of functions to run  (comma-delimited, no whitespace). Setting this option runs ONLY for the functions explicitly requested here (along with any functions upon which the assigned functions are dependent). See the sub-functions list, below. Allowed options are: NVC, annotatedSpliceExonCounts, GCDistribution, GeneCalcs, FPKM, cigarMatch, QualityScoreDistribution, writeJunctionSeqCounts, writeKnownSplices, writeNovelSplices, writeClippedNVC, CigarOpDistribution, cigarLocusCounts, InsertSize, chromCounts, writeSpliceExon, writeGenewiseGeneBody, JunctionCalcs, writeGeneCounts, makeJunctionBed, writeBiotypeCounts, writeDESeq, writeDEXSeq, makeWiggles, writeGeneBody, StrandCheck, makeAllBrowserTracks (CommaDelimitedListOfStrings)
 
 ### --seqReadCt val:
 
@@ -185,13 +185,13 @@ If a large fraction of the read-pairs are mapped to extremely distant loci (or t
 
 * QualityScoreDistribution: Calculate quality scores by cycle.
 
-* writeJunctionSeqCounts: Write counts file designed for use with JunctionSeq (contains known splice junctions, gene counts, and exon counts).
+* writeJunctionSeqCounts: Write counts file designed for use with JunctionSeq (contains known splice junctions, gene counts, and exon counts). [Depends: writeSpliceExon]
 
-* writeKnownSplices: Write known splice junction counts.
+* writeKnownSplices: Write known splice junction counts. [Depends: JunctionCalcs]
 
-* writeNovelSplices: Write novel splice junction counts.
+* writeNovelSplices: Write novel splice junction counts. [Depends: JunctionCalcs]
 
-* writeClippedNVC: Write NVC file containing clipped sequences.
+* writeClippedNVC: Write NVC file containing clipped sequences. [Depends: NVC]
 
 * CigarOpDistribution: Cigar operation rates by cycle and cigar operation length rates (deletions, insertions, splicing, clipping, etc).
 
@@ -199,22 +199,26 @@ If a large fraction of the read-pairs are mapped to extremely distant loci (or t
 
 * chromCounts: Calculate chromosome counts
 
-* writeGenewiseGeneBody: Write file containing gene-body distributions for each (non-overlapping) gene.
+* writeSpliceExon: Synonym for function "writeJunctionSeqCounts" (for backwards-compatibility) [Depends: JunctionCalcs]
+
+* writeGenewiseGeneBody: Write file containing gene-body distributions for each (non-overlapping) gene. [Depends: GeneCalcs]
 
 * JunctionCalcs: Find splice junctions (both novel and annotated).
 
-* writeGeneCounts: Write extended gene-level read/read-pair counts file (includes counts for CDS/UTR, ambiguous regions, etc).
+* writeGeneCounts: Write extended gene-level read/read-pair counts file (includes counts for CDS/UTR, ambiguous regions, etc). [Depends: GeneCalcs]
 
-* writeDESeq: Write gene-level read/read-pair counts file, suitable for use with DESeq, EdgeR, etc.
+* writeBiotypeCounts: Write a table listing read counts for each gene BioType (uses the optional "gene_biotype" GTF attribute). [Depends: GeneCalcs]
 
-* writeDEXSeq: Write exon-level read/read-pair counts file, designed for use with DEXSeq.
+* writeDESeq: Write gene-level read/read-pair counts file, suitable for use with DESeq, EdgeR, etc. [Depends: GeneCalcs]
 
-* writeGeneBody: Write gene-body distribution file.
+* writeDEXSeq: Write exon-level read/read-pair counts file, designed for use with DEXSeq. [Depends: JunctionCalcs]
+
+* writeGeneBody: Write gene-body distribution file. [Depends: GeneCalcs]
 
 * StrandCheck: Check the strandedness of the data. Note that if the stranded option is set incorrectly, this tool will automatically print a warning to that effect.
 
 ## NON-DEFAULT SUB-FUNCTIONS:
-* annotatedSpliceExonCounts: Write counts for exons, known-splice-junctions, and genes, with annotation columns indicating chromosome, etc (default: OFF)
+* annotatedSpliceExonCounts: Write counts for exons, known-splice-junctions, and genes, with annotation columns indicating chromosome, etc (default: OFF) [Depends: JunctionCalcs]
 
 * FPKM: Write FPKM values. Note: FPKMs are generally NOT the recommended normalization method. We recommend using a more advanced normalization as provided by DESeq, edgeR, CuffLinks, or similar (default: OFF)
 
@@ -222,13 +226,11 @@ If a large fraction of the read-pairs are mapped to extremely distant loci (or t
 
 * cigarLocusCounts: BETA: This function is still undergoing basic testing. It is not intended for production use at this time. (default: OFF)
 
-* writeSpliceExon: Synonym for function "writeJunctionSeqCounts" (for backwards-compatibility)
-
 * makeJunctionBed: Write splice-junction count "bed" files. (default: OFF)
 
 * makeWiggles: Write "wiggle" coverage files with 100-bp window size. Note: this REQUIRES that the --chromSizes parameter be included! (default: OFF)
 
-* makeAllBrowserTracks: Write both the "wiggle" and the splice-junction bed files (default: OFF)
+* makeAllBrowserTracks: Write both the "wiggle" and the splice-junction bed files (default: OFF) [Depends: makeJunctionBed, makeWiggles]
 
 ## AUTHORS:
 
