@@ -128,27 +128,30 @@ See the [related wikipedia article](https://en.wikipedia.org/wiki/FASTQ_format#E
 (As of v0.3.26) QoRTs now includes a read-count gene biotype plot. However, this plot is not included in the main battery of plots (as of v0.3.26), as it may require special preparation.
 
 This plot can be generated using the following command:
+
     > makePlot.biotype.rates(plotter);
 
 However, for this plot to work correctly you must have included biotype information in your input GTF file fed to QoRTs. For ensembl data this should already be included, but if your annotation comes from elsewhere 
 then you will need to add this information yourself.
 
-The ”biotype” is pulled from the GTF annotation file using the optional ”gene_biotype” attribute
+The "biotype" is pulled from the GTF annotation file using the optional "gene\_biotype" attribute
 tag. This is the tag identifier used by Ensembl in their annotations. This separates RNA transcripts into
 categories such as protein coding mRNAs, lncRNAs, rRNAs, and so on. Unfortunately there are dozens
 if not hundreds of different ways to encode this sort information for various species and institutions,
 and unlike many other features no common standard has yet appeared. If you need to include this sort
 of information, you will need to edit the annotation GTF file yourself. You only need to mark the rRNA
-fields yourself. Any genes that do not have a gene_biotype field will simply be assigned the ”UNK”
+fields yourself. Any genes that do not have a gene_biotype field will simply be assigned the "UNK"
 biotype, so you only need to add the biotypes that you are interested in testing.
 
 You can even just attach the biotypes for your desired genes to the end of the GTF file simply by adding lines that include the gene ID's and the desired "biotype".
 These can be any genes of interest, gene types, or even ERCC spike-ins. For example, at the end of your GTF file you could append:
-    chr22  blah this_text      1  2  0 +  .  gene_id "MyGene1"; gene_biotype "GeneGroup1";
-    chr22  blah is_irrelevant  1  2  0 +  .  gene_id "MyGene2"; gene_biotype "GeneGroup1";
-    chr22  blah and_can_be     1  2  0 +  .  gene_id "MyGene3"; gene_biotype "GeneGroup1";
-    chr22  blah anything_but   1  2  0 +  .  gene_id "MyGene4"; gene_biotype "GeneGroup2";
-    chr22  blah exon_or_CDS    1  2  0 +  .  gene_id "MyGene5"; gene_biotype "GeneGroup2";
+
+     chr22  blah this_text      1  2  0 +  .  gene_id "MyGene1"; gene_biotype "GeneGroup1";
+     chr22  blah is_irrelevant  1  2  0 +  .  gene_id "MyGene2"; gene_biotype "GeneGroup1";
+     chr22  blah and_can_be     1  2  0 +  .  gene_id "MyGene3"; gene_biotype "GeneGroup1";
+     chr22  blah anything_but   1  2  0 +  .  gene_id "MyGene4"; gene_biotype "GeneGroup2";
+     chr22  blah exon_or_CDS    1  2  0 +  .  gene_id "MyGene5"; gene_biotype "GeneGroup2";
+
 As long as the "feature" column is not equal to "exon" or "CDS", the line will be ignored by QoRTs except to assign featuretype. All the other fields will be ignored.
 
 You do still need those gene ID's and their position info to be listed elsewhere in the GTF.
@@ -163,7 +166,9 @@ Hopefully this tool will be of some service in assessing the approximate relativ
 You might also be able to infer outliers in the rRNA quantities by checking for unusually low mapping rates or unusually high multi-mapping rates.
 
 Basic help and documentation can be found using the command:
+
     > help(makePlot.biotype.rates);
+
 And by checking the section in the vignette.
 
 ##How do I cite QoRTs?
