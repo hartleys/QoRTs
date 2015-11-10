@@ -1,4 +1,4 @@
-This is pdfeTeX, Version 3.141592-1.21a-2.2 (Web2C 7.5.4) (format=latex 2015.4.23)  6 NOV 2015 15:22
+This is pdfeTeX, Version 3.141592-1.21a-2.2 (Web2C 7.5.4) (format=latex 2015.4.23)  9 NOV 2015 18:46
 entering extended mode
 **./images.tex
 (./images.tex
@@ -318,8 +318,8 @@ driver: pdftex
 (1in=72.27pt, 1cm=28.45pt)
 -----------------------
 
-(/home/hartleys/UTILS/BuildRelease/QoRTs_0.3.26/QoRTs/vignettes/QoRTs-vignette.
-aux
+(/home/hartleys/UTILS/BuildRelease/QoRTs_1.0.0/QoRTs/vignettes/QoRTs-vignette.a
+ux
 
 LaTeX Warning: Label `sec:praeludium' multiply defined.
 
@@ -1121,8 +1121,8 @@ LaTeX Warning: There were multiply-defined labels.
  ) 
 Here is how much of TeX's memory you used:
  3976 strings out of 94501
- 56472 string characters out of 1176789
- 112475 words of memory out of 1000000
+ 56469 string characters out of 1176789
+ 112472 words of memory out of 1000000
  7075 multiletter control sequences out of 10000+50000
  6418 words of font info for 23 fonts, out of 500000 for 2000
  580 hyphenation exceptions out of 1000
@@ -1145,4 +1145,4 @@ s not exist, replaced by a fixed one
 e1/bluesky/cm/cmssi10.pfb></usr/share/texmf/fonts/type1/bluesky/cm/cmss10.pfb><
 /usr/share/texmf/fonts/type1/bluesky/cm/cmssbx10.pfb></usr/share/texmf/fonts/ty
 pe1/bluesky/cm/cmss12.pfb></usr/share/texmf/fonts/type1/bluesky/cm/cmssi12.pfb>
-Output written on images.pdf (27 pages, 76463 bytes).
+Output written on images.pdf (27 pages, 76458 bytes).

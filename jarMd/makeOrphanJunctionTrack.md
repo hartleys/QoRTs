@@ -1,13 +1,13 @@
 # QoRTs: Quality Of Rna-seq Tool Set
-> Version 0.3.26 (Updated Fri Nov  6 15:15:18 EST 2015)
+> Version 1.0.0 (Updated Mon Nov  9 18:40:55 EST 2015)
 
 > ([back to main](../index.html)) ([back to java-utility help](index.html))
 
-## Help for java command "makeOrphanJunctionBed"
+## Help for java command "makeOrphanJunctionTrack"
 
 ## USAGE:
 
-    java [Java Options] -jar QoRTs.jar makeOrphanJunctionBed [options] outfile
+    java [Java Options] -jar QoRTs.jar makeOrphanJunctionTrack [options] outfile
 
 
 ## DESCRIPTION:
