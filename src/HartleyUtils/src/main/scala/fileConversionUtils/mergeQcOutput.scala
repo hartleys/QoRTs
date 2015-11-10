@@ -49,6 +49,10 @@ object mergeQcOutput {
                                          argDesc = "A comma-delimited list of strings, indicating which file types to attempt to merge. By default, this utility autodetects the presence of all mergable qc files and merges all standard files. Valid codes are: " + mergeFileList.mkString(", ") ,
                                          defaultValue = Some(mergeFileList)
                                         ) ::
+                    new UnaryArgument( name = "noGzip",
+                                         arg = List("--noGzip"), // name of value
+                                         argDesc = "Flag to indicate whether whether input and output data is/will be gzip-compressed." // description
+                                       ) ::
                     new BinaryArgument[String](   name = "trackTitlePrefix",
                                                         arg = List("--trackTitle"),  
                                                         valueName = "options", 
@@ -76,7 +80,8 @@ object mergeQcOutput {
              parser.get[List[String]]("mergeFiles"),
              parser.get[Int]("wiggleWindow"),
              parser.get[String]("additionalTrackOptions"),
-             parser.get[String]("trackTitlePrefix")
+             parser.get[String]("trackTitlePrefix"),
+             ! parser.get[Boolean]("noGzip")
            );
          }
      }
@@ -122,6 +127,10 @@ object mergeQcOutput {
                                          argDesc = "A comma-delimited list of strings, indicating which file types to attempt to merge. By default, this utility autodetects the presence of all mergable qc files and merges all standard files. Valid codes are:" + mergeFileList.mkString(",") ,
                                          defaultValue = Some(mergeFileList)
                                         ) ::
+                    new UnaryArgument( name = "noGzip",
+                                         arg = List("--noGzip"), // name of value
+                                         argDesc = "Flag to indicate whether whether input and output data is/will be gzip-compressed." // description
+                                       ) ::
                     new FinalArgument[String](
                                          name = "infileDir",
                                          valueName = "infileDir",
@@ -154,24 +163,25 @@ object mergeQcOutput {
              parser.get[List[String]]("mergeFiles"),
              parser.get[Int]("wiggleWindow"),
              parser.get[Option[String]]("sampleID"),
-             parser.get[String]("additionalTrackOptions")
+             parser.get[String]("additionalTrackOptions"),
+             ! parser.get[Boolean]("noGzip")
            );
          }
      }
   }
   
-  def multirun(infileDir : String, decoderFile : String, outfile : String, mergeFiles : List[String], wiggleWindow : Int, sampID : Option[String], additionalTrackOptions : String){
+  def multirun(infileDir : String, decoderFile : String, outfile : String, mergeFiles : List[String], wiggleWindow : Int, sampID : Option[String], additionalTrackOptions : String, gzipped : Boolean){
     val decoder : Map[String,Set[String]] = decode(decoderFile,infileDir);
     
     val initialTimeStamp = TimeStampUtil();
     
     if(sampID.isEmpty){
       for((sampleID, infiles) <- decoder){
-        merge(infiles.toSeq, outfile + "/"+sampleID+"/",  mergeFiles, wiggleWindow, additionalTrackOptions, sampleID);
+        merge(infiles.toSeq, outfile + "/"+sampleID+"/",  mergeFiles, wiggleWindow, additionalTrackOptions, sampleID, gzipped);
       }
     } else {
       val infiles = decoder(sampID.get);
-      merge(infiles.toSeq, outfile + "/"+sampID.get+"/",  mergeFiles, wiggleWindow, additionalTrackOptions, sampID.get);
+      merge(infiles.toSeq, outfile + "/"+sampID.get+"/",  mergeFiles, wiggleWindow, additionalTrackOptions, sampID.get, gzipped);
     }
     
     standardStatusReport(initialTimeStamp);
@@ -199,28 +209,30 @@ object mergeQcOutput {
     });
   }
    
-   def run(infile : String, outfile : String, mergeFiles : List[String], wiggleWindow : Int, additionalTrackOptions : String, trackTitlePrefix : String){
+   def run(infile : String, outfile : String, mergeFiles : List[String], wiggleWindow : Int, additionalTrackOptions : String, trackTitlePrefix : String, gzipped : Boolean){
      val infiles = infile.split(",");
-     merge(infiles.toSeq, outfile, mergeFiles, wiggleWindow, additionalTrackOptions, trackTitlePrefix);
+     merge(infiles.toSeq, outfile, mergeFiles, wiggleWindow, additionalTrackOptions, trackTitlePrefix, gzipped = gzipped);
    }
    
-   def merge(infiles : Seq[String], outfile : String, mergeFiles : List[String], wiggleWindow : Int, additionalTrackOptions : String, trackTitlePrefix : String){
+   def merge(infiles : Seq[String], outfile : String, mergeFiles : List[String], wiggleWindow : Int, additionalTrackOptions : String, trackTitlePrefix : String, gzipped : Boolean){
      
      var currTimeStamp = TimeStampUtil();
      
-     val DESeq_suffix = "QC.geneCounts.formatted.for.DESeq.txt.gz";
-     val DEXSeq_suffix = "QC.exonCounts.formatted.for.DEXSeq.txt.gz";
-     val Splice_suffix = "QC.spliceJunctionAndExonCounts.forJunctionSeq.txt.gz";
-     val NovelSplice_suffix = "QC.spliceJunctionCounts.novelSplices.txt.gz";
-     val KnownSplice_suffix = "QC.spliceJunctionCounts.knownSplices.txt.gz";
+     val gzText = if(gzipped){ ".gz" } else {""}
      
-     val unstranded_wiggle_suffix = "QC.wiggle.unstranded.wig.gz";
-     val stranded_wiggle_fwd_suffix = "QC.wiggle.fwd.wig.gz";
-     val stranded_wiggle_rev_suffix = "QC.wiggle.rev.wig.gz";
+     val DESeq_suffix = "QC.geneCounts.formatted.for.DESeq.txt" + gzText;
+     val DEXSeq_suffix = "QC.exonCounts.formatted.for.DEXSeq.txt" + gzText;
+     val Splice_suffix = "QC.spliceJunctionAndExonCounts.forJunctionSeq.txt" + gzText;
+     val NovelSplice_suffix = "QC.spliceJunctionCounts.novelSplices.txt" + gzText;
+     val KnownSplice_suffix = "QC.spliceJunctionCounts.knownSplices.txt" + gzText;
      
-     val unstranded_alt_wiggle_suffix = "QC.wiggle.Win"+wiggleWindow.toString()+".unstranded.wig.gz";
-     val stranded_alt_wiggle_fwd_suffix = "QC.wiggle.Win"+wiggleWindow.toString()+".fwd.wig.gz";
-     val stranded_alt_wiggle_rev_suffix = "QC.wiggle.Win"+wiggleWindow.toString()+".rev.wig.gz";
+     val unstranded_wiggle_suffix = "QC.wiggle.unstranded.wig" + gzText;
+     val stranded_wiggle_fwd_suffix = "QC.wiggle.fwd.wig" + gzText;
+     val stranded_wiggle_rev_suffix = "QC.wiggle.rev.wig" + gzText;
+     
+     val unstranded_alt_wiggle_suffix = "QC.wiggle.Win"+wiggleWindow.toString()+".unstranded.wig" + gzText;
+     val stranded_alt_wiggle_fwd_suffix = "QC.wiggle.Win"+wiggleWindow.toString()+".fwd.wig" + gzText;
+     val stranded_alt_wiggle_rev_suffix = "QC.wiggle.Win"+wiggleWindow.toString()+".rev.wig" + gzText;
      
      
      //if(outfile.last == '/' || outfile.last == '\\'){

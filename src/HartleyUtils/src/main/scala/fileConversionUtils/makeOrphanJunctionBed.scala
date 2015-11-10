@@ -14,7 +14,7 @@ object makeOrphanJunctionBed {
      override def priority = 25;
      val parser : CommandLineArgParser = 
        new CommandLineArgParser(
-          command = "makeOrphanJunctionBed", 
+          command = "makeOrphanJunctionTrack", 
           quickSynopsis = "", 
           synopsis = "", 
           description = "This utility takes the 'orphan' splice junction count files created by the QoRTs QC utility "+

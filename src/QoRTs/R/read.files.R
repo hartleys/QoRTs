@@ -360,14 +360,40 @@ QC_INTERNAL_SCALAQC_FILE_LIST_SINGLE_END <- list(
 ##################################################################################################################################
 ##################################################################################################################################
 
+find.compression.variant <- function(f){
+  sapply(f,find.compression.variant.helper);
+}
+
+find.compression.variant.helper <- function(f){
+  if(file.exists(f)){
+    return(f);
+  }
+  if(substr(f,nchar(f)-2,nchar(f)) == ".gz"){
+    f <- substr(f,1,nchar(f)-3);
+  }
+  if(substr(f,nchar(f)-3,nchar(f)) == ".zip"){
+    f <- substr(f,1,nchar(f)-4);
+  }
+  
+  if(file.exists(f)){
+    return(f);
+  } else if(file.exists(paste0(f,".gz"))){
+    return(paste0(f,".gz"));
+  } else if(file.exists(paste0(f,".zip"))){
+    return(paste0(f,".zip"));
+  } else {
+    return(NA);
+  }
+}
+
 read.in.scalaQC.files <- function(infile.prefix, lanebam.list, qc.data.dir.list, infile.suffix){
   message(paste0("reading ",infile.suffix," files..."));
-  infiles <- paste0(infile.prefix,unlist(qc.data.dir.list),"/", infile.suffix);
-  if(file.exists(infiles[1])){
+  infiles <- find.compression.variant(paste0(infile.prefix,unlist(qc.data.dir.list),"/", infile.suffix));
+  if(! is.na(infiles[1])){
     #print("!")
     for(i in 1:length(infiles)){
-      if(! file.exists(infiles[i])){
-        stop("File not found: ",infiles[i]);
+      if(is.na(infiles[i])){
+        stop("File not found: ",infiles[i], "()");
       }
     }
     out <- lapply(lanebam.list,FUN=function(unique.ID){

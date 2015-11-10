@@ -1,5 +1,5 @@
-# QoRTs v0.3.26
-(Compiled Fri Nov  6 15:14:14 EST 2015)
+# QoRTs v1.0.0
+(Compiled Mon Nov  9 18:40:46 EST 2015)
 
 The [QoRTs software package](http://hartleys.github.io/QoRTs/) is a fast, efficient, and portable 
 multifunction toolkit designed to assist in
@@ -81,7 +81,7 @@ For a full listing of all help topics for the R utility, use the R command:
 
 ##LEGAL:
 This software is "United States Government Work" under the terms of the United 
-States Copyright Act. It was written as part of the authors' official duties 
+States Copyright Act. It was written as part of the authors’ official duties 
 for the United States Government and thus QoRT Package User Manual cannot be 
 copyrighted. This software is freely available to the public for use without a 
 copyright notice. Restrictions cannot be placed on its present or future use.

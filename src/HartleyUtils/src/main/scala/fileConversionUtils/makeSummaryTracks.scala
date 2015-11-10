@@ -37,6 +37,10 @@ object makeSummaryTracks {
                                          argDesc = "The window size of the alternate-size wiggle track, if applicable." ,
                                          defaultValue = Some(100)
                                         ) ::
+                    new UnaryArgument( name = "noGzip",
+                                         arg = List("--noGzip"), // name of value
+                                         argDesc = "Flag to indicate whether whether input and output data is/will be gzip-compressed." // description
+                                       ) ::
                     new BinaryArgument[List[String]](
                                          name = "mergeFiles", 
                                          arg = List("--mergeFiles"), 
@@ -67,7 +71,7 @@ object makeSummaryTracks {
      
      def run(args : Array[String]) {
        val out = parser.parseArguments(args.toList.tail);
-      
+       
        if(out){
          mergeQcOutput.run(
              parser.get[String]("infileDirs"),
@@ -75,7 +79,8 @@ object makeSummaryTracks {
              parser.get[List[String]]("mergeFiles"),
              parser.get[Int]("wiggleWindow"),
              "",
-             "Untitled"
+             "Untitled",
+             ! parser.get[Boolean]("noGzip")
            );
          }
      }

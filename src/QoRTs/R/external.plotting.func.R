@@ -72,7 +72,8 @@ makePlot.biotype.rates <- function(plotter,
           });
         }
       }, error = function(e){ errorPlot(plot.name,e, code = 0); stop(e);});
-      makePlot.generic.points(plot.name,tf.list,plotter,pre.plot.func=pre.plot.func, label.y = F, ylim = c(min.y,max.y), family="mono",...)
+      #makePlot.generic.points(plot.name,tf.list,plotter,pre.plot.func=pre.plot.func, label.y = F, ylim = c(min.y,max.y), family="mono",...)
+      makePlot.generic.points(plot.name,tf.list,plotter,pre.plot.func=pre.plot.func, label.y = F, family="mono",...)
       
       if(log.y){
         abline(h=ceiling(min.y):ceiling(max.y), col="gray",lty=3,...);
@@ -115,6 +116,8 @@ makePlot.biotype.rates <- function(plotter,
 
 
 makePlot.qual.pair <- function(plotter, y.name, r2.buffer = NULL, debugMode = DEFAULTDEBUGMODE, singleEndMode = plotter$res@singleEnd, ...) {
+  readLabel <- if(singleEndMode){ "Reads" } else {"Read-Pairs"}
+  
    if(y.name == "min"){ plot.name <- "Minimum";
    } else if(y.name == "max"){ plot.name <- "Maximum";
    } else if(y.name == "lowerQuartile"){ plot.name <- "Lower Quartile";
@@ -194,6 +197,8 @@ makePlot.qual.pair <- function(plotter, y.name, r2.buffer = NULL, debugMode = DE
 
 
 makePlot.gc <- function(plotter, plot.medians = NULL, plot.means = TRUE, plotRate = FALSE, byPair = FALSE, debugMode = DEFAULTDEBUGMODE, singleEndMode = plotter$res@singleEnd, ...){
+  readLabel <- if(singleEndMode){ "Reads" } else {"Read-Pairs"}
+  
   if(byPair & singleEndMode) stop("ERROR with makePlot.gc: byPair and singleEndMode cannot both be TRUE.");
   if(! byPair){
     makePlot.gc.byRead(plotter = plotter, plot.medians = plot.medians, plot.means = plot.means, plotRate = plotRate, debugMode = debugMode, ...);
@@ -227,6 +232,7 @@ makePlot.gc <- function(plotter, plot.medians = NULL, plot.means = TRUE, plotRat
 }
 
 makePlot.gc.byRead <- function(plotter, plot.medians = NULL, plot.means = TRUE, plotRate = FALSE, debugMode = DEFAULTDEBUGMODE, singleEndMode = plotter$res@singleEnd, ...){
+  readLabel <- if(singleEndMode){ "Reads" } else {"Read-Pairs"}
   plot.name <- "GC Content";
   if(debugMode){ message("Starting: ",plot.name," plot."); }
   plotter.error.wrapper(plot.name, plotterFcn = function(){
@@ -258,12 +264,14 @@ makePlot.gc.byRead <- function(plotter, plot.medians = NULL, plot.means = TRUE, 
 }
 
 makePlot.clipping <- function(plotter, rate.per.million = FALSE, r2.buffer = NULL , debugMode = DEFAULTDEBUGMODE, singleEndMode = plotter$res@singleEnd,...){
+  readLabel <- if(singleEndMode){ "Reads" } else {"Read-Pairs"}
   makePlot.cigarOp.byCycle(plotter,"SoftClip", r2.buffer = r2.buffer, rate.per.million = rate.per.million, singleEndMode = singleEndMode, ... );
 }
 
 #tryCatch({
 #}, error = function(e){ errorPlot(plot.name,e, code = 0); stop(e);});
 makePlot.cigarOp.byCycle <- function(plotter,op, r2.buffer = NULL, rate.per.million = TRUE, debugMode = DEFAULTDEBUGMODE, singleEndMode = plotter$res@singleEnd,...){
+  readLabel <- if(singleEndMode){ "Reads" } else {"Read-Pairs"}
   SUFFIX.FIELD.IDS <- c("_S","_M","_E","_B")
   H.FIELD.IDS <- paste0("H",SUFFIX.FIELD.IDS);
   S.FIELD.IDS <- paste0("S",SUFFIX.FIELD.IDS);
@@ -389,6 +397,7 @@ makePlot.cigarOp.byCycle <- function(plotter,op, r2.buffer = NULL, rate.per.mill
 
 
 makePlot.insert.size <- function(plotter, calc.rate = TRUE, pct.cutoff = 0.98, plot.medians = TRUE, plot.means = NULL, debugMode = DEFAULTDEBUGMODE, singleEndMode = plotter$res@singleEnd,...){
+  readLabel <- if(singleEndMode){ "Reads" } else {"Read-Pairs"}
   plot.name <- "Insert Size";
   if(debugMode){ message("Starting: ",plot.name," plot."); }
   plotter.error.wrapper(plot.name, plotterFcn = function(){
@@ -453,6 +462,7 @@ makePlot.genebody <- function(plotter,
                   plot.means = TRUE, 
                   debugMode = DEFAULTDEBUGMODE, 
                   singleEndMode = plotter$res@singleEnd, ... ){
+  readLabel <- if(singleEndMode){ "Reads" } else {"Read-Pairs"}
   avgMethod <- match.arg(avgMethod);
   geneset <- match.arg(geneset);
   
@@ -475,6 +485,7 @@ makePlot.genebody.coverage.PCT <- function(plotter,
                     plot.means = TRUE, 
                     debugMode = DEFAULTDEBUGMODE, 
                     singleEndMode = plotter$res@singleEnd, ... ){
+  readLabel <- if(singleEndMode){ "Reads" } else {"Read-Pairs"}
   geneset <- match.arg(geneset);
   
   if(geneset == "Overall"){
@@ -596,6 +607,7 @@ makePlot.genebody.coverage.TC <- function(plotter,
 
 
 makePlot.genebody.coverage <- function(plotter, plot.medians = NULL, plot.means = TRUE, debugMode = DEFAULTDEBUGMODE, singleEndMode = plotter$res@singleEnd, ... ){
+  readLabel <- if(singleEndMode){ "Reads" } else {"Read-Pairs"}
   plot.name <- "Gene-Body Coverage";
   if(debugMode){ message("Starting: ",plot.name," plot."); }
   plotter.error.wrapper(plot.name, plotterFcn = function(){
@@ -627,7 +639,7 @@ makePlot.genebody.coverage <- function(plotter, plot.medians = NULL, plot.means 
 
       internal.plot.main.title("Gene-Body Coverage", plotter, ...);
       title(xlab = "Percentile of Gene Body (5\'->3\')");
-      title(ylab = "Rate");
+      title(ylab = paste0("Proportion of ",readLabel));
   
       if(debugMode){ message("Finished: ",plot.name," plot.",getTimeAndDiff(ts)); }
     }
@@ -639,6 +651,7 @@ makePlot.genebody.coverage <- function(plotter, plot.medians = NULL, plot.means 
 
 
 makePlot.genebody.coverage.UMQuartile <- function(plotter, plot.medians = NULL, plot.means = TRUE, debugMode = DEFAULTDEBUGMODE, singleEndMode = plotter$res@singleEnd, ... ){
+  readLabel <- if(singleEndMode){ "Reads" } else {"Read-Pairs"}
   plot.name <- "Gene-Body Coverage, Upper Middle Quartile Genes";
   if(debugMode){ message("Starting: ",plot.name," plot."); }
     plotter.error.wrapper(plot.name, plotterFcn = function(){
@@ -677,6 +690,7 @@ makePlot.genebody.coverage.UMQuartile <- function(plotter, plot.medians = NULL, 
 }
 
 makePlot.genebody.coverage.lowExpress <- function(plotter, plot.medians = NULL, plot.means = TRUE, debugMode = DEFAULTDEBUGMODE, singleEndMode = plotter$res@singleEnd, ... ){
+  readLabel <- if(singleEndMode){ "Reads" } else {"Read-Pairs"}
   plot.name <- "Gene-Body Coverage, Low Expression Genes";
   if(debugMode){ message("Starting: ",plot.name," plot."); }
   plotter.error.wrapper(plot.name, plotterFcn = function(){
@@ -717,6 +731,7 @@ makePlot.genebody.coverage.lowExpress <- function(plotter, plot.medians = NULL, 
 
 
 makePlot.missingness.rate <- function(plotter,  r2.buffer = NULL, debugMode = DEFAULTDEBUGMODE, singleEndMode = plotter$res@singleEnd, ...){
+  readLabel <- if(singleEndMode){ "Reads" } else {"Read-Pairs"}
   plot.name <- "Missingness Rate, by read cycle";
   if(debugMode){ message("Starting: ",plot.name," plot."); }
   plotter.error.wrapper(plot.name, plotterFcn = function(){
@@ -801,6 +816,7 @@ makePlot.missingness.rate <- function(plotter,  r2.buffer = NULL, debugMode = DE
 
 
 makePlot.cigarLength.distribution <- function(plotter,op, r2.buffer = NULL, perMillion = TRUE, log.x = FALSE, log.y = FALSE, debugMode = DEFAULTDEBUGMODE, singleEndMode = plotter$res@singleEnd,...){
+  readLabel <- if(singleEndMode){ "Reads" } else {"Read-Pairs"}
   if(op == "SoftClip"){
     op.title <- "Alignment Clipping Length";
     op.field <- "S"
@@ -958,6 +974,7 @@ makePlot.gene.cdf <- function(plotter, sampleWise = FALSE, plot.intercepts = TRU
   #plot.name <- "gene cdf";
   #if(debugMode){ message("Starting: ",plot.name," plot."); }
   #plotter.error.wrapper(plot.name, plotterFcn = function(){
+  readLabel <- if(singleEndMode){ "Reads" } else {"Read-Pairs"}
   if(rasterize.plotting.area){
     check.rasterize.or.die("rasterize.plotting.area");
   }
@@ -974,6 +991,7 @@ makePlot.gene.cdf <- function(plotter, sampleWise = FALSE, plot.intercepts = TRU
 makePlot.gene.cdf.bamWise <- function(plotter, plot.intercepts = TRUE, label.intercepts = FALSE, debugMode = DEFAULTDEBUGMODE,
                                       rasterize.plotting.area = FALSE, raster.height = 1000, raster.width = 1000, singleEndMode = plotter$res@singleEnd,
                                       ...){
+  readLabel <- if(singleEndMode){ "Reads" } else {"Read-Pairs"}
   plot.name <- "Cumulative Gene Assignment Diversity";
   if(debugMode){ message("Starting: ",plot.name," plot."); }
   plotter.error.wrapper(plot.name, plotterFcn = function(){
@@ -1023,6 +1041,7 @@ makePlot.raw.NVC <- function(plotter,  r2.buffer = NULL,  points.highlighted = T
                          rasterize.plotting.area = FALSE, raster.height = 1000, raster.width = 2000,
                          show.base.legend = TRUE, debugMode = DEFAULTDEBUGMODE, singleEndMode = plotter$res@singleEnd, ...){
   plot.name <- "NVC, Raw";
+  readLabel <- if(singleEndMode){ "Reads" } else {"Read-Pairs"}
   if(debugMode){ message("Starting: ",plot.name," plot."); }
   plotter.error.wrapper(plot.name, plotterFcn = function(){
     if(rasterize.plotting.area){
@@ -1090,6 +1109,7 @@ makePlot.minus.clipping.NVC <- function(plotter,  r2.buffer = NULL, points.highl
                                     show.base.legend = TRUE, debugMode = DEFAULTDEBUGMODE, singleEndMode = plotter$res@singleEnd, ...){
   plot.name <- "NVC, Aligned bases only";
   if(debugMode){ message("Starting: ",plot.name," plot."); }
+  readLabel <- if(singleEndMode){ "Reads" } else {"Read-Pairs"}
   plotter.error.wrapper(plot.name, plotterFcn = function(){
     if(rasterize.plotting.area){
       check.rasterize.or.die("rasterize.plotting.area");
@@ -1158,6 +1178,7 @@ makePlot.NVC.lead.clip <- function(plotter, clip.amt = 10,  r2.buffer = clip.amt
                               rasterize.plotting.area = FALSE, raster.height = 1000, raster.width = 1000,
                               show.base.legend = TRUE, debugMode = DEFAULTDEBUGMODE, singleEndMode = plotter$res@singleEnd, ...){
   plot.name <- "Lead Clipping NVC";
+  readLabel <- if(singleEndMode){ "Reads" } else {"Read-Pairs"}
   clip.amt <- min(c(clip.amt, plotter$res@decoder$cycle.CT));
   if(debugMode){ message("Starting: ",plot.name," plot."); }
   plotter.error.wrapper(plot.name, plotterFcn = function(){
@@ -1227,6 +1248,7 @@ makePlot.NVC.tail.clip <- function(plotter, clip.amt = 10,  r2.buffer = clip.amt
                                rasterize.plotting.area = FALSE, raster.height = 1000, raster.width = 1000,
                                show.base.legend = TRUE, debugMode = DEFAULTDEBUGMODE, singleEndMode = plotter$res@singleEnd, ...){
   plot.name <- "Tail Clipping NVC";
+  readLabel <- if(singleEndMode){ "Reads" } else {"Read-Pairs"}
   clip.amt <- min(c(clip.amt, plotter$res@decoder$cycle.CT));
   
   if(debugMode){ message("Starting: ",plot.name," plot."); }
@@ -1304,6 +1326,7 @@ makePlot.NVC.lead.clip.matchByClipPosition <- function(plotter, clip.amt = 10,  
                                                        show.base.legend = TRUE, load.results = TRUE, debugMode = DEFAULTDEBUGMODE,  singleEndMode = plotter$res@singleEnd,
                                                        ...){
   plot.name <- "Lead Clipping NVC";
+  readLabel <- if(singleEndMode){ "Reads" } else {"Read-Pairs"}
   if(debugMode){ message("Starting: ",plot.name," plot."); }
   plotter.error.wrapper(plot.name, plotterFcn = function(){
     if(rasterize.plotting.area){
@@ -1422,6 +1445,7 @@ makePlot.NVC.tail.clip.matchByClipPosition <- function(plotter, clip.amt = 10,  
                                                        rasterize.plotting.area = FALSE, raster.height = 1000, raster.width = 1000,
                                                        show.base.legend = TRUE, debugMode = DEFAULTDEBUGMODE,  singleEndMode = plotter$res@singleEnd, ...){
   plot.name <- "Lead Clipping NVC";
+  readLabel <- if(singleEndMode){ "Reads" } else {"Read-Pairs"}
   if(debugMode){ message("Starting: ",plot.name," plot."); }
   plotter.error.wrapper(plot.name, plotterFcn = function(){
     if(rasterize.plotting.area){
@@ -1515,6 +1539,7 @@ makePlot.NVC.tail.clip.matchByClipPosition <- function(plotter, clip.amt = 10,  
 
 makePlot.gene.assignment.rates <- function(plotter, debugMode = DEFAULTDEBUGMODE, singleEndMode = plotter$res@singleEnd, ...) {
   plot.name <- "Gene Assignment Rates";
+  readLabel <- if(singleEndMode){ "Reads" } else {"Read-Pairs"}
   if(debugMode){ message("Starting: ",plot.name," plot."); }
   plotter.error.wrapper(plot.name, plotterFcn = function(){
     res <- plotter$res;
@@ -1551,6 +1576,7 @@ makePlot.gene.assignment.rates <- function(plotter, debugMode = DEFAULTDEBUGMODE
 ####  if(is.null(plotter$res@qc.data[["summary"]]) | ! all(c() %in% plotter$res@qc.data[["summary"]][[1]]$FIELD) ){
 makePlot.splice.junction.loci.counts <- function(plotter, calc.rate = FALSE, high.low.cutoff = 4, debugMode = DEFAULTDEBUGMODE, singleEndMode = plotter$res@singleEnd, ...){
   plot.name <- "Splice Junction Loci Rates";
+  readLabel <- if(singleEndMode){ "Reads" } else {"Read-Pairs"}
   if(debugMode){ message("Starting: ",plot.name," plot."); }
   plotter.error.wrapper(plot.name, plotterFcn = function(){
     res <- plotter$res;
@@ -1602,6 +1628,7 @@ makePlot.splice.junction.loci.counts <- function(plotter, calc.rate = FALSE, hig
 
 makePlot.splice.junction.event.ratesPerRead <- function(plotter, high.low.cutoff = 4, debugMode = DEFAULTDEBUGMODE, singleEndMode = plotter$res@singleEnd, ...){
   plot.name <- "Splice Junction Event Rates";
+  readLabel <- if(singleEndMode){ "Reads" } else {"Read-Pairs"}
   if(debugMode){ message("Starting: ",plot.name," plot."); }
   plotter.error.wrapper(plot.name, plotterFcn = function(){
     calc.ratePerRead = TRUE;
@@ -1651,6 +1678,7 @@ makePlot.splice.junction.event.ratesPerRead <- function(plotter, high.low.cutoff
 
 makePlot.splice.junction.event.proportions <- function(plotter, high.low.cutoff = 4, debugMode = DEFAULTDEBUGMODE, singleEndMode = plotter$res@singleEnd, ...){
   plot.name <- "Splice Junction Event Rates";
+  readLabel <- if(singleEndMode){ "Reads" } else {"Read-Pairs"}
   if(debugMode){ message("Starting: ",plot.name," plot."); }
   plotter.error.wrapper(plot.name, plotterFcn = function(){
     calc.ratePerRead = FALSE;
@@ -1711,6 +1739,7 @@ makePlot.splice.junction.event.proportions <- function(plotter, high.low.cutoff 
 
 makePlot.splice.junction.event.counts <- function(plotter, high.low.cutoff = 4, debugMode = DEFAULTDEBUGMODE, singleEndMode = plotter$res@singleEnd, ...){
   plot.name <- "Splice Junction Event Rates";
+  readLabel <- if(singleEndMode){ "Reads" } else {"Read-Pairs"}
   if(debugMode){ message("Starting: ",plot.name," plot."); }
   plotter.error.wrapper(plot.name, plotterFcn = function(){
     calc.ratePerRead = FALSE;
@@ -1763,6 +1792,7 @@ makePlot.splice.junction.event.counts <- function(plotter, high.low.cutoff = 4, 
 
 makePlot.splice.junction.event.proportionsByType <- function(plotter, high.low.cutoff = 4, debugMode = DEFAULTDEBUGMODE, singleEndMode = plotter$res@singleEnd, ...){
   plot.name <- "Splice Junction Event Rates";
+  readLabel <- if(singleEndMode){ "Reads" } else {"Read-Pairs"}
   if(debugMode){ message("Starting: ",plot.name," plot."); }
   plotter.error.wrapper(plot.name, plotterFcn = function(){
     calc.rate = TRUE
@@ -1836,6 +1866,7 @@ makePlot.splice.junction.event.proportionsByType <- function(plotter, high.low.c
 
 makePlot.strandedness.test <- function(plotter, plot.target.boxes = FALSE, debugMode = DEFAULTDEBUGMODE, singleEndMode = plotter$res@singleEnd, ...){
   plot.name <- "Strandedness Test";
+  readLabel <- if(singleEndMode){ "Reads" } else {"Read-Pairs"}
   if(debugMode){ message("Starting: ",plot.name," plot."); }
   plotter.error.wrapper(plot.name, plotterFcn = function(){
     res <- plotter$res;
@@ -1884,6 +1915,7 @@ makePlot.strandedness.test <- function(plotter, plot.target.boxes = FALSE, debug
 
 makePlot.dropped.rates <- function(plotter, dropAlwaysZeroRows = FALSE, debugMode = DEFAULTDEBUGMODE, singleEndMode = plotter$res@singleEnd,...){
   plot.name <- "Dropped Rates";
+  readLabel <- if(singleEndMode){ "Reads" } else {"Read-Pairs"}
   if(debugMode){ message("Starting: ",plot.name," plot."); }
   plotter.error.wrapper(plot.name, plotterFcn = function(){
     res <- plotter$res;
@@ -1949,6 +1981,7 @@ makePlot.dropped.rates <- function(plotter, dropAlwaysZeroRows = FALSE, debugMod
 #names(plotter$res@calc.data)
 makePlot.mapping.rates <- function(plotter, plot.mm = NULL, y.counts.in.millions = TRUE, debugMode = DEFAULTDEBUGMODE, singleEndMode = plotter$res@singleEnd, ...){
   plot.name <- "Mapping Rates";
+  readLabel <- if(singleEndMode){ "Reads" } else {"Read-Pairs"}
   if(debugMode){ message("Starting: ",plot.name," plot."); }
   plotter.error.wrapper(plot.name, plotterFcn = function(){
     res <- plotter$res;
@@ -2166,6 +2199,7 @@ makePlot.chrom.type.rates <- function(plotter,
                                   custom.chromosome.style.def.function = NULL,
                                   return.table = FALSE, debugMode = DEFAULTDEBUGMODE,  singleEndMode = plotter$res@singleEnd, ...){
   plot.name <- "Chromosome Rates";
+  readLabel <- if(singleEndMode){ "Reads" } else {"Read-Pairs"}
   if(debugMode){ message("Starting: ",plot.name," plot."); }
   plotter.error.wrapper(plot.name, plotterFcn = function(){
     res <- plotter$res;
@@ -2278,6 +2312,7 @@ makePlot.chrom.type.rates <- function(plotter,
 
 makePlot.norm.factors <- function(plotter, by.sample = TRUE, return.table = FALSE, debugMode = DEFAULTDEBUGMODE, singleEndMode = plotter$res@singleEnd, ...){
   plot.name <- "Normalization Factors";
+  readLabel <- if(singleEndMode){ "Reads" } else {"Read-Pairs"}
   if(debugMode){ message("Starting: ",plot.name," plot."); }
   plotter.error.wrapper(plot.name, plotterFcn = function(){
     res <- plotter$res;
@@ -2325,6 +2360,7 @@ makePlot.norm.factors <- function(plotter, by.sample = TRUE, return.table = FALS
 
 makePlot.norm.factors.vs.TC <- function(plotter, by.sample = TRUE, return.table = FALSE, debugMode = DEFAULTDEBUGMODE, singleEndMode = plotter$res@singleEnd, ...){
   plot.name <- "Normalization Factors";
+  readLabel <- if(singleEndMode){ "Reads" } else {"Read-Pairs"}
   if(debugMode){ message("Starting: ",plot.name," plot."); }
   plotter.error.wrapper(plot.name, plotterFcn = function(){
     res <- plotter$res;
@@ -2380,6 +2416,7 @@ makePlot.norm.factors.vs.TC <- function(plotter, by.sample = TRUE, return.table 
 #Placeholder for future functionality!
 makePlot.cigarMismatch <- function(plotter,debugMode = DEFAULTDEBUGMODE,  singleEndMode = plotter$res@singleEnd,...){
   plot.name <- "Cigar Mismatch";
+  readLabel <- if(singleEndMode){ "Reads" } else {"Read-Pairs"}
   if(debugMode){ message("Starting: ",plot.name," plot."); }
   plotter.error.wrapper(plot.name, plotterFcn = function(){
     res <- plotter$res;
@@ -2412,6 +2449,7 @@ makePlot.cigarMismatch <- function(plotter,debugMode = DEFAULTDEBUGMODE,  single
 #INCOMPLETE! Temporary placeholder for future functionality
 makePlot.splicing.mismatch <- function(plotter, debugMode = DEFAULTDEBUGMODE,  singleEndMode = plotter$res@singleEnd,... ){
   plot.name <- "Splice Mismatch";
+  readLabel <- if(singleEndMode){ "Reads" } else {"Read-Pairs"}
   plotter.error.wrapper(plot.name, plotterFcn = function(){
     res <- plotter$res;
     plot.name <- "Splicing Mismatch";
