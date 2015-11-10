@@ -191,15 +191,22 @@ object mergeQcOutput {
   def decode(decoder : String, infileDir : String) : Map[String,Set[String]] = {
     val lines = getLinesSmartUnzip(decoder);
     val header = lines.next.split("\\s+");
-    val qcDirCol = if(header.indexOf("qc.data.dir") == -1){
-      header.indexOf("unique.id");
-    } else {
-      header.indexOf("qc.data.dir");
-    }
+    val qcDirCol = 
+      if(header.indexOf("qc.data.dir") != -1){
+        header.indexOf("qc.data.dir");
+      } else if(header.indexOf("unique.ID") != -1){
+        header.indexOf("unique.ID");
+      } else if(header.indexOf("unique.id") != -1){
+        header.indexOf("unique.id");
+      } else if(header.indexOf("lanebam.ID") != -1){
+        header.indexOf("lanebam.ID");
+      } else {
+        -1
+      }
     val idCol = header.indexOf("sample.ID");
     
     if(idCol == -1) error("Fatal error! Decoder has no column named sample.ID!");
-    if(qcDirCol == -1) error("Fatal error! Decoder has no column named 'qc.data.dir' or 'unique.id'!");
+    if(qcDirCol == -1) error("Fatal error! Decoder has no column named 'qc.data.dir', 'unique.ID', 'unique.id', or 'lanebam.ID'!");
     
     lines.foldLeft(Map[String,Set[String]]().withDefault(x => Set[String]()))((soFar, line) =>{
       val cells = line.split("\\s+");

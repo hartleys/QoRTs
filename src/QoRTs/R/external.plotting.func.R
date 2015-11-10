@@ -97,10 +97,10 @@ makePlot.biotype.rates <- function(plotter,
       }
       if(debugMode){ message("Finished: ",plot.name," plot.",getTimeAndDiff(ts)); }
       
-      print("1:");
-      print(tf.list[[1]]);
-      print("2:");
-      print(tf.list[[2]]);
+      #print("1:");
+      #print(tf.list[[1]]);
+      #print("2:");
+      #print(tf.list[[2]]);
 
     }
   })
