@@ -29,8 +29,7 @@ The R package can be installed in R using the command:
                        repos=NULL, 
                        type="source");
 
-The java jar file does not need to be installed, it can simply be downloaded and used directly.
-Just execute it using the java command:
+The java jar file does not need to be installed, it can simply be downloaded and used directly. Download the jar file from the [latest release](https://github.com/hartleys/QoRTs/releases/latest) and execute it using the java command:
     
     java -jar /path/to/jarfile/QoRTs.jar QC input.bam anno.gtf.gz /output/dir/
 
@@ -81,7 +80,7 @@ For a full listing of all help topics for the R utility, use the R command:
 
 ##LEGAL:
 This software is "United States Government Work" under the terms of the United 
-States Copyright Act. It was written as part of the authors’ official duties 
+States Copyright Act. It was written as part of the authorsâ€™ official duties 
 for the United States Government and thus QoRT Package User Manual cannot be 
 copyrighted. This software is freely available to the public for use without a 
 copyright notice. Restrictions cannot be placed on its present or future use.
