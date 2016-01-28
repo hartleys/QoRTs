@@ -1,10 +1,24 @@
-\begin{thebibliography}{1}
+\begin{thebibliography}{10}
+
+\bibitem{QoRTs}
+Stephen~W Hartley and James~C Mullikin.
+\newblock Qorts: a comprehensive toolset for quality control and data
+  processing of rna-seq experiments.
+\newblock {\em BMC bioinformatics}, 16(1):224, 2015.
+\newblock URL: \url{http://www.ncbi.nlm.nih.gov/pmc/articles/PMC4506620/}.
 
 \bibitem{DESeq}
 Simon Anders and Wolfgang Huber.
 \newblock {D}ifferential expression analysis for sequence count data.
 \newblock {\em Genome Biology}, 11:R106, 2010.
 \newblock URL: \url{http://genomebiology.com/2010/11/10/R106}.
+
+\bibitem{DESeq2}
+Simon~Anders Michael I~Love, Wolfgang~Huber.
+\newblock Moderated estimation of fold change and dispersion for rna-seq data
+  with deseq2.
+\newblock {\em Genome Biology}, 15:550, 2014.
+\newblock URL: \url{http://www.genomebiology.com/content/15/12/550}.
 
 \bibitem{edgeR}
 Mark~D. Robinson and Gordon~K. Smyth.

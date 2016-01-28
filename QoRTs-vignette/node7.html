@@ -7,8 +7,8 @@ original version by:  Nikos Drakos, CBLU, University of Leeds
   Jens Lippmann, Marek Rouchal, Martin Wilck and others -->
 <HTML>
 <HEAD>
-<TITLE>Processing of aligned RNA-Seq data</TITLE>
-<META NAME="description" CONTENT="Processing of aligned RNA-Seq data">
+<TITLE>Dataset Organization</TITLE>
+<META NAME="description" CONTENT="Dataset Organization">
 <META NAME="keywords" CONTENT="QoRTs-vignette">
 <META NAME="resource-type" CONTENT="document">
 <META NAME="distribution" CONTENT="global">
@@ -26,26 +26,26 @@ original version by:  Nikos Drakos, CBLU, University of Leeds
 
 <BODY > <div id=wrap>
 <!--Navigation Panel-->
-<A NAME="tex2html254"
+<A NAME="tex2html255"
   HREF="node8.html">
 <IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next" SRC="next.png"></A> 
-<A NAME="tex2html250"
+<A NAME="tex2html251"
   HREF="QoRTs-vignette.html">
 <IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up" SRC="up.png"></A> 
-<A NAME="tex2html244"
+<A NAME="tex2html245"
   HREF="node6.html">
 <IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous" SRC="prev.png"></A> 
-<A NAME="tex2html252"
+<A NAME="tex2html253"
   HREF="node1.html">
 <IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents" SRC="contents.png"></A>  
 <BR>
-<B> Next:</B> <A NAME="tex2html255"
-  HREF="node8.html">Visualization</A>
-<B> Up:</B> <A NAME="tex2html251"
+<B> Next:</B> <A NAME="tex2html256"
+  HREF="node8.html">Processing of aligned RNA-Seq</A>
+<B> Up:</B> <A NAME="tex2html252"
   HREF="QoRTs-vignette.html">QoRTs Package User Manual</A>
-<B> Previous:</B> <A NAME="tex2html245"
-  HREF="node6.html">Dataset Organization</A>
- &nbsp; <B>  <A NAME="tex2html253"
+<B> Previous:</B> <A NAME="tex2html246"
+  HREF="node6.html">Quick Start</A>
+ &nbsp; <B>  <A NAME="tex2html254"
   HREF="node1.html">Contents</A></B> 
 <BR>
 <BR>
@@ -54,126 +54,164 @@ original version by:  Nikos Drakos, CBLU, University of Leeds
 <A NAME="CHILD_LINKS"><STRONG>Subsections</STRONG></A>
 
 <UL>
-<LI><A NAME="tex2html256"
-  HREF="node7.html#SECTION00071000000000000000">Memory Usage</A>
+<LI><A NAME="tex2html257"
+  HREF="node7.html#SECTION00071000000000000000">Example data</A>
 </UL>
 <!--End of Table of Child-Links-->
 <HR>
 
-<H1><A NAME="SECTION00070000000000000000"></A>  <A NAME="sec:initialProcessing"></A>
+<H1><A NAME="SECTION00070000000000000000"></A>  <A NAME="sec:dataset"></A>
 <BR>
-Processing of aligned RNA-Seq data
-</H1><FONT COLOR="#585858"><FONT COLOR="#585858"></FONT></FONT>
+Dataset Organization
+</H1>
 <P>
-<FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858">The first step is to process the aligned RNA-Seq data. The bulk of the data-processing is performed by the QoRTs.jar java utility. This tool produces an array of output files, analyzing and tabulating the data in various ways. This utility requires about 10-20gb of RAM for most genomes, and takes roughly 4-7 minutes to process 1 million read-pairs.
-</FONT></FONT></FONT>
+<FONT COLOR="#585858">Several QoRTs functions will require "decoder" information in some form, which describes each sample and all of its technical replicates (if any). The simplest method is to provide a decoder file. All of the columns are optional except for unique.ID, however if group, lane, and/or technical replicate information is not supplied then QoRTs obviously will not be able to produce plots that organized and/or grouped by these factors.
+</FONT>
 <P>
-<FONT COLOR="#585858"><FONT COLOR="#585858"></FONT></FONT><PRE>
-java -jar /path/to/jarfile/QoRTs.jar QC \
-                   mybamfile.bam \
-                   transcriptAnnotationFile.gtf.gz \
-                   /qc/data/dir/path/
-</PRE><FONT COLOR="#585858"><FONT COLOR="#585858"></FONT></FONT>
-<P>
-<FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858">In the above command (which must be entered as a single line), you must replace <code>/path/to/jarfile/</code> with the file-path to the directory in which the jar file is kept. The path <code>/qc/data/dir/path/</code> should be replaced with the path you want the QC data to be written. This should match the path located in the decoder in the qc.data.dir column for this sample-run.
-</FONT></FONT></FONT>
-<P>
-<FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858">The bam processing tool includes numerous options. A full description of these options can be found in the online documentation of the jar utility<A NAME="tex2html12"
-  HREF="footnode.html#foot1536"><SUP>6</SUP></A>, or by entering the command:
-</FONT></FONT></FONT><PRE>
-java -jar /path/to/jarfile/QoRTs.jar QC --man
-</PRE><FONT COLOR="#585858"><FONT COLOR="#585858"></FONT></FONT>
-<P>
-<FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858">There are a number of crucial points that require attention when using the QoRTs.jar QC command.
-</FONT></FONT></FONT>
-<P>
-<FONT COLOR="#585858"><FONT COLOR="#585858"></FONT></FONT>
+<FONT COLOR="#585858"><I>Fields</I>:
+  </FONT>
 <UL>
-<LI><I>MAPQ filter:</I> Most aligners designed for RNA-Seq use the MAPQ field to define whether or not a read is multi-mapped. However, different aligners use different conventions. By default QoRTs assumes the RNA-STAR convention in which a MAPQ of 255 indicates a unique alignment. For TopHat, the <code>--minMAPQ</code> parameter must be set to 50. For GSNAP, the MAPQ behavior is not well documented (or at least I have been unable to find such documentation), but a MAPQ filtering threshold of 30 appears to work.
+<LI><I>unique.ID</I>: A unique identifier for the row. QoRTs will also accept the synonym "lanebam.ID". THIS IS THE ONLY MANDATORY FIELD.
 </LI>
-<LI><I>Stranded Data:</I> By default, QoRTs assumes that the data is <I>NOT</I> strand-specific. For strand-specific data, the <code>--stranded</code> option must be used.
+<LI><I>lane.ID</I>: The ID of the lane or batch. By default this will be set to "UNKNOWN".
 </LI>
-<LI><I>Stranded Library Type:</I> The <code>--fr_secondStrand</code> option may be required depending on the stranded library type. QoRTs does not attempt to automatically detect the platform and protocol used for stranded data. There are two types of strand-specific protocols, which are described by the TopHat/CuffLinks documentation at <TT><A NAME="tex2html14"
-  HREF="http://cufflinks.cbcb.umd.edu/manual.html#library">http://cufflinks.cbcb.umd.edu/manual.html#library</A></TT> as <code>fr-firststrand</code> and <code>fr-secondstrand</code>. In HTSeq, these same library type options are defined as <code>-s reverse</code> and <code>-s yes</code> respectively. According to the CuffLinks manual, <code>fr-firststrand</code> (the default used by QoRTs for stranded data) applies to dUTP, NSR, and NNSR protocols, whereas <code>fr-secondstrand</code> applies to "Directional Illumina (ligation)" and "Standard SOLiD" protocols. If you are unsure which library type applies to your dataset, don't worry: one of the tests will report stranded library type. If you use this test to determine library type, be aware that you may have to re-run QoRTs with the correct library type set.
+<LI><I>group.ID</I>: The ID of the "group". For example: "Case" or "Control". By default this will be set to "UNKNOWN".
 </LI>
-<LI><I>Read Groups:</I> Depending on the production pipeline, each biological sample may be run across multiple sequencer lanes. These seperate files can be merged together either before or after analysis with QoRTs (and maybe even before alignment). However, if the merger occurs before analysis with QoRTs, then each bam file will consist of multiple seperate lanes or runs. In this case, it is STRONGLY recommended that seperate QC runs be performed on each "read group", using the <code>--readGroup</code> option. This will prevent run- or lane-specific biases, artifacts, or errors from being obfuscated.
+<LI><I>sample.ID</I>: The ID of the biological sample from which the data originated. Each sample can have multiple rows, representing technical replicates (in which the same sample is sequenced on multiple lanes or runs). By default QoRTs will assume that every row comes from a separate sample, and will thus set the sample.ID to equal the unique.ID.
 </LI>
-<LI><I>Read Sorting:</I> For paired-end data reads must be sorted. By default, QoRTs can accept files sorted by name OR by position. Technically QoRTs will accept unsorted data, but the memory usage will be greatly increased.
+<LI><I>qc.data.dir</I>: The directory in which the java utility saved all the output data. If this column does not exist, by default it will be set to be unique.ID.
 </LI>
-<LI><I>Single-end vs paired-end:</I> By default, QoRTs assumes the input bam file consists of paired-end data. For single-end data, the <code>--singleEnded</code> option must be used.
+<LI><I>input.read.pair.count</I>: (Optional) The number of reads in the original fastq file, prior to alignment. If this field is left out, then QoRTs will skip comparisons and plotting of mapping rates. There are a number of other ways to input this value. See Section <A HREF="node9.html#subsec:plotDesc-17">8.4.21</A>.
+</LI>
+<LI><I>multi.mapped.read.pair.count</I>: (Optional) The number of reads that were multi-mapped by the aligner. This field should only be used if filtering for multi-mapped reads is performed prior to analysis with QoRTs (which is not recommended). Even in this case, this field can simply be left out and QoRTs will skip plotting and comparisons of multi-mapping rates.  See Section <A HREF="node9.html#subsec:plotDesc-17">8.4.21</A>.
   
 </LI>
-</UL><FONT COLOR="#585858"><FONT COLOR="#585858"></FONT></FONT>
+</UL>
 <P>
-<FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858">For example, to read the first read group bam-file for SAMP1 from the example dataset (which is stranded, coordinate-sorted, and uses the <code>fr_firstStrand</code> stranded library type), one would use the following command:
-</FONT></FONT></FONT>
+<FONT COLOR="#585858">In addition, the decoder can contain any other additional columns as desired, as long as all of the column names are distinct.
+</FONT>
 <P>
-<FONT COLOR="#585858"><FONT COLOR="#585858"></FONT></FONT><PRE>
-java -jar /path/to/jarfile/QoRTs.jar QC \
-                   --stranded \
-                   inputData/bamFiles/SAMP1_RG1.bam \
-                   inputData/annoFiles/anno.gtf.gz \
-                   outputData/qortsData/SAMP1_RG1/
-</PRE><FONT COLOR="#585858"><FONT COLOR="#585858"></FONT></FONT>
+<FONT COLOR="#585858">While QoRTs is primarily designed to allow comparisons between biological groups, lanes, sequencing-runs, etc, it can also be used on simpler datasets, or even individual samples. Thus, only the unique.ID variable is actually required. For testing purposes, you can produce a completed decoder (with all default values filled in) using the <code>completeAndCheckDecoder</code> function.
+</FONT>
 <P>
-<FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858">This command must be run on each bam file (and possibly more than once on each, if each bam file consists of multiple separate read-groups).
-</FONT></FONT></FONT>
+<FONT COLOR="#585858">The simplest example would just be a character vector of unique.ID's:
+</FONT>
 <P>
-<FONT COLOR="#585858"><FONT COLOR="#585858"></FONT></FONT>
-<H2><A NAME="SECTION00071000000000000000"></A>  <A NAME="sec:memUsage"></A>
+<FONT COLOR="#585858">
+
+<DIV ALIGN="LEFT">
+<FONT COLOR="#585858"><TT>
+ <FONT COLOR="#bc5a65"><B>completeAndCheckDecoder</B></FONT><FONT COLOR="#585858">(</FONT><FONT COLOR="#bc5a65"><B>c</B></FONT><FONT COLOR="#585858">(</FONT><FONT COLOR="#317ecc">&#34;SAMPLE1&#34;</FONT><FONT COLOR="#585858">,</FONT><FONT COLOR="#317ecc">&#34;SAMPLE2&#34;</FONT><FONT COLOR="#585858">,</FONT><FONT COLOR="#317ecc">&#34;SAMPLE3&#34;</FONT><FONT COLOR="#585858">));</FONT>
+<BR></TT></FONT>
+</DIV>
+<PRE>
+##   unique.ID sample.ID lane.ID group.ID qc.data.dir
+## 1   SAMPLE1   SAMPLE1 UNKNOWN  UNKNOWN     SAMPLE1
+## 2   SAMPLE2   SAMPLE2 UNKNOWN  UNKNOWN     SAMPLE2
+## 3   SAMPLE3   SAMPLE3 UNKNOWN  UNKNOWN     SAMPLE3
+</PRE>
+<P>
+<FONT COLOR="#585858">Alternatively, any of the optional fields can be included or left out, as desired:
+</FONT>
+<P>
+<FONT COLOR="#585858">
+
+<DIV ALIGN="LEFT">
+<FONT COLOR="#585858"><TT>
+ <FONT COLOR="#585858">incompleteDecoder</FONT> <FONT COLOR="#b05a65">&lt;-</FONT> <FONT COLOR="#bc5a65"><B>data.frame</B></FONT><FONT COLOR="#585858">(</FONT><FONT COLOR="#55aa55">unique.ID</FONT> <FONT COLOR="#585858">=</FONT> <FONT COLOR="#bc5a65"><B>c</B></FONT><FONT COLOR="#585858">(</FONT><FONT COLOR="#317ecc">&#34;SAMPLE1&#34;</FONT><FONT COLOR="#585858">,</FONT> <FONT COLOR="#317ecc">&#34;SAMPLE2&#34;</FONT><FONT COLOR="#585858">),</FONT>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<FONT COLOR="#55aa55">group.ID</FONT> <FONT COLOR="#585858">=</FONT> <FONT COLOR="#bc5a65"><B>c</B></FONT><FONT COLOR="#585858">(</FONT><FONT COLOR="#317ecc">&#34;CASE&#34;</FONT><FONT COLOR="#585858">,</FONT><FONT COLOR="#317ecc">&#34;CONTROL&#34;</FONT><FONT COLOR="#585858">));</FONT>
+<BR><FONT COLOR="#bc5a65"><B>completeAndCheckDecoder</B></FONT><FONT COLOR="#585858">(incompleteDecoder);</FONT>
+<BR></TT></FONT>
+</DIV>
+<PRE>
+##   unique.ID group.ID sample.ID lane.ID qc.data.dir
+## 1   SAMPLE1     CASE   SAMPLE1 UNKNOWN     SAMPLE1
+## 2   SAMPLE2  CONTROL   SAMPLE2 UNKNOWN     SAMPLE2
+</PRE>
+<P>
+</FONT></FONT>
+<H2><A NAME="SECTION00071000000000000000"></A> <A NAME="subsec:exampledata"></A>
 <BR>
-Memory Usage
+Example data
 </H2><FONT COLOR="#585858"><FONT COLOR="#585858"></FONT></FONT>
 <P>
-<FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858"><I>Memory usage:</I> The QoRTs QC utility requires at least 4gb or RAM for most genomes / datasets. Larger genomes, genomes with more annotated genes/transcripts, or larger bam files may require more RAM. You can set the maximum amount of RAM allocated to the JVM using the options <code>-Xmx4000M</code>. This should be included <I>before</I> the <code>-jar</code> in the command line. For example:
+<FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858">The separate R package QoRTsExampleData contains an example dataset with an example decoder:
 </FONT></FONT></FONT>
 <P>
+<FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858">
+</FONT></FONT>
+<DIV ALIGN="LEFT">
+<FONT COLOR="#585858"><FONT COLOR="#585858"></FONT></FONT><FONT COLOR="#585858"><TT>
+ <FONT COLOR="#585858">directory</FONT> <FONT COLOR="#b05a65">&lt;-</FONT> <FONT COLOR="#bc5a65"><B>paste0</B></FONT><FONT COLOR="#585858">(</FONT><FONT COLOR="#bc5a65"><B>system.file</B></FONT><FONT COLOR="#585858">(</FONT><FONT COLOR="#317ecc">&#34;extdata/&#34;</FONT><FONT COLOR="#585858">,</FONT> <FONT COLOR="#55aa55">package</FONT><FONT COLOR="#585858">=</FONT><FONT COLOR="#317ecc">&#34;QoRTsExampleData&#34;</FONT><FONT COLOR="#585858">,</FONT>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<FONT COLOR="#55aa55">mustWork</FONT><FONT COLOR="#585858">=</FONT><FONT COLOR="#af0f91">TRUE</FONT><FONT COLOR="#585858">),</FONT><FONT COLOR="#317ecc">&#34;/&#34;</FONT><FONT COLOR="#585858">);</FONT>
+<BR><FONT COLOR="#585858">decoder.file</FONT> <FONT COLOR="#b05a65">&lt;-</FONT> <FONT COLOR="#bc5a65"><B>system.file</B></FONT><FONT COLOR="#585858">(</FONT><FONT COLOR="#317ecc">&#34;extdata/decoder.txt&#34;</FONT><FONT COLOR="#585858">,</FONT>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<FONT COLOR="#55aa55">package</FONT><FONT COLOR="#585858">=</FONT><FONT COLOR="#317ecc">&#34;QoRTsExampleData&#34;</FONT><FONT COLOR="#585858">,</FONT>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<FONT COLOR="#55aa55">mustWork</FONT><FONT COLOR="#585858">=</FONT><FONT COLOR="#af0f91">TRUE</FONT><FONT COLOR="#585858">);</FONT>
+<BR><FONT COLOR="#585858">decoder.data</FONT> <FONT COLOR="#b05a65">&lt;-</FONT> <FONT COLOR="#bc5a65"><B>read.table</B></FONT><FONT COLOR="#585858">(decoder.file,</FONT>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<FONT COLOR="#55aa55">header</FONT><FONT COLOR="#585858">=T,</FONT>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<FONT COLOR="#55aa55">stringsAsFactors</FONT><FONT COLOR="#585858">=F);</FONT>
+<BR><FONT COLOR="#bc5a65"><B>print</B></FONT><FONT COLOR="#585858">(decoder.data);</FONT>
+<BR></TT><FONT COLOR="#585858"></FONT></FONT>
+</DIV>
 <FONT COLOR="#585858"><FONT COLOR="#585858"></FONT></FONT><PRE>
-#Set the maximum to the minimum recommended 4 gigabytes:
-java -Xmx4000M -jar /path/to/jarfile/QoRTs.jar QC \
-                   --stranded \
-                   inputData/bamFiles/SAMP1_RG1.bam \
-                   inputData/annoFiles/anno.gtf.gz \
-                   outputData/qortsData/SAMP1_RG1/
-
-#Or Set the maximum to 16 gigabytes:
-java -Xmx16G -jar /path/to/jarfile/QoRTs.jar QC \
-                   --stranded \
-                   inputData/bamFiles/SAMP1_RG1.bam \
-                   inputData/annoFiles/anno.gtf.gz \
-                   outputData/qortsData/SAMP1_RG1/
+##    sample.ID lane.ID unique.ID  qc.data.dir group.ID input.read.pair.count
+## 1      SAMP1      L1 SAMP1_RG1 ex/SAMP1_RG1     CASE                465298
+## 2      SAMP1      L2 SAMP1_RG2 ex/SAMP1_RG2     CASE                472241
+## 3      SAMP1      L3 SAMP1_RG3 ex/SAMP1_RG3     CASE                500691
+## 4      SAMP2      L1 SAMP2_RG1 ex/SAMP2_RG1     CASE                461405
+## 5      SAMP2      L2 SAMP2_RG2 ex/SAMP2_RG2     CASE                467713
+## 6      SAMP2      L3 SAMP2_RG3 ex/SAMP2_RG3     CASE                492322
+## 7      SAMP3      L1 SAMP3_RG1 ex/SAMP3_RG1     CASE                485397
+## 8      SAMP3      L2 SAMP3_RG2 ex/SAMP3_RG2     CASE                489859
+## 9      SAMP3      L3 SAMP3_RG3 ex/SAMP3_RG3     CASE                516906
+## 10     SAMP4      L1 SAMP4_RG1 ex/SAMP4_RG1     CTRL                460968
+## 11     SAMP4      L2 SAMP4_RG2 ex/SAMP4_RG2     CTRL                468391
+## 12     SAMP4      L3 SAMP4_RG3 ex/SAMP4_RG3     CTRL                484530
+## 13     SAMP5      L1 SAMP5_RG1 ex/SAMP5_RG1     CTRL                469884
+## 14     SAMP5      L2 SAMP5_RG2 ex/SAMP5_RG2     CTRL                475001
+## 15     SAMP5      L3 SAMP5_RG3 ex/SAMP5_RG3     CTRL                494213
+## 16     SAMP6      L1 SAMP6_RG1 ex/SAMP6_RG1     CTRL                452429
+## 17     SAMP6      L2 SAMP6_RG2 ex/SAMP6_RG2     CTRL                458810
+## 18     SAMP6      L3 SAMP6_RG3 ex/SAMP6_RG3     CTRL                477751
 </PRE><FONT COLOR="#585858"><FONT COLOR="#585858"></FONT></FONT>
 <P>
-<FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858">This option can be used with any and all of the QoRTs java utilities.
+<FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858">Due to size constraints the example dataset contained in this R package includes only the QC output data, not the raw bam-files themselves. The actual bamfiles, along with a step-by-step example walkthrough that covers the entire analysis pipeline, are linked to from the QoRTs github website (<TT><A NAME="tex2html9"
+  HREF="https://github.com/hartleys/QoRTs">https://github.com/hartleys/QoRTs</A></TT>).
 </FONT></FONT></FONT>
 <P>
-<FONT COLOR="#585858"><FONT COLOR="#585858"></FONT></FONT><HR>
+<FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858">The example dataset is derived from a set of rat pineal gland samples, which were multiplexed and sequenced across six sequencer lanes. For the sake of simplicity, the example dataset was limited to only six samples and three lanes. However, the bam files alone would still occupy 18 gigabytes of disk space, which would make it unsuitable for distribution as an example dataset. To further reduce the example bamfile sizes, only reads that mapped to chromosomes chr14, chr15, chrX, and chrM were included. Additionally, all the selected chromosomes EXCEPT for chromosome 14 were randomly downsampled to 30 percent of their original read counts.
+</FONT></FONT></FONT>
+<P>
+<FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858">THIS DATASET IS INTENDED FOR DEMONSTRATION AND TESTING PURPOSES ONLY. Due to the various alterations that have been made to reduce file sizes and improve portability, it is not representitive of the original data and as such is really not suitable for any actual analyses.
+</FONT></FONT></FONT>
+<P>
+<FONT COLOR="#585858"><FONT COLOR="#585858"></FONT></FONT></FONT><HR>
 <!--Navigation Panel-->
-<A NAME="tex2html254"
+<A NAME="tex2html255"
   HREF="node8.html">
 <IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next" SRC="next.png"></A> 
-<A NAME="tex2html250"
+<A NAME="tex2html251"
   HREF="QoRTs-vignette.html">
 <IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up" SRC="up.png"></A> 
-<A NAME="tex2html244"
+<A NAME="tex2html245"
   HREF="node6.html">
 <IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous" SRC="prev.png"></A> 
-<A NAME="tex2html252"
+<A NAME="tex2html253"
   HREF="node1.html">
 <IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents" SRC="contents.png"></A>  
 <BR>
-<B> Next:</B> <A NAME="tex2html255"
-  HREF="node8.html">Visualization</A>
-<B> Up:</B> <A NAME="tex2html251"
+<B> Next:</B> <A NAME="tex2html256"
+  HREF="node8.html">Processing of aligned RNA-Seq</A>
+<B> Up:</B> <A NAME="tex2html252"
   HREF="QoRTs-vignette.html">QoRTs Package User Manual</A>
-<B> Previous:</B> <A NAME="tex2html245"
-  HREF="node6.html">Dataset Organization</A>
- &nbsp; <B>  <A NAME="tex2html253"
+<B> Previous:</B> <A NAME="tex2html246"
+  HREF="node6.html">Quick Start</A>
+ &nbsp; <B>  <A NAME="tex2html254"
   HREF="node1.html">Contents</A></B> 
 <!--End of Navigation Panel-->
 <ADDRESS>
 Dr Stephen William Hartley
-2015-11-10
+2016-01-28
 </ADDRESS>
 </div></BODY>
 </HTML>

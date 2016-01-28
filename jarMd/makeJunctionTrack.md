@@ -1,5 +1,5 @@
 # QoRTs: Quality Of Rna-seq Tool Set
-> Version 1.0.1 (Updated Tue Nov 10 10:06:01 EST 2015)
+> Version 1.0.7 (Updated Thu Jan 28 16:24:20 EST 2016)
 
 > ([back to main](../index.html)) ([back to java-utility help](index.html))
 
@@ -12,7 +12,7 @@
 
 ## DESCRIPTION:
 
-This utility takes the splice junction count files created by the QoRTs QC utility across multiple samples and creates a single merged splice junction 'bed' file that lists each splice junction along with the mean read\-pair coverage counts \(optionally, the mean normalized counts\)\.This splice junction bed file can be used to visualize splice junction counts using the UCSC genome browser and other similar utilities\.Note: Either the '\-\-filenames' or the '\-\-sampleList' option must be set\! The sampleList option is generally used with the \-\-infilePrefix and \-\-infileSuffix options\.
+This utility takes the splice junction count files created by the QoRTs QC utility across multiple samples and creates a single merged splice junction 'bed' file that lists each splice junction along with the mean read\-pair coverage counts \(optionally, the mean normalized counts\)\.This splice junction bed file can be used to visualize splice junction counts using the UCSC genome browser and other similar utilities\. Note: Either the '\-\-filenames' or the '\-\-sampleList' option must be set\! The sampleList option is generally used with the \-\-infilePrefix and \-\-infileSuffix options\. Also note: This command only compiles the named splice junctions\. For other unnamed splice junctions such as novel splice junctions with low coverage, or novel splice junctions that bridge multiple genes, use the makeAltJunctionTrack command instead\.
 
 ## REQUIRED ARGUMENTS:
 ### flatgff.gff.gz:

@@ -1,5 +1,5 @@
 # QoRTs: Quality Of Rna-seq Tool Set
-> Version1.0.1 (Updated Tue Nov 10 10:06:01 EST 2015)
+> Version1.0.7 (Updated Thu Jan 28 16:24:20 EST 2016)
 
 > ([back to help base](../index.html))
 
@@ -32,13 +32,13 @@ NOTE: if you run into OutOfMemoryExceptions, try adding the java options: "-Xmx8
 
 > Generates '.wig' wiggle files, suitable for use with the UCSC genome browser or similar tools. Wiggle files contain depth-of-coverage counts for all equally-sized windows across the entire genome. These depth-of-coverage counts can be either be by read (the default) or by read-pair.
 
+### [makeJunctionTrack](makeJunctionTrack.html)
+
+> This utility takes the splice junction count files created by the QoRTs QC utility across multiple samples and creates a single merged splice junction 'bed' file that lists each splice junction along with the mean read-pair coverage counts (optionally, the mean normalized counts).This splice junction bed file can be used to visualize splice junction counts using the UCSC genome browser and other similar utilities. Note: Either the '--filenames' or the '--sampleList' option must be set! The sampleList option is generally used with the --infilePrefix and --infileSuffix options. Also note: This command only compiles the named splice junctions. For other unnamed splice junctions such as novel splice junctions with low coverage, or novel splice junctions that bridge multiple genes, use the makeAltJunctionTrack command instead.
+
 ### [makeOrphanJunctionTrack](makeOrphanJunctionTrack.html)
 
 > This utility takes the 'orphan' splice junction count files created by the QoRTs QC utility (optionally across multiple samples) and creates a single merged splice junction 'bed' file that lists each splice junction along with the read-pair coverage counts. It can optionally calculate the mean counts, and/or normalize the counts using the supplied normalization size factors.The output splice junction bed file can be used to visualize splice junction counts using the UCSC genome browser, IGV, or other similar utilities.Note: Either the '--filenames' or the '--sampleList' option MUST be set! The sampleList option is generally used with the --infilePrefix and --infileSuffix options to determine the input filenames.
-
-### [makeJunctionTrack](makeJunctionTrack.html)
-
-> This utility takes the splice junction count files created by the QoRTs QC utility across multiple samples and creates a single merged splice junction 'bed' file that lists each splice junction along with the mean read-pair coverage counts (optionally, the mean normalized counts).This splice junction bed file can be used to visualize splice junction counts using the UCSC genome browser and other similar utilities.Note: Either the '--filenames' or the '--sampleList' option must be set! The sampleList option is generally used with the --infilePrefix and --infileSuffix options.
 
 ### [mergeNovelSplices](mergeNovelSplices.html)
 
@@ -58,6 +58,14 @@ It can also be used to produce a flattened gff file that adheres to the specific
 ### [generateSamplePlots](generateSamplePlots.html)
 
 > This simple function invokes R and generates a simple, single-replicate plots (or a similar pdf report) given a single replicate's QoRTs QC output.
+
+### [longReadClassifier](longReadClassifier.html)
+
+> This function Classifies long reads (such as those from pacbio or oxford nanopore sequencers) It determines which reads are matches to the known isoforms supplied in the gene annotation.Note that many of the options listed below are currently nonfunctional. They are placeholders for future improvements and/or holdovers from the QC function, upon which this function is built.WARNING! THIS FUNCTION IS BETA!
+
+### [makeAltJunctionTrack](makeAltJunctionTrack.html)
+
+> This utility generates a splice-junction 'bed' file from the less common QoRTs-generated splice junction counts produced by the QC utility. This splice junction bed file can be used to visualize splice junction counts using the UCSC genome browser and other similar utilities.
 
 ## AUTHORS:
 
