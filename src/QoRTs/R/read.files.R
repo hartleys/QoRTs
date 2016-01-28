@@ -673,14 +673,14 @@ calc.samplewise.norm.factors <- function(res, calc.DESeq2 , calc.edgeR ){
     samples <- res@sample.list;
    
     if(calc.DESeq2){
-       if(! "DESeq2" %in% rownames(installed.packages())){
+       if(! requireNamespace("DESeq2",quietly=TRUE)){
          message("Warning: DESeq2 installation not found. Skipping calculation of DESeq2 normalization factors.");
          calc.DESeq2 <- FALSE;
        }
        
     }
     if(calc.edgeR){
-       if(! "edgeR" %in% rownames(installed.packages())){
+       if(! requireNamespace("edgeR",quietly=TRUE)){
          message("Warning: DESeq2 installation not found. Skipping calculation of DESeq2 normalization factors.");
          calc.edgeR <- FALSE;
        }
@@ -704,36 +704,36 @@ calc.samplewise.norm.factors <- function(res, calc.DESeq2 , calc.edgeR ){
         count.matrix <- do.call(cbind.data.frame, res@calc.data[["SAMPLE_GENE_COUNTS"]]);
       }
 
-      if(calc.DESeq2 & "DESeq2" %in% rownames(installed.packages())){
+      if(calc.DESeq2 & requireNamespace("DESeq2",quietly=TRUE)){
         message("Calculating DESeq2 Normalization Factors (Geometric normalization)...");
-        suppressPackageStartupMessages(require("DESeq2"));
+        #suppressPackageStartupMessages(requireNamespace("DESeq2"));
 
         tryCatch({
-          norm.factors$Norm_Geo <- estimateSizeFactorsForMatrix(count.matrix);
+          norm.factors$Norm_Geo <- DESeq2::estimateSizeFactorsForMatrix(count.matrix);
         }, error = function(e){
           message("WARNING: DESeq2::estimateSizeFactorsForMatrix failed. Skipping DESeq2 normalization.",e);
           #norm.factors[,Norm_Geo:=NULL];
         });
       }
 
-      if(calc.edgeR & "edgeR" %in% rownames(installed.packages())){
+      if(calc.edgeR &  requireNamespace("edgeR",quietly=TRUE)){
         message("Calculating edgeR Normalization Factors (all edgeR normalizations)...");
-        suppressPackageStartupMessages(require("edgeR"));
+        #suppressPackageStartupMessages(require("edgeR"));
 
         tryCatch({
-          norm.factors$Norm_TMM <- calcNormFactors(count.matrix, method="TMM");
+          norm.factors$Norm_TMM <- edgeR::calcNormFactors(count.matrix, method="TMM");
         }, error = function(e){
           message("WARNING: edgeR::calcNormFactors(method=TMM) failed. Skipping edgeR TMM normalizations.",e);
           #norm.factors[,Norm_TMM:=NULL];
         });
          tryCatch({
-           norm.factors$Norm_UQ <- calcNormFactors(count.matrix, method="upperquartile");
+           norm.factors$Norm_UQ <- edgeR::calcNormFactors(count.matrix, method="upperquartile");
          }, error = function(e){
            message("WARNING: edgeR::calcNormFactors(method=upperquartile) failed. Skipping edgeR upperquartile normalizations.",e);
            #norm.factors[,Norm_UQ:=NULL];
         });
         tryCatch({
-          norm.factors$Norm_RLE <- calcNormFactors(count.matrix, method="RLE");
+          norm.factors$Norm_RLE <- edgeR::calcNormFactors(count.matrix, method="RLE");
         }, error = function(e){
           message("WARNING: edgeR::calcNormFactors(method=RLE) failed. Skipping edgeR RLE normalizations.",e);
           #norm.factors[,Norm_RLE:=NULL];
@@ -749,15 +749,15 @@ calc.samplewise.norm.factors <- function(res, calc.DESeq2 , calc.edgeR ){
 
 calc.lanebamwise.norm.factors <- function(res, calc.DESeq2 , calc.edgeR){
     if(calc.DESeq2){
-       if(! "DESeq2" %in% rownames(installed.packages())){
+       if(! requireNamespace("DESeq2",quietly=TRUE)){
          message("Warning: DESeq2 installation not found. Skipping calculation of DESeq2 normalization factors.");
          calc.DESeq2 <- FALSE;
        }
        
     }
     if(calc.edgeR){
-       if(! "edgeR" %in% rownames(installed.packages())){
-         message("Warning: DESeq2 installation not found. Skipping calculation of DESeq2 normalization factors.");
+       if(! requireNamespace("edgeR",quietly=TRUE)){
+         message("Warning: edgeR installation not found. Skipping calculation of DESeq2 normalization factors.");
          calc.edgeR <- FALSE;
        }
        
@@ -781,19 +781,19 @@ calc.lanebamwise.norm.factors <- function(res, calc.DESeq2 , calc.edgeR){
          count.matrix <- count.matrix[is.gene,, drop = F];
       }
 
-      if(calc.DESeq2 & "DESeq2" %in% rownames(installed.packages())){
+      if(calc.DESeq2 & requireNamespace("DESeq2",quietly=TRUE)){
         message("Calculating DESeq2 Normalization Factors (Geometric normalization)...");
-        suppressPackageStartupMessages(require("DESeq2"));
+        requireNamespace("DESeq2",quietly=TRUE);
 
-        norm.factors$Norm_Geo <- estimateSizeFactorsForMatrix(count.matrix);
+        norm.factors$Norm_Geo <- DESeq2::estimateSizeFactorsForMatrix(count.matrix);
       }
 
-      if(calc.edgeR & "edgeR" %in% rownames(installed.packages())){
+      if(calc.edgeR & requireNamespace("edgeR",quietly=TRUE)){
         message("Calculating edgeR Normalization Factors (all edgeR normalizations)...");
-        suppressPackageStartupMessages(require("edgeR"));
-        norm.factors$Norm_TMM <- calcNormFactors(count.matrix, method="TMM");
-        norm.factors$Norm_UQ <- calcNormFactors(count.matrix, method="upperquartile");
-        norm.factors$Norm_RLE <- calcNormFactors(count.matrix, method="RLE");
+        requireNamespace("edgeR",quietly=TRUE);
+        norm.factors$Norm_TMM <- edgeR::calcNormFactors(count.matrix, method="TMM");
+        norm.factors$Norm_UQ <- edgeR::calcNormFactors(count.matrix, method="upperquartile");
+        norm.factors$Norm_RLE <- edgeR::calcNormFactors(count.matrix, method="RLE");
       }
       res@calc.data[["norm.factors.byLaneBam"]] <- norm.factors;
       return(res);

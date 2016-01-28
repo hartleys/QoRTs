@@ -47,7 +47,11 @@
   y-axis: The rate at which the bases at the given read-cycle is
   clipped off.
 }
-
+\examples{
+  data(res,package="QoRTsExampleData");
+  plotter <- build.plotter.colorByGroup(res);
+  makePlot.clipping(plotter)
+}
 \seealso{
   \code{\link{build.plotter}}
 }

@@ -409,10 +409,11 @@ object mergeQcOutput {
      close(writer);
    }
    
-   def mergeComplexData(infilePrefixes : Seq[String], infileSuffix : String, outfile : String){
+   def mergeComplexData(infilePrefixes : Seq[String], infileSuffix : String, outfile : String, hasTitleLine : Boolean = true){
      
      val iterSeq : Seq[Iterator[String]] = infilePrefixes.map(prefix => getLinesSmartUnzip(prefix + infileSuffix));
-     iterSeq.foreach(_.next);
+     val titleLine : String = iterSeq.head.next;
+     iterSeq.tail.foreach(_.next);
      
      val sumIterator : Iterator[String] = new Iterator[String](){
        def hasNext : Boolean = iterSeq.head.hasNext;
@@ -432,6 +433,7 @@ object mergeQcOutput {
      }
      
      val writer = openWriterSmart(outfile);
+     writer.write(titleLine+"\n");
      for(line <- sumIterator){
        writer.write(line +"\n");
      }

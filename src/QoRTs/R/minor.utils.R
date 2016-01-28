@@ -197,7 +197,7 @@ check.rasterize.or.die <- function(varname = "rasterize.plotting.area"){
 }
 
 can.plot.raster <- function(){
-   if(! suppressWarnings(require(png))){
+   if(! suppressWarnings(requireNamespace("png",quietly=TRUE))){
      #warning("Cannot rasterize plots! Package png not found. Recommend installing package png.");
      return(FALSE);
    }
@@ -231,7 +231,7 @@ autoselect.raster.device <- function(debugMode){
      return(outDev);
    } else if(is.available.raster.device("CairoPNG")){
      if(debugMode) message("selecting CairoPNG raster device.");
-     rasterDev <- CairoPNG;
+     rasterDev <- Cairo::CairoPNG;
      return(rasterDev);
    } else {
      stop("Error: no viable raster (png) device found! Install package CairoPNG or reinstall R with png capabilities activated!");
@@ -241,7 +241,7 @@ is.available.raster.device <- function(d){
    if(d == "png"){
      capabilities()[["png"]];
    } else if(d == "CairoPNG"){
-     if(suppressWarnings(require("Cairo"))){
+     if(suppressWarnings(requireNamespace("Cairo"))){
        return(TRUE);
      } else {
        return(FALSE);
@@ -252,7 +252,7 @@ is.available.raster.device <- function(d){
 }
 
 make.mixed.raster.vector.function <- function(use.raster.device = NULL, raster.height = 1000, raster.width = 1000, debugMode = TRUE, ...){
-  if(! require(png)){
+  if(! requireNamespace("png",quietly=TRUE)){
     stop("FATAL ERROR: cannot make hybrid raster/vector drawings without package \"png\". Install package png or set rasterize.plotting.area to FALSE");
   }
 
@@ -274,7 +274,7 @@ make.mixed.raster.vector.function <- function(use.raster.device = NULL, raster.h
   
   printRaster <- function(){
     #if(debugMode) message(">     (rasterizingPlot) Reading Rasterized image...");
-    require(png);
+    requireNamespace("png",quietly=TRUE);
     imgData <- png::readPNG(usetempfile);
     #if(debugMode) message(">     (rasterizingPlot) Rasterized image read.");
     rasterData <- as.raster(imgData);

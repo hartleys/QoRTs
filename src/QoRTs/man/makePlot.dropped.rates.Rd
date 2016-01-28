@@ -37,7 +37,11 @@ makePlot.dropped.rates(plotter, dropAlwaysZeroRows = FALSE,
    
    Note that in the example dataset reads were never dropped. This is a consequence of the pre-processing steps in the example pipeline.
 }
-
+\examples{
+  data(res,package="QoRTsExampleData");
+  plotter <- build.plotter.colorByGroup(res);
+  makePlot.dropped.rates(plotter)
+}
 \seealso{
   \code{\link{build.plotter}}
 }

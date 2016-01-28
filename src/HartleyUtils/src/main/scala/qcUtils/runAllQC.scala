@@ -58,6 +58,10 @@ object runAllQC {
                       ("cigarLocusCounts"          -> "BETA: This function is still undergoing basic testing. It is not intended for production use at this time. (default: OFF)")
   );
   
+  final val QC_HIDDEN_BETA_FUNCTION_MAP : scala.collection.immutable.Map[String,String] = Map(
+                      //("featureComboCount" -> "Write a table including all combinations of exon/junction features, and the counts. (BETA FUNCTION! NOT FOR PRODUCTION USE!)")
+      );
+  
   final val QC_DEFAULT_ON_FUNCTION_LIST  : scala.collection.immutable.Set[String] = QC_DEFAULT_ON_FUNCTION_MAP.keySet;
   final val QC_DEFAULT_OFF_FUNCTION_LIST  : scala.collection.immutable.Set[String] = QC_DEFAULT_OFF_FUNCTION_MAP.keySet;
   
@@ -671,7 +675,7 @@ object runAllQC {
       runFuncTEMP2 -- QC_INCOMPATIBLE_WITH_SINGLE_END_FUNCTION_LIST;
     }
     
-    val notFoundFunc = runFunc.find(  ! QC_FUNCTION_LIST.contains(_) ) ;
+    val notFoundFunc = runFunc.find(  ! (QC_FUNCTION_LIST ++ QC_HIDDEN_BETA_FUNCTION_MAP.keySet).contains(_) ) ;
     if( ! notFoundFunc.isEmpty ){
       error("ERROR: Function not found: \"" + notFoundFunc.get +"\"");
     }
@@ -1011,6 +1015,10 @@ object runAllQC {
                                                                                                                    isSingleEnd, stranded, fr_secondStrand, 
                                                                                                                    1.0, true, true, true, None, "") else QCUtility.getBlankUnitUtil;
     
+    //Special super secret utility: 
+    //val qcFCC :  QCUtility[Unit]   =   if(runFunc.contains("featureComboCount"))        new qcFeatureComboCt(anno_holder, stranded, fr_secondStrand,  outfile = outfile)                   else QCUtility.getBlankUnitUtil;
+
+    
     val extractWriter : Option[WriterUtil] = extractReadsFunction match {
       case Some(f) => Some(openWriter(outfile + ".extractedReads.sam"));
       case None => None;
@@ -1065,6 +1073,7 @@ object runAllQC {
               qcCM.runOnReadPair(r1,r2,readNum);
               qcCLC.runOnReadPair(r1,r2,readNum);
               qcWIG.runOnReadPair(r1,r2,readNum);
+              //qcFCC.runOnReadPair(r1,r2,readNum);
               useReadNum += 1;
               
               val extract = extractReadsFunction match {
@@ -1079,7 +1088,7 @@ object runAllQC {
                 writeExtractedReads(r1,r2);
               }
               
-              if(internalUtils.commonSeqUtils.isReadMultiMapped(r1) || internalUtils.commonSeqUtils.isReadMultiMapped(r2)){
+              if(internalUtils.commonSeqUtils.isReadMultiMapped(r1, minMAPQ) || internalUtils.commonSeqUtils.isReadMultiMapped(r2, minMAPQ)){
                 keptMultiMappedCt += 1;
               }
             }

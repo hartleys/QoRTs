@@ -96,7 +96,13 @@
   \code{makePlot.genebody.coverage.UMQuartile} plots the gene body coverage across the genes that fall in the upper-middle quartile of total expression for each sample-run (excluding genes with zero reads).
   \code{makePlot.genebody.coverage.lowExpress} plots the gene body coverage across the genes that fall in the lower two quartiles of total expression for each sample-run (excluding genes with zero reads).
 }
-
+\examples{
+  data(res,package="QoRTsExampleData");
+  plotter <- build.plotter.colorByGroup(res);
+  makePlot.genebody(plotter, geneset = "Overall");
+  makePlot.genebody(plotter, geneset = "90-100");
+  makePlot.genebody(plotter, geneset = "50-75");
+}
 \seealso{
   \code{\link{build.plotter}}
 }

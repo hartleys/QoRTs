@@ -43,7 +43,11 @@ The categories are:
     \item \emph{No Gene, middle of nowhere}: The read-pair does not overlap with the exons of any annotated gene, and is \emph{more} than 10 kilobases from the nearest annotated gene.
   }
 }
-
+\examples{
+  data(res,package="QoRTsExampleData");
+  plotter <- build.plotter.colorByGroup(res);
+  makePlot.gene.assignment.rates(plotter)
+}
 \seealso{
   \code{\link{build.plotter}}
 }

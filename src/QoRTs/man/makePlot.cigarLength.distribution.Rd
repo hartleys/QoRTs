@@ -72,7 +72,12 @@
   
   y-axis: Frequency of the given length.
 }
-
+\examples{
+  data(res,package="QoRTsExampleData");
+  plotter <- build.plotter.colorByGroup(res);
+  makePlot.cigarLength.distribution(plotter, op = "Del");
+  makePlot.cigarLength.distribution(plotter, op = "Ins");
+}
 \seealso{
   \code{\link{build.plotter}}
 }

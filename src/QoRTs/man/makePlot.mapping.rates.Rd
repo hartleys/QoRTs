@@ -39,7 +39,11 @@ makePlot.mapping.rates(plotter, plot.mm = NULL,
 \details{
 For each sample-run, this function plots the number of mapped reads and the rate at which reads map (if the total reads is provided).
 }
-
+\examples{
+  data(res,package="QoRTsExampleData");
+  plotter <- build.plotter.colorByGroup(res);
+  makePlot.mapping.rates(plotter);
+}
 \seealso{
   \code{\link{build.plotter}}
   \code{\link{read.qc.results.data}}

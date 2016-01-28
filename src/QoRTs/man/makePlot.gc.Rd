@@ -56,7 +56,11 @@
   
   y-axis: Rate at which the given percent occurs.
 }
-
+\examples{
+  data(res,package="QoRTsExampleData");
+  plotter <- build.plotter.colorByGroup(res);
+  makePlot.gc(plotter)
+}
 \seealso{
   \code{\link{build.plotter}}
 }

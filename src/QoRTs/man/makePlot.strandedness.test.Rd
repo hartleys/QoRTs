@@ -35,7 +35,11 @@ makePlot.strandedness.test(plotter, plot.target.boxes = FALSE,
 \details{
    TODO!
 }
-
+\examples{
+  data(res,package="QoRTsExampleData");
+  plotter <- build.plotter.colorByGroup(res);
+  makePlot.strandedness.test(plotter);
+}
 \seealso{
   \code{\link{build.plotter}}
 }

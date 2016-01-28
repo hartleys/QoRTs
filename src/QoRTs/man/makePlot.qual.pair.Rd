@@ -57,7 +57,13 @@ would be plotted directly on top of one another. To reduce this
 problem, the lines are vertically offset from one another. Most
 plotters offset each line by lane.ID.
 }
-
+\examples{
+  data(res,package="QoRTsExampleData");
+  plotter <- build.plotter.colorByGroup(res);
+  makePlot.qual.pair(plotter,y.name="min");
+  makePlot.qual.pair(plotter,y.name="median");
+  makePlot.qual.pair(plotter,y.name="max");
+}
 \seealso{
   \code{\link{build.plotter}}
 }

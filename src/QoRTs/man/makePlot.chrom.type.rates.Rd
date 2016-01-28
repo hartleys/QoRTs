@@ -68,7 +68,11 @@ makePlot.chrom.type.rates(plotter,
 \value{
    By default, this function returns nothing. If the return.table parameter is TRUE, then it returns a data.frame with the data that was plotted.
 }
-
+\examples{
+  data(res,package="QoRTsExampleData");
+  plotter <- build.plotter.colorByGroup(res);
+  makePlot.chrom.type.rates(plotter);
+}
 \seealso{
   \code{\link{build.plotter}}
 }

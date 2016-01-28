@@ -70,13 +70,16 @@ BiocStyle::latex()
 \title{QoRTs Package User Manual}
 \author{Stephen Hartley\\
 National Human Genome Research Institute\\
-National Institutes of Health\\
-v1.0.1 %REPLACE_THIS_LINE_WITH_VERSION_NUMBER
+National Institutes of Health
 }
 
 \begin{document}
 
 \maketitle
+
+\begin{center}
+\textbf{QoRTs v}\Sexpr{packageVersion("QoRTs")}
+\end{center}
 
 \tableofcontents
 
@@ -100,7 +103,7 @@ openBitmap = function(nm, rows=1, cols=1, height = 600, width = 800, cex = 1.2) 
 \section{Overview} \label{sec:praeludium}
 %-----------------------------------------------------------
 
-The QoRTs software package is a fast, efficient, and portable multifunction toolkit designed to assist in the analysis, quality control, and data management of RNA-Seq datasets. Its primary function is to aid in the detection and identification of errors, biases, and artifacts produced by paired-end high-throughput RNA-Seq technology. In addition, it can produce count data designed for use with differential expression \footnote{Such as \Biocpkg{DESeq}, \Biocpkg{DESeq2}\cite{DESeq} or \Biocpkg{edgeR}\cite{edgeR}} and differential exon usage tools \footnote{Such as \Biocpkg{DEXSeq}\cite{DEXSeq}}, as well as individual-sample and/or group-summary genome track files suitable for use with the UCSC genome browser (or any compatible browser).
+The \href{http://hartleys.github.io/QoRTs/}{QoRTs software package}\cite{QoRTs} is a fast, efficient, and portable multifunction toolkit designed to assist in the analysis, quality control, and data management of RNA-Seq datasets. Its primary function is to aid in the detection and identification of errors, biases, and artifacts produced by paired-end high-throughput RNA-Seq technology. In addition, it can produce count data designed for use with differential expression \footnote{Such as \Biocpkg{DESeq}\cite{DESeq}, \Biocpkg{DESeq2}\cite{DESeq2} or \Biocpkg{edgeR}\cite{edgeR}} and differential exon usage tools \footnote{Such as \Biocpkg{DEXSeq}\cite{DEXSeq} or \href{http://hartleys.github.io/JunctionSeq/}{JunctionSeq}}, as well as individual-sample and/or group-summary genome track files suitable for use with the UCSC genome browser (or any compatible browser).
 
 In its primary role as a QC tool it can produce a wide variety of graphs, plots, and tables that allow the data to be visualized in various ways. Data can be compiled and contrasted in multiple ways to allow systematic errors or artifacts to reveal themselves more easily. While it will not directly assign pass/fail status, it is a powerful tool for bioinformaticians to detect and identify features in the data. In (hopefully) most cases, these plots and graphs will not reveal anything other than mixed statistical noise. Next-Gen sequencing technologies have matured to the point where gross systematic errors and batch-specific biases are relatively modest and rare. However: mistakes can still occur, and basing conclusions on flawed data can be disastrous.
 
@@ -108,9 +111,13 @@ Across the field of bioinformatics there are numerous cases where biases, artifa
 
 The QoRTs package is composed of two parts: a java jar-file (for data processing) and a companion R package (for generating tables, figures, and plots). The java utility is written in the Scala programming language (v2.11.1), however, it has been compiled to java byte-code and does not require an installation of Scala (or any other external libraries) in order to function. The entire QoRTs toolkit can be used on almost any operating system that supports java and R. While not explicitly required, the use of a 64-bit version of java is recommended.
 
-This vignette primarily covers the quality control functionality of QoRTs, and briefly covers the other functions and capabilities.
+This vignette primarily covers the quality control functionality of QoRTs, and briefly covers the other functions and capabilities. For more information on these other functions, and on further analysis using the QoRTs pipeline, see the comprehensive walktrhough, below.
 
-The most recent release of QoRTs is available on the QoRTs github page (\url{http://github.com/hartleys/QoRTs}). Additional help and documentation is available online (\url{http://hartleys.github.io/QoRTs/index.html}). A comprehensive walkthrough covering the entire process from post-alignment all the way to differential expression analysis, along with a full example dataset and example output can be found online (\url{https://dl.dropboxusercontent.com/u/103621176/qorts/exData/QoRTsFullExampleData.zip}).
+The most recent release of QoRTs is available on the QoRTs github page (\url{http://hartleys.github.io/QoRTs/}), along with additional help and documentation.
+
+\href{http://hartleys.github.io/JunctionSeq/doc/example-walkthrough.pdf}{A comprehensive walkthrough} is available online that describes the entire analysis pipeline from aligned reads through analysis with other tools such as DESeq2, edgeR, DEXSeq, and JunctionSeq, as well as the creation of plots and browser tracks. The example dataset used by this walkthrough is \href{https://dl.dropboxusercontent.com/u/103621176/pipelineWalkthrough/QoRTsPipelineWalkthrough.zip}{available online} (280mb download), including the \href{https://dl.dropboxusercontent.com/u/103621176/pipelineWalkthrough/bamfiles.zip}{bam files} (~1gb download).
+
+A UCSC browser session produced in this pipeline is also \href{https://genome.ucsc.edu/cgi-bin/hgTracks?hgS_doOtherUser=submit&hgS_otherUserName=stephen.hartley&hgS_otherUserSessionName=rn6_pipelineWalkthrough_finalTracks}{available online}, along with \href{https://dl.dropboxusercontent.com/u/103621176/pipelineWalkthrough/trackHub/index.html}{the trackhub} used to create this session.
 
 %-----------------------------------------------------------
 \section{Requirements}  \label{sec:reqs}
@@ -123,6 +130,24 @@ The most recent release of QoRTs is available on the QoRTs github page (\url{htt
 \emph{Annotation:} QoRTs requires transcript annotations in the form of a gtf file. If you are using a annotation-guided aligner (which is STRONGLY recommended) it is likely you already have a transcript gtf file for your reference genome. We recommend you use the same annotation gtf for alignment, QC, and downstream analysis. We have found the Ensembl "Gene Sets" gtf\footnote{Which can be acquired from the Ensembl website at \url{http://www.ensembl.org}} suitable for these purposes. However, any format that adheres to the gtf file specification\footnote{See the gtf file specification at \url{http://genome.ucsc.edu/FAQ/FAQformat.html}} will work.
 
 \emph{Dataset:} QoRTs requires aligned RNA-Seq data. Data can be paired-end or single-end, unstranded or stranded (using either strandedness rule, see Section \ref{sec:initialProcessing}). It is strongly recommended, but not explicitly required, that the SAM/BAM files be sorted (either by name or position). QoRTs can use additional metadata (such as technical replicate status, case/control status, batch id, etc) to produce comparisons between these replicate groups, but this information is optional.
+
+%-----------------------------------------------------------
+\section{Installation}  \label{sec:install}
+%-----------------------------------------------------------
+
+QoRTs installation is easy, as it does not have and R package dependencies. You can download the latest version of the java jar file \href{http://hartleys.github.io/QoRTs/QoRTs.jar}{here}. The jar file does not need to be installed, and is simply called directly. 
+
+\noindent For example, to get the general help for the QoRTs jar utility, use the command:
+\begin{verbatim}
+java -jar /path/to/jarfile/QoRTs.jar --help
+\end{verbatim}
+
+The R companion package can be installed from inside R with the command:
+<<installQoRTsCompanion, eval = FALSE>>=
+install.packages("http://hartleys.github.io/QoRTs/QoRTs_LATEST.tar.gz", 
+                 repos = NULL, 
+                 type="source")
+@
 
 %-----------------------------------------------------------
 \subsection{Recommendations}  \label{sec:recs}

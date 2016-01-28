@@ -152,8 +152,8 @@ object qcGtfAnnotationBuilder {
       }
     }
     
-    reportln("        (DEBUG) Extracted gene BioType using key \""+codes.BIOTYPE_ATTRIBUTE_KEY+"\".","debug");
-    reportln("                Found "+bioset.size+" types: ["+bioset.toList.mkString(",")+"]","debug");
+    reportln("      (DEBUG) Extracted gene BioType using key \""+codes.BIOTYPE_ATTRIBUTE_KEY+"\".","debug");
+    reportln("              Found "+bioset.size+" types: ["+bioset.toList.mkString(",")+"]","debug");
     
     reportln("      (DEBUG) Finished Biotype Map ["+getDateAndTimeString+"]","debug");
     return out.withDefault(x => "UNK");

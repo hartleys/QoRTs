@@ -80,7 +80,11 @@
     bridges an unannotated splice junction.
   }
 }
-
+\examples{
+  data(res,package="QoRTsExampleData");
+  plotter <- build.plotter.colorByGroup(res);
+  makePlot.insert.size(plotter);
+}
 \seealso{
   \code{\link{build.plotter}}
 }

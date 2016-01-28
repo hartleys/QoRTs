@@ -103,7 +103,12 @@ makePlot.NVC.tail.clip(plotter, clip.amt,  r2.buffer,
    
    This function plots the nucleotide rates for the sections of reads that were soft-clipped by the aligner. Note that these will not function on reads that have been aligned using an aligner that does not practice soft clipping (such as TopHat2).
 }
-
+\examples{
+  data(res,package="QoRTsExampleData");
+  plotter <- build.plotter.colorByGroup(res);
+  makePlot.NVC.lead.clip(plotter, clip.amt = 12);
+  makePlot.NVC.tail.clip(plotter, clip.amt = 12);
+}
 \seealso{
   \code{\link{build.plotter}}, \code{\link{makePlot.NVC}}
 }

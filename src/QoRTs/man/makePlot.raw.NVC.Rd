@@ -102,7 +102,12 @@ makePlot.minus.clipping.NVC(plotter,  r2.buffer = NULL,
    
    \code{\link{makePlot.raw.NVC}} plots the nucleotides of all cycles of all aligned reads. \code{\link{makePlot.minus.clipping.NVC}} plots the nucleotides for all cycles that are NOT soft-clipped by the aligner. Note that for reads aligned with an aligner that does not perform soft-clipping (such as TopHat2), the two plots will be identical.
 }
-
+\examples{
+  data(res,package="QoRTsExampleData");
+  plotter <- build.plotter.colorByGroup(res);
+  makePlot.minus.clipping.NVC(plotter);
+  makePlot.raw.NVC(plotter);
+}
 \seealso{
   \code{\link{build.plotter}}
 }

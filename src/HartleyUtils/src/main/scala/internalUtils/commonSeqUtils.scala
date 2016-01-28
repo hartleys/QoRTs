@@ -790,6 +790,9 @@ object commonSeqUtils {
   final val CODA_NOT_UNIQUE_ALIGNMENT = 9;
   
   final val CODA_TOTAL_READ_PAIRS = 10;
+
+  final val CODA_PAIR_STRANDS_DISAGREE = 11;
+    
   final val CODA_NOT_MARKED_RG = 11;
   
   final val CODA_CODA_LENGTH = 12;
@@ -834,7 +837,7 @@ object commonSeqUtils {
     return sb.toString;
   }
    
-  def useReadPair(r1 : SAMRecord, r2 : SAMRecord, causeOfDropArray : Array[Int], dropOptions : Seq[Boolean] = CODA_DEFAULT_OPTIONS, dropChrom : Set[String], readGroup : Option[String], minMAPQ : Int = 255) : Boolean = {
+  def useReadPair(r1 : SAMRecord, r2 : SAMRecord, causeOfDropArray : Array[Int], dropOptions : Seq[Boolean] = CODA_DEFAULT_OPTIONS, dropChrom : Set[String], readGroup : Option[String], minMAPQ : Int ) : Boolean = {
     
     causeOfDropArray(CODA_TOTAL_READ_PAIRS) += 1;
     
@@ -880,9 +883,9 @@ object commonSeqUtils {
     return CODA_READ_OK;
   }
   
-  def isReadMultiMapped(samRecord : SAMRecord) : Boolean = {
-    samRecord.getMappingQuality() < 255;
-  }
+  def isReadMultiMapped(samRecord : SAMRecord, minMAPQ : Int) : Boolean = {
+    samRecord.getMappingQuality() < minMAPQ;
+  } 
   
   //def useRead(samRecord : SAMRecord, causeOfDropArray : Array[Int]) : Boolean = {
   //  if(samRecord.getMateUnmappedFlag()) { causeOfDropArray(0) = causeOfDropArray(0) + 1; return false; }

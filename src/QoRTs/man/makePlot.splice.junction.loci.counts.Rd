@@ -40,7 +40,11 @@ makePlot.splice.junction.loci.counts(plotter,
 \details{
    This function plots the number (y-axis) of splice junction \emph{loci} of each type that appear in the bam-file's reads. Splice junctions are split into 4 groups, first by whether the splice junction appears in the transcript annotation gtf ("known" vs "novel"), and then by whether the splice junction has 4 or more reads covering it, or 1-3 reads ("Hi" vs "Lo").
 }
-
+\examples{
+  data(res,package="QoRTsExampleData");
+  plotter <- build.plotter.colorByGroup(res);
+  makePlot.splice.junction.loci.counts(plotter);
+}
 \seealso{
   \code{\link{build.plotter}}, \code{\link{makePlot.splice.junction.event}}
 }

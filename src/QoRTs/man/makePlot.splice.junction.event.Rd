@@ -72,7 +72,14 @@
    
    All of these plots are generally used to detect whether sample-specific or batch effects have a substantial or biased effect on splice junction appearance, either due to differences in the original RNA, or due to artifacts that alter the rate at which the aligner maps across splice junctions.
 }
-
+\examples{
+  data(res,package="QoRTsExampleData");
+  plotter <- build.plotter.colorByGroup(res);
+  makePlot.splice.junction.event.counts(plotter);
+  makePlot.splice.junction.event.ratesPerRead(plotter);
+  makePlot.splice.junction.event.proportions(plotter);
+  makePlot.splice.junction.event.proportionsByType(plotter);
+}
 \seealso{
   \code{\link{build.plotter}}, \code{\link{makePlot.splice.junction.loci.counts}}
 }

@@ -11,7 +11,7 @@ import internalUtils.GtfTool._;
 object makeOrphanJunctionBed {
 
   class converter extends CommandLineRunUtil { 
-     override def priority = 25;
+     override def priority = 28;
      val parser : CommandLineArgParser = 
        new CommandLineArgParser(
           command = "makeOrphanJunctionTrack", 

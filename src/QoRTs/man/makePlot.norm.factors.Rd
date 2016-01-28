@@ -56,6 +56,12 @@
 \value{
   Usually returns nothing, unless return.table is TRUE, in which case it returns a data.frame containing the plotted data for each sample. 
 }
+\examples{
+  data(res,package="QoRTsExampleData");
+  plotter <- build.plotter.colorByGroup(res);
+  makePlot.norm.factors(plotter);
+  makePlot.norm.factors.vs.TC(plotter);
+}
 \seealso{
   \code{\link{build.plotter}}
 

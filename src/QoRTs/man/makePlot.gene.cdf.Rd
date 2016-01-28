@@ -73,7 +73,11 @@
 
   Note that this is restricted to only the reads that map to a single unique gene. Reads that map to more than one gene, or that map to intronic or intergenic areas are ignored.
 }
-
+\examples{
+  data(res,package="QoRTsExampleData");
+  plotter <- build.plotter.colorByGroup(res);
+  makePlot.gene.cdf(plotter)
+}
 \seealso{
   \code{\link{build.plotter}}
 }

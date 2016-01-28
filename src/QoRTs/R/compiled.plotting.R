@@ -464,7 +464,7 @@ makeMultiPlot.GENERIC <- function(res,
     };
     devCloseFunct <- function(){dev.off()}        
   } else if(plot.device.name == "CairoPNG"){
-    if(! require(Cairo)) stop("Error: package Cairo not found. Install package Cairo or set plot.device.name to something other than CairoPNG or CairoPDF.");
+    if(! requireNamespace("Cairo", quietly=TRUE)) stop("Error: package Cairo not found. Install package Cairo or set plot.device.name to something other than CairoPNG or CairoPDF.");
 
     if(is.null(outfile.ext)) outfile.ext = ".png";
     if(is.null(outfile)) outfile <- paste0(outfile.dir, outfile.prefix,outfile.ext);
@@ -472,7 +472,8 @@ makeMultiPlot.GENERIC <- function(res,
     devOpenFunct <- function(f,w){
       default.params <- list(filename = f, height = height.per.px * height.mult, width = width.per.px * width.mult * w, pointsize = 36, units = "px");
       dev.params <- overmerge.list(default.params,plotting.device.params);
-      do.call(CairoPNG,dev.params)
+      requireNamespace("Cairo", quietly=TRUE)
+      do.call(Cairo::CairoPNG,dev.params)
     };
     devCloseFunct <- function(){dev.off()}
   } else if(plot.device.name == "svg"){
@@ -496,14 +497,15 @@ makeMultiPlot.GENERIC <- function(res,
     };
     devCloseFunct <- function(){dev.off()}
   } else if(plot.device.name == "CairoPDF"){
-    if(! require(Cairo)) stop("Error: package Cairo not found. Install package Cairo or set plot.device.name to something other than CairoPNG or CairoPDF.");
+    if(! requireNamespace("Cairo",quietly=TRUE)) stop("Error: package Cairo not found. Install package Cairo or set plot.device.name to something other than CairoPNG or CairoPDF.");
     if(is.null(outfile.ext)) outfile.ext = ".pdf";
     if(is.null(outfile)) outfile <- paste0(outfile.dir, outfile.prefix,outfile.ext);
     
     devOpenFunct <- function(f,w){
       default.params <- list(file = f, height = 0, width = 0, pointsize = 10, paper = "letter");
       dev.params <- overmerge.list(default.params,plotting.device.params);
-      do.call(CairoPDF,dev.params)
+      requireNamespace("Cairo", quietly=TRUE)
+      do.call(Cairo::CairoPDF,dev.params)
     };
     devCloseFunct <- function(){dev.off()}
   } else {
@@ -576,11 +578,11 @@ QoRTs.open.plotting.device <- function(filename, plot.device.name = "png", devic
    if(is.null(plot.device.name)){
      return(funct.do.nothing);
    } else if(plot.device.name == "png"){
-     do.call(png,device.params.final);
+     do.call(grDevices::png,device.params.final);
      return(dev.off)
    } else if(plot.device.name == "CairoPNG"){
-     require("Cairo");
-     do.call(CairoPNG,device.params.final);
+     requireNamespace("Cairo");
+     do.call(Cairo::CairoPNG,device.params.final);
      return(dev.off)
    } else if(plot.device.name == "CairoPDF" | plot.device.name == "pdf"){
      #do nothing!
@@ -839,15 +841,6 @@ INTERNAL.plot.summaries.pdf <- function(res, plotter,
                                         exclude.autosomes.chrom.rate.plot = TRUE,
                                         chromosome.name.style = "UCSC",
                                         ...){
-
-  #if(pdf.device.name == "pdf"){
-  #   pdf(pdf.outfile, paper = pdf.paper, pointsize=pdf.pointsize, width=pdf.width, height=pdf.height);
-  #} else if(pdf.device.name == "CairoPDF"){
-   #  require(Cairo);
-   #  CairoPDF(pdf.outfile, paper = pdf.paper, pointsize=pdf.pointsize, width=pdf.width, height=pdf.height);
-  #} else {
-  #   stop("unrecognized option for pdf.device.name: allowed values are pdf and CairoPDF");
-  #}
   
 
   a.to.z <- c("a","b","c","d","e","f","g","h","i","j","k","l","m","n","o","p","q","r","s","t","u","v","w","x","y","z")

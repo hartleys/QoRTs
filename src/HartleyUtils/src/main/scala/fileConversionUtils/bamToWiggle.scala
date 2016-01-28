@@ -388,7 +388,7 @@ object bamToWiggle {
   } 
   
   
-  def runOnFile(infile : String, qcBTW : QcBamToWig, testRun : Boolean, isSingleEnd : Boolean, keepMultiMapped : Boolean, readGroup : Option[String]){
+ /* def runOnFile(infile : String, qcBTW : QcBamToWig, testRun : Boolean, isSingleEnd : Boolean, keepMultiMapped : Boolean, readGroup : Option[String]){
     val reader : SAMFileReader = if(infile == "-"){
       new SAMFileReader(System.in);
     } else {
@@ -417,8 +417,8 @@ object bamToWiggle {
       if(internalUtils.commonSeqUtils.useReadPair(r1,r2,coda, coda_options, Set[String](), readGroup)){
         qcBTW.runOnReadPair(r1,r2,readNum);
       }
-    }
-  }
+    } 
+  }*/
   
   def getReadBlocks(r : SAMRecord) : Vector[(Int,Int)] = {
     r.getAlignmentBlocks().toVector.map((block) => {

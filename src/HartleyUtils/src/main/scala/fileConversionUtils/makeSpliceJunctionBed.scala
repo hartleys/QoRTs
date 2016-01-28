@@ -23,12 +23,12 @@ object makeSpliceJunctionBed {
                         "mean read-pair coverage counts (optionally, the mean normalized counts)."+
                         "This splice junction bed file "+
                         "can be used to visualize splice junction counts using the UCSC genome browser "+
-                        "and other similar utilities."+
+                        "and other similar utilities. "+
                         "Note: Either the '--filenames' or the '--sampleList' option must be set! The sampleList option is "+
-                        "generally used with the --infilePrefix and --infileSuffix options."+
-                        ""+
-                        ""+
-                        ""+
+                        "generally used with the --infilePrefix and --infileSuffix options. "+
+                        "Also note: This command only compiles the named splice junctions. For other unnamed "+
+                        "splice junctions such as novel splice junctions with low coverage, or novel splice junctions "+
+                        "that bridge multiple genes, use the makeAltJunctionTrack command instead."+
                         ""+
                         "",
           argList = 

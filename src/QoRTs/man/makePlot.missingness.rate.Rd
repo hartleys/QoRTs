@@ -38,7 +38,11 @@
   
   y-axis: Rate at which the sequencer assigns an 'N' base.
 }
-
+\examples{
+  data(res,package="QoRTsExampleData");
+  plotter <- build.plotter.colorByGroup(res);
+  makePlot.missingness.rate(plotter);
+}
 \seealso{
   \code{\link{build.plotter}}
 }

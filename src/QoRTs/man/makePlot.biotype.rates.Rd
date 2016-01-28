@@ -54,7 +54,11 @@
   y-axis: Total read counts across all genes in the BioType, 
   measured either in reads or reads-per-million.
 }
-
+\examples{
+  data(res,package="QoRTsExampleData");
+  plotter <- build.plotter.colorByGroup(res);
+  makePlot.biotype.rates(plotter);
+}
 \seealso{
   \code{\link{build.plotter}}
 }
