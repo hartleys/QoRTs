@@ -50,16 +50,14 @@ object convertSpliceCountsToBed {
      override def priority = 100;
      val parser : CommandLineArgParser = 
        new CommandLineArgParser(
-          command = "makeAltJunctionTrack", 
+          command = "makeSimpleJunctionTrack", 
           quickSynopsis = "", 
           synopsis = "", 
-          description = "This utility generates a splice-junction 'bed' file from the less common QoRTs-generated "+
-                        "splice junction counts produced by the QC utility. This splice junction bed file "+
-                        "can be used to visualize splice junction counts using the UCSC genome browser "+
-                        "and other similar utilities."+
-                        ""+
-                        ""+
-                        "",   
+          description = "This utility converts QoRTs splice junction count files into "+
+                        "bed format. Unlike makeJunctionTrack and makeOrphanJunctionTrack, "+
+                        "this utility is not designed to compile multiple samples or replicates "+
+                        "together. It is a simple converter from a QoRTs junction count file "+
+                        "to a bed file. The count files come in 3 types: known, novel, and orphan.",
           argList = 
                     new BinaryOptionArgument[String](
                                          name = "rgb", 

@@ -37,6 +37,10 @@
 \details{
   Returns summary data in table form.
 }
+\examples{
+  data(res,package="QoRTsExampleData");
+  get.summary.table(res);
+}
 
 \seealso{
   \code{\link{read.qc.results.data}} 

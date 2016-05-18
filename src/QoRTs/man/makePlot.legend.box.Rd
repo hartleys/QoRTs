@@ -43,6 +43,17 @@ makePlot.legend.over(position, plotter, debugMode, singleEndMode, \dots)
    
    makePlot.legend.over adds a legend to the current plotting frame.
 }
+\examples{
+data(res,package="QoRTsExampleData");
+plotter <- build.plotter.colorByGroup(res);
+#Add a legend to an existing plot:
+makePlot.strandedness.test(plotter);
+makePlot.legend.over("topright", plotter)
+
+#Or make a legend as a separate plot:
+makePlot.legend.box(plotter);
+}
+
 
 \seealso{
   \code{\link{build.plotter}}

@@ -1386,7 +1386,7 @@ In addition to the standard quality-control tools described in the previous sect
 Before counting exons and splice junctions, QoRTs generates a set of non-overlapping exonic fragments out of all the exons in the genome annotation gtf file. It then assigns each exonic fragment a unique identifier. Similarly, it assigns every splice junction its own unique identifier. A gtf file listing all these genomic features and their unique identifiers can be created using the following command:
 
 \begin{verbatim}
-java -jar /path/to/jarfile/QoRTs.jar makeFlatGtf \
+java -jar /path/to/jarfile/QoRTs.jar makeFlatGff \
                                      input.gtf \
                                      flattened.gff
 \end{verbatim}

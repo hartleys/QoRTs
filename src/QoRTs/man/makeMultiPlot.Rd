@@ -271,6 +271,14 @@
     Rasteration of large plots can be turned off via the rasterize.large.plots option.
 }
 
+
+\examples{
+  \dontrun{
+    data(res,package="QoRTsExampleData");
+    makeMultiPlot.colorByGroup(res);
+  }
+}
+
 \seealso{
   \code{\link{build.plotter}}
 }

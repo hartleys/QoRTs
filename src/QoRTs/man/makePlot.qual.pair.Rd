@@ -63,6 +63,9 @@ plotters offset each line by lane.ID.
   makePlot.qual.pair(plotter,y.name="min");
   makePlot.qual.pair(plotter,y.name="median");
   makePlot.qual.pair(plotter,y.name="max");
+  
+  #Legend:
+  makePlot.legend.box(plotter);
 }
 \seealso{
   \code{\link{build.plotter}}

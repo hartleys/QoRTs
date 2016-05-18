@@ -54,6 +54,7 @@ object runAllQC {
                       ("makeWiggles"               -> "Write \"wiggle\" coverage files with 100-bp window size. Note: this REQUIRES that the --chromSizes parameter be included! (default: OFF)"),
                       ("makeJunctionBed"           -> "Write splice-junction count \"bed\" files. (default: OFF)"),
                       ("makeAllBrowserTracks"      -> "Write both the \"wiggle\" and the splice-junction bed files (default: OFF)"),
+                      ("calcDetailedGeneCounts"    -> "Calculate more detailed read counts for each gene, counting the number of reads that cover introns, cross-strand, etc (default: OFF)"),
                       ("cigarMatch"                -> "Work-In-Progress: this function is a placeholder for future functionality, and is not intended for use at this time. (default: OFF)"),
                       ("cigarLocusCounts"          -> "BETA: This function is still undergoing basic testing. It is not intended for production use at this time. (default: OFF)")
   );
@@ -157,7 +158,7 @@ object runAllQC {
                                          argDesc = "Flag to indicate that reads are from a fr_secondstrand type of stranded library (equivalent to the \"stranded = yes\" option in HTSeq or the \"fr_secondStrand\" library-type option in TopHat/CuffLinks). "+
                                                    "If your data is stranded, you must know the library type in order to analyze it properly. This utility uses the same "+
                                                    "definitions as cufflinks to define strandedness type. By default, the fr_firststrand "+
-                                                   "library type is assumed for all stranded data (equivalent to the \"stranded = D\" option in HTSeq)." // description
+                                                   "library type is assumed for all stranded data (equivalent to the \"stranded = reverse\" option in HTSeq)." // description
                                        ) ::
                     new BinaryOptionArgument[Int](
                                          name = "maxReadLength", 
@@ -782,7 +783,8 @@ object runAllQC {
           generatePdfReport=generatePdfReport,
           extractReadsFunction = extractReadsFunction,
           adjustPhredScore = adjustPhredScore,
-          maxPhredScore = maxPhredScore)
+          maxPhredScore = maxPhredScore,
+          calcDetailedGeneCounts = runFunc.contains("calcDetailedGeneCounts"))
     }
   }
   
@@ -814,7 +816,8 @@ object runAllQC {
                    generatePdfReport : Boolean,
                    extractReadsFunction : Option[((String, Int, (Int,Int)) => Boolean)],
                    adjustPhredScore : Int,
-                   maxPhredScore : Int){
+                   maxPhredScore : Int,
+                   calcDetailedGeneCounts : Boolean){
     
     val inputReadCt : Option[Int] = seqReadCt match {
       case Some(ct) => Some(ct);
@@ -999,7 +1002,7 @@ object runAllQC {
     
     //"writeKnownSplices","writeNovelSplices","writeSpliceExon", "writeDESeq","writeDEXSeq","writeGenewiseGeneBody"
     //  final val QC_FUNCTION_LIST : Seq[String] = Seq("InsertSize","NVC","CigarOpDistribution","QualityScoreDistribution","GCDistribution","GeneCounts","JunctionCounts");
-    val qcGGC:  QCUtility[String] =   if(runFunc.contains("GeneCalcs"))                 new qcGetGeneCounts(stranded,fr_secondStrand,anno_holder,coda,coda_options,40, runFunc.contains("FPKM"), runFunc.contains("writeGenewiseGeneBody"), runFunc.contains("writeDESeq"), runFunc.contains("writeGeneCounts"), runFunc.contains("writeGeneBody"), runFunc.contains("writeBiotypeCounts"), geneKeepFunc) else QCUtility.getBlankStringUtil;
+    val qcGGC:  QCUtility[String] =   if(runFunc.contains("GeneCalcs"))                 new qcGetGeneCounts(stranded,fr_secondStrand,anno_holder,coda,coda_options,40, runFunc.contains("FPKM"), runFunc.contains("writeGenewiseGeneBody"), runFunc.contains("writeDESeq"), runFunc.contains("writeGeneCounts"), runFunc.contains("writeGeneBody"), runFunc.contains("writeBiotypeCounts"), geneKeepFunc, calcDetailedGeneCounts= calcDetailedGeneCounts) else QCUtility.getBlankStringUtil;
     val qcIS :  QCUtility[Int]    =   if(runFunc.contains("InsertSize"))                new qcInnerDistance(anno_holder, stranded, fr_secondStrand, readLength)        else QCUtility.getBlankIntUtil;
     val qcCS :  QCUtility[Unit]   =   if(runFunc.contains("NVC"))                       new qcNVC(isSingleEnd, readLength, runFunc.contains("writeClippedNVC"))                     else QCUtility.getBlankUnitUtil;
     val qcJD :  QCUtility[Unit]   =   if(runFunc.contains("CigarOpDistribution"))       new qcCigarDistribution(isSingleEnd, readLength)                                            else QCUtility.getBlankUnitUtil;
@@ -1127,9 +1130,9 @@ object runAllQC {
     summaryWriter.write(internalUtils.commonSeqUtils.causeOfDropArrayToStringTabbed(coda, coda_options));
     
     summaryWriter.write("KEPT_NOT_UNIQUE_ALIGNMENT	"+keptMultiMappedCt+"\n");
-    summaryWriter.write("minObservedReadLength  "+minObsReadLength + "\n");
-    summaryWriter.write("maxObservedReadLength  "+minObsReadLength + "\n");
-    summaryWriter.write("maxLegalPhredScore  "+maxPhredScore + "\n");
+    summaryWriter.write("minObservedReadLength\t"+minObsReadLength + "\n");
+    summaryWriter.write("maxObservedReadLength\t"+minObsReadLength + "\n");
+    summaryWriter.write("maxLegalPhredScore\t"+maxPhredScore + "\n");
     
     if(isSingleEnd){
       summaryWriter.write("IS_SINGLE_END	1\n");
@@ -1138,9 +1141,9 @@ object runAllQC {
     }
     
     if(inputReadCt.isEmpty){
-      summaryWriter.write("PREALIGNMENT_READ_CT	-1\n");
+      summaryWriter.write("PREALIGNMENT_READ_CT\t-1\n");
     } else {
-      summaryWriter.write("PREALIGNMENT_READ_CT	"+inputReadCt.get+"\n");
+      summaryWriter.write("PREALIGNMENT_READ_CT\t"+inputReadCt.get+"\n");
     }
     
     val iterationMinutes = (outputIterationTimeStamp.compareTo(samIterationTimeStamp) / 1000).toDouble / 60.toDouble;

@@ -40,7 +40,7 @@ class qcGtfAnnotationBuilder(gtffile : String, flatgtffile : Option[String], str
   lazy val geneArray : GenomicArrayOfSets[String] = qcGtfAnnotationBuilder.qcGetGeneCounts_readGtf(stranded,gtffile, stdCodes).finalizeStepVectors;
   lazy val qcGetGeneCounts_cdsArray : GenomicArrayOfSets[String]  =  qcGtfAnnotationBuilder.qcGetGeneCounts_geneArea_CDS_readGtf(stranded, gtffile, stdCodes).finalizeStepVectors;
   lazy val qcGetGeneCounts_intronArray : GenomicArrayOfSets[String]  =  qcGtfAnnotationBuilder.qcGetGeneCounts_geneArea_INTRONS_readFlatGtf(stranded, makeFlatReader, flatCodes).finalizeStepVectors;
-
+  lazy val qcGetGeneCounts_spanArray : GenomicArrayOfSets[String] = qcGtfAnnotationBuilder.qcGetGeneCounts_geneArea_regions(stranded,gtffile, stdCodes).finalizeStepVectors;
   lazy val flatFeatureList : IndexedSeq[String] = qcGtfAnnotationBuilder.getFlatFeatureList(makeFlatReader, stranded, flatCodes);
   
   lazy val geneLengthMap : GenMap[String,Int] = qcGtfAnnotationBuilder.getGeneLengthMap(geneArray);
@@ -196,6 +196,8 @@ object qcGtfAnnotationBuilder {
   def extractGeneId(gtfLine : GtfLine, codes : GtfCodes) : String = {
     return gtfLine.getAttributeOrDie(codes.GENE_ID_ATTRIBUTE_KEY);
   }
+  
+  
   def buildGenomicArrayOfSets_fromGtf(stranded : Boolean, gtffile : String, lineFilter : ( GtfLine => Boolean ) , elementExtractor : (GtfLine => String)) : GenomicArrayOfSets[String] = {
     //report("reading Gtf: " + gtffile + "\n","note");
     val geneArray : GenomicArrayOfSets[String] = GenomicArrayOfSets[String](stranded);
@@ -254,6 +256,40 @@ object qcGtfAnnotationBuilder {
   private def qcGetGeneCounts_geneArea_CDS_readGtf(stranded : Boolean, gtffile : String, codes : GtfCodes) : GenomicArrayOfSets[String] = {
     return buildGenomicArrayOfSets_fromGtf(stranded, gtffile, (gtfLine : GtfLine) => gtfLine.featureType == codes.STD_CDS_TYPE_CODE, (gtfLine : GtfLine) => extractGeneId(gtfLine, codes));
   }
+  private def qcGetGeneCounts_geneArea_regions(stranded : Boolean, gtffile : String, codes : GtfCodes) : GenomicArrayOfSets[String] = {
+   // return buildGenomicArrayOfSets_fromGtf(stranded, gtffile, (gtfLine : GtfLine) => gtfLine.featureType == codes.STD_CDS_TYPE_CODE, (gtfLine : GtfLine) => extractGeneId(gtfLine, codes));
+    val gtfReader = GtfReader.getGtfReader(gtffile, stranded, true, "\\s+");
+    
+    reportln("      (Loading gene regions)","debug");
+    
+    val spanArray = scala.collection.mutable.AnyRefMap[String,GenomicInterval]();
+    for(gtfLine <- gtfReader){
+      if(gtfLine.featureType == codes.STD_EXON_TYPE_CODE || gtfLine.featureType == codes.STD_CDS_TYPE_CODE){
+        val geneID = extractGeneId(gtfLine, codes);
+        val curriv = gtfLine.getGenomicInterval.usingStrandedness(stranded);
+
+        spanArray.get(geneID) match {
+          case Some(newiv) => {
+            spanArray(geneID) = GenomicInterval(curriv.chromName,curriv.strand, Math.min(curriv.start,newiv.start), Math.max(curriv.end,newiv.end));
+          }
+          case None => {
+            spanArray(geneID) = GenomicInterval(curriv.chromName,curriv.strand,curriv.start, curriv.end);
+          }
+        }
+      }
+    }
+    reportln("      (Generating region array)","debug");
+    
+    val geneArray : GenomicArrayOfSets[String] = GenomicArrayOfSets[String](stranded);
+    for(geneID <- spanArray.keySet){
+      val iv = spanArray(geneID);
+      geneArray.addSpan(iv, geneID);
+    }
+    
+    reportln("      (Region array complete)","debug");
+    return geneArray;
+  }
+  
   
   private def qcGetGeneCounts_geneArea_INTRONS_readFlatGtf(stranded : Boolean, makeFlatReader : (() => Iterator[FlatGtfLine]), codes : GtfCodes) : GenomicArrayOfSets[String] = {
     return buildGenomicArrayOfSets_fromGtf(stranded, makeFlatReader, (gtfLine : GtfLine) => gtfLine.featureType == codes.JS_FEATURETYPE_KNOWNSPLICE || gtfLine.featureType == codes.JS_FEATURETYPE_NOVELSPLICE, (gtfLine : GtfLine) => extractGeneId(gtfLine, codes));

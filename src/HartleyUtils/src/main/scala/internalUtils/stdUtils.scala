@@ -25,6 +25,61 @@ object stdUtils {
   }
   
   /**************************************************************************************************************************
+   * Specialty:
+   **************************************************************************************************************************/
+  
+  def calculateGeometricSizeFactorsForMatrix(m : Seq[Seq[Int]], verbose : Boolean = true) : Vector[Double] = {
+    if(verbose) reportln(">   Calculating size factors","debug");
+    
+    val nrow = m.size;
+    val ncol = m.head.size;
+    if(m.exists(_.size != ncol)) error("FATAL ERROR in size factor calculations: count matrix does not have consistent dimensions.");
+    
+    if(verbose) reportln(">      nrow = "+nrow,"debug");
+    if(verbose) reportln(">      ncol = "+ncol,"debug");
+
+    val logGeoMeans : Vector[Double] = Range(0,ncol).toVector.map((j : Int) => {
+      Range(0,nrow).toVector.map((i : Int) => {
+        scala.math.log(m(i)(j));
+      }).sum / nrow.toDouble;
+    });
+    //m.map( (x : Seq[Int]) => (x.map(scala.math.log(_)).sum / x.size) ).toVector;
+    if(verbose) reportln(">      Calculated logGeoMeans.","debug");
+    if(verbose) reportln(">      logGeoMeans.size = "+logGeoMeans.size,"debug");
+
+    if(verbose) reportln(">      SF iteration:","debug");
+    val sf : Vector[Double] = m.map((cts : Seq[Int]) => {
+      val v = cts.zip(logGeoMeans).filter{
+        case (ct : Int, lgm : Double) => 
+          (ct > 0) && (! lgm.isInfinite)
+      }.map{ 
+        case (ct : Int, lgm : Double) => 
+          scala.math.log(ct) - lgm
+      }
+      val med = scala.math.exp(median(v));
+      if(verbose) reportln(">         v.size = "+v.size+", median = "+med,"debug");
+      med;
+    }).toVector;
+    if(verbose) reportln(">      SF iteration done.","debug");
+    if(verbose) reportln(">      sf.size = "+sf.size,"debug");
+
+    if(verbose) reportln(">   Size factor calculation complete.","debug");
+
+    return sf;
+  } 
+  
+  def median(v : Seq[Double]) : Double = {
+    val x = v.sorted;
+    if(x.size == 0){
+      return(Double.NaN);
+    } else if(x.size % 2 == 0){
+      (x((x.size/2) - 1) + x(x.size/2)) / 2.0;
+    } else {
+      x( x.size / 2 );
+    }
+  }
+  
+  /**************************************************************************************************************************
    * timestamp / memory-usage utilities
    **************************************************************************************************************************/
   
@@ -134,8 +189,7 @@ object stdUtils {
       }
     }
   }
-  
-  
+    
   class filterWithCount[A](iter : Iterator[A], filterFunction : (A => Boolean)) extends Iterator[A] {
     private val nextHolder : Array[Option[A]] = Array.ofDim[Option[A]](1);
     private var dropCt : Int = 0;

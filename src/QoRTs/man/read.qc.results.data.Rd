@@ -79,6 +79,44 @@
   All decoders are allowed to contain other columns in addition to the ones listed here, so long as their names are distinct. Columns do not need to appear in any particular order, so long as they are named according to the specifications above.
 }
 
+\examples{
+  #Load the decoder from the example dataset:
+  directory <- paste0(system.file("extdata/", 
+                      package="QoRTsExampleData", 
+                      mustWork=TRUE),"/");
+  decoder.file <- system.file("extdata/decoder.txt", 
+                              package="QoRTsExampleData", 
+                              mustWork=TRUE);
+  decoder.data <- read.table(decoder.file,
+                             header=TRUE,
+                             stringsAsFactors=FALSE);
+  print(decoder.data);
+
+  #This command produces the example dataset used in all the other
+  #  examples:
+  res <- read.qc.results.data(directory, 
+                              decoder = decoder.data,
+                              calc.DESeq2 = TRUE, 
+                              calc.edgeR = TRUE);
+  #Note that DESeq2 and edgeR are required in order to 
+  #  calculate the size factors using the options above.
+  
+  #You can also specify incomplete decoders, and use
+  #  the following command to fill in the defaults:
+  completeAndCheckDecoder(c("SAMP1","SAMP2",
+                            "SAMP3","SAMP4",
+                            "SAMP5","SAMP6"))
+
+  #You don't actually have to use completeAndCheckDecoder,
+  #You can just pass the incomplete decoder directly to QoRTs.
+  #For example, to load a small subset of the example data 
+  #(without phenotype data):
+  res <- read.qc.results.data(paste0(directory,"/ex/"), 
+                              decoder = c("SAMP1_RG1","SAMP2_RG1",
+                                          "SAMP3_RG1","SAMP4_RG1"));
+
+}
+
 \seealso{
   \code{\link{build.plotter}}
 }

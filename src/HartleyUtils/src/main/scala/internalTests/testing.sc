@@ -5,13 +5,26 @@ import net.sf.samtools._
 object testing {
   println("Welcome to the Scala worksheet")       //> Welcome to the Scala worksheet
   "Hello".substring(0,2)                          //> res0: String = He
-
+  
+  scala.math.log(10.0)                            //> res1: Double = 2.302585092994046
+  
   //val reader =  new SAMFileReader(new java.io.File("C:\\Users\\hartleys\\work\\nihwork\\home_copy\\projects\\ZZZ-ExampleDataset\\TestSets\\readLength50\\inputData\\fastq\\SAMP1_RG1.50bp.1.fq.gz"));
   
-  "Hello+World".split("\\+")                      //> res1: Array[String] = Array(Hello, World)
+  "Hello+World".split("\\+")                      //> res2: Array[String] = Array(Hello, World)
   
+  Range(0,10).toVector                            //> res3: Vector[Int] = Vector(0, 1, 2, 3, 4, 5, 6, 7, 8, 9)
+  
+  Vector("hi").tail                               //> res4: scala.collection.immutable.Vector[String] = Vector()
 
-  Vector("hi").tail                               //> res2: scala.collection.immutable.Vector[String] = Vector()
+  scala.math.log(0).isInfinite                    //> res5: Boolean = true
+
+  val splitstr = "Gene = \"HRG10;2\"; TX = \"Blah\"; exon = 1; variant = \"3\";"
+                                                  //> splitstr  : String = Gene = "HRG10;2"; TX = "Blah"; exon = 1; variant = "3";
+                                                  //| 
+  
+  splitstr.split(";(?=([^\"]*\"[^\"]*\")*[^\"]*$)")
+                                                  //> res6: Array[String] = Array(Gene = "HRG10;2", " TX = "Blah"", " exon = 1", "
+                                                  //|  variant = "3"")
 
   print(Vector("Hello","World","How","Are","You"));
                                                   //> Vector(Hello, World, How, Are, You)
@@ -21,32 +34,32 @@ object testing {
     return 0.toString * (cols - s.length) + s;
   }                                               //> zeroPad: (i: Int, cols: Int)String
    
-   0.toDouble / 0.toDouble                        //> res3: Double = NaN
+   0.toDouble / 0.toDouble                        //> res7: Double = NaN
    
    
    
-   0.toString * -2                                //> res4: String = ""
+   0.toString * -2                                //> res8: String = ""
    
-   zeroPad(3000,3)                                //> res5: String = 3000
+   zeroPad(3000,3)                                //> res9: String = 3000
 
   internalUtils.stdUtils.zipIteratorWithCount(List("A","B","C","D","E","F","G").iterator).filter(x => x._2 % 2 == 0).toList
-                                                  //> res6: List[(String, Int)] = List((A,0), (C,2), (E,4), (G,6))
+                                                  //> res10: List[(String, Int)] = List((A,0), (C,2), (E,4), (G,6))
 
   val x = scala.collection.mutable.AnyRefMap[internalUtils.commonSeqUtils.GenomicInterval,Int]().withDefault(k => 0)
-                                                  //> x  : scala.collection.mutable.Map[internalUtils.commonSeqUtils.GenomicInterv
-                                                  //| al,Int] = Map()
+                                                  //> x  : scala.collection.mutable.Map[internalUtils.commonSeqUtils.GenomicInter
+                                                  //| val,Int] = Map()
   
   val giv = internalUtils.commonSeqUtils.GenomicInterval("chrX",'+',10,100)
-                                                  //> giv  : internalUtils.commonSeqUtils.GenomicInterval = GenomicInterval(chrX,+
-                                                  //| ,10,100)
+                                                  //> giv  : internalUtils.commonSeqUtils.GenomicInterval = GenomicInterval(chrX,
+                                                  //| +,10,100)
   
   x(giv) += 1
   
-  x                                               //> res7: scala.collection.mutable.Map[internalUtils.commonSeqUtils.GenomicInte
-                                                  //| rval,Int] = Map(GenomicInterval(chrX,+,10,100) -> 1)
+  x                                               //> res11: scala.collection.mutable.Map[internalUtils.commonSeqUtils.GenomicInt
+                                                  //| erval,Int] = Map(GenomicInterval(chrX,+,10,100) -> 1)
   
-  x.keySet                                        //> res8: scala.collection.Set[internalUtils.commonSeqUtils.GenomicInterval] = 
-                                                  //| Set(GenomicInterval(chrX,+,10,100))
+  x.keySet                                        //> res12: scala.collection.Set[internalUtils.commonSeqUtils.GenomicInterval] =
+                                                  //|  Set(GenomicInterval(chrX,+,10,100))
   
   val line = "x	y"                                //> line  : String = x	y
   
@@ -65,15 +78,15 @@ object testing {
   */
   
   
-(10 until 10).toVector                            //> res9: Vector[Int] = Vector()
+(10 until 10).toVector                            //> res13: Vector[Int] = Vector()
 
-Range(10, 1, -1).toVector                         //> res10: Vector[Int] = Vector(10, 9, 8, 7, 6, 5, 4, 3, 2)
+Range(10, 1, -1).toVector                         //> res14: Vector[Int] = Vector(10, 9, 8, 7, 6, 5, 4, 3, 2)
 val op = CigarOperator.SOFT_CLIP                  //> op  : net.sf.samtools.CigarOperator = S
 
-op.consumesReadBases()                            //> res11: Boolean = true
-op.consumesReferenceBases()                       //> res12: Boolean = false
+op.consumesReadBases()                            //> res15: Boolean = true
+op.consumesReferenceBases()                       //> res16: Boolean = false
 
-System.getProperty("sun.arch.data.model")         //> res13: String = 64
+System.getProperty("sun.arch.data.model")         //> res17: String = 64
   
   def escapeToMarkdown(s : String) : String = {
     escapifyString(s, List("`","\\*","_","\\{","\\}","\\[","\\]","\\(","\\)","\\#","\\+","-","\\.","!"));
@@ -96,25 +109,25 @@ System.getProperty("sun.arch.data.model")         //> res13: String = 64
   //writer.write(out2)
   //writer.close()
   
-  new java.io.File( "." ).getCanonicalPath        //> res14: String = C:\eclipseScalav400
+  new java.io.File( "." ).getCanonicalPath        //> res18: String = C:\eclipseScalav400
   
-  "test\\_string"                                 //> res15: String("test\\_string") = test\_string
+  "test\\_string"                                 //> res19: String("test\\_string") = test\_string
   
-  "test_string".replaceAll("_","\\\\_")           //> res16: String = test\_string
+  "test_string".replaceAll("_","\\\\_")           //> res20: String = test\_string
   
   
-  CigarOperator.SOFT_CLIP                         //> res17: net.sf.samtools.CigarOperator = S
+  CigarOperator.SOFT_CLIP                         //> res21: net.sf.samtools.CigarOperator = S
   
-  CigarOperator.SOFT_CLIP.consumesReadBases()     //> res18: Boolean = true
+  CigarOperator.SOFT_CLIP.consumesReadBases()     //> res22: Boolean = true
   
-  CigarOperator.SOFT_CLIP.consumesReferenceBases()//> res19: Boolean = false
+  CigarOperator.SOFT_CLIP.consumesReferenceBases()//> res23: Boolean = false
   
   
   
   val X = 10                                      //> X  : Int = 10
   val Y = 0                                       //> Y  : Int = 0
   
-  X.toDouble / Y.toDouble                         //> res20: Double = Infinity
+  X.toDouble / Y.toDouble                         //> res24: Double = Infinity
   
   
   

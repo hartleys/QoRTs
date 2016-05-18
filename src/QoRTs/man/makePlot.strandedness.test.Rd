@@ -39,6 +39,9 @@ makePlot.strandedness.test(plotter, plot.target.boxes = FALSE,
   data(res,package="QoRTsExampleData");
   plotter <- build.plotter.colorByGroup(res);
   makePlot.strandedness.test(plotter);
+  
+  #Add a legend:
+  makePlot.legend.over("topright", plotter)
 }
 \seealso{
   \code{\link{build.plotter}}

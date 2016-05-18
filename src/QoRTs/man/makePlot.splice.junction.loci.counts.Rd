@@ -44,6 +44,8 @@ makePlot.splice.junction.loci.counts(plotter,
   data(res,package="QoRTsExampleData");
   plotter <- build.plotter.colorByGroup(res);
   makePlot.splice.junction.loci.counts(plotter);
+  #Add a legend:
+  makePlot.legend.over("topright", plotter)
 }
 \seealso{
   \code{\link{build.plotter}}, \code{\link{makePlot.splice.junction.event}}

@@ -73,12 +73,15 @@ object addNovelSplices {
                                                    "in a subdirectory with the same name as the sample's sample.ID." // description
                                         ) ::
                     new FinalArgument[String](
-                                         name = "sizeFactorFile",
-                                         valueName = "sizeFactorFile",
-                                         argDesc = "This file must contain (at least) two columns: one labelled 'sample.ID' and one labelled 'size.factor'. "+
-                                                   " Size factors can be generated using DESeq, EdgeR, DEXSeq, CuffLinks, or similar utilities. "+
-                                                   "Rough size factors can be calculated simply by taking the read count for each sample and dividing it by the average read count "+
-                                                   "across all samples. Note that this overly-simplistic 'total count' normalization method is NOT recommended."// description
+                                         name = "decoderFile",
+                                         valueName = "decoderFile",
+                                         argDesc = "This tab-delimited file must contain a column titled 'sample.ID'. "+
+                                                   "Optionally, it may also contain a column titled 'size.factor', "+
+                                                   "allowing you to specify size factors generated using DESeq, EdgeR, DEXSeq, CuffLinks, or similar utilities.  "+
+                                                   "If the size.factor column is missing, then the size factors will automatically be calculated using the "+
+                                                   "gene-level read counts for all non-aggregate (ie. non-overlapping) genes, using the standard 'Geometric' normalization method "+
+                                                   "used by DESeq, DESeq2, and CuffDiff, as described in Anders et.al. (PMC3218662). Any columns other than 'sample.ID' and 'size.factor' "+
+                                                   "will be ignored."
                                         ) :: 
                     new FinalArgument[String](
                                          name = "gtfFile",
@@ -98,7 +101,7 @@ object addNovelSplices {
        if(out){
          addNovelSplices.mergeNovel(
              parser.get[String]("infileDir") + "/",
-             parser.get[String]("sizeFactorFile"),
+             parser.get[String]("decoderFile"),
              parser.get[String]("gtfFile"),
              parser.get[String]("outfileDir"),
              parser.get[Boolean]("stranded"),
@@ -119,15 +122,24 @@ object addNovelSplices {
      val idCol = decoderTitleLine.indexOf("sample.ID");
      val sfCol = decoderTitleLine.indexOf("size.factor");
      
-     reportln("decoderTitleLine: "+decoderTitleLine,"debug");
-     reportln("idCol: "+idCol,"debug");
-     reportln("sfCol: "+sfCol,"debug");
-     
-     val sampleSF : Seq[(String,Double)] = decoderLines.tail.map((line : String) => {
-       val cells = line.split("	");
-       ((cells(idCol),
-           string2double(cells(sfCol))));
-     });
+     val sampleSF : Seq[(String,Double)] = if(sfCol == -1){
+       reportln("decoderTitleLine: "+decoderTitleLine,"debug");
+       reportln("idCol: "+idCol,"debug");
+       decoderLines.tail.map((line : String) => {
+         val cells = line.split("\t");
+         ((cells(idCol), -1.0));
+       });
+     } else {
+       reportln("decoderTitleLine: "+decoderTitleLine,"debug");
+       reportln("idCol: "+idCol,"debug");
+       reportln("sfCol: "+sfCol,"debug");
+       
+       decoderLines.tail.map((line : String) => {
+         val cells = line.split("\t");
+         ((cells(idCol),
+             string2double(cells(sfCol))));
+       });
+     }
      
      val flatlines = fileConversionUtils.prepFlatGtfFile.getFlatGtfLines(gtfFile,stranded);
      
@@ -135,19 +147,43 @@ object addNovelSplices {
   }
   
   
-  def mergeNovelHelper(infileDir : String, sampleSF : Seq[(String,Double)], flatgff : IndexedSeq[FlatGtfLine], outfileDir : String, 
-                       stranded : Boolean, minCount : Double, noGzipOutput : Boolean, noGzipInput : Boolean, minSpan : Int){
+  def mergeNovelHelper(infileDir : String, sampleSFraw : Seq[(String,Double)], flatgff : IndexedSeq[FlatGtfLine], outfileDir : String, 
+                       stranded : Boolean, minCount : Double, noGzipOutput : Boolean, noGzipInput : Boolean, minSpan : Int, dropAggregates : Boolean = true){
     
     val Splice_suffix = "/QC.spliceJunctionAndExonCounts.forJunctionSeq.txt" + (if(noGzipInput){""} else {".gz"});
     val NovelSplice_suffix = "/QC.spliceJunctionCounts.novelSplices.txt" + (if(noGzipInput){""} else {".gz"});
     val WithNovel_Splice_suffix = "/QC.spliceJunctionAndExonCounts.withNovel.forJunctionSeq.txt" + (if(noGzipOutput){""} else {".gz"});
     val novel_gff_suffix = "/withNovel.forJunctionSeq.gff" + (if(noGzipOutput){""} else {".gz"});
-    val novel_gff_file = outfileDir + novel_gff_suffix; 
+    val novel_gff_file = outfileDir + novel_gff_suffix;
+    val size_factor_file = outfileDir + "/JS.GEO.size.factors.txt";
     
     val orphan_Splice_suffix = "/QC.spliceJunctionCounts.orphanSplices.txt" + (if(noGzipOutput){""} else {".gz"});
     val orphan_gff_suffix = "/orphanSplices.gff" + (if(noGzipOutput){""} else {".gz"});
     val orphan_gff_file = outfileDir + orphan_gff_suffix; 
     
+    val sampleSF = if(sampleSFraw.exists( _._2 == -1.0 ) ){
+      val geneCountMatrix : Seq[Seq[Int]] = sampleSFraw.map(_._1).map((sampID : String) => getLinesSmartUnzip(infileDir + sampID + Splice_suffix)).map((lines : Iterator[String]) => {
+        lines.map((line : String) => {
+          line.split("\t")
+        }).filter((cells : Array[String]) => {
+          cells(0).split(":")(1).charAt(0) == 'A';
+        }).filter((cells : Array[String]) => {
+          dropAggregates && (! cells(0).contains("+"));
+        }).map((cells : Array[String]) => string2int(cells(1))).toSeq;
+      })
+      val sf = calculateGeometricSizeFactorsForMatrix(geneCountMatrix);
+      val finalSF = sampleSFraw.map(_._1).zip(sf);
+      
+      val sfwriter = openWriterSmart(size_factor_file);
+      sfwriter.write("sample.ID\tsize.factor\n"); 
+      for(s <- finalSF){
+        sfwriter.write(s._1 + "\t"+s._2+"\n");
+      }
+      close(sfwriter);
+      finalSF;
+    } else {
+      sampleSFraw;
+    }
     
     //Make a gene map out of aggregate genes.
     val geneArray : GenomicArrayOfSets[String] = buildGenomicArrayOfSets_fromGtf(stranded , (() => flatgff.iterator),  (g : FlatGtfLine) => g.isAggregateGene, (g : FlatGtfLine) => g.getFeatureAggregateGene)

@@ -300,7 +300,10 @@ object GtfTool {
      lazy val lz_attr = cells(8).trim;
      def attr : String = lz_attr;
      
-     lazy val lz_attributeArray = attr.split(";");
+     //Dumb version, doesn't properly capture quotes:
+     //lazy val lz_attributeArray = attr.split(";");
+     //Smart version: semicolons inside quotes are allowed, but will be automatically replaced with underscores.
+     lazy val lz_attributeArray = attr.split(";(?=([^\"]*\"[^\"]*\")*[^\"]*$)").map(_.replace(";","_"));
      def attributeArray : Array[String] = lz_attributeArray;
      
      lazy val lz_attributeMap : Map[String,String] = {

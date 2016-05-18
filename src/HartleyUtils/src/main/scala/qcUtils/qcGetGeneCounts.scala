@@ -315,6 +315,16 @@ object qcGetGeneCounts {
     close(writer2);
   }
   
+  def featuresNearPair(distance : Int, r1 : SAMRecord, r2 : SAMRecord, stranded : Boolean, fr_secondStrand : Boolean, featureArray : GenomicArrayOfSets[String], reverseStrand : Boolean = false) : Set[String] = {
+    featuresNearRead(distance,r1,stranded,fr_secondStrand, featureArray) ++ featuresNearRead(distance,r1,stranded,fr_secondStrand, featureArray);
+  }
+  def featuresNearRead(distance : Int, r : SAMRecord, stranded : Boolean, fr_secondStrand : Boolean, featureArray : GenomicArrayOfSets[String], reverseStrand : Boolean = false) : Set[String] = {
+    val readIntervals : Iterator[GenomicInterval] = getExpandedGenomicIntervalsFromRead(distance, r , stranded , fr_secondStrand);
+    readIntervals.map((iv) => {
+      featureArray.findIntersectingSteps(iv).map(_._2).flatten.toSet
+    }).flatten.toSet
+  }
+  
   def pairIsNearFeatures(distance : Int, r1 : SAMRecord, r2 : SAMRecord, stranded : Boolean, fr_secondStrand : Boolean, featureArray : GenomicArrayOfSets[String]) : Boolean = {
     readIsNearFeatures(distance,r1,stranded,fr_secondStrand, featureArray) || readIsNearFeatures(distance,r1,stranded,fr_secondStrand, featureArray);
   }
@@ -362,7 +372,7 @@ class qcGetGeneCounts( stranded : Boolean,
                        geneBodyIntervalCount : Int, 
                        calcRPKM : Boolean, writeGenewiseGeneBody : Boolean, writeDESeq : Boolean, writeGeneCounts : Boolean, writeGeneBody : Boolean,
                        writeBiotypeCounts : Boolean,
-                       geneKeepFunc : (String => Boolean)) extends QCUtility[String] {
+                       geneKeepFunc : (String => Boolean), calcDetailedGeneCounts : Boolean = false) extends QCUtility[String] {
   
   reportln("> Init GeneCalcs Utility","debug");
   
@@ -387,7 +397,40 @@ class qcGetGeneCounts( stranded : Boolean,
   
   //val utilCounts : scala.collection.mutable.Map[String,Int] = qcGtfAnnotationBuilder.initializeCounter[String](Set("_no_feature","_ambiguous"));
   val geneArea_cdsCounts : scala.collection.mutable.Map[String,Int] = qcGtfAnnotationBuilder.initializeCounter[String](geneArray.getValueSet);
-  val geneArea_intronsCounts : scala.collection.mutable.Map[String,Int] = qcGtfAnnotationBuilder.initializeCounter[String](geneArea_intronsArray.getValueSet);
+  
+  val spanArray : GenomicArrayOfSets[String] = if(calcDetailedGeneCounts){
+    anno_holder.qcGetGeneCounts_spanArray;
+  } else {
+    GenomicArrayOfSets[String](stranded);
+  }
+  
+  //Advanced gene counts:
+  val geneArea_intronsCounts : scala.collection.mutable.Map[String,Int] = if(calcDetailedGeneCounts)  qcGtfAnnotationBuilder.initializeCounter[String](spanArray.getValueSet);
+                                                                          else  scala.collection.mutable.Map[String,Int]();
+  val geneArea_intronsAmbig : scala.collection.mutable.Map[String,Int] = if(calcDetailedGeneCounts)  qcGtfAnnotationBuilder.initializeCounter[String](spanArray.getValueSet);
+                                                                          else  scala.collection.mutable.Map[String,Int]();
+  val geneArea_nearCounts : scala.collection.mutable.Map[String,Int] = if(calcDetailedGeneCounts)  qcGtfAnnotationBuilder.initializeCounter[String](spanArray.getValueSet);
+                                                                          else  scala.collection.mutable.Map[String,Int]();
+  val geneArea_nearAmbig : scala.collection.mutable.Map[String,Int] = if(calcDetailedGeneCounts)  qcGtfAnnotationBuilder.initializeCounter[String](spanArray.getValueSet);
+                                                                          else  scala.collection.mutable.Map[String,Int]();
+  val geneArea_farCounts : scala.collection.mutable.Map[String,Int] = if(calcDetailedGeneCounts)  qcGtfAnnotationBuilder.initializeCounter[String](spanArray.getValueSet);
+                                                                          else  scala.collection.mutable.Map[String,Int]();
+  val geneArea_farAmbig : scala.collection.mutable.Map[String,Int] = if(calcDetailedGeneCounts)  qcGtfAnnotationBuilder.initializeCounter[String](spanArray.getValueSet);
+                                                                          else  scala.collection.mutable.Map[String,Int]();
+  
+  val geneArea_wrongStrandCts : scala.collection.mutable.Map[String,Int] = if(stranded && calcDetailedGeneCounts)  qcGtfAnnotationBuilder.initializeCounter[String](geneArray.getValueSet);
+                                                                           else  scala.collection.mutable.Map[String,Int]();
+  
+  val geneArea_wrongStrandAmbig : scala.collection.mutable.Map[String,Int] = if(stranded && calcDetailedGeneCounts)  qcGtfAnnotationBuilder.initializeCounter[String](geneArray.getValueSet);
+                                                                                 else  scala.collection.mutable.Map[String,Int]();
+  
+  val geneArea_wrongStrandAndIntron : scala.collection.mutable.Map[String,Int] = if(stranded && calcDetailedGeneCounts)  qcGtfAnnotationBuilder.initializeCounter[String](spanArray.getValueSet);
+                                                                                 else  scala.collection.mutable.Map[String,Int]();
+  val geneArea_wrongStrandAndIntronAmbig : scala.collection.mutable.Map[String,Int] = if(stranded && calcDetailedGeneCounts)  qcGtfAnnotationBuilder.initializeCounter[String](spanArray.getValueSet);
+                                                                                 else  scala.collection.mutable.Map[String,Int]();
+  
+  //val geneArea_wrongStrandOrIntron : scala.collection.mutable.Map[String,Int] = if(stranded && calcDetailedGeneCounts)  qcGtfAnnotationBuilder.initializeCounter[String](geneArea_intronsArray.getValueSet);
+  //                                                                               else  scala.collection.mutable.Map[String,Int]();
   
   val geneCounts_ambig : scala.collection.mutable.Map[String,Int] = qcGtfAnnotationBuilder.initializeCounter[String](geneArray.getValueSet);
   val geneCounts_utr : scala.collection.mutable.Map[String,Int] = qcGtfAnnotationBuilder.initializeCounter[String](geneArray.getValueSet);
@@ -403,6 +446,13 @@ class qcGetGeneCounts( stranded : Boolean,
   var readTenKb : Int = 0;
   var readMiddleOfNowhere : Int = 0;
   
+  var detailed_readIntronCount = 0;
+  var detailed_readOneKb = 0;
+  var detailed_readTenKb = 0;
+  var detailed_readMiddleOfNowhere = 0;
+  var detailed_strandSwap = 0;
+  var detailed_strandSwapIntron = 0;
+  
   def runOnReadPair(r1 : SAMRecord, r2 : SAMRecord, readNum : Int) : String = {
     val readGenes = qcGetGeneCounts.getPairFeatures(r1,r2,stranded,fr_secondStrand,geneArray);
     
@@ -415,6 +465,60 @@ class qcGetGeneCounts( stranded : Boolean,
       //  geneArea_intronsCounts(intron) += 1;
       //}
       //if(readIntrons.size > 0) readIntronCount += 1;
+      if(calcDetailedGeneCounts){
+        val intronGeneSet = qcGetGeneCounts.featuresNearPair(0,    r1,r2,stranded,fr_secondStrand,spanArray);
+        val nearbyGeneSet = qcGetGeneCounts.featuresNearPair(1000, r1,r2,stranded,fr_secondStrand,spanArray);
+        val farGeneSet = qcGetGeneCounts.featuresNearPair(10000,r1,r2,stranded,fr_secondStrand,spanArray);
+        
+        if(intronGeneSet.isEmpty) detailed_readIntronCount += 1;
+        else if(nearbyGeneSet.isEmpty) detailed_readOneKb += 1;
+        else if(farGeneSet.isEmpty) detailed_readTenKb += 1;
+        else detailed_readMiddleOfNowhere += 1;
+        
+        if(intronGeneSet.size == 1){
+          geneArea_intronsCounts(intronGeneSet.head) += 1;
+        } else if(intronGeneSet.size > 1){
+          intronGeneSet.foreach((g) => {
+            geneArea_intronsAmbig(g) += 1;
+          })
+        } else if(nearbyGeneSet.size == 1){
+          geneArea_nearCounts(nearbyGeneSet.head) += 1;
+        } else if(nearbyGeneSet.size > 1){
+          nearbyGeneSet.foreach((g) => {
+            geneArea_nearAmbig(g) += 1;
+          })
+        } else if(farGeneSet.size == 1){
+          geneArea_farCounts(farGeneSet.head) += 1;
+        } else if(farGeneSet.size > 1){
+          farGeneSet.foreach((g) => {
+            geneArea_farAmbig(g) += 1;
+          })
+        }
+        
+        if(stranded){
+          val strandSwapAndIntronGeneSet = qcGetGeneCounts.featuresNearPair(0,  r1,r2,stranded,fr_secondStrand,spanArray, reverseStrand = true);
+          val strandSwapGeneSet = qcGetGeneCounts.featuresNearPair(0,  r1,r2,stranded,fr_secondStrand,geneArray, reverseStrand = true);
+          if(strandSwapGeneSet.size == 1){
+            geneArea_wrongStrandCts(strandSwapGeneSet.head) += 1;
+            detailed_strandSwap += 1;
+          } else if(strandSwapGeneSet.size > 1) {
+            strandSwapGeneSet.foreach((g) => {
+              geneArea_wrongStrandAmbig(g) += 1;
+            })
+            detailed_strandSwap += 1;
+          } else if(intronGeneSet.isEmpty){
+            if(strandSwapAndIntronGeneSet.size == 1){
+              geneArea_wrongStrandAndIntron(strandSwapAndIntronGeneSet.head) += 1;
+              detailed_strandSwapIntron += 1;
+            } else if(strandSwapAndIntronGeneSet.size > 1){
+              detailed_strandSwapIntron += 1;
+              strandSwapAndIntronGeneSet.foreach((g) => {
+                geneArea_wrongStrandAndIntronAmbig(g) += 1;
+              })
+            }
+          }
+        }
+      }
       if(qcGetGeneCounts.pairIsNearFeatures(0,r1,r2,stranded,fr_secondStrand,geneArea_intronsArray)) readIntronCount += 1;
       else if(qcGetGeneCounts.pairIsNearFeatures(1000,r1,r2,stranded,fr_secondStrand,geneArray)) readOneKb += 1;
       else if(qcGetGeneCounts.pairIsNearFeatures(10000,r1,r2,stranded,fr_secondStrand,geneArray)) readTenKb += 1;
@@ -515,6 +619,35 @@ class qcGetGeneCounts( stranded : Boolean,
       //writer.write("_total_ambiguous	"+ utilCounts("_ambiguous") + "	0	0	0\n");
       writer.write("_total_no_feature	"+ readNoFeature + "	0	0	0\n");
       writer.write("_total_ambiguous	"+ readAmbiguous + "	0	0	0\n");
+      close(writer);
+    }
+    if(calcDetailedGeneCounts){
+      val writer = openWriterSmart_viaGlobalParam(outfile + ".geneCounts.detailed.txt");
+      //writer.write("");
+      val titleString = "GENEID\tCOUNT\tCOUNT_CDS\tCOUNT_UTR\tCOUNT_AMBIG_GENE\t"+
+                        "intronic\tintronic_AMBIG\tnearby\tnearby_AMBIG\tfar\tfar_AMBIG"+ 
+                        (if(stranded){"\twrongStrand\twrongStrand_AMBIG\twrongStrandIntron\twrongStrandIntron_AMBIG"}) + 
+                        "\n";
+      writer.write(titleString);
+      for(key <- geneCounts.keys.toVector.sorted){
+        val line = key + "\t"+geneCounts(key) +"\t"+geneCounts_utr(key)+"\t"+geneArea_cdsCounts(key)+"\t"+geneCounts_ambig(key)+
+                   "\t"+geneArea_intronsCounts(key)+"\t"+geneArea_intronsAmbig(key)+
+                   "\t"+geneArea_nearCounts(key)+"\t"+geneArea_nearAmbig(key)+
+                   "\t"+geneArea_farCounts(key)+"\t"+geneArea_farAmbig(key)+
+                   (if(stranded){
+                     "\t"+geneArea_wrongStrandCts(key)+"\t"+geneArea_wrongStrandAmbig(key)+
+                     "\t"+geneArea_wrongStrandAndIntron(key)+"\t"+geneArea_wrongStrandAndIntronAmbig(key)
+                   })+
+                   "\n"
+        writer.write(line);
+      }
+      summaryWriter.write("ReadPairs_ADV_NoGene_Intron\t" + detailed_readIntronCount +"\n");
+      summaryWriter.write("ReadPairs_ADV_NoGene_OneKbFromGene\t" + detailed_readOneKb +"\n");
+      summaryWriter.write("ReadPairs_ADV_NoGene_TenKbFromGene\t" + detailed_readTenKb +"\n");
+      summaryWriter.write("ReadPairs_ADV_NoGene_MiddleOfNowhere\t" + detailed_readMiddleOfNowhere +"\n");
+      summaryWriter.write("ReadPairs_ADV_NoGene_swappedStrand\t" + detailed_strandSwap +"\n");
+      summaryWriter.write("ReadPairs_ADV_NoGene_swappedStrandIntron\t" + detailed_strandSwapIntron +"\n");
+      
       close(writer);
     }
     

@@ -61,6 +61,9 @@
   plotter <- build.plotter.colorByGroup(res);
   makePlot.norm.factors(plotter);
   makePlot.norm.factors.vs.TC(plotter);
+  
+  #Legend:
+  makePlot.legend.box(plotter);
 }
 \seealso{
   \code{\link{build.plotter}}

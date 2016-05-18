@@ -76,7 +76,7 @@ object mergeQcOutput {
        if(out){
          mergeQcOutput.run(
              parser.get[String]("infileDirs"),
-             parser.get[String]("outfile"),
+             parser.get[String]("outfilePrefix"),
              parser.get[List[String]]("mergeFiles"),
              parser.get[Int]("wiggleWindow"),
              parser.get[String]("additionalTrackOptions"),

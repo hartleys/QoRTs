@@ -35,8 +35,13 @@ object genomicUtils {
       }
     }
   }
-  def getExpandedGenomicIntervalsFromRead(d : Int, r : SAMRecord, stranded : Boolean, fr_secondStrand : Boolean) : Iterator[GenomicInterval] = {
-    val strand = getStrand(r,stranded,fr_secondStrand);
+  def getExpandedGenomicIntervalsFromRead(d : Int, r : SAMRecord, stranded : Boolean, fr_secondStrand : Boolean, reverseStrand : Boolean = false) : Iterator[GenomicInterval] = {
+    val rawStrand = getStrand(r,stranded,fr_secondStrand);
+    val strand = if((! stranded) || (! reverseStrand)){ rawStrand } else { 
+      if(rawStrand == '.') '.';
+      else if(rawStrand == '+') '-';
+      else '+';
+    } 
     val blocks : Iterator[AlignmentBlock] = r.getAlignmentBlocks().iterator;
     val chromName = r.getReferenceName();
     

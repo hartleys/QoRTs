@@ -100,6 +100,33 @@
 \value{
   A QoRT_Plotter reference object used to create QC summary plots. Depending on which plotter is used, samples/lane-bams can be organized by group, sample, lane, or any arbitrary variable found in the decoder.
 }
+\examples{
+data(res,package="QoRTsExampleData");
+plotter.basic <- build.plotter.basic(res);
+makePlot.insert.size(plotter.basic);
+
+plotter.colorByGroup <- build.plotter.colorByGroup(res);
+makePlot.insert.size(plotter.colorByGroup);
+makePlot.legend.over("topright",plotter.colorByGroup);
+
+plotter.colorByLane <- build.plotter.colorByLane(res);
+makePlot.insert.size(plotter.colorByLane);
+makePlot.legend.over("topright",plotter.colorByLane);
+
+plotter.colorBySample <- build.plotter.colorBySample(res);
+makePlot.insert.size(plotter.colorBySample);
+makePlot.legend.over("topright",plotter.colorBySample);
+
+plotter.HS <- build.plotter.highlightSample("SAMP1",
+                                            res);
+makePlot.insert.size(plotter.HS);
+makePlot.legend.over("topright",plotter.HS);
+
+plotter.HSCBL <- build.plotter.highlightSample.colorByLane("SAMP1",
+                                                           res);
+makePlot.insert.size(plotter.HSCBL);
+makePlot.legend.over("topright",plotter.HSCBL);
+}
 
 \seealso{
   \code{\link{read.qc.results.data}} 

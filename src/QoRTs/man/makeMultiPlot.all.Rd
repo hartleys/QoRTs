@@ -101,7 +101,12 @@
   Saves MANY compiled QC plots for the given dataset, calling all 
   standard variants of \code{\link{makeMultiPlot}}.
 }
-
+\examples{
+  \dontrun{
+  data(res,package="QoRTsExampleData");
+    makeMultiPlot.all(res, outfile.dir = "./");
+  }
+}
 \seealso{
   \code{\link{read.qc.results.data}}, \code{\link{build.plotter}}, \code{\link{makeMultiPlot}}
 }

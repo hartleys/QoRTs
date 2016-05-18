@@ -120,6 +120,13 @@
   Generates a sample highlight plot for each sample in the dataset.
 }
 
+\examples{
+  \dontrun{
+  data(res,package="QoRTsExampleData");
+    makeMultiPlot.highlightSample.all(res);
+    makeMultiPlot.highlightSample.colorByLane.all(res);
+  }
+}
 \seealso{
   \code{\link{build.plotter}}, \code{\link{makeMultiPlot}}
 }
