@@ -1,6 +1,6 @@
 # QoRTs: Quality of RNA-seq Tool-Set
-v1.0.7
-Revised Thu Jan 28 16:24:04 EST 2016
+v1.0.22
+Revised Wed May 18 14:34:41 EDT 2016
 
 The QoRTs software package is a fast, efficient, and portable multifunction toolkit designed to assist in
 the analysis, quality control, and data management of RNA-Seq datasets. Its primary function is to aid
@@ -18,10 +18,14 @@ The most recent release of QoRTs is available on the [QoRTs github page](http://
 * QoRTs vignette. User manual and general how-to. Available as a [pdf](doc/QoRTs-vignette.pdf) or [on the web](QoRTs-vignette/index.html).
 * [Java jar utility help index.](jarHtml/index.html) The Java utility is responsible for the bulk of the data processing, and contains a number of useful tools. It must be run on all replicates.
 * [R package help.](Rhtml/index.html) The R package is responsible for producing visualizations, graphs, plots, and summary tables. (also available as a [pdf](doc/QoRTs-manual.pdf))
-* A [comprehensive walkthrough](https://dl.dropboxusercontent.com/u/103621176/pipelineWalkthrough/example-walkthrough.pdf) of the entire analysis pipeline, run on a different [example dataset](https://dl.dropboxusercontent.com/u/103621176/pipelineWalkthrough/QoRTsPipelineWalkthrough.zip). This walkthrough primarily covers the analysis and data processing. For more information on the quality control steps see the Vignette, above.
-* The raw [bam files](https://dl.dropboxusercontent.com/u/103621176/pipelineWalkthrough/bamfiles.zip) for the example walkthough (File is ~1.1gb).
 * The [Example QC data](QoRTsExampleData_LATEST.tar.gz) used in the vignette.
 * [Frequently Asked Questions](FAQ.html): Check here if you run into problems!
+
+For advanced users:
+
+* A [comprehensive walkthrough](https://dl.dropboxusercontent.com/u/103621176/pipelineWalkthrough/example-walkthrough.pdf) of an entire analysis pipeline. This walkthrough primarily covers the analysis and data processing. For more information on the quality control steps see the Vignette, above.
+* The [example dataset and results](https://dl.dropboxusercontent.com/u/103621176/pipelineWalkthrough/QoRTsPipelineWalkthrough.zip) for the walkthrough.
+* The raw [bam files](https://dl.dropboxusercontent.com/u/103621176/pipelineWalkthrough/bamfiles.zip) for the example walkthough (File is ~1.1gb).
 
 ##Citing QoRTs:
 If you use QoRTs and find it helpful, you can cite it in your publications as:

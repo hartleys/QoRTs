@@ -1,6 +1,11 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><title>R: Reading QC results data</title>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <link rel="stylesheet" type="text/css" href="R.css" />
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.3/styles/github.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.3/highlight.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.3/languages/r.min.js"></script>
+<script>hljs.initHighlightingOnLoad();</script>
 </head><body>
 
 <table width="100%" summary="page for read.qc.results.data {QoRTs}"><tr><td>read.qc.results.data {QoRTs}</td><td style="text-align: right;">R Documentation</td></tr></table>
@@ -153,5 +158,250 @@ The technical-replicate decoder should have one row per unique.ID, with the foll
 <p><code><a href="build.plotter.html">build.plotter</a></code>
 </p>
 
-<hr /><div style="text-align: center;">[Package <em>QoRTs</em> version 1.0.7 <a href="00Index.html">Index</a>]</div>
+
+<h3>Examples</h3>
+
+<pre><code class="r">  #Load the decoder from the example dataset:
+  directory &lt;- paste0(system.file(&quot;extdata/&quot;, 
+                      package=&quot;QoRTsExampleData&quot;, 
+                      mustWork=TRUE),&quot;/&quot;);
+  decoder.file &lt;- system.file(&quot;extdata/decoder.txt&quot;, 
+                              package=&quot;QoRTsExampleData&quot;, 
+                              mustWork=TRUE);
+  decoder.data &lt;- read.table(decoder.file,
+                             header=TRUE,
+                             stringsAsFactors=FALSE);
+  print(decoder.data);
+</code></pre>
+
+<pre><code>##    sample.ID lane.ID unique.ID  qc.data.dir group.ID input.read.pair.count
+## 1      SAMP1      L1 SAMP1_RG1 ex/SAMP1_RG1     CASE                465298
+## 2      SAMP1      L2 SAMP1_RG2 ex/SAMP1_RG2     CASE                472241
+## 3      SAMP1      L3 SAMP1_RG3 ex/SAMP1_RG3     CASE                500691
+## 4      SAMP2      L1 SAMP2_RG1 ex/SAMP2_RG1     CASE                461405
+## 5      SAMP2      L2 SAMP2_RG2 ex/SAMP2_RG2     CASE                467713
+## 6      SAMP2      L3 SAMP2_RG3 ex/SAMP2_RG3     CASE                492322
+## 7      SAMP3      L1 SAMP3_RG1 ex/SAMP3_RG1     CASE                485397
+## 8      SAMP3      L2 SAMP3_RG2 ex/SAMP3_RG2     CASE                489859
+## 9      SAMP3      L3 SAMP3_RG3 ex/SAMP3_RG3     CASE                516906
+## 10     SAMP4      L1 SAMP4_RG1 ex/SAMP4_RG1     CTRL                460968
+## 11     SAMP4      L2 SAMP4_RG2 ex/SAMP4_RG2     CTRL                468391
+## 12     SAMP4      L3 SAMP4_RG3 ex/SAMP4_RG3     CTRL                484530
+## 13     SAMP5      L1 SAMP5_RG1 ex/SAMP5_RG1     CTRL                469884
+## 14     SAMP5      L2 SAMP5_RG2 ex/SAMP5_RG2     CTRL                475001
+## 15     SAMP5      L3 SAMP5_RG3 ex/SAMP5_RG3     CTRL                494213
+## 16     SAMP6      L1 SAMP6_RG1 ex/SAMP6_RG1     CTRL                452429
+## 17     SAMP6      L2 SAMP6_RG2 ex/SAMP6_RG2     CTRL                458810
+## 18     SAMP6      L3 SAMP6_RG3 ex/SAMP6_RG3     CTRL                477751
+</code></pre>
+
+<pre><code class="r">  #This command produces the example dataset used in all the other
+  #  examples:
+  res &lt;- read.qc.results.data(directory, 
+                              decoder = decoder.data,
+                              calc.DESeq2 = TRUE, 
+                              calc.edgeR = TRUE);
+</code></pre>
+
+<pre><code>## Note: no multi.mapped.read.pair.count column found. This column is optional, but without it (depending on how your aligner implements multi-mapping) multi-mapping rates might not be plotted.
+## reading QC.summary.txt files...
+## done.
+## [time: 2016-05-18 14:43:48],[elapsed: 0.03 secs]
+## Autodetected Paired-End mode.
+## reading QC.gc.byPair.txt.gz files...
+## done.
+## [time: 2016-05-18 14:43:48],[elapsed: 0.03 secs]
+## reading QC.gc.byRead.txt.gz files...
+## done.
+## [time: 2016-05-18 14:43:48],[elapsed: 0.02 secs]
+## reading QC.gc.byRead.vsBaseCt.txt.gz files...
+## done.
+## [time: 2016-05-18 14:43:49],[elapsed: 0.21 secs]
+## reading QC.quals.r1.txt.gz files...
+## done.
+## [time: 2016-05-18 14:43:49],[elapsed: 0.03 secs]
+## reading QC.quals.r2.txt.gz files...
+## done.
+## [time: 2016-05-18 14:43:49],[elapsed: 0.03 secs]
+## reading QC.cigarOpDistribution.byReadCycle.R1.txt.gz files...
+## done.
+## [time: 2016-05-18 14:43:49],[elapsed: 0.08 secs]
+## reading QC.cigarOpDistribution.byReadCycle.R2.txt.gz files...
+## done.
+## [time: 2016-05-18 14:43:49],[elapsed: 0.07 secs]
+## reading QC.cigarOpLengths.byOp.R1.txt.gz files...
+## done.
+## [time: 2016-05-18 14:43:49],[elapsed: 0.17 secs]
+## reading QC.cigarOpLengths.byOp.R2.txt.gz files...
+## done.
+## [time: 2016-05-18 14:43:49],[elapsed: 0.18 secs]
+## reading QC.geneBodyCoverage.by.expression.level.txt.gz files...
+## done.
+## [time: 2016-05-18 14:43:49],[elapsed: 0.03 secs]
+## reading QC.geneCounts.txt.gz files...
+## done.
+## [time: 2016-05-18 14:43:49],[elapsed: 0.24 secs]
+## reading QC.insert.size.txt.gz files...
+## done.
+## [time: 2016-05-18 14:43:49],[elapsed: 0.05 secs]
+## reading QC.NVC.raw.R1.txt.gz files...
+## done.
+## [time: 2016-05-18 14:43:49],[elapsed: 0.06 secs]
+## reading QC.NVC.raw.R2.txt.gz files...
+## done.
+## [time: 2016-05-18 14:43:50],[elapsed: 0.06 secs]
+## reading QC.NVC.lead.clip.R1.txt.gz files...
+## done.
+## [time: 2016-05-18 14:43:50],[elapsed: 0.7 secs]
+## reading QC.NVC.lead.clip.R2.txt.gz files...
+## done.
+## [time: 2016-05-18 14:43:51],[elapsed: 0.68 secs]
+## reading QC.NVC.tail.clip.R1.txt.gz files...
+## done.
+## [time: 2016-05-18 14:43:51],[elapsed: 0.58 secs]
+## reading QC.NVC.tail.clip.R2.txt.gz files...
+## done.
+## [time: 2016-05-18 14:43:52],[elapsed: 0.6 secs]
+## reading QC.NVC.minus.clipping.R1.txt.gz files...
+## done.
+## [time: 2016-05-18 14:43:52],[elapsed: 0.06 secs]
+## reading QC.NVC.minus.clipping.R2.txt.gz files...
+## done.
+## [time: 2016-05-18 14:43:52],[elapsed: 0.06 secs]
+## reading QC.chromCount.txt.gz files...
+## done.
+## [time: 2016-05-18 14:43:52],[elapsed: 0.02 secs]
+## reading QC.biotypeCounts.txt.gz files...
+## done.
+## [time: 2016-05-18 14:43:52],[elapsed: 0.02 secs]
+## reading QC.geneBodyCoverage.byExpr.avgPct.txt.gz files...
+## done.
+## [time: 2016-05-18 14:43:52],[elapsed: 0.04 secs]
+## calculating secondary data:
+## Calculating DESeq2 Normalization Factors (Geometric normalization)...
+## Calculating edgeR Normalization Factors (all edgeR normalizations)...
+## Calculating DESeq2 Normalization Factors (Geometric normalization)...
+## Calculating edgeR Normalization Factors (all edgeR normalizations)...
+## debug 3B
+## done.
+## [time: 2016-05-18 14:44:00],[elapsed: 8 secs]
+</code></pre>
+
+<pre><code class="r">  #Note that DESeq2 and edgeR are required in order to 
+  #  calculate the size factors using the options above.
+
+  #You can also specify incomplete decoders, and use
+  #  the following command to fill in the defaults:
+  completeAndCheckDecoder(c(&quot;SAMP1&quot;,&quot;SAMP2&quot;,
+                            &quot;SAMP3&quot;,&quot;SAMP4&quot;,
+                            &quot;SAMP5&quot;,&quot;SAMP6&quot;))
+</code></pre>
+
+<pre><code>## Simple decoder found, list of sample/unique ID&#39;s. Building complete decoder.
+## column &#39;qc.data.dir&#39; not found in the decoder, assuming qc.data.dir = unique.ID
+</code></pre>
+
+<pre><code>##   unique.ID sample.ID lane.ID group.ID qc.data.dir
+## 1     SAMP1     SAMP1 UNKNOWN  UNKNOWN       SAMP1
+## 2     SAMP2     SAMP2 UNKNOWN  UNKNOWN       SAMP2
+## 3     SAMP3     SAMP3 UNKNOWN  UNKNOWN       SAMP3
+## 4     SAMP4     SAMP4 UNKNOWN  UNKNOWN       SAMP4
+## 5     SAMP5     SAMP5 UNKNOWN  UNKNOWN       SAMP5
+## 6     SAMP6     SAMP6 UNKNOWN  UNKNOWN       SAMP6
+</code></pre>
+
+<pre><code class="r">  #You don&#39;t actually have to use completeAndCheckDecoder,
+  #You can just pass the incomplete decoder directly to QoRTs.
+  #For example, to load a small subset of the example data 
+  #(without phenotype data):
+  res &lt;- read.qc.results.data(paste0(directory,&quot;/ex/&quot;), 
+                              decoder = c(&quot;SAMP1_RG1&quot;,&quot;SAMP2_RG1&quot;,
+                                          &quot;SAMP3_RG1&quot;,&quot;SAMP4_RG1&quot;));
+</code></pre>
+
+<pre><code>## Simple decoder found, list of sample/unique ID&#39;s. Building complete decoder.
+## column &#39;qc.data.dir&#39; not found in the decoder, assuming qc.data.dir = unique.ID
+## Note: no input.read.pair.count column found. This column is optional, but without it mapping rates cannot be calculated.
+## Note: no multi.mapped.read.pair.count column found. This column is optional, but without it (depending on how your aligner implements multi-mapping) multi-mapping rates might not be plotted.
+## reading QC.summary.txt files...
+## done.
+## [time: 2016-05-18 14:44:00],[elapsed: 0.01 secs]
+## Autodetected Paired-End mode.
+## reading QC.gc.byPair.txt.gz files...
+## done.
+## [time: 2016-05-18 14:44:00],[elapsed: 0.01 secs]
+## reading QC.gc.byRead.txt.gz files...
+## done.
+## [time: 2016-05-18 14:44:00],[elapsed: 0.01 secs]
+## reading QC.gc.byRead.vsBaseCt.txt.gz files...
+## done.
+## [time: 2016-05-18 14:44:00],[elapsed: 0.05 secs]
+## reading QC.quals.r1.txt.gz files...
+## done.
+## [time: 2016-05-18 14:44:00],[elapsed: 0.01 secs]
+## reading QC.quals.r2.txt.gz files...
+## done.
+## [time: 2016-05-18 14:44:01],[elapsed: 0.01 secs]
+## reading QC.cigarOpDistribution.byReadCycle.R1.txt.gz files...
+## done.
+## [time: 2016-05-18 14:44:01],[elapsed: 0.02 secs]
+## reading QC.cigarOpDistribution.byReadCycle.R2.txt.gz files...
+## done.
+## [time: 2016-05-18 14:44:01],[elapsed: 0.13 secs]
+## reading QC.cigarOpLengths.byOp.R1.txt.gz files...
+## done.
+## [time: 2016-05-18 14:44:01],[elapsed: 0.04 secs]
+## reading QC.cigarOpLengths.byOp.R2.txt.gz files...
+## done.
+## [time: 2016-05-18 14:44:01],[elapsed: 0.04 secs]
+## reading QC.geneBodyCoverage.by.expression.level.txt.gz files...
+## done.
+## [time: 2016-05-18 14:44:01],[elapsed: 0.01 secs]
+## reading QC.geneCounts.txt.gz files...
+## done.
+## [time: 2016-05-18 14:44:01],[elapsed: 0.05 secs]
+## reading QC.insert.size.txt.gz files...
+## done.
+## [time: 2016-05-18 14:44:01],[elapsed: 0.01 secs]
+## reading QC.NVC.raw.R1.txt.gz files...
+## done.
+## [time: 2016-05-18 14:44:01],[elapsed: 0.01 secs]
+## reading QC.NVC.raw.R2.txt.gz files...
+## done.
+## [time: 2016-05-18 14:44:01],[elapsed: 0.01 secs]
+## reading QC.NVC.lead.clip.R1.txt.gz files...
+## done.
+## [time: 2016-05-18 14:44:01],[elapsed: 0.15 secs]
+## reading QC.NVC.lead.clip.R2.txt.gz files...
+## done.
+## [time: 2016-05-18 14:44:01],[elapsed: 0.15 secs]
+## reading QC.NVC.tail.clip.R1.txt.gz files...
+## done.
+## [time: 2016-05-18 14:44:01],[elapsed: 0.13 secs]
+## reading QC.NVC.tail.clip.R2.txt.gz files...
+## done.
+## [time: 2016-05-18 14:44:01],[elapsed: 0.13 secs]
+## reading QC.NVC.minus.clipping.R1.txt.gz files...
+## done.
+## [time: 2016-05-18 14:44:01],[elapsed: 0.01 secs]
+## reading QC.NVC.minus.clipping.R2.txt.gz files...
+## done.
+## [time: 2016-05-18 14:44:01],[elapsed: 0.01 secs]
+## reading QC.chromCount.txt.gz files...
+## done.
+## [time: 2016-05-18 14:44:01],[elapsed: 0.01 secs]
+## reading QC.biotypeCounts.txt.gz files...
+## done.
+## [time: 2016-05-18 14:44:01],[elapsed: 0.01 secs]
+## reading QC.geneBodyCoverage.byExpr.avgPct.txt.gz files...
+## done.
+## [time: 2016-05-18 14:44:01],[elapsed: 0.01 secs]
+## calculating secondary data:
+## debug 3B
+## done.
+## [time: 2016-05-18 14:44:02],[elapsed: 0.04 secs]
+</code></pre>
+
+
+<hr /><div style="text-align: center;">[Package <em>QoRTs</em> version 1.0.22 <a href="00Index.html">Index</a>]</div>
 </body></html>

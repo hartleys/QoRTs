@@ -1,5 +1,5 @@
 # QoRTs: Quality Of Rna-seq Tool Set
-> Version 1.0.7 (Updated Thu Jan 28 16:24:20 EST 2016)
+> Version 1.0.22 (Updated Wed May 18 14:34:58 EDT 2016)
 
 > ([back to main](../index.html)) ([back to java-utility help](index.html))
 
@@ -7,7 +7,7 @@
 
 ## USAGE:
 
-    java [Java Options] -jar QoRTs.jar mergeNovelSplices [options] infileDir sizeFactorFile annotation.gtf.gz outfileDir
+    java [Java Options] -jar QoRTs.jar mergeNovelSplices [options] infileDir decoderFile annotation.gtf.gz outfileDir
 
 
 ## DESCRIPTION:
@@ -21,9 +21,9 @@ This utility takes the QC output from the standard QC utility run on a series of
 > The input file directory. All samples should be contained inside this directory, in a subdirectory with the same name as the sample's sample.ID. (String)
 
 
-### sizeFactorFile:
+### decoderFile:
 
-> This file must contain (at least) two columns: one labelled 'sample.ID' and one labelled 'size.factor'.  Size factors can be generated using DESeq, EdgeR, DEXSeq, CuffLinks, or similar utilities. Rough size factors can be calculated simply by taking the read count for each sample and dividing it by the average read count across all samples. Note that this overly-simplistic 'total count' normalization method is NOT recommended. (String)
+> This tab-delimited file must contain a column titled 'sample.ID'. Optionally, it may also contain a column titled 'size.factor', allowing you to specify size factors generated using DESeq, EdgeR, DEXSeq, CuffLinks, or similar utilities.  If the size.factor column is missing, then the size factors will automatically be calculated using the gene-level read counts for all non-aggregate (ie. non-overlapping) genes, using the standard 'Geometric' normalization method used by DESeq, DESeq2, and CuffDiff, as described in Anders et.al. (PMC3218662). Any columns other than 'sample.ID' and 'size.factor' will be ignored. (String)
 
 
 ### annotation.gtf.gz:

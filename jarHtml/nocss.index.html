@@ -1,7 +1,7 @@
 <h1>QoRTs: Quality Of Rna-seq Tool Set</h1>
 
 <blockquote>
-  <p>Version1.0.7 (Updated Thu Jan 28 16:24:20 EST 2016)</p>
+  <p>Version1.0.22 (Updated Wed May 18 14:34:58 EDT 2016)</p>
 
 <p>(<a href="../index.html">back to help base</a>)</p>
 </blockquote>
@@ -89,10 +89,10 @@ It can also be used to produce a flattened gff file that adheres to the specific
   <p>This function Classifies long reads (such as those from pacbio or oxford nanopore sequencers) It determines which reads are matches to the known isoforms supplied in the gene annotation.Note that many of the options listed below are currently nonfunctional. They are placeholders for future improvements and/or holdovers from the QC function, upon which this function is built.WARNING! THIS FUNCTION IS BETA!</p>
 </blockquote>
 
-<h3><a href="makeAltJunctionTrack.html">makeAltJunctionTrack</a></h3>
+<h3><a href="makeSimpleJunctionTrack.html">makeSimpleJunctionTrack</a></h3>
 
 <blockquote>
-  <p>This utility generates a splice-junction 'bed' file from the less common QoRTs-generated splice junction counts produced by the QC utility. This splice junction bed file can be used to visualize splice junction counts using the UCSC genome browser and other similar utilities.</p>
+  <p>This utility converts QoRTs splice junction count files into bed format. Unlike makeJunctionTrack and makeOrphanJunctionTrack, this utility is not designed to compile multiple samples or replicates together. It is a simple converter from a QoRTs junction count file to a bed file. The count files come in 3 types: known, novel, and orphan.</p>
 </blockquote>
 
 <h2>AUTHORS:</h2>

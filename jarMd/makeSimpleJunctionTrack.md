@@ -1,18 +1,18 @@
 # QoRTs: Quality Of Rna-seq Tool Set
-> Version 1.0.7 (Updated Thu Jan 28 16:24:20 EST 2016)
+> Version 1.0.22 (Updated Wed May 18 14:34:58 EDT 2016)
 
 > ([back to main](../index.html)) ([back to java-utility help](index.html))
 
-## Help for java command "makeAltJunctionTrack"
+## Help for java command "makeSimpleJunctionTrack"
 
 ## USAGE:
 
-    java [Java Options] -jar QoRTs.jar makeAltJunctionTrack [options] indir fileType outdir
+    java [Java Options] -jar QoRTs.jar makeSimpleJunctionTrack [options] indir fileType outdir
 
 
 ## DESCRIPTION:
 
-This utility generates a splice\-junction 'bed' file from the less common QoRTs\-generated splice junction counts produced by the QC utility\. This splice junction bed file can be used to visualize splice junction counts using the UCSC genome browser and other similar utilities\.
+This utility converts QoRTs splice junction count files into bed format\. Unlike makeJunctionTrack and makeOrphanJunctionTrack, this utility is not designed to compile multiple samples or replicates together\. It is a simple converter from a QoRTs junction count file to a bed file\. The count files come in 3 types: known, novel, and orphan\.
 
 ## REQUIRED ARGUMENTS:
 ### indir:

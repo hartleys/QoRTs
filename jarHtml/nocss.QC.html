@@ -1,7 +1,7 @@
 <h1>QoRTs: Quality Of Rna-seq Tool Set</h1>
 
 <blockquote>
-  <p>Version 1.0.7 (Updated Thu Jan 28 16:24:20 EST 2016)</p>
+  <p>Version 1.0.22 (Updated Wed May 18 14:34:58 EDT 2016)</p>
 
 <p>(<a href="../index.html">back to main</a>) (<a href="index.html">back to java-utility help</a>)</p>
 </blockquote>
@@ -55,7 +55,7 @@ If the filename ends with ".gz" or ".zip", the file will be parsed using the app
 <h3>--stranded_fr_secondstrand:</h3>
 
 <blockquote>
-  <p>Flag to indicate that reads are from a fr_secondstrand type of stranded library (equivalent to the "stranded = yes" option in HTSeq or the "fr_secondStrand" library-type option in TopHat/CuffLinks). If your data is stranded, you must know the library type in order to analyze it properly. This utility uses the same definitions as cufflinks to define strandedness type. By default, the fr_firststrand library type is assumed for all stranded data (equivalent to the "stranded = D" option in HTSeq). (flag)</p>
+  <p>Flag to indicate that reads are from a fr_secondstrand type of stranded library (equivalent to the "stranded = yes" option in HTSeq or the "fr_secondStrand" library-type option in TopHat/CuffLinks). If your data is stranded, you must know the library type in order to analyze it properly. This utility uses the same definitions as cufflinks to define strandedness type. By default, the fr_firststrand library type is assumed for all stranded data (equivalent to the "stranded = reverse" option in HTSeq). (flag)</p>
 </blockquote>
 
 <h3>--maxReadLength len:</h3>
@@ -115,13 +115,13 @@ If the filename ends with ".gz" or ".zip", the file will be parsed using the app
 <h3>--addFunctions func1,func2,...:</h3>
 
 <blockquote>
-  <p>A list of functions to add (comma-delimited, no whitespace). This can be used to add functions that are off by default. Followed by a comma delimited list, with no internal whitespace. See the sub-functions list, below. The default-off functions are: annotatedSpliceExonCounts, FPKM, cigarMatch, cigarLocusCounts, makeJunctionBed, makeWiggles, makeAllBrowserTracks (CommaDelimitedListOfStrings)</p>
+  <p>A list of functions to add (comma-delimited, no whitespace). This can be used to add functions that are off by default. Followed by a comma delimited list, with no internal whitespace. See the sub-functions list, below. The default-off functions are: annotatedSpliceExonCounts, FPKM, cigarMatch, cigarLocusCounts, makeJunctionBed, makeWiggles, makeAllBrowserTracks, calcDetailedGeneCounts (CommaDelimitedListOfStrings)</p>
 </blockquote>
 
 <h3>--runFunctions func1,func2,...:</h3>
 
 <blockquote>
-  <p>The complete list of functions to run  (comma-delimited, no whitespace). Setting this option runs ONLY for the functions explicitly requested here (along with any functions upon which the assigned functions are dependent). See the sub-functions list, below. Allowed options are: NVC, annotatedSpliceExonCounts, GCDistribution, GeneCalcs, FPKM, cigarMatch, QualityScoreDistribution, writeJunctionSeqCounts, writeKnownSplices, writeNovelSplices, writeClippedNVC, CigarOpDistribution, cigarLocusCounts, InsertSize, chromCounts, writeSpliceExon, writeGenewiseGeneBody, JunctionCalcs, writeGeneCounts, makeJunctionBed, writeBiotypeCounts, writeDESeq, writeDEXSeq, makeWiggles, writeGeneBody, StrandCheck, makeAllBrowserTracks (CommaDelimitedListOfStrings)</p>
+  <p>The complete list of functions to run  (comma-delimited, no whitespace). Setting this option runs ONLY for the functions explicitly requested here (along with any functions upon which the assigned functions are dependent). See the sub-functions list, below. Allowed options are: NVC, annotatedSpliceExonCounts, GCDistribution, GeneCalcs, FPKM, cigarMatch, QualityScoreDistribution, writeJunctionSeqCounts, writeKnownSplices, writeNovelSplices, writeClippedNVC, CigarOpDistribution, cigarLocusCounts, InsertSize, chromCounts, writeSpliceExon, writeGenewiseGeneBody, JunctionCalcs, writeGeneCounts, makeJunctionBed, writeBiotypeCounts, writeDESeq, writeDEXSeq, makeWiggles, writeGeneBody, StrandCheck, makeAllBrowserTracks, calcDetailedGeneCounts (CommaDelimitedListOfStrings)</p>
 </blockquote>
 
 <h3>--seqReadCt val:</h3>
@@ -286,6 +286,7 @@ If a large fraction of the read-pairs are mapped to extremely distant loci (or t
 <li><p>makeJunctionBed: Write splice-junction count "bed" files. (default: OFF)</p></li>
 <li><p>makeWiggles: Write "wiggle" coverage files with 100-bp window size. Note: this REQUIRES that the --chromSizes parameter be included! (default: OFF)</p></li>
 <li><p>makeAllBrowserTracks: Write both the "wiggle" and the splice-junction bed files (default: OFF) [Depends: makeJunctionBed, makeWiggles]</p></li>
+<li><p>calcDetailedGeneCounts: Calculate more detailed read counts for each gene, counting the number of reads that cover introns, cross-strand, etc (default: OFF)</p></li>
 </ul>
 
 <h2>AUTHORS:</h2>
