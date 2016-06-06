@@ -1,6 +1,6 @@
 # QoRTs: Quality of RNA-seq Tool-Set
-v1.1.0
-Revised Mon Jun  6 13:51:30 EDT 2016
+v1.1.1
+Revised Mon Jun  6 14:56:42 EDT 2016
 
 The QoRTs software package is a fast, efficient, and portable multifunction toolkit designed to assist in
 the analysis, quality control, and data management of RNA-Seq datasets. Its primary function is to aid
