@@ -613,12 +613,12 @@ class qcGetGeneCounts( stranded : Boolean,
       //writer.write("");
       writer.write("GENEID	COUNT	COUNT_CDS	COUNT_UTR	COUNT_AMBIG_GENE\n");
       for(key <- geneCounts.keys.toVector.sorted){
-        writer.write(key + "	"+geneCounts(key) +"	"+geneArea_cdsCounts(key)+" "+geneCounts_utr(key)+"	"+geneCounts_ambig(key)+"\n");
+        writer.write(key + "\t"+geneCounts(key) +"\t"+geneArea_cdsCounts(key)+"\t"+geneCounts_utr(key)+"\t"+geneCounts_ambig(key)+"\n");
       }
       //writer.write("_total_no_feature	"+ utilCounts("_no_feature") + "	0	0	0\n");
       //writer.write("_total_ambiguous	"+ utilCounts("_ambiguous") + "	0	0	0\n");
-      writer.write("_total_no_feature	"+ readNoFeature + "	0	0	0\n");
-      writer.write("_total_ambiguous	"+ readAmbiguous + "	0	0	0\n");
+      writer.write("_total_no_feature\t"+ readNoFeature + "\t0\t0\t0\n");
+      writer.write("_total_ambiguous\t"+ readAmbiguous + "\t0\t0\t0\n");
       close(writer);
     }
     if(calcDetailedGeneCounts){
