@@ -12,21 +12,23 @@ makeMultiPlot.all <- function(res, outfile.dir = "./",
                          plotting.device.params = list(), 
                          debugMode = DEFAULTDEBUGMODE , 
                          rasterize.large.plots = NULL, 
+                         rasterize.medium.plots = NULL,
                          raster.height = 1000, 
                          raster.width = 1000,
                          exclude.autosomes.chrom.rate.plot = TRUE,
                          chromosome.name.style = "UCSC",
                          fig.res = 150, fig.base.height.inches = 7,
+                         insertSize.plot.xlim = NULL,
                          ...){
 
   get.summary.table(res, outfile = paste0(outfile.dir,"summary.table.txt"), debugMode = debugMode);
 
-                                makeMultiPlot.basic(res = res, outfile.dir = outfile.dir, plotter.params = plotter.params, plot.device.name = plot.device.name, plotting.device.params = plotting.device.params, rasterize.large.plots = rasterize.large.plots, raster.height = raster.height, raster.width = raster.width, chromosome.name.style = chromosome.name.style, exclude.autosomes.chrom.rate.plot = exclude.autosomes.chrom.rate.plot, fig.res = fig.res, fig.base.height.inches = fig.base.height.inches,...);
-                        makeMultiPlot.colorBySample(res = res, outfile.dir = outfile.dir, plotter.params = plotter.params, plot.device.name = plot.device.name, plotting.device.params = plotting.device.params, rasterize.large.plots = rasterize.large.plots, raster.height = raster.height, raster.width = raster.width, chromosome.name.style = chromosome.name.style, exclude.autosomes.chrom.rate.plot = exclude.autosomes.chrom.rate.plot, fig.res = fig.res, fig.base.height.inches = fig.base.height.inches, ...);
-                         makeMultiPlot.colorByGroup(res = res, outfile.dir = outfile.dir, plotter.params = plotter.params, plot.device.name = plot.device.name, plotting.device.params = plotting.device.params, rasterize.large.plots = rasterize.large.plots, raster.height = raster.height, raster.width = raster.width, chromosome.name.style = chromosome.name.style, exclude.autosomes.chrom.rate.plot = exclude.autosomes.chrom.rate.plot, fig.res = fig.res, fig.base.height.inches = fig.base.height.inches, ...);
-                          makeMultiPlot.colorByLane(res = res, outfile.dir = outfile.dir, plotter.params = plotter.params, plot.device.name = plot.device.name, plotting.device.params = plotting.device.params, rasterize.large.plots = rasterize.large.plots, raster.height = raster.height, raster.width = raster.width, chromosome.name.style = chromosome.name.style, exclude.autosomes.chrom.rate.plot = exclude.autosomes.chrom.rate.plot, fig.res = fig.res, fig.base.height.inches = fig.base.height.inches, ...);
-                  makeMultiPlot.highlightSample.all(res = res, outfile.dir = outfile.dir, plotter.params = plotter.params, plot.device.name = plot.device.name, plotting.device.params = plotting.device.params, rasterize.large.plots = rasterize.large.plots, raster.height = raster.height, raster.width = raster.width, chromosome.name.style = chromosome.name.style, exclude.autosomes.chrom.rate.plot = exclude.autosomes.chrom.rate.plot, fig.res = fig.res, fig.base.height.inches = fig.base.height.inches, ...);
-      makeMultiPlot.highlightSample.colorByLane.all(res = res, outfile.dir = outfile.dir, plotter.params = plotter.params, plot.device.name = plot.device.name, plotting.device.params = plotting.device.params, rasterize.large.plots = rasterize.large.plots, raster.height = raster.height, raster.width = raster.width, chromosome.name.style = chromosome.name.style, exclude.autosomes.chrom.rate.plot = exclude.autosomes.chrom.rate.plot, fig.res = fig.res, fig.base.height.inches = fig.base.height.inches, ...);
+                                makeMultiPlot.basic(res = res, outfile.dir = outfile.dir, plotter.params = plotter.params, plot.device.name = plot.device.name, plotting.device.params = plotting.device.params, rasterize.large.plots = rasterize.large.plots, rasterize.medium.plots=rasterize.medium.plots, raster.height = raster.height, raster.width = raster.width, chromosome.name.style = chromosome.name.style, exclude.autosomes.chrom.rate.plot = exclude.autosomes.chrom.rate.plot, fig.res = fig.res, fig.base.height.inches = fig.base.height.inches,insertSize.plot.xlim=insertSize.plot.xlim,...);
+                        makeMultiPlot.colorBySample(res = res, outfile.dir = outfile.dir, plotter.params = plotter.params, plot.device.name = plot.device.name, plotting.device.params = plotting.device.params, rasterize.large.plots = rasterize.large.plots, rasterize.medium.plots=rasterize.medium.plots, raster.height = raster.height, raster.width = raster.width, chromosome.name.style = chromosome.name.style, exclude.autosomes.chrom.rate.plot = exclude.autosomes.chrom.rate.plot, fig.res = fig.res, fig.base.height.inches = fig.base.height.inches,insertSize.plot.xlim=insertSize.plot.xlim, ...);
+                         makeMultiPlot.colorByGroup(res = res, outfile.dir = outfile.dir, plotter.params = plotter.params, plot.device.name = plot.device.name, plotting.device.params = plotting.device.params, rasterize.large.plots = rasterize.large.plots, rasterize.medium.plots=rasterize.medium.plots, raster.height = raster.height, raster.width = raster.width, chromosome.name.style = chromosome.name.style, exclude.autosomes.chrom.rate.plot = exclude.autosomes.chrom.rate.plot, fig.res = fig.res, fig.base.height.inches = fig.base.height.inches,insertSize.plot.xlim=insertSize.plot.xlim, ...);
+                          makeMultiPlot.colorByLane(res = res, outfile.dir = outfile.dir, plotter.params = plotter.params, plot.device.name = plot.device.name, plotting.device.params = plotting.device.params, rasterize.large.plots = rasterize.large.plots, rasterize.medium.plots=rasterize.medium.plots, raster.height = raster.height, raster.width = raster.width, chromosome.name.style = chromosome.name.style, exclude.autosomes.chrom.rate.plot = exclude.autosomes.chrom.rate.plot, fig.res = fig.res, fig.base.height.inches = fig.base.height.inches,insertSize.plot.xlim=insertSize.plot.xlim, ...);
+                  makeMultiPlot.highlightSample.all(res = res, outfile.dir = outfile.dir, plotter.params = plotter.params, plot.device.name = plot.device.name, plotting.device.params = plotting.device.params, rasterize.large.plots = rasterize.large.plots, rasterize.medium.plots=rasterize.medium.plots, raster.height = raster.height, raster.width = raster.width, chromosome.name.style = chromosome.name.style, exclude.autosomes.chrom.rate.plot = exclude.autosomes.chrom.rate.plot, fig.res = fig.res, fig.base.height.inches = fig.base.height.inches,insertSize.plot.xlim=insertSize.plot.xlim, ...);
+      makeMultiPlot.highlightSample.colorByLane.all(res = res, outfile.dir = outfile.dir, plotter.params = plotter.params, plot.device.name = plot.device.name, plotting.device.params = plotting.device.params, rasterize.large.plots = rasterize.large.plots, rasterize.medium.plots=rasterize.medium.plots, raster.height = raster.height, raster.width = raster.width, chromosome.name.style = chromosome.name.style, exclude.autosomes.chrom.rate.plot = exclude.autosomes.chrom.rate.plot, fig.res = fig.res, fig.base.height.inches = fig.base.height.inches,insertSize.plot.xlim=insertSize.plot.xlim, ...);
 
 }
 
@@ -41,11 +43,13 @@ makeMultiPlot.highlightSample.all <- function(res, outfile.dir = "./",
                                                   verbose = TRUE,
                                                   debugMode = DEFAULTDEBUGMODE , 
                                                   rasterize.large.plots = NULL, 
+                                                  rasterize.medium.plots = NULL,
                                                   raster.height = 1000, 
                                                   raster.width = 1000,
                                                   exclude.autosomes.chrom.rate.plot = TRUE,
                                                   chromosome.name.style = "UCSC",
                                                   fig.res = 150, fig.base.height.inches = 7,
+                                                  insertSize.plot.xlim = NULL,
                                                   ...){
   for(curr.sample in unique(res@decoder$sample.ID)){
     makeMultiPlot.highlightSample(res = res, 
@@ -55,8 +59,10 @@ makeMultiPlot.highlightSample.all <- function(res, outfile.dir = "./",
                                      plotter.params = plotter.params,
                                      plot.device.name = plot.device.name,
                                      rasterize.large.plots = rasterize.large.plots, 
+                                     rasterize.medium.plots = rasterize.medium.plots,
                                      raster.height = raster.height, raster.width = raster.width, chromosome.name.style = chromosome.name.style, exclude.autosomes.chrom.rate.plot = exclude.autosomes.chrom.rate.plot,
                                      fig.res = fig.res, fig.base.height.inches = fig.base.height.inches,
+                                     insertSize.plot.xlim=insertSize.plot.xlim,
                                      ...);
     if(verbose) message(paste0(curr.sample," complete!"));
   }
@@ -69,11 +75,13 @@ makeMultiPlot.highlightSample.colorByLane.all <- function(res, outfile.dir = "./
                                                                  verbose = TRUE, 
                                                                  debugMode = DEFAULTDEBUGMODE ,
                                                                  rasterize.large.plots = NULL, 
+                                                                 rasterize.medium.plots = NULL,
                                                                  raster.height = 1000, 
                                                                  raster.width = 1000,
                                                                  exclude.autosomes.chrom.rate.plot = TRUE,
                                                                  chromosome.name.style = "UCSC",
                                                                  fig.res = 150, fig.base.height.inches = 7,
+                                                                 insertSize.plot.xlim = NULL,
                                                                  ...){
   for(curr.sample in unique(res@decoder$sample.ID)){
     makeMultiPlot.highlightSample.colorByLane(res = res,
@@ -83,8 +91,10 @@ makeMultiPlot.highlightSample.colorByLane.all <- function(res, outfile.dir = "./
                     plotter.params = plotter.params, 
                     plot.device.name = plot.device.name, 
                     rasterize.large.plots = rasterize.large.plots, 
+                    rasterize.medium.plots = rasterize.medium.plots,
                     raster.height = raster.height, raster.width = raster.width, chromosome.name.style = chromosome.name.style, exclude.autosomes.chrom.rate.plot = exclude.autosomes.chrom.rate.plot,
                     fig.res = fig.res, fig.base.height.inches = fig.base.height.inches,
+                    insertSize.plot.xlim=insertSize.plot.xlim,
                     ...);
     if(verbose) message(paste0(curr.sample," complete!"));
   }
@@ -106,12 +116,14 @@ makeMultiPlot.basic <- function(res,  outfile = NULL,
                                    verbose = TRUE, 
                                    debugMode = DEFAULTDEBUGMODE , 
                                    rasterize.large.plots = NULL, 
+                                   rasterize.medium.plots = NULL,
                                    raster.height = 1000, 
                                    raster.width = 1000,
                                    separatePlots = FALSE,
                                    exclude.autosomes.chrom.rate.plot = TRUE,
                                    chromosome.name.style = "UCSC",
                                    fig.res = 150, fig.base.height.inches = 7,
+                                   insertSize.plot.xlim = NULL,
                                    ...){  
 
     build.plotter.function <- function(){
@@ -131,10 +143,12 @@ makeMultiPlot.basic <- function(res,  outfile = NULL,
                          cdf.bySample = FALSE, 
                          cdf.plotIntercepts = FALSE, 
                          rasterize.large.plots = rasterize.large.plots,
+                         rasterize.medium.plots = rasterize.medium.plots,
                          raster.height = raster.height, raster.width = raster.width, chromosome.name.style = chromosome.name.style, exclude.autosomes.chrom.rate.plot = exclude.autosomes.chrom.rate.plot,
                          separatePlots = separatePlots,
                          nvc.highlight.points = FALSE,
                          fig.res = fig.res, fig.base.height.inches = fig.base.height.inches,
+                         insertSize.plot.xlim=insertSize.plot.xlim,
                          ...);
 
 }
@@ -153,12 +167,14 @@ makeMultiPlot.colorByGroup <- function(res, outfile = NULL,
                                           verbose = TRUE, 
                                           debugMode = DEFAULTDEBUGMODE , 
                                           rasterize.large.plots = NULL,
+                                          rasterize.medium.plots = NULL,
                                           raster.height = 1000, 
                                           raster.width = 1000,
                                           separatePlots = FALSE,
                                           exclude.autosomes.chrom.rate.plot = TRUE,
                                           chromosome.name.style = "UCSC",
                                           fig.res = 150, fig.base.height.inches = 7,
+                                          insertSize.plot.xlim=NULL,
                                           ...){
     build.plotter.function <- function(){
       build.plotter.colorByGroup(res, plotter.params = plotter.params);
@@ -177,8 +193,10 @@ makeMultiPlot.colorByGroup <- function(res, outfile = NULL,
                          cdf.bySample = FALSE, 
                          cdf.plotIntercepts = FALSE, 
                          rasterize.large.plots = rasterize.large.plots, 
+                         rasterize.medium.plots = rasterize.medium.plots,
                          raster.height = raster.height, raster.width = raster.width, chromosome.name.style = chromosome.name.style, exclude.autosomes.chrom.rate.plot = exclude.autosomes.chrom.rate.plot,
                          separatePlots = separatePlots, fig.res = fig.res, fig.base.height.inches = fig.base.height.inches,
+                         insertSize.plot.xlim=insertSize.plot.xlim,
                          ...);
 }
 
@@ -196,12 +214,14 @@ makeMultiPlot.colorByLane <- function(res, outfile = NULL,
                                          verbose = TRUE, 
                                          debugMode = DEFAULTDEBUGMODE , 
                                          rasterize.large.plots = NULL, 
+                                         rasterize.medium.plots = NULL,
                                          raster.height = 1000, 
                                          raster.width = 1000,
                                          separatePlots = FALSE,
                                          exclude.autosomes.chrom.rate.plot = TRUE,
                                          chromosome.name.style = "UCSC",
                                          fig.res = 150, fig.base.height.inches = 7,
+                                         insertSize.plot.xlim=NULL,
                                          ...){
     build.plotter.function <- function(){
       build.plotter.colorByLane(res, plotter.params = plotter.params);
@@ -220,8 +240,10 @@ makeMultiPlot.colorByLane <- function(res, outfile = NULL,
                          cdf.bySample = FALSE, 
                          cdf.plotIntercepts = FALSE, 
                          rasterize.large.plots = rasterize.large.plots,
+                         rasterize.medium.plots = rasterize.medium.plots,
                          raster.height = raster.height, raster.width = raster.width, chromosome.name.style = chromosome.name.style, exclude.autosomes.chrom.rate.plot = exclude.autosomes.chrom.rate.plot,
                          separatePlots = separatePlots, fig.res = fig.res, fig.base.height.inches = fig.base.height.inches,
+                         insertSize.plot.xlim=insertSize.plot.xlim,
                          ...);
 }
 
@@ -239,12 +261,14 @@ makeMultiPlot.colorBySample <- function(res, outfile = NULL,
                                          verbose = TRUE, 
                                          debugMode = DEFAULTDEBUGMODE , 
                                          rasterize.large.plots = NULL, 
+                                         rasterize.medium.plots = NULL,
                                          raster.height = 1000, 
                                          raster.width = 1000,
                                          separatePlots = FALSE,
                                          exclude.autosomes.chrom.rate.plot = TRUE,
                                          chromosome.name.style = "UCSC",
                                          fig.res = 150, fig.base.height.inches = 7,
+                                         insertSize.plot.xlim=NULL,
                                          ...){
     build.plotter.function <- function(){
       build.plotter.colorBySample(res, plotter.params = plotter.params);
@@ -263,8 +287,10 @@ makeMultiPlot.colorBySample <- function(res, outfile = NULL,
                          cdf.bySample = FALSE, 
                          cdf.plotIntercepts = FALSE, 
                          rasterize.large.plots = rasterize.large.plots,
+                         rasterize.medium.plots = rasterize.medium.plots,
                          raster.height = raster.height, raster.width = raster.width, chromosome.name.style = chromosome.name.style, exclude.autosomes.chrom.rate.plot = exclude.autosomes.chrom.rate.plot,
                          separatePlots = separatePlots, fig.res = fig.res, fig.base.height.inches = fig.base.height.inches,
+                         insertSize.plot.xlim=insertSize.plot.xlim,
                          ...);
 }
 
@@ -283,12 +309,14 @@ makeMultiPlot.highlightSample <- function(res,curr.sample,outfile = NULL,
                                               plotting.device.params = list(), 
                                               verbose = TRUE, debugMode = DEFAULTDEBUGMODE , 
                                               rasterize.large.plots = NULL, 
+                                              rasterize.medium.plots = NULL,
                                               raster.height = 1000,
                                               raster.width = 1000,
                                               separatePlots = FALSE,
                                               exclude.autosomes.chrom.rate.plot = TRUE,
                                               chromosome.name.style = "UCSC",
                                               fig.res = 150, fig.base.height.inches = 7,
+                                              insertSize.plot.xlim=NULL,
                                               ...){
 
     build.plotter.function <- function(){
@@ -308,8 +336,10 @@ makeMultiPlot.highlightSample <- function(res,curr.sample,outfile = NULL,
                          cdf.bySample = TRUE, 
                          cdf.plotIntercepts = TRUE, 
                          rasterize.large.plots = rasterize.large.plots,
+                         rasterize.medium.plots = rasterize.medium.plots,
                          raster.height = raster.height, raster.width = raster.width, chromosome.name.style = chromosome.name.style, exclude.autosomes.chrom.rate.plot = exclude.autosomes.chrom.rate.plot,
                          separatePlots = separatePlots, fig.res = fig.res, fig.base.height.inches = fig.base.height.inches,
+                         insertSize.plot.xlim=insertSize.plot.xlim,
                          ...);
 }
 
@@ -327,12 +357,14 @@ makeMultiPlot.highlightSample.colorByLane <- function(res,curr.sample, outfile =
                                                              verbose = TRUE, 
                                                              debugMode = DEFAULTDEBUGMODE , 
                                                              rasterize.large.plots = NULL,
+                                                             rasterize.medium.plots = NULL,
                                                              raster.height = 1000,
                                                              raster.width = 1000,
                                                              separatePlots = FALSE,
                                                              exclude.autosomes.chrom.rate.plot = TRUE,
                                                              chromosome.name.style = "UCSC",
                                                              fig.res = 150, fig.base.height.inches = 7,
+                                                             insertSize.plot.xlim=NULL,
                                                              ...){
     build.plotter.function <- function(){
       build.plotter.highlightSample.colorByLane(curr.sample,res, merge.offset.outgroup = FALSE, plotter.params = plotter.params);
@@ -351,13 +383,16 @@ makeMultiPlot.highlightSample.colorByLane <- function(res,curr.sample, outfile =
                          cdf.bySample = FALSE, 
                          cdf.plotIntercepts = TRUE, 
                          rasterize.large.plots = rasterize.large.plots,
+                         rasterize.medium.plots = rasterize.medium.plots,
                          raster.height = raster.height, raster.width = raster.width, chromosome.name.style = chromosome.name.style, exclude.autosomes.chrom.rate.plot = exclude.autosomes.chrom.rate.plot,
                          separatePlots = separatePlots, fig.res = fig.res, fig.base.height.inches = fig.base.height.inches,
+                         insertSize.plot.xlim=insertSize.plot.xlim,
                          ...);
 }
 
 supportedDevices <- c("png","CairoPNG","tiff","jpeg","CairoPDF","pdf","svg","curr");
 supportedVectorDevices <- c("pdf","CairoPDF","svg");
+forPrintDevices <- c("pdf","CairoPDF");
 
 makeMultiPlot.GENERIC <- function(res, 
                                  build.plotter.function, 
@@ -370,6 +405,7 @@ makeMultiPlot.GENERIC <- function(res,
                                  complete.extended = TRUE, 
                                  debugMode, verbose, 
                                  rasterize.large.plots = NULL, 
+                                 rasterize.medium.plots = NULL, 
                                  raster.height = 1000,
                                  raster.width = 1000,
                                  separatePlots = FALSE,
@@ -377,6 +413,7 @@ makeMultiPlot.GENERIC <- function(res,
                                  exclude.autosomes.chrom.rate.plot = TRUE,
                                  chromosome.name.style = "UCSC",
                                  fig.res = 150, fig.base.height.inches = 7,
+                                 insertSize.plot.xlim=NULL,
                                  ... ){
 
 
@@ -400,6 +437,7 @@ makeMultiPlot.GENERIC <- function(res,
   if(is.null(rasterize.large.plots)){
     if(plot.device.name %in% supportedVectorDevices){
       if(check.rasterize.or.warn("rasterize.large.plots")){
+        message("Default: rasterizing large plots")
         rasterize.large.plots = TRUE;
       } else {
         rasterize.large.plots = FALSE;
@@ -408,7 +446,20 @@ makeMultiPlot.GENERIC <- function(res,
       rasterize.large.plots = FALSE;
     }
   }
-  if(rasterize.large.plots){
+  if(is.null(rasterize.medium.plots)){
+    if(plot.device.name %in% forPrintDevices){
+      if(check.rasterize.or.warn("rasterize.medium.plots")){
+        message("Default: rasterizing medium plots")
+        rasterize.medium.plots = TRUE;
+      } else {
+        rasterize.medium.plots = FALSE;
+      }
+    } else {
+      rasterize.medium.plots = FALSE;
+    }
+  }
+  
+  if(rasterize.large.plots || rasterize.medium.plots){
     check.rasterize.or.die("rasterize.large.plots");
     
     if((! plot.device.name %in% supportedVectorDevices) & (plot.device.name != "curr")){
@@ -416,6 +467,7 @@ makeMultiPlot.GENERIC <- function(res,
     }
   }
   if(debugMode) message("Rasterize large plots: ", rasterize.large.plots);
+  if(debugMode) message("Rasterize medium plots: ", rasterize.medium.plots);
 
   if(plot.device.name == "curr"){
     if(debugMode) message("Plotting to the currently-open device...");
@@ -534,18 +586,20 @@ makeMultiPlot.GENERIC <- function(res,
     plotter <- build.plotter.function();
     if(plot.device.name == "CairoPDF" | plot.device.name == "pdf"){
       if(debugMode) if(debugMode) message("Plotting pdf...");
-      INTERNAL.plot.summaries.pdf( res = res, plotter = plotter, nvc.highlight.points = nvc.highlight.points, verbose = verbose, debugMode = debugMode, rasterize.large.plots = rasterize.large.plots, raster.height = raster.height, raster.width = raster.width, 
+      INTERNAL.plot.summaries.pdf( res = res, plotter = plotter, nvc.highlight.points = nvc.highlight.points, verbose = verbose, debugMode = debugMode, 
+                                   rasterize.large.plots = rasterize.large.plots, rasterize.medium.plots = rasterize.medium.plots, raster.height = raster.height, raster.width = raster.width, 
                                    exclude.autosomes.chrom.rate.plot = exclude.autosomes.chrom.rate.plot,
-                                   chromosome.name.style = chromosome.name.style,
+                                   chromosome.name.style = chromosome.name.style,insertSize.plot.xlim=insertSize.plot.xlim,
                                    ...);
     } else if(! complete.extended) {
       if(debugMode) message("Plotting std...");
       INTERNAL.plot.summaries(res = res, plotter = plotter, nvc.highlight.points = nvc.highlight.points, verbose = verbose, debugMode = debugMode, rasterize.large.plots = rasterize.large.plots, raster.height = raster.height, raster.width = raster.width, separatePlotFuncts = separatePlotFuncts, ...);
     } else {
       if(debugMode) message("Plotting extended...");
-      INTERNAL.plot.summaries.advanced(res = res, plotter = plotter, nvc.highlight.points = nvc.highlight.points, verbose = verbose, debugMode = debugMode, rasterize.large.plots = rasterize.large.plots, raster.height = raster.height, raster.width = raster.width, separatePlotFuncts = separatePlotFuncts,
+      INTERNAL.plot.summaries.advanced(res = res, plotter = plotter, nvc.highlight.points = nvc.highlight.points, verbose = verbose, debugMode = debugMode, 
+                                       rasterize.large.plots = rasterize.large.plots, rasterize.medium.plots = rasterize.medium.plots, raster.height = raster.height, raster.width = raster.width, separatePlotFuncts = separatePlotFuncts,
                                        exclude.autosomes.chrom.rate.plot = exclude.autosomes.chrom.rate.plot,
-                                       chromosome.name.style = chromosome.name.style,
+                                       chromosome.name.style = chromosome.name.style,insertSize.plot.xlim=insertSize.plot.xlim,
                                        ...);
     }
   }, error = function(e){
@@ -608,6 +662,7 @@ INTERNAL.plot.summaries <- function(res, plotter,verbose = TRUE, cdf.bySample = 
                                              nvc.highlight.points = TRUE,
                                              cdf.plotIntercepts = TRUE, debugMode, 
                                              rasterize.large.plots = FALSE,
+                                             rasterize.medium.plots = FALSE,
                                              raster.height,
                                              raster.width,
                                              separatePlotFuncts,
@@ -619,26 +674,26 @@ INTERNAL.plot.summaries <- function(res, plotter,verbose = TRUE, cdf.bySample = 
      ts <- timestamp();
   
   makePlot.legend.box(plotter, debugMode = debugMode, ...);
-  makePlot.qual.pair(plotter,"min", debugMode = debugMode, ...);
-  makePlot.qual.pair(plotter,"lowerQuartile", debugMode = debugMode, ...);
-  makePlot.qual.pair(plotter,"median", debugMode = debugMode, ...);
-  makePlot.qual.pair(plotter,"upperQuartile", debugMode = debugMode, ...);
-  makePlot.qual.pair(plotter,"max", debugMode = debugMode, ...);
+  makePlot.qual.pair(plotter,"min", debugMode = debugMode,rasterize.plotting.area = rasterize.medium.plots, raster.height = raster.height, raster.width = raster.width, ...);
+  makePlot.qual.pair(plotter,"lowerQuartile", debugMode = debugMode,rasterize.plotting.area = rasterize.medium.plots, raster.height = raster.height, raster.width = raster.width, ...);
+  makePlot.qual.pair(plotter,"median", debugMode = debugMode,rasterize.plotting.area = rasterize.medium.plots, raster.height = raster.height, raster.width = raster.width, ...);
+  makePlot.qual.pair(plotter,"upperQuartile", debugMode = debugMode,rasterize.plotting.area = rasterize.medium.plots, raster.height = raster.height, raster.width = raster.width, ...);
+  makePlot.qual.pair(plotter,"max", debugMode = debugMode,rasterize.plotting.area = rasterize.medium.plots, raster.height = raster.height, raster.width = raster.width, ...);
 
-  makePlot.clipping(plotter, debugMode = debugMode, ...);
-  makePlot.cigarOp.byCycle(plotter,"Del", debugMode = debugMode, ...);
-  makePlot.cigarOp.byCycle(plotter,"Ins", debugMode = debugMode, ...);
-  makePlot.cigarOp.byCycle(plotter,"Splice", debugMode = debugMode, ...);
+  makePlot.clipping(plotter, debugMode = debugMode,rasterize.plotting.area = rasterize.medium.plots, raster.height = raster.height, raster.width = raster.width, ...);
+  makePlot.cigarOp.byCycle(plotter,"Del", debugMode = debugMode,rasterize.plotting.area = rasterize.medium.plots, raster.height = raster.height, raster.width = raster.width, ...);
+  makePlot.cigarOp.byCycle(plotter,"Ins", debugMode = debugMode,rasterize.plotting.area = rasterize.medium.plots, raster.height = raster.height, raster.width = raster.width, ...);
+  makePlot.cigarOp.byCycle(plotter,"Splice", debugMode = debugMode,rasterize.plotting.area = rasterize.medium.plots, raster.height = raster.height, raster.width = raster.width, ...);
   #makePlot.cigarLength.distribution(plotter,"Ins", log.y = TRUE, debugMode = debugMode, ...);
   #makePlot.cigarLength.distribution(plotter,"Del", log.y = TRUE, debugMode = debugMode, ...);
-  makePlot.gc(plotter, debugMode = debugMode, ...);
-  makePlot.missingness.rate(plotter, debugMode = debugMode, ...);
+  makePlot.gc(plotter, debugMode = debugMode,rasterize.plotting.area = rasterize.medium.plots, raster.height = raster.height, raster.width = raster.width, ...);
+  makePlot.missingness.rate(plotter, debugMode = debugMode,rasterize.plotting.area = rasterize.medium.plots, raster.height = raster.height, raster.width = raster.width, ...);
   
-  makePlot.insert.size(plotter, debugMode = debugMode, ...);
+  makePlot.insert.size(plotter, debugMode = debugMode,rasterize.plotting.area = rasterize.medium.plots, raster.height = raster.height, raster.width = raster.width, ...);
   makePlot.gene.cdf(plotter, sampleWise = cdf.bySample, plot.intercepts = cdf.plotIntercepts, debugMode = debugMode, rasterize.plotting.area = rasterize.large.plots, raster.height = raster.height, raster.width = raster.width, ...)
-  makePlot.genebody.coverage(plotter, debugMode = debugMode, ...);
-  makePlot.genebody.coverage.UMQuartile(plotter, debugMode = debugMode, ...);
-  makePlot.genebody.coverage.lowExpress(plotter, debugMode = debugMode, ...);
+  makePlot.genebody.coverage(plotter, debugMode = debugMode,rasterize.plotting.area = rasterize.medium.plots, raster.height = raster.height, raster.width = raster.width, ...);
+  makePlot.genebody.coverage.UMQuartile(plotter, debugMode = debugMode,rasterize.plotting.area = rasterize.medium.plots, raster.height = raster.height, raster.width = raster.width, ...);
+  makePlot.genebody.coverage.lowExpress(plotter, debugMode = debugMode,rasterize.plotting.area = rasterize.medium.plots, raster.height = raster.height, raster.width = raster.width, ...);
   makePlot.gene.assignment.rates(plotter, debugMode = debugMode, ...);
   
   makePlot.splice.junction.loci.counts(plotter, debugMode = debugMode, ...);
@@ -662,11 +717,13 @@ INTERNAL.plot.summaries.advanced <- function(res, plotter,verbose = TRUE, cdf.by
                                              nvc.highlight.points = TRUE,
                                              cdf.plotIntercepts = TRUE, debugMode, cex.corner.label = 2, 
                                              rasterize.large.plots = FALSE, 
+                                             rasterize.medium.plots = FALSE, 
                                              raster.height,
                                              raster.width,
                                              separatePlotFuncts,
                                              exclude.autosomes.chrom.rate.plot = TRUE,
                                              chromosome.name.style = "UCSC",
+                                             insertSize.plot.xlim=NULL,
                                              ...){
   outfilePrefix <- separatePlotFuncts$outfilePrefix;
   outfileExt <- separatePlotFuncts$outfileExt;
@@ -697,28 +754,28 @@ INTERNAL.plot.summaries.advanced <- function(res, plotter,verbose = TRUE, cdf.by
   }
   
   openFunc("legend",1); makePlot.legend.box(plotter, debugMode = debugMode, ...); devCloseFunct();
-  openFunc("qual.pair.min",1); makePlot.qual.pair(plotter,"min", debugMode = debugMode, ...); plot.corner.label(1); devCloseFunct();
-  openFunc("qual.pair.lowerQuartile",1); makePlot.qual.pair(plotter,"lowerQuartile", debugMode = debugMode, ...); plot.corner.label(2); devCloseFunct();
-  openFunc("qual.pair.median",1); makePlot.qual.pair(plotter,"median", debugMode = debugMode, ...); plot.corner.label(3); devCloseFunct();
-  openFunc("qual.pair.upperQuartile",1); makePlot.qual.pair(plotter,"upperQuartile", debugMode = debugMode, ...); plot.corner.label(4); devCloseFunct();
-  openFunc("qual.pair.max",1); makePlot.qual.pair(plotter,"max", debugMode = debugMode, ...); plot.corner.label(5); devCloseFunct();
-  openFunc("clippingProfile",1); makePlot.clipping(plotter, debugMode = debugMode, ...); plot.corner.label(6); devCloseFunct();
+  openFunc("qual.pair.min",1); makePlot.qual.pair(plotter,"min", debugMode = debugMode,rasterize.plotting.area = rasterize.medium.plots, raster.height = raster.height, raster.width = raster.width, ...); plot.corner.label(1); devCloseFunct();
+  openFunc("qual.pair.lowerQuartile",1); makePlot.qual.pair(plotter,"lowerQuartile", debugMode = debugMode,rasterize.plotting.area = rasterize.medium.plots, raster.height = raster.height, raster.width = raster.width, ...); plot.corner.label(2); devCloseFunct();
+  openFunc("qual.pair.median",1); makePlot.qual.pair(plotter,"median", debugMode = debugMode, rasterize.plotting.area = rasterize.medium.plots, raster.height = raster.height, raster.width = raster.width,...); plot.corner.label(3); devCloseFunct();
+  openFunc("qual.pair.upperQuartile",1); makePlot.qual.pair(plotter,"upperQuartile", debugMode = debugMode, rasterize.plotting.area = rasterize.medium.plots, raster.height = raster.height, raster.width = raster.width,...); plot.corner.label(4); devCloseFunct();
+  openFunc("qual.pair.max",1); makePlot.qual.pair(plotter,"max", debugMode = debugMode, rasterize.plotting.area = rasterize.medium.plots, raster.height = raster.height, raster.width = raster.width,...); plot.corner.label(5); devCloseFunct();
+  openFunc("clippingProfile",1); makePlot.clipping(plotter, debugMode = debugMode,rasterize.plotting.area = rasterize.medium.plots, raster.height = raster.height, raster.width = raster.width, ...); plot.corner.label(6); devCloseFunct();
   
-  openFunc("DeletionProfile",1); makePlot.cigarOp.byCycle(plotter,"Del", debugMode = debugMode, ...); plot.corner.label(7); devCloseFunct();
-  openFunc("InsertionProfile",1); makePlot.cigarOp.byCycle(plotter,"Ins", debugMode = debugMode, ...); plot.corner.label(8); devCloseFunct();
-  openFunc("SpliceProfile",1); makePlot.cigarOp.byCycle(plotter,"Splice", debugMode = debugMode, ...); plot.corner.label(9); devCloseFunct();
-  openFunc("InsertionLengthHisto",1); makePlot.cigarLength.distribution(plotter,"Ins", log.y = TRUE, debugMode = debugMode, ...); plot.corner.label(10); devCloseFunct();
-  openFunc("DeletionLengthHisto",1); makePlot.cigarLength.distribution(plotter,"Del", log.y = TRUE, debugMode = debugMode, ...); plot.corner.label(11); devCloseFunct();
-  openFunc("gc",1); makePlot.gc(plotter, debugMode = debugMode, ...); plot.corner.label(12); devCloseFunct();
-  openFunc("missingness.rate",1); makePlot.missingness.rate(plotter, debugMode = debugMode, ...); plot.corner.label(13); devCloseFunct();
+  openFunc("DeletionProfile",1); makePlot.cigarOp.byCycle(plotter,"Del", debugMode = debugMode,rasterize.plotting.area = rasterize.medium.plots, raster.height = raster.height, raster.width = raster.width, ...); plot.corner.label(7); devCloseFunct();
+  openFunc("InsertionProfile",1); makePlot.cigarOp.byCycle(plotter,"Ins", debugMode = debugMode,rasterize.plotting.area = rasterize.medium.plots, raster.height = raster.height, raster.width = raster.width, ...); plot.corner.label(8); devCloseFunct();
+  openFunc("SpliceProfile",1); makePlot.cigarOp.byCycle(plotter,"Splice", debugMode = debugMode,rasterize.plotting.area = rasterize.medium.plots, raster.height = raster.height, raster.width = raster.width, ...); plot.corner.label(9); devCloseFunct();
+  openFunc("InsertionLengthHisto",1); makePlot.cigarLength.distribution(plotter,"Ins", log.y = TRUE, debugMode = debugMode,rasterize.plotting.area = rasterize.medium.plots, raster.height = raster.height, raster.width = raster.width, ...); plot.corner.label(10); devCloseFunct();
+  openFunc("DeletionLengthHisto",1); makePlot.cigarLength.distribution(plotter,"Del", log.y = TRUE, debugMode = debugMode,rasterize.plotting.area = rasterize.medium.plots, raster.height = raster.height, raster.width = raster.width, ...); plot.corner.label(11); devCloseFunct();
+  openFunc("gc",1); makePlot.gc(plotter, debugMode = debugMode,rasterize.plotting.area = rasterize.medium.plots, raster.height = raster.height, raster.width = raster.width, ...); plot.corner.label(12); devCloseFunct();
+  openFunc("missingness.rate",1); makePlot.missingness.rate(plotter, debugMode = debugMode, rasterize.plotting.area = rasterize.medium.plots, raster.height = raster.height, raster.width = raster.width,...); plot.corner.label(13); devCloseFunct();
   
   openFunc("dropped.rate",1); makePlot.dropped.rates(plotter, debugMode = debugMode, ...); plot.corner.label(14); devCloseFunct();
-  openFunc("insert.size",1); makePlot.insert.size(plotter, debugMode = debugMode, ...); plot.corner.label(15); devCloseFunct();
+  openFunc("insert.size",1); makePlot.insert.size(plotter, debugMode = debugMode, xlim = insertSize.plot.xlim,rasterize.plotting.area = rasterize.medium.plots, raster.height = raster.height, raster.width = raster.width, ...); plot.corner.label(15); devCloseFunct();
   openFunc("gene.diversity",1); makePlot.gene.cdf(plotter, sampleWise = cdf.bySample, plot.intercepts = cdf.plotIntercepts, debugMode = debugMode, rasterize.plotting.area = rasterize.large.plots, raster.height = raster.height, raster.width = raster.width, ...); plot.corner.label(16); devCloseFunct();
   
-  openFunc("genebody.coverage.allGenes",1); makePlot.genebody(plotter, geneset="Overall", debugMode = debugMode, ...); plot.corner.label(17); devCloseFunct();
-  openFunc("genebody.coverage.umquartileExpressionGenes",1); makePlot.genebody(plotter, geneset="50-75", debugMode = debugMode, ...); plot.corner.label(18); devCloseFunct();
-  openFunc("genebody.coverage.lowExpressionGenes",1); makePlot.genebody(plotter, geneset="0-50", debugMode = debugMode, ...); plot.corner.label(19); devCloseFunct();
+  openFunc("genebody.coverage.allGenes",1); makePlot.genebody(plotter, geneset="Overall", debugMode = debugMode,rasterize.plotting.area = rasterize.medium.plots, raster.height = raster.height, raster.width = raster.width, ...); plot.corner.label(17); devCloseFunct();
+  openFunc("genebody.coverage.umquartileExpressionGenes",1); makePlot.genebody(plotter, geneset="50-75", debugMode = debugMode,rasterize.plotting.area = rasterize.medium.plots, raster.height = raster.height, raster.width = raster.width, ...); plot.corner.label(18); devCloseFunct();
+  openFunc("genebody.coverage.lowExpressionGenes",1); makePlot.genebody(plotter, geneset="0-50", debugMode = debugMode,rasterize.plotting.area = rasterize.medium.plots, raster.height = raster.height, raster.width = raster.width, ...); plot.corner.label(19); devCloseFunct();
   #openFunc("genebody.coverage.allGenes",1); makePlot.genebody.coverage(plotter, debugMode = debugMode, ...); plot.corner.label(17); devCloseFunct();
   #openFunc("genebody.coverage.umquartileExpressionGenes",1); makePlot.genebody.coverage.UMQuartile(plotter, debugMode = debugMode, ...); plot.corner.label(18); devCloseFunct();
   #openFunc("genebody.coverage.lowExpressionGenes",1); makePlot.genebody.coverage.lowExpress(plotter, debugMode = debugMode, ...); plot.corner.label(19); devCloseFunct();
@@ -751,6 +808,7 @@ INTERNAL.plot.summaries.GENERIC <- function(res, plotter,
               nvc.highlight.points = TRUE,
               cdf.plotIntercepts = TRUE, debugMode, cex.corner.label = 2, 
               rasterize.large.plots = FALSE, 
+              rasterize.medium.plots = FALSE,
               raster.height,
               raster.width,
               separatePlotFuncts,
@@ -786,27 +844,27 @@ INTERNAL.plot.summaries.GENERIC <- function(res, plotter,
   }
   
   openFunc("legend",1); makePlot.legend.box(plotter, debugMode = debugMode, ...); devCloseFunct();
-  openFunc("qual.pair.min",1); makePlot.qual.pair(plotter,"min", debugMode = debugMode, ...); plot.corner.label(1); devCloseFunct();
-  openFunc("qual.pair.lowerQuartile",1); makePlot.qual.pair(plotter,"lowerQuartile", debugMode = debugMode, ...); plot.corner.label(2); devCloseFunct();
-  openFunc("qual.pair.median",1); makePlot.qual.pair(plotter,"median", debugMode = debugMode, ...); plot.corner.label(3); devCloseFunct();
-  openFunc("qual.pair.upperQuartile",1); makePlot.qual.pair(plotter,"upperQuartile", debugMode = debugMode, ...); plot.corner.label(4); devCloseFunct();
-  openFunc("qual.pair.max",1); makePlot.qual.pair(plotter,"max", debugMode = debugMode, ...); plot.corner.label(5); devCloseFunct();
-  openFunc("clippingProfile",1); makePlot.clipping(plotter, debugMode = debugMode, ...); plot.corner.label(6); devCloseFunct();
+  openFunc("qual.pair.min",1); makePlot.qual.pair(plotter,"min", debugMode = debugMode,rasterize.plotting.area = rasterize.medium.plots, raster.height = raster.height, raster.width = raster.width, ...); plot.corner.label(1); devCloseFunct();
+  openFunc("qual.pair.lowerQuartile",1); makePlot.qual.pair(plotter,"lowerQuartile", debugMode = debugMode,rasterize.plotting.area = rasterize.medium.plots, raster.height = raster.height, raster.width = raster.width, ...); plot.corner.label(2); devCloseFunct();
+  openFunc("qual.pair.median",1); makePlot.qual.pair(plotter,"median", debugMode = debugMode,rasterize.plotting.area = rasterize.medium.plots, raster.height = raster.height, raster.width = raster.width, ...); plot.corner.label(3); devCloseFunct();
+  openFunc("qual.pair.upperQuartile",1); makePlot.qual.pair(plotter,"upperQuartile", debugMode = debugMode,rasterize.plotting.area = rasterize.medium.plots, raster.height = raster.height, raster.width = raster.width, ...); plot.corner.label(4); devCloseFunct();
+  openFunc("qual.pair.max",1); makePlot.qual.pair(plotter,"max", debugMode = debugMode,rasterize.plotting.area = rasterize.medium.plots, raster.height = raster.height, raster.width = raster.width, ...); plot.corner.label(5); devCloseFunct();
+  openFunc("clippingProfile",1); makePlot.clipping(plotter, debugMode = debugMode,rasterize.plotting.area = rasterize.medium.plots, raster.height = raster.height, raster.width = raster.width, ...); plot.corner.label(6); devCloseFunct();
   
-  openFunc("DeletionProfile",1); makePlot.cigarOp.byCycle(plotter,"Del", debugMode = debugMode, ...); plot.corner.label(7); devCloseFunct();
-  openFunc("InsertionProfile",1); makePlot.cigarOp.byCycle(plotter,"Ins", debugMode = debugMode, ...); plot.corner.label(8); devCloseFunct();
-  openFunc("SpliceProfile",1); makePlot.cigarOp.byCycle(plotter,"Splice", debugMode = debugMode, ...); plot.corner.label(9); devCloseFunct();
-  openFunc("InsertionLengthHisto",1); makePlot.cigarLength.distribution(plotter,"Ins", log.y = TRUE, debugMode = debugMode, ...); plot.corner.label(10); devCloseFunct();
-  openFunc("DeletionLengthHisto",1); makePlot.cigarLength.distribution(plotter,"Del", log.y = TRUE, debugMode = debugMode, ...); plot.corner.label(11); devCloseFunct();
-  openFunc("gc",1); makePlot.gc(plotter, debugMode = debugMode, ...); plot.corner.label(12); devCloseFunct();
-  openFunc("missingness.rate",1); makePlot.missingness.rate(plotter, debugMode = debugMode, ...); plot.corner.label(13); devCloseFunct();
+  openFunc("DeletionProfile",1); makePlot.cigarOp.byCycle(plotter,"Del", debugMode = debugMode,rasterize.plotting.area = rasterize.medium.plots, raster.height = raster.height, raster.width = raster.width, ...); plot.corner.label(7); devCloseFunct();
+  openFunc("InsertionProfile",1); makePlot.cigarOp.byCycle(plotter,"Ins", debugMode = debugMode,rasterize.plotting.area = rasterize.medium.plots, raster.height = raster.height, raster.width = raster.width, ...); plot.corner.label(8); devCloseFunct();
+  openFunc("SpliceProfile",1); makePlot.cigarOp.byCycle(plotter,"Splice", debugMode = debugMode,rasterize.plotting.area = rasterize.medium.plots, raster.height = raster.height, raster.width = raster.width, ...); plot.corner.label(9); devCloseFunct();
+  openFunc("InsertionLengthHisto",1); makePlot.cigarLength.distribution(plotter,"Ins", log.y = TRUE, debugMode = debugMode,rasterize.plotting.area = rasterize.medium.plots, raster.height = raster.height, raster.width = raster.width, ...); plot.corner.label(10); devCloseFunct();
+  openFunc("DeletionLengthHisto",1); makePlot.cigarLength.distribution(plotter,"Del", log.y = TRUE, debugMode = debugMode,rasterize.plotting.area = rasterize.medium.plots, raster.height = raster.height, raster.width = raster.width, ...); plot.corner.label(11); devCloseFunct();
+  openFunc("gc",1); makePlot.gc(plotter, debugMode = debugMode,rasterize.plotting.area = rasterize.medium.plots, raster.height = raster.height, raster.width = raster.width, ...); plot.corner.label(12); devCloseFunct();
+  openFunc("missingness.rate",1); makePlot.missingness.rate(plotter, debugMode = debugMode,rasterize.plotting.area = rasterize.medium.plots, raster.height = raster.height, raster.width = raster.width, ...); plot.corner.label(13); devCloseFunct();
   
   openFunc("dropped.rate",1); makePlot.dropped.rates(plotter, debugMode = debugMode, ...); plot.corner.label(14); devCloseFunct();
-  openFunc("insert.size",1); makePlot.insert.size(plotter, debugMode = debugMode, ...); plot.corner.label(15); devCloseFunct();
+  openFunc("insert.size",1); makePlot.insert.size(plotter, debugMode = debugMode,rasterize.plotting.area = rasterize.medium.plots, raster.height = raster.height, raster.width = raster.width, ...); plot.corner.label(15); devCloseFunct();
   openFunc("gene.diversity",1); makePlot.gene.cdf(plotter, sampleWise = cdf.bySample, plot.intercepts = cdf.plotIntercepts, debugMode = debugMode, rasterize.plotting.area = rasterize.large.plots, raster.height = raster.height, raster.width = raster.width, ...); plot.corner.label(16); devCloseFunct();
-  openFunc("genebody.coverage.allGenes",1); makePlot.genebody.coverage(plotter, debugMode = debugMode, ...); plot.corner.label(17); devCloseFunct();
-  openFunc("genebody.coverage.umquartileExpressionGenes",1); makePlot.genebody.coverage.UMQuartile(plotter, debugMode = debugMode, ...); plot.corner.label(18); devCloseFunct();
-  openFunc("genebody.coverage.lowExpressionGenes",1); makePlot.genebody.coverage.lowExpress(plotter, debugMode = debugMode, ...); plot.corner.label(19); devCloseFunct();
+  openFunc("genebody.coverage.allGenes",1); makePlot.genebody.coverage(plotter, debugMode = debugMode,rasterize.plotting.area = rasterize.medium.plots, raster.height = raster.height, raster.width = raster.width, ...); plot.corner.label(17); devCloseFunct();
+  openFunc("genebody.coverage.umquartileExpressionGenes",1); makePlot.genebody.coverage.UMQuartile(plotter, debugMode = debugMode,rasterize.plotting.area = rasterize.medium.plots, raster.height = raster.height, raster.width = raster.width, ...); plot.corner.label(18); devCloseFunct();
+  openFunc("genebody.coverage.lowExpressionGenes",1); makePlot.genebody.coverage.lowExpress(plotter, debugMode = debugMode,rasterize.plotting.area = rasterize.medium.plots, raster.height = raster.height, raster.width = raster.width, ...); plot.corner.label(19); devCloseFunct();
   openFunc("geneAssignmentRates",1); makePlot.gene.assignment.rates(plotter, debugMode = debugMode, ...); plot.corner.label(20); devCloseFunct();
   
   openFunc("sj.locus.ct",1); makePlot.splice.junction.loci.counts(plotter, debugMode = debugMode, ...); plot.corner.label(21); devCloseFunct();
@@ -836,10 +894,12 @@ INTERNAL.plot.summaries.pdf <- function(res, plotter,
                                         cdf.plotIntercepts = TRUE, debugMode, 
                                         cex.corner.label = 2, 
                                         rasterize.large.plots, 
+                                        rasterize.medium.plots,
                                         raster.height,
                                         raster.width,
                                         exclude.autosomes.chrom.rate.plot = TRUE,
                                         chromosome.name.style = "UCSC",
+                                        insertSize.plot.xlim=NULL,
                                         ...){
   
 
@@ -854,34 +914,35 @@ INTERNAL.plot.summaries.pdf <- function(res, plotter,
   if(verbose) {message(paste0("Starting compiled plot..."));}
      ts <- timestamp();
 
+
   layout(matrix(1:6,3,2,byrow=TRUE));
   makePlot.legend.box(plotter, debugMode = debugMode, ...); plot.corner.label(1);
-  makePlot.qual.pair(plotter,"min", debugMode = debugMode, ...); plot.corner.label(2);
-  makePlot.qual.pair(plotter,"lowerQuartile", debugMode = debugMode, ...); plot.corner.label(3);
-  makePlot.qual.pair(plotter,"median", debugMode = debugMode, ...); plot.corner.label(4);
-  makePlot.qual.pair(plotter,"upperQuartile", debugMode = debugMode, ...); plot.corner.label(5);
-  makePlot.qual.pair(plotter,"max", debugMode = debugMode, ...); plot.corner.label(6);
+  makePlot.qual.pair(plotter,"min", debugMode = debugMode,rasterize.plotting.area = rasterize.medium.plots, raster.height = raster.height, raster.width = raster.width, ...); plot.corner.label(2);
+  makePlot.qual.pair(plotter,"lowerQuartile", debugMode = debugMode,rasterize.plotting.area = rasterize.medium.plots, raster.height = raster.height, raster.width = raster.width, ...); plot.corner.label(3);
+  makePlot.qual.pair(plotter,"median", debugMode = debugMode,rasterize.plotting.area = rasterize.medium.plots, raster.height = raster.height, raster.width = raster.width, ...); plot.corner.label(4);
+  makePlot.qual.pair(plotter,"upperQuartile", debugMode = debugMode,rasterize.plotting.area = rasterize.medium.plots, raster.height = raster.height, raster.width = raster.width, ...); plot.corner.label(5);
+  makePlot.qual.pair(plotter,"max", debugMode = debugMode,rasterize.plotting.area = rasterize.medium.plots, raster.height = raster.height, raster.width = raster.width, ...); plot.corner.label(6);
 
   layout(matrix(1:6,3,2,byrow=TRUE));
-  makePlot.clipping(plotter, debugMode = debugMode, ...); plot.corner.label(7);
-  makePlot.cigarOp.byCycle(plotter,"Del", debugMode = debugMode, ...); plot.corner.label(8);
-  makePlot.cigarOp.byCycle(plotter,"Ins", debugMode = debugMode, ...); plot.corner.label(9);
-  makePlot.cigarOp.byCycle(plotter,"Splice", debugMode = debugMode, ...); plot.corner.label(10);
-  makePlot.cigarLength.distribution(plotter,"Ins", log.y = TRUE, debugMode = debugMode, ...); plot.corner.label(11);
-  makePlot.cigarLength.distribution(plotter,"Del", log.y = TRUE, debugMode = debugMode, ...); plot.corner.label(12);
+  makePlot.clipping(plotter, debugMode = debugMode,rasterize.plotting.area = rasterize.medium.plots, raster.height = raster.height, raster.width = raster.width, ...); plot.corner.label(7);
+  makePlot.cigarOp.byCycle(plotter,"Del", debugMode = debugMode,rasterize.plotting.area = rasterize.medium.plots, raster.height = raster.height, raster.width = raster.width, ...); plot.corner.label(8);
+  makePlot.cigarOp.byCycle(plotter,"Ins", debugMode = debugMode,rasterize.plotting.area = rasterize.medium.plots, raster.height = raster.height, raster.width = raster.width, ...); plot.corner.label(9);
+  makePlot.cigarOp.byCycle(plotter,"Splice", rasterize.plotting.area = rasterize.medium.plots, raster.height = raster.height, raster.width = raster.width,debugMode = debugMode, ...); plot.corner.label(10);
+  makePlot.cigarLength.distribution(plotter,"Ins", log.y = TRUE, debugMode = debugMode,rasterize.plotting.area = rasterize.medium.plots, raster.height = raster.height, raster.width = raster.width, ...); plot.corner.label(11);
+  makePlot.cigarLength.distribution(plotter,"Del", log.y = TRUE, debugMode = debugMode,rasterize.plotting.area = rasterize.medium.plots, raster.height = raster.height, raster.width = raster.width, ...); plot.corner.label(12);
 
   layout(matrix(1:6,3,2,byrow=TRUE));
-  makePlot.gc(plotter, debugMode = debugMode, ...); plot.corner.label(13);
-  makePlot.missingness.rate(plotter, debugMode = debugMode, ...); plot.corner.label(14);
+  makePlot.gc(plotter, debugMode = debugMode,rasterize.plotting.area = rasterize.medium.plots, raster.height = raster.height, raster.width = raster.width, ...); plot.corner.label(13);
+  makePlot.missingness.rate(plotter, debugMode = debugMode,rasterize.plotting.area = rasterize.medium.plots, raster.height = raster.height, raster.width = raster.width, ...); plot.corner.label(14);
   makePlot.dropped.rates(plotter, debugMode = debugMode, ...); plot.corner.label(15);
-  makePlot.insert.size(plotter, debugMode = debugMode, ...); plot.corner.label(16);
+  makePlot.insert.size(plotter, debugMode = debugMode,rasterize.plotting.area = rasterize.medium.plots, raster.height = raster.height, raster.width = raster.width, ...); plot.corner.label(16);
   makePlot.gene.cdf(plotter, sampleWise = cdf.bySample, plot.intercepts = cdf.plotIntercepts, debugMode = debugMode, rasterize.plotting.area = rasterize.large.plots, raster.height = raster.height, raster.width = raster.width, ...); plot.corner.label(17);
   #makePlot.genebody.coverage(plotter, debugMode = debugMode, ...); plot.corner.label(18);
-  makePlot.genebody(plotter, geneset="Overall", debugMode = debugMode, ...); plot.corner.label(18);
+  makePlot.genebody(plotter, geneset="Overall", debugMode = debugMode,rasterize.plotting.area = rasterize.medium.plots, raster.height = raster.height, raster.width = raster.width, ...); plot.corner.label(18);
   
   layout(matrix(1:6,3,2,byrow=TRUE));
-  makePlot.genebody(plotter, geneset="50-75", debugMode = debugMode, ...); plot.corner.label(19);
-  makePlot.genebody(plotter, geneset="0-50", debugMode = debugMode, ...); plot.corner.label(20);
+  makePlot.genebody(plotter, geneset="50-75", debugMode = debugMode,rasterize.plotting.area = rasterize.medium.plots, raster.height = raster.height, raster.width = raster.width, ...); plot.corner.label(19);
+  makePlot.genebody(plotter, geneset="0-50", debugMode = debugMode,rasterize.plotting.area = rasterize.medium.plots, raster.height = raster.height, raster.width = raster.width, ...); plot.corner.label(20);
   #makePlot.genebody.coverage.UMQuartile(plotter, debugMode = debugMode, ...); plot.corner.label(19);
   #makePlot.genebody.coverage.lowExpress(plotter, debugMode = debugMode, ...); plot.corner.label(20);
   makePlot.gene.assignment.rates(plotter, debugMode = debugMode, ...); plot.corner.label(21);

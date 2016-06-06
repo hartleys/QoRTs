@@ -146,7 +146,7 @@ object addNovelSplices {
      mergeNovelHelper(infileDir , sampleSF , flatlines, outfileDir , stranded, minCount ,noGzipOutput , noGzipInput, minSpan);
   }
   
-  
+   
   def mergeNovelHelper(infileDir : String, sampleSFraw : Seq[(String,Double)], flatgff : IndexedSeq[FlatGtfLine], outfileDir : String, 
                        stranded : Boolean, minCount : Double, noGzipOutput : Boolean, noGzipInput : Boolean, minSpan : Int, dropAggregates : Boolean = true){
     

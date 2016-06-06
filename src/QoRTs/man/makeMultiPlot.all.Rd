@@ -14,11 +14,13 @@
                      plotting.device.params = list(), 
                      debugMode,
                      rasterize.large.plots,
+                     rasterize.medium.plots,
                      raster.height = 1000, 
                      raster.width = 1000,
                      exclude.autosomes.chrom.rate.plot = TRUE,
                      chromosome.name.style = "UCSC",
                      fig.res = 150, fig.base.height.inches = 7,
+                     insertSize.plot.xlim,
                      \dots)
 }
 \arguments{
@@ -63,6 +65,9 @@
     By default, this parameter will be set to TRUE when a vector
     device is selected.
   }
+  \item{rasterize.medium.plots}{
+    Logical. as rasterize.large.plots, but applies to moderately-large plots. By default, this parameter will be set to TRUE for pdf/CairoPDF output only.
+  }
   \item{raster.height}{
     Numeric. If rasterize.plotting.area is TRUE, then this is the
     height of the plotting area raster image, in pixels.
@@ -91,7 +96,11 @@
     will be equal to the height for vector devices, or used to calculate the height
     in pixels using the fig.res value (see above).
   }
-  
+  \item{insertSize.plot.xlim}{
+    A numeric vector of length 2. The x-axis limits for the insert size plot. By default QoRTs will attempt to find reasonable values for this, 
+    but there are always situations where the default behavior is not ideal. Using this parameter you can set
+    it explicitly.
+  }
   \item{\dots}{ 
     Arguments to be passed to methods, such as
     \link{graphical parameters} (see \code{\link{par}}).

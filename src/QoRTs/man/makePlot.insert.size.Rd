@@ -11,7 +11,8 @@
 \usage{
   makePlot.insert.size(plotter, calc.rate = TRUE, pct.cutoff = 0.98,
                    plot.medians = TRUE, plot.means = NULL,
-                   debugMode, singleEndMode,
+                   debugMode, singleEndMode, xlim = NULL,
+                   rasterize.plotting.area = FALSE, raster.height = 1000, raster.width = 1000,
                    \dots)
 }
 \arguments{
@@ -46,6 +47,26 @@
       By default this is determined from the data. Thus, this parameter should 
       never need to be set by the user.
   }
+  \item{xlim}{
+      Numeric vector of length 2. Sets the x-axis limits. By default
+      QoRTs will attempt to autodetect reasonable values for this, but
+      there are always cases where you want to set this explicitly.
+  }
+  \item{rasterize.plotting.area}{
+      Logical. If \code{TRUE}, then "flatten" the plotting lines into a raster format. 
+      This requires support for png file creation and the installation of the "png" 
+      package. Only the plotting lines will be rasterized, the 
+      axes and annotations will be vector format. Default is \code{FALSE}.
+  }
+  \item{raster.height}{
+      Numeric integer. If \code{rasterize.plotting.area} is \code{TRUE}, then this
+      will set the height of the rasterized plot, in pixels.
+  }
+  \item{raster.width}{
+      Numeric integer. If \code{rasterize.plotting.area} is \code{TRUE}, then this
+      will set the width of the rasterized plot, in pixels.
+  }
+  
   \item{\dots}{ 
     Arguments to be passed to methods, such as
     \link{graphical parameters} (see \code{\link{par}}).

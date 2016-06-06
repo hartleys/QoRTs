@@ -14,6 +14,7 @@
                                 log.x = FALSE, 
                                 log.y = FALSE, 
                                 debugMode, singleEndMode,
+                                rasterize.plotting.area = FALSE, raster.height = 1000, raster.width = 1000,
                                 \dots)
 }
 \arguments{
@@ -62,6 +63,21 @@
       By default this is determined from the data. Thus, this parameter should 
       never need to be set by the user.
   }
+  \item{rasterize.plotting.area}{
+      Logical. If \code{TRUE}, then "flatten" the plotting lines into a raster format. 
+      This requires support for png file creation and the installation of the "png" 
+      package. Only the plotting lines will be rasterized, the 
+      axes and annotations will be vector format. Default is \code{FALSE}.
+  }
+  \item{raster.height}{
+      Numeric integer. If \code{rasterize.plotting.area} is \code{TRUE}, then this
+      will set the height of the rasterized plot, in pixels.
+  }
+  \item{raster.width}{
+      Numeric integer. If \code{rasterize.plotting.area} is \code{TRUE}, then this
+      will set the width of the rasterized plot, in pixels.
+  }
+  
   \item{\dots}{ 
     Arguments to be passed to methods, such as
     \link{graphical parameters} (see \code{\link{par}}).

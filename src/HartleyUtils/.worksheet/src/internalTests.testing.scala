@@ -18,7 +18,8 @@ object testing {;import org.scalaide.worksheet.runtime.library.WorksheetSupport.
 
   scala.math.log(0).isInfinite;System.out.println("""res5: Boolean = """ + $show(res$5));$skip(82); 
 
-  val splitstr = "Gene = \"HRG10;2\"; TX = \"Blah\"; exon = 1; variant = \"3\";";System.out.println("""splitstr  : String = """ + $show(splitstr ));$skip(55); val res$6 = 
+  val splitstr = "Gene = \"HRG10;2\"; TX = \"Blah\"; exon = 1; variant = \"3\";";System.out.println("""splitstr  : String = """ + $show(splitstr ));$skip(58); val res$6 = 
+  
   
   splitstr.split(";(?=([^\"]*\"[^\"]*\")*[^\"]*$)");System.out.println("""res6: Array[String] = """ + $show(res$6));$skip(53); 
 
@@ -113,10 +114,10 @@ System.getProperty("sun.arch.data.model");System.out.println("""res17: String = 
   val X = 10;System.out.println("""X  : Int = """ + $show(X ));$skip(12); 
   val Y = 0;System.out.println("""Y  : Int = """ + $show(Y ));$skip(29); val res$24 = 
   
-  X.toDouble / Y.toDouble;System.out.println("""res24: Double = """ + $show(res$24))}
+  X.toDouble / Y.toDouble;System.out.println("""res24: Double = """ + $show(res$24));$skip(38); val res$25 = 
   
   
-  
+   Seq(1,2,3,4,5).filter(_ < 3);System.out.println("""res25: Seq[Int] = """ + $show(res$25))}
   
   
 }

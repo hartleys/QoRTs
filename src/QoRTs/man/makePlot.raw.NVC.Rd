@@ -64,7 +64,7 @@ makePlot.minus.clipping.NVC(plotter,  r2.buffer = NULL,
     (see \code{\link{par}} for information on cex).
   }
   \item{rasterize.plotting.area}{
-    Logical. If TRUE, the plotting area will be written to a temp
+    Logical. If \code{TRUE}, the plotting area will be written to a temp
     png file then drawn to the current device as a raster image.
     This option is generally preferred for vector devices, because
     NVC plots can be very large when drawn in vector format. 

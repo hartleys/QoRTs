@@ -21,8 +21,6 @@ wordwrap.string <- function(s, width){
   }
 }
 
-
-
 draw.logyaxis.stdScalePlot <- function(ylim, ylim.truncate, lwd, lwd.mini, tcl = -0.5, side = 2, label.style = c("base10","raw","none"),...){
   label.style <- match.arg(label.style);
   if(missing(ylim)){

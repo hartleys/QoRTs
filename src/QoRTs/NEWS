@@ -1,0 +1,59 @@
+## v1.1.0:
+New features, updates, and bug-fixes.
+* Major bugfix: Fixed the geneCounts file so that UTR/CDS counts are no longer switched. Thanks to Roy Francis!
+* Added "rasterize.medium.plots" parameter to all makeMultiPlot functions. This option will 
+rasterize certain plots when plotting in a vector format. This can reduce file sizes and 
+make these images printable. It defaults to TRUE when plotting to a multi-page pdf. Note
+that this option will only work when png files are supported and when the "png" package
+is installed.
+* Added "rasterize.plotting.area", "raster.height", and "raster.width" parameters to several
+different makePlot functions.
+* Added xlim to the makePlot.insert.size function, because in certain cases the auto-detected
+limits are not ideal no matter how I design the auto-detect algorithm. This parameter
+sets the x-axis limits.
+* Added "insertSize.plot.xlim" to makeMultiPlot functions, which sets the xlim
+parameter for the makePlot.insert.size function.
+
+## v1.0.22:
+Several updates, additions, and bug-fixes:
+
+* Edited the license file of the R package (as per [this suggestion](https://github.com/hartleys/QoRTs/issues/13)) so that it no longer mentions picard (which isn't in the R package itself).
+* [Fixed delimiter typo.](https://github.com/hartleys/QoRTs/issues/14)
+* The "mergeNovelSplices" function now automatically calculates size factors if none are provided explicitly.
+* Fixed a bug in the (rarely-used) "mergeCounts" function (thanks to Vahid Aslanzadeh).
+* QoRTs will now automatically parse gene names (and other GTF attributes) that contain semicolons. To prevent formatting errors in related pipelines, it then replaces all semicolons with underscores. This fixes [an issue](https://github.com/hartleys/QoRTs/issues/12) encountered with  the use of the arabidopsis annotation, which includes semicolons in a few gene ID's. Note that the use of semicolons in gene ID's is not recommended, as many downstream analysis tools will fail.
+* Added additional warnings.
+* Upgraded the testing environment to scientific linux 6.
+* Added additional testing.
+
+
+## v1.0.20:
+* Edited LICENSE file of the R package to omit picard license info (since picard is not contained in the R package itself).
+* Minor bug fixes: Fixed individual merge function. Fixed certain whitespace delimiters.
+
+## v1.0.7:
+
+#### Major additions to the QoRTs java utility:
+* Added java function makeOrphanJunctionTrack, which makes a splice 
+junction track out of the "orphan" track produced by the mergeNovelSplices utility
+* Added java function makeAltJunctionTrack, which makes splice junction 
+tracks out of the known and novel splice junction files produced by QoRTs QC. 
+These plots are similar to the plots produced by makeOrphanJunctionTrack and
+makeJunctionTrack but is produced without sharing information between 
+multiple samples and thus will produce slightly different sets of splice
+junctions.
+* Added java function longReadClassifier. This is basically an entirely separate analysis
+tool designed to characterize PacBio SMRT long read data.
+* Minor bugfix: QoRTs mergeAllCounts now passes on the title line 
+on the knownSplices.counts.txt file. It used to just drop the header.
+
+#### Additions/changes to the QoRTs companion R package:
+* Changed "require" calls to "requireNamespace" when calling optional 
+external packages (Cairo, png, DESeq2, and edgeR). All calls to functions
+belonging to these packages are now referenced using the namespace.
+* Added usage examples to the manual for all individual plots. The R online
+help page now includes example images for each plot, directly produced using the
+example code.
+* Minor changes to the vignette. Added installation instructions. Cleaned up a few
+typos.
+

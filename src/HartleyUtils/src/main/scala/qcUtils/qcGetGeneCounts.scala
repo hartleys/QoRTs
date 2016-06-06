@@ -630,7 +630,7 @@ class qcGetGeneCounts( stranded : Boolean,
                         "\n";
       writer.write(titleString);
       for(key <- geneCounts.keys.toVector.sorted){
-        val line = key + "\t"+geneCounts(key) +"\t"+geneCounts_utr(key)+"\t"+geneArea_cdsCounts(key)+"\t"+geneCounts_ambig(key)+
+        val line = key + "\t"+geneCounts(key) +"\t"+geneArea_cdsCounts(key)+"\t"+geneCounts_utr(key)+"\t"+geneCounts_ambig(key)+
                    "\t"+geneArea_intronsCounts(key)+"\t"+geneArea_intronsAmbig(key)+
                    "\t"+geneArea_nearCounts(key)+"\t"+geneArea_nearAmbig(key)+
                    "\t"+geneArea_farCounts(key)+"\t"+geneArea_farAmbig(key)+

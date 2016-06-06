@@ -42,9 +42,19 @@ errorPlot <- function(plot.name, e, code = "UNKNOWN", newPlot = TRUE, cex = NULL
 #                                                  plotter, x.name, y.name, norm.x, avg.y, xlim , ylim = NULL, vert.offset = 0, horiz.offset = 0, draw.horiz.lines = FALSE, plot.type = "lines", r2.buffer = 10, override.lty = -1, x.is.log = FALSE, y.is.log = FALSE, pre.plot.func = NULL, y.axis.las = 1, ...){
 makePlot.generic <- function(plot.name, data.list, plotter, x.name, y.name, norm.x, avg.y, plot.type = "lines", xlim = NULL, ylim = NULL, 
                               plot.means = FALSE, plot.medians = FALSE, vert.offset = 0, pre.plot.func = NULL, override.lty = -1, 
-                             draw.horiz.lines = FALSE, x.is.log = FALSE, y.is.log = FALSE, y.axis.las = 1, zeroBaseX = FALSE, ...){
+                              draw.horiz.lines = FALSE, x.is.log = FALSE, y.is.log = FALSE, y.axis.las = 1, zeroBaseX = FALSE, 
+                              rasterize.plotting.area = FALSE, raster.height = 1000, raster.width = 1000,
+                              debugMode = FALSE,
+                              ...){
   tryCatch({
     priorities <- sort(unique(plotter$lanebam.params$plot.priority));
+    
+     if(rasterize.plotting.area){
+       rasterize.plotting.area <- check.rasterize.or.warn();
+    }
+    
+    if(rasterize.plotting.area) rasterFunc <- make.mixed.raster.vector.function(raster.height = raster.height, raster.width = raster.width, debugMode = debugMode);
+    
     tf.xy <- function(dl, i){
       curr.lanebam <- plotter$lanebam.params$unique.ID[i];
       curr.x <- dl[[curr.lanebam]][[x.name]];
@@ -135,7 +145,12 @@ makePlot.generic <- function(plot.name, data.list, plotter, x.name, y.name, norm
       if(plot.medians) text(xlim.min,avg.plot.center,labels="Median:", adj=0);
       if(plot.means)   text(xlim.min,avg.plot.center,labels="Mean:", adj=0);
     }
-
+    
+    if(rasterize.plotting.area){
+      rasterFunc$initRaster();
+      plot(0,0,col="transparent",main="",xlab="",ylab="",xlim=c(xlim[1],xlim[2]),ylim=ylim,axes=F, bg = "transparent", ...);
+    }
+    
     for(p in priorities){
       p.params <- plotter$lanebam.params[plotter$lanebam.params$plot.priority == p,];
       for(j in 1:length(p.params$unique.ID)){
@@ -155,6 +170,11 @@ makePlot.generic <- function(plot.name, data.list, plotter, x.name, y.name, norm
         }
       }
     }
+    if(rasterize.plotting.area){
+      rasterFunc$closeRaster();
+      rasterFunc$printRaster();
+    }
+    
     #axis(1);
     #axis(2);
     box();
@@ -187,6 +207,10 @@ makePlot.generic <- function(plot.name, data.list, plotter, x.name, y.name, norm
     return(TRUE);
   }, error = function(e){ errorPlot(plot.name, e, code = 2, newPlot = FALSE); stop();});
 }
+
+
+
+
 #data.list.r1 <- get.clipping.from.dl(plotter$res@qc.data[["cigarOpDistribution.byReadCycle.R1"]])
 #data.list.r2 <- get.clipping.from.dl(plotter$res@qc.data[["cigarOpDistribution.byReadCycle.R2"]])
 #dl <- data.list.r1; x.name <- "CYCLE"; y.name <- "S_T"
@@ -198,11 +222,19 @@ makePlot.generic <- function(plot.name, data.list, plotter, x.name, y.name, norm
 
 makePlot.generic.pair <- function(plot.name, data.list.r1, data.list.r2, plotter, x.name, y.name, norm.x, avg.y, xlim , ylim = NULL, vert.offset = 0, horiz.offset = 0, 
                                   draw.horiz.lines = FALSE, plot.type = "lines", r2.buffer = 10, override.lty = -1, 
-                                  x.is.log = FALSE, y.is.log = FALSE, pre.plot.func = NULL, y.axis.las = 1, zeroBaseX = FALSE, ...){
+                                  x.is.log = FALSE, y.is.log = FALSE, pre.plot.func = NULL, y.axis.las = 1, zeroBaseX = FALSE, 
+                                  rasterize.plotting.area = FALSE, raster.height = 1000, raster.width = 1000,
+                                  debugMode = FALSE,
+                                  ...){
 
   tryCatch({
 
     priorities <- sort(unique(plotter$lanebam.params$plot.priority));
+    
+    if(rasterize.plotting.area){
+      rasterize.plotting.area <- check.rasterize.or.warn();
+    }
+    if(rasterize.plotting.area) rasterFunc <- make.mixed.raster.vector.function(raster.height = raster.height, raster.width = raster.width, debugMode = debugMode);
 
     tf.xy <- function(dl, i){
       curr.lanebam <- plotter$lanebam.params$unique.ID[i];
@@ -265,6 +297,15 @@ makePlot.generic.pair <- function(plot.name, data.list.r1, data.list.r2, plotter
       #print(horiz.lines.at);
       abline(h = horiz.lines.at, lty=3,col="grey");
     }
+    
+    if(rasterize.plotting.area){
+      rasterFunc$initRaster();
+      #plot.new();
+      #plot.window(xlim=c(xlim[1],xlim[2] * 2 + r2.buffer),ylim=ylim, ...);
+      plot(0,0,col="transparent",main="",xlab="",ylab="",xlim=c(xlim[1],xlim[2] * 2 + r2.buffer),ylim=ylim,axes=F, bg = "transparent", ...);
+      
+    }
+    
     for(p in priorities){
       p.params <- plotter$lanebam.params[plotter$lanebam.params$plot.priority == p,];
       for(j in 1:length(p.params$unique.ID)){
@@ -284,6 +325,12 @@ makePlot.generic.pair <- function(plot.name, data.list.r1, data.list.r2, plotter
         }
       }
     }
+    
+    if(rasterize.plotting.area){
+      rasterFunc$closeRaster();
+      rasterFunc$printRaster();
+    }
+    
     pretty.axis.x <- limited.pretty(xlim);
     pretty.axis.x.labels <- pretty.axis.x;
     if(x.is.log) {
@@ -326,6 +373,10 @@ makePlot.gene.cdf.helper <- function(plot.name, data.list, plotter,plot.intercep
                                      ...){
 
   tryCatch({
+
+    if(rasterize.plotting.area){
+      rasterize.plotting.area <- check.rasterize.or.warn();
+    }
 
    if(rasterize.plotting.area) rasterFunc <- make.mixed.raster.vector.function(raster.height = raster.height, raster.width = raster.width, debugMode = debugMode);
    
@@ -431,7 +482,10 @@ makePlot.gene.cdf.bySample.helper <- function(plot.name, data.list, curr.sample,
                                               debugMode = FALSE,
                                               ...){
   tryCatch({
-
+  
+    if(rasterize.plotting.area){
+      rasterize.plotting.area <- check.rasterize.or.warn();
+    }
    if(rasterize.plotting.area) rasterFunc <- make.mixed.raster.vector.function(raster.height = raster.height, raster.width = raster.width, debugMode = debugMode);
 
    gene.ct <- length(data.list[[1]])
@@ -535,6 +589,10 @@ makePlot.generic.NVC.single <- function(plot.name, data.list.r1, plotter, x.name
                                   x.axis.labels  = NULL, count.x.from.end = FALSE, pre.plot.func = NULL, label.major.cex = 1, 
                                   show.base.legend = TRUE, nvc.colors = NULL, nvc.colors.light = NULL, 
                                   rasterize.plotting.area = FALSE, raster.height = 1000, raster.width = 2000, debugMode = FALSE, ... ){
+
+    if(rasterize.plotting.area){
+      rasterize.plotting.area <- check.rasterize.or.warn();
+    }
 
   if(rasterize.plotting.area){
     return(makePlot.generic.NVC.single.RASTERIZED(plot.name, data.list.r1 = data.list.r1, plotter = plotter, x.name = x.name, y.name = y.name, xlim = xlim, ylim = ylim,
@@ -908,6 +966,9 @@ makePlot.generic.NVC.pair <- function(plot.name, data.list.r1, data.list.r2, plo
                                   x.axis.labels  = NULL, count.x.from.end = FALSE, pre.plot.func = NULL, label.major.cex = 1, 
                                   show.base.legend = TRUE, nvc.colors = NULL, nvc.colors.light = NULL, 
                                   rasterize.plotting.area = FALSE, raster.height = 1000, raster.width = 2000, debugMode = FALSE, ... ){
+    if(rasterize.plotting.area){
+      rasterize.plotting.area <- check.rasterize.or.warn();
+    }
 
   if(rasterize.plotting.area){
     return(makePlot.generic.NVC.pair.RASTERIZED(plot.name, data.list.r1 = data.list.r1, data.list.r2 = data.list.r2, plotter = plotter, x.name = x.name, y.name = y.name, xlim = xlim, ylim = ylim, r2.buffer = r2.buffer, 
@@ -1560,7 +1621,9 @@ makePlot.generic.points.right <- function(plot.name, tf.list, plotter, plot.type
 ########################################################################################################################
 ################ Plotter internals:
 
-internal.plot.legend <- function(plotter, legend.type, legend.pos, ...){
+internal.plot.legend <- function(plotter, legend.type, legend.pos, 
+                                 #autofit.limits = NULL, 
+                                 ...){
   if(plotter$plot.type == "highlightSample.colorByLane"){
     
   } else if(plotter$plot.type == "highlightSample") {
@@ -1582,7 +1645,31 @@ internal.plot.legend <- function(plotter, legend.type, legend.pos, ...){
   }
 
   if(legend.type == "lnpt"){
-    legend(legend.pos,legend=plotter$legend.params$name,lty=plotter$legend.params$lines.lty, col=plotter$legend.params$lines.col, pch=plotter$legend.params$points.pch, ...);
+    ncol <- 1;
+    if(length(plotter$legend.params$name) >= 6) ncol <- 2;
+    
+    #if(is.null(autofit.limits)){
+      legend(legend.pos,
+           legend=plotter$legend.params$name,
+           lty=plotter$legend.params$lines.lty, 
+           col=plotter$legend.params$lines.col, 
+           pch=plotter$legend.params$points.pch,
+           ncol = ncol,
+           ...);
+    #} else {
+    #  x <- legend(legend.pos,
+    #       legend=plotter$legend.params$name,
+    #       lty=plotter$legend.params$lines.lty, 
+    #       col=plotter$legend.params$lines.col, 
+    #       pch=plotter$legend.params$points.pch,
+    #       ncol = ncol,
+    #       plot=FALSE,
+    #       ...);
+    #  isTooBig <- function(x){
+    #    x$rect$left < autofit.limits[1] || x$rect$left + x$rect$w > autofit.limits[2] || x$rect$top .....TODO
+    #  }
+    #}
+    
   } else if(legend.type == "lines"){
     legend(legend.pos,legend=plotter$legend.params$name,lty=plotter$legend.params$lines.lty, col=plotter$legend.params$lines.col, ...);
   } else if(legend.type == "points"){

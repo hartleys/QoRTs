@@ -22,6 +22,7 @@ object testing {
                                                   //> splitstr  : String = Gene = "HRG10;2"; TX = "Blah"; exon = 1; variant = "3";
                                                   //| 
   
+  
   splitstr.split(";(?=([^\"]*\"[^\"]*\")*[^\"]*$)")
                                                   //> res6: Array[String] = Array(Gene = "HRG10;2", " TX = "Blah"", " exon = 1", "
                                                   //|  variant = "3"")
@@ -130,7 +131,7 @@ System.getProperty("sun.arch.data.model")         //> res17: String = 64
   X.toDouble / Y.toDouble                         //> res24: Double = Infinity
   
   
-  
+   Seq(1,2,3,4,5).filter(_ < 3)                   //> res25: Seq[Int] = List(1, 2)
   
   
 }

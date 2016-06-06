@@ -10,7 +10,8 @@
 }
 \usage{
 makePlot.dropped.rates(plotter, dropAlwaysZeroRows = FALSE, 
-                       debugMode, singleEndMode, \dots)
+                       debugMode, singleEndMode,
+                       \dots)
 }
 \arguments{
   \item{plotter}{

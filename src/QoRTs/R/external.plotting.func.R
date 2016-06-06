@@ -115,7 +115,8 @@ makePlot.biotype.rates <- function(plotter,
 
 
 
-makePlot.qual.pair <- function(plotter, y.name, r2.buffer = NULL, debugMode = DEFAULTDEBUGMODE, singleEndMode = plotter$res@singleEnd, ...) {
+makePlot.qual.pair <- function(plotter, y.name, r2.buffer = NULL, debugMode = DEFAULTDEBUGMODE, singleEndMode = plotter$res@singleEnd, 
+                               rasterize.plotting.area = FALSE, raster.height = 1000, raster.width = 1000, ...) {
   readLabel <- if(singleEndMode){ "Reads" } else {"Read-Pairs"}
   
    if(y.name == "min"){ plot.name <- "Minimum";
@@ -161,6 +162,7 @@ makePlot.qual.pair <- function(plotter, y.name, r2.buffer = NULL, debugMode = DE
                                draw.horiz.lines = TRUE,
                                override.lty = 1,
                                zeroBaseX = TRUE,
+                               rasterize.plotting.area = rasterize.plotting.area, raster.height = raster.height, raster.width = raster.width,
                                ...);
        } else {
          makePlot.generic.pair(plot.name, plotter$res@qc.data[["quals.r1"]], 
@@ -177,6 +179,7 @@ makePlot.qual.pair <- function(plotter, y.name, r2.buffer = NULL, debugMode = DE
                                override.lty = 1,
                                r2.buffer =  r2.buffer,
                                zeroBaseX = TRUE,
+                               rasterize.plotting.area = rasterize.plotting.area, raster.height = raster.height, raster.width = raster.width,
                                ...);
        }
        
@@ -196,12 +199,13 @@ makePlot.qual.pair <- function(plotter, y.name, r2.buffer = NULL, debugMode = DE
 }
 
 
-makePlot.gc <- function(plotter, plot.medians = NULL, plot.means = TRUE, plotRate = FALSE, byPair = FALSE, debugMode = DEFAULTDEBUGMODE, singleEndMode = plotter$res@singleEnd, ...){
+makePlot.gc <- function(plotter, plot.medians = NULL, plot.means = TRUE, plotRate = FALSE, byPair = FALSE, debugMode = DEFAULTDEBUGMODE, singleEndMode = plotter$res@singleEnd, 
+                        rasterize.plotting.area = FALSE, raster.height = 1000, raster.width = 1000, ...){
   readLabel <- if(singleEndMode){ "Reads" } else {"Read-Pairs"}
   
   if(byPair & singleEndMode) stop("ERROR with makePlot.gc: byPair and singleEndMode cannot both be TRUE.");
   if(! byPair){
-    makePlot.gc.byRead(plotter = plotter, plot.medians = plot.medians, plot.means = plot.means, plotRate = plotRate, debugMode = debugMode, ...);
+    makePlot.gc.byRead(plotter = plotter, plot.medians = plot.medians, plot.means = plot.means, plotRate = plotRate, debugMode = debugMode,rasterize.plotting.area = rasterize.plotting.area, raster.height = raster.height, raster.width = raster.width, ...);
   } else {
     plot.name <- "GC Content (by read-pair)";
     if(debugMode){ message("Starting: ",plot.name," plot."); }
@@ -218,7 +222,9 @@ makePlot.gc <- function(plotter, plot.medians = NULL, plot.means = TRUE, plotRat
             plot.means <- FALSE;
         }
         makePlot.generic(plot.name,res@qc.data[["gc.byPair"]], plotter, 
-                 x.name = "NUM_BASES_GC",y.name = "CT",norm.x = plotRate,avg.y = TRUE,plot.type = "lines", plot.means = plot.means, plot.medians = plot.medians, ...);
+                 x.name = "NUM_BASES_GC",y.name = "CT",norm.x = plotRate,avg.y = TRUE,plot.type = "lines", plot.means = plot.means, plot.medians = plot.medians, 
+                 rasterize.plotting.area = rasterize.plotting.area, raster.height = raster.height, raster.width = raster.width,
+                 ...);
         if(plotRate){ title(xlab = "% G/C");
         } else { title(xlab = "# G/C"); }
         
@@ -231,7 +237,8 @@ makePlot.gc <- function(plotter, plot.medians = NULL, plot.means = TRUE, plotRat
   }
 }
 
-makePlot.gc.byRead <- function(plotter, plot.medians = NULL, plot.means = TRUE, plotRate = FALSE, debugMode = DEFAULTDEBUGMODE, singleEndMode = plotter$res@singleEnd, ...){
+makePlot.gc.byRead <- function(plotter, plot.medians = NULL, plot.means = TRUE, plotRate = FALSE, debugMode = DEFAULTDEBUGMODE, singleEndMode = plotter$res@singleEnd, 
+                               rasterize.plotting.area = FALSE, raster.height = 1000, raster.width = 1000, ...){
   readLabel <- if(singleEndMode){ "Reads" } else {"Read-Pairs"}
   plot.name <- "GC Content";
   if(debugMode){ message("Starting: ",plot.name," plot."); }
@@ -251,7 +258,9 @@ makePlot.gc.byRead <- function(plotter, plot.medians = NULL, plot.means = TRUE, 
       makePlot.generic(plot.name,res@qc.data[["gc.byRead"]], plotter, 
                x.name = "NUM_BASES_GC",y.name = "CT",norm.x = plotRate,
                avg.y = TRUE,plot.type = "lines", 
-               plot.means = plot.means, plot.medians = plot.medians, ...);
+               plot.means = plot.means, plot.medians = plot.medians, 
+               rasterize.plotting.area = rasterize.plotting.area, raster.height = raster.height, raster.width = raster.width,
+               ...);
       if(plotRate){ title(xlab = "% G/C");
       } else { title(xlab = "# G/C"); }
       title(ylab = "Frequency");
@@ -263,14 +272,16 @@ makePlot.gc.byRead <- function(plotter, plot.medians = NULL, plot.means = TRUE, 
   })
 }
 
-makePlot.clipping <- function(plotter, rate.per.million = FALSE, r2.buffer = NULL , debugMode = DEFAULTDEBUGMODE, singleEndMode = plotter$res@singleEnd,...){
+makePlot.clipping <- function(plotter, rate.per.million = FALSE, r2.buffer = NULL , debugMode = DEFAULTDEBUGMODE, singleEndMode = plotter$res@singleEnd,
+                              rasterize.plotting.area = FALSE, raster.height = 1000, raster.width = 1000, ...){
   readLabel <- if(singleEndMode){ "Reads" } else {"Read-Pairs"}
-  makePlot.cigarOp.byCycle(plotter,"SoftClip", r2.buffer = r2.buffer, rate.per.million = rate.per.million, singleEndMode = singleEndMode, ... );
+  makePlot.cigarOp.byCycle(plotter,"SoftClip", r2.buffer = r2.buffer, rate.per.million = rate.per.million, singleEndMode = singleEndMode,rasterize.plotting.area=rasterize.plotting.area,raster.height=raster.height,raster.width=raster.width, ... );
 }
 
 #tryCatch({
 #}, error = function(e){ errorPlot(plot.name,e, code = 0); stop(e);});
-makePlot.cigarOp.byCycle <- function(plotter,op, r2.buffer = NULL, rate.per.million = TRUE, debugMode = DEFAULTDEBUGMODE, singleEndMode = plotter$res@singleEnd,...){
+makePlot.cigarOp.byCycle <- function(plotter,op, r2.buffer = NULL, rate.per.million = TRUE, debugMode = DEFAULTDEBUGMODE, singleEndMode = plotter$res@singleEnd,
+                                     rasterize.plotting.area = FALSE, raster.height = 1000, raster.width = 1000, ...){
   readLabel <- if(singleEndMode){ "Reads" } else {"Read-Pairs"}
   SUFFIX.FIELD.IDS <- c("_S","_M","_E","_B")
   H.FIELD.IDS <- paste0("H",SUFFIX.FIELD.IDS);
@@ -340,6 +351,7 @@ makePlot.cigarOp.byCycle <- function(plotter,op, r2.buffer = NULL, rate.per.mill
                              draw.horiz.lines = FALSE,
                              override.lty = 1,
                              r2.buffer = r2.buffer,
+                             rasterize.plotting.area = rasterize.plotting.area, raster.height = raster.height, raster.width = raster.width,
                              ...);
       
       if(! singleEndMode){
@@ -379,6 +391,7 @@ makePlot.cigarOp.byCycle <- function(plotter,op, r2.buffer = NULL, rate.per.mill
                              vert.offset=0, 
                              draw.horiz.lines = FALSE,
                              override.lty = 1,
+                             rasterize.plotting.area = rasterize.plotting.area, raster.height = raster.height, raster.width = raster.width,
                              ...);
       title(xlab="Read Cycle");
       if(rate.per.million){
@@ -396,7 +409,8 @@ makePlot.cigarOp.byCycle <- function(plotter,op, r2.buffer = NULL, rate.per.mill
 
 
 
-makePlot.insert.size <- function(plotter, calc.rate = TRUE, pct.cutoff = 0.98, plot.medians = TRUE, plot.means = NULL, debugMode = DEFAULTDEBUGMODE, singleEndMode = plotter$res@singleEnd,...){
+makePlot.insert.size <- function(plotter, calc.rate = TRUE, pct.cutoff = 0.98, plot.medians = TRUE, plot.means = NULL, debugMode = DEFAULTDEBUGMODE, singleEndMode = plotter$res@singleEnd, xlim = NULL,
+                                 rasterize.plotting.area = FALSE, raster.height = 1000, raster.width = 1000, ...){
   readLabel <- if(singleEndMode){ "Reads" } else {"Read-Pairs"}
   plot.name <- "Insert Size";
   if(debugMode){ message("Starting: ",plot.name," plot."); }
@@ -419,15 +433,18 @@ makePlot.insert.size <- function(plotter, calc.rate = TRUE, pct.cutoff = 0.98, p
         data.list <- lapply(res@qc.data[["insert.size"]],function(df){
           df[df$InsertSize >= 0,];
         });
-        xlim.min <- min(sapply(data.list,function(df){min(df$InsertSize)}));
-        xlim.max <- max(sapply(data.list,function(df){
-          cts <- df$Ct;
-          total <- sum(cts);
-          cumsum <- cumsum(cts) / sum(cts);
-          limit.index <- which(cumsum >= pct.cutoff)[1];
-          df$InsertSize[limit.index];
-        }));
-        xlim <- c(xlim.min,xlim.max);
+        if(is.null(xlim)){
+          xlim.min <- min(sapply(data.list,function(df){min(df$InsertSize)}));
+          xlim.max <- max(sapply(data.list,function(df){
+            cts <- df$Ct;
+            total <- sum(cts);
+            cumsum <- cumsum(cts) / sum(cts);
+            limit.index <- which(cumsum >= pct.cutoff)[1];
+            df$InsertSize[limit.index];
+          }));
+          xlim <- c(xlim.min,xlim.max);
+        }
+        
         #print(xlim);
         data.list <- lapply(data.list,function(df){
           rbind.data.frame(data.frame(InsertSize = c(-1), Ct = c(0)),df);
@@ -444,7 +461,9 @@ makePlot.insert.size <- function(plotter, calc.rate = TRUE, pct.cutoff = 0.98, p
                norm.x = FALSE, avg.y = calc.rate,
                plot.type = "lines", 
                xlim = xlim,
-               plot.means = plot.means, plot.medians = plot.medians,pre.plot.func = pre.plot.func,  ...);
+               plot.means = plot.means, plot.medians = plot.medians,pre.plot.func = pre.plot.func,
+               rasterize.plotting.area = rasterize.plotting.area, raster.height = raster.height, raster.width = raster.width,
+               ...);
       internal.plot.main.title("Insert Size", plotter, ...);
       title(xlab = "Insert Size (bp)");
       title(ylab = "Rate");
@@ -461,19 +480,20 @@ makePlot.genebody <- function(plotter,
                   plot.medians = NULL, 
                   plot.means = TRUE, 
                   debugMode = DEFAULTDEBUGMODE, 
-                  singleEndMode = plotter$res@singleEnd, ... ){
+                  singleEndMode = plotter$res@singleEnd, 
+                  rasterize.plotting.area = FALSE, raster.height = 1000, raster.width = 1000, ... ){
   readLabel <- if(singleEndMode){ "Reads" } else {"Read-Pairs"}
   avgMethod <- match.arg(avgMethod);
   geneset <- match.arg(geneset);
   
   if(avgMethod == "TotalCounts"){
     if(geneset == "Overall"){
-      makePlot.genebody.coverage(plotter = plotter, plot.medians = plot.medians, plot.means=plot.means, debugMode=debugMode, singleEndMode=singleEndMode, ...);
+      makePlot.genebody.coverage(plotter = plotter, plot.medians = plot.medians, plot.means=plot.means, debugMode=debugMode, singleEndMode=singleEndMode, rasterize.plotting.area = rasterize.plotting.area, raster.height = raster.height, raster.width = raster.width, ...);
     } else {
-      makePlot.genebody.coverage.TC(plotter = plotter, geneset = geneset, plot.medians = plot.medians, plot.means = plot.means, debugMode = debugMode, singleEndMode=singleEndMode, ...);
+      makePlot.genebody.coverage.TC(plotter = plotter, geneset = geneset, plot.medians = plot.medians, plot.means = plot.means, debugMode = debugMode, singleEndMode=singleEndMode,rasterize.plotting.area = rasterize.plotting.area, raster.height = raster.height, raster.width = raster.width, ...);
     }
   } else {
-    makePlot.genebody.coverage.PCT(plotter = plotter, geneset = geneset, plot.medians = plot.medians, plot.means = plot.means, debugMode = debugMode, singleEndMode=singleEndMode, ...);
+    makePlot.genebody.coverage.PCT(plotter = plotter, geneset = geneset, plot.medians = plot.medians, plot.means = plot.means, debugMode = debugMode, singleEndMode=singleEndMode,rasterize.plotting.area = rasterize.plotting.area, raster.height = raster.height, raster.width = raster.width, ...);
   }
   
 }
@@ -484,7 +504,9 @@ makePlot.genebody.coverage.PCT <- function(plotter,
                     plot.medians = NULL, 
                     plot.means = TRUE, 
                     debugMode = DEFAULTDEBUGMODE, 
-                    singleEndMode = plotter$res@singleEnd, ... ){
+                    singleEndMode = plotter$res@singleEnd, 
+                    rasterize.plotting.area = FALSE, raster.height = 1000, raster.width = 1000, 
+                    ... ){
   readLabel <- if(singleEndMode){ "Reads" } else {"Read-Pairs"}
   geneset <- match.arg(geneset);
   
@@ -531,7 +553,9 @@ makePlot.genebody.coverage.PCT <- function(plotter,
                    x.name = "Quantile",y.name = "GeneBodyCoverage", 
                    norm.x = TRUE, avg.y = FALSE,
                    plot.type = "lines", 
-                   plot.means = plot.means, plot.medians = plot.medians, ...);
+                   plot.means = plot.means, plot.medians = plot.medians,
+                   rasterize.plotting.area = rasterize.plotting.area, raster.height = raster.height, raster.width = raster.width,
+                   ...);
 
       internal.plot.main.title(plot.name, plotter, ...);
       title(xlab = "Percentile of Gene Body (5\'->3\')");
@@ -548,6 +572,7 @@ makePlot.genebody.coverage.TC <- function(plotter,
                     plot.medians = NULL, 
                     plot.means = TRUE, 
                     debugMode = DEFAULTDEBUGMODE, 
+                    rasterize.plotting.area = FALSE, raster.height = 1000, raster.width = 1000, 
                     singleEndMode = plotter$res@singleEnd, ... ){
   geneset <- match.arg(geneset);
   
@@ -593,7 +618,9 @@ makePlot.genebody.coverage.TC <- function(plotter,
                    x.name = "Quantile",y.name = "GeneBodyCoverage", 
                    norm.x = TRUE, avg.y = TRUE,
                    plot.type = "lines", 
-                   plot.means = plot.means, plot.medians = plot.medians, ...);
+                   plot.means = plot.means, plot.medians = plot.medians,
+                   rasterize.plotting.area = rasterize.plotting.area, raster.height = raster.height, raster.width = raster.width,
+                   ...);
 
       internal.plot.main.title(plot.name, plotter, ...);
       title(xlab = "Percentile of Gene Body (5\'->3\')");
@@ -606,7 +633,8 @@ makePlot.genebody.coverage.TC <- function(plotter,
 
 
 
-makePlot.genebody.coverage <- function(plotter, plot.medians = NULL, plot.means = TRUE, debugMode = DEFAULTDEBUGMODE, singleEndMode = plotter$res@singleEnd, ... ){
+makePlot.genebody.coverage <- function(plotter, plot.medians = NULL, plot.means = TRUE, debugMode = DEFAULTDEBUGMODE, singleEndMode = plotter$res@singleEnd, 
+                                       rasterize.plotting.area = FALSE, raster.height = 1000, raster.width = 1000, ... ){
   readLabel <- if(singleEndMode){ "Reads" } else {"Read-Pairs"}
   plot.name <- "Gene-Body Coverage";
   if(debugMode){ message("Starting: ",plot.name," plot."); }
@@ -635,7 +663,9 @@ makePlot.genebody.coverage <- function(plotter, plot.medians = NULL, plot.means 
                x.name = "Quantile",y.name = "GeneBodyCoverage", 
                norm.x = TRUE, avg.y = TRUE,
                plot.type = "lines", 
-               plot.means = plot.means, plot.medians = plot.medians, ...);
+               plot.means = plot.means, plot.medians = plot.medians, 
+               rasterize.plotting.area = rasterize.plotting.area, raster.height = raster.height, raster.width = raster.width,
+               ...);
 
       internal.plot.main.title("Gene-Body Coverage", plotter, ...);
       title(xlab = "Percentile of Gene Body (5\'->3\')");
@@ -650,7 +680,8 @@ makePlot.genebody.coverage <- function(plotter, plot.medians = NULL, plot.means 
 
 
 
-makePlot.genebody.coverage.UMQuartile <- function(plotter, plot.medians = NULL, plot.means = TRUE, debugMode = DEFAULTDEBUGMODE, singleEndMode = plotter$res@singleEnd, ... ){
+makePlot.genebody.coverage.UMQuartile <- function(plotter, plot.medians = NULL, plot.means = TRUE, debugMode = DEFAULTDEBUGMODE, singleEndMode = plotter$res@singleEnd, 
+                                                  rasterize.plotting.area = FALSE, raster.height = 1000, raster.width = 1000, ... ){
   readLabel <- if(singleEndMode){ "Reads" } else {"Read-Pairs"}
   plot.name <- "Gene-Body Coverage, Upper Middle Quartile Genes";
   if(debugMode){ message("Starting: ",plot.name," plot."); }
@@ -678,7 +709,9 @@ makePlot.genebody.coverage.UMQuartile <- function(plotter, plot.medians = NULL, 
                    x.name = "Quantile",y.name = "GeneBodyCoverage", 
                    norm.x = TRUE, avg.y = TRUE,
                    plot.type = "lines", 
-                   plot.means = plot.means, plot.medians = plot.medians, ...);
+                   plot.means = plot.means, plot.medians = plot.medians, 
+                   rasterize.plotting.area = rasterize.plotting.area, raster.height = raster.height, raster.width = raster.width,
+                   ...);
 
       internal.plot.main.title("Gene-Body Coverage, Upper Middle Quartile Genes", plotter, ...);
       title(xlab = "Percentile of Gene Body (5\'->3\')");
@@ -689,7 +722,8 @@ makePlot.genebody.coverage.UMQuartile <- function(plotter, plot.medians = NULL, 
   })
 }
 
-makePlot.genebody.coverage.lowExpress <- function(plotter, plot.medians = NULL, plot.means = TRUE, debugMode = DEFAULTDEBUGMODE, singleEndMode = plotter$res@singleEnd, ... ){
+makePlot.genebody.coverage.lowExpress <- function(plotter, plot.medians = NULL, plot.means = TRUE, debugMode = DEFAULTDEBUGMODE, singleEndMode = plotter$res@singleEnd, 
+                                                  rasterize.plotting.area = FALSE, raster.height = 1000, raster.width = 1000, ... ){
   readLabel <- if(singleEndMode){ "Reads" } else {"Read-Pairs"}
   plot.name <- "Gene-Body Coverage, Low Expression Genes";
   if(debugMode){ message("Starting: ",plot.name," plot."); }
@@ -717,7 +751,9 @@ makePlot.genebody.coverage.lowExpress <- function(plotter, plot.medians = NULL, 
                    x.name = "Quantile",y.name = "GeneBodyCoverage", 
                    norm.x = TRUE, avg.y = TRUE,
                    plot.type = "lines", 
-                   plot.means = plot.means, plot.medians = plot.medians, ...);
+                   plot.means = plot.means, plot.medians = plot.medians,
+                   rasterize.plotting.area = rasterize.plotting.area, raster.height = raster.height, raster.width = raster.width,
+                   ...);
 
       internal.plot.main.title("Gene-Body Coverage, Low Expression Genes", plotter, ...);
       title(xlab = "Percentile of Gene Body (5\'->3\')");
@@ -730,7 +766,8 @@ makePlot.genebody.coverage.lowExpress <- function(plotter, plot.medians = NULL, 
 
 
 
-makePlot.missingness.rate <- function(plotter,  r2.buffer = NULL, debugMode = DEFAULTDEBUGMODE, singleEndMode = plotter$res@singleEnd, ...){
+makePlot.missingness.rate <- function(plotter,  r2.buffer = NULL, debugMode = DEFAULTDEBUGMODE, singleEndMode = plotter$res@singleEnd, 
+                                      rasterize.plotting.area = FALSE, raster.height = 1000, raster.width = 1000, ...){
   readLabel <- if(singleEndMode){ "Reads" } else {"Read-Pairs"}
   plot.name <- "Missingness Rate, by read cycle";
   if(debugMode){ message("Starting: ",plot.name," plot."); }
@@ -762,6 +799,7 @@ makePlot.missingness.rate <- function(plotter,  r2.buffer = NULL, debugMode = DE
                                  vert.offset=0, 
                                  draw.horiz.lines = FALSE,
                                  override.lty = 1,
+                                 rasterize.plotting.area = rasterize.plotting.area, raster.height = raster.height, raster.width = raster.width,
                                  ...);
       internal.plot.main.title("'N' Rate, by Read Cycle", plotter, ...);
       title(xlab = "Read Cycle");
@@ -799,6 +837,7 @@ makePlot.missingness.rate <- function(plotter,  r2.buffer = NULL, debugMode = DE
                                  draw.horiz.lines = FALSE,
                                  override.lty = 1,
                                  r2.buffer = r2.buffer,
+                                 rasterize.plotting.area = rasterize.plotting.area, raster.height = raster.height, raster.width = raster.width,
                                  ...);
       internal.plot.main.title("'N' Rate, by Read Cycle", plotter, ...);
       internal.plot.read.labels(plotter,"bottom",r2.buffer,xlim[2]);
@@ -815,7 +854,8 @@ makePlot.missingness.rate <- function(plotter,  r2.buffer = NULL, debugMode = DE
 ####################################################################################
 
 
-makePlot.cigarLength.distribution <- function(plotter,op, r2.buffer = NULL, perMillion = TRUE, log.x = FALSE, log.y = FALSE, debugMode = DEFAULTDEBUGMODE, singleEndMode = plotter$res@singleEnd,...){
+makePlot.cigarLength.distribution <- function(plotter,op, r2.buffer = NULL, perMillion = TRUE, log.x = FALSE, log.y = FALSE, debugMode = DEFAULTDEBUGMODE, singleEndMode = plotter$res@singleEnd,
+                                              rasterize.plotting.area = FALSE, raster.height = 1000, raster.width = 1000, ...){
   readLabel <- if(singleEndMode){ "Reads" } else {"Read-Pairs"}
   if(op == "SoftClip"){
     op.title <- "Alignment Clipping Length";
@@ -876,6 +916,8 @@ makePlot.cigarLength.distribution <- function(plotter,op, r2.buffer = NULL, perM
         
         xlim <- c(xlim.min,xlim.max)
       }, error = function(e){ errorPlot(plot.name,e, code = 0); stop(e);});
+      
+      
       makePlot.generic(plot.name,cigarLenData.list.r1, 
                                  plotter = plotter, 
                                  x.name = "LEN",
@@ -889,6 +931,7 @@ makePlot.cigarLength.distribution <- function(plotter,op, r2.buffer = NULL, perM
                                  override.lty = 1,
                                  x.is.log = log.x,
                                  y.is.log = log.y,
+                                 rasterize.plotting.area = rasterize.plotting.area, raster.height = raster.height, raster.width = raster.width,
                                  ...);
 
       internal.plot.read.labels(plotter,"bottom",r2.buffer,xlim[2]);
@@ -947,6 +990,7 @@ makePlot.cigarLength.distribution <- function(plotter,op, r2.buffer = NULL, perM
                                  r2.buffer = r2.buffer,
                                  x.is.log = log.x,
                                  y.is.log = log.y,
+                                 rasterize.plotting.area = rasterize.plotting.area, raster.height = raster.height, raster.width = raster.width,
                                  ...);
 
       internal.plot.read.labels(plotter,"bottom",r2.buffer,xlim[2]);
