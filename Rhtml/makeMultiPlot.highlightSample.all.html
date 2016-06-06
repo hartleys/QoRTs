@@ -31,11 +31,13 @@ one for every sample.
                      plotting.device.params = list(),
                      verbose = TRUE, debugMode,
                      rasterize.large.plots,
+                     rasterize.medium.plots,
                      raster.height = 1000, 
                      raster.width = 1000,
                      exclude.autosomes.chrom.rate.plot = TRUE,
                      chromosome.name.style = "UCSC",
                      fig.res = 150, fig.base.height.inches = 7,
+                     insertSize.plot.xlim,
                      ...)
 
   makeMultiPlot.highlightSample.colorByLane.all(res, 
@@ -45,11 +47,13 @@ one for every sample.
                      plotting.device.params = list(),
                      verbose = TRUE, debugMode,
                      rasterize.large.plots,
+                     rasterize.medium.plots,
                      raster.height = 1000, 
                      raster.width = 1000,
                      exclude.autosomes.chrom.rate.plot = TRUE,
                      chromosome.name.style = "UCSC",
                      fig.res = 150, fig.base.height.inches = 7,
+                     insertSize.plot.xlim,
                      ...)
 </pre>
 
@@ -134,6 +138,12 @@ be flattened. <em>Note that this requires the png package.</em>
 device is selected.
 </p>
 </td></tr>
+<tr valign="top"><td><code>rasterize.medium.plots</code></td>
+<td>
+
+<p>Logical. as rasterize.large.plots, but applies to moderately-large plots. By default, this parameter will be set to TRUE for pdf/CairoPDF output only.
+</p>
+</td></tr>
 <tr valign="top"><td><code>raster.height</code></td>
 <td>
 
@@ -180,6 +190,14 @@ will be equal to the height for vector devices, or used to calculate the height
 in pixels using the fig.res value (see above).
 </p>
 </td></tr>
+<tr valign="top"><td><code>insertSize.plot.xlim</code></td>
+<td>
+
+<p>A numeric vector of length 2. The x-axis limits for the insert size plot. By default QoRTs will attempt to find reasonable values for this, 
+but there are always situations where the default behavior is not ideal. Using this parameter you can set
+it explicitly.
+</p>
+</td></tr>
 <tr valign="top"><td><code>...</code></td>
 <td>
  
@@ -213,5 +231,5 @@ in pixels using the fig.res value (see above).
 </code></pre>
 
 
-<hr /><div style="text-align: center;">[Package <em>QoRTs</em> version 1.0.22 <a href="00Index.html">Index</a>]</div>
+<hr /><div style="text-align: center;">[Package <em>QoRTs</em> version 1.1.0 <a href="00Index.html">Index</a>]</div>
 </body></html>
