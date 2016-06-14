@@ -1,6 +1,6 @@
 # Frequently Asked Questions
-v1.1.2
-Revised Mon Jun  6 15:18:28 EDT 2016
+v1.1.6
+Revised Tue Jun 14 15:00:02 EDT 2016
 
 ## What if none of these answers solve my problem?
 
