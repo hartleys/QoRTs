@@ -126,16 +126,52 @@ object prepFlatGtfFile {
          }
        }
    */
-  
-  private def buildGenomicArrayOfSets_Tx_and_Map(stranded : Boolean, gtffile : String, codes : GtfCodes = new GtfCodes()) : (GenomicArrayOfSets[String], Map[String,String], Map[String,(Char,Map[String,Char])]) = {
+  private def buildTxCdsSpanMap(stranded: Boolean, gtffile : String, codes : GtfCodes = new GtfCodes()): Map[String,(Int,Int)] = {
+    var txCDS : Map[String,(Int,Int)] = Map[String,(Int,Int)]();
+    val gtfReader = GtfReader.getStdGtfReader(gtffile, stranded, true, "\\s+", codes);
+    
+    for(gtfLine <- gtfReader){
+      if(gtfLine.isCDS){
+        val tx = gtfLine.getTxID;
+        txCDS.get(tx) match {
+          case Some((currStart : Int, currEnd : Int)) => {
+            txCDS += ((tx,(math.min(currStart,gtfLine.start),math.max(currEnd,gtfLine.end))))
+          }
+          case None => {
+            txCDS += ((tx,(gtfLine.start,gtfLine.end)))
+          }
+        }
+      }
+    }
+    
+    return txCDS.withDefaultValue((0,0));
+  }
+  private def buildGenomicArrayOfSets_Tx_and_Map(stranded : Boolean, gtffile : String, codes : GtfCodes = new GtfCodes()) : (GenomicArrayOfSets[String], Map[String,String], Map[String,(Char,Map[String,Char])], Map[String,(Int,Int)]) = {
     val txArray : GenomicArrayOfSets[String] = GenomicArrayOfSets[String](stranded);
     val gtfReader = GtfReader.getStdGtfReader(gtffile, stranded, true, "\\s+", codes);
     var txMap : Map[String,String] = Map[String,String]();
     var geneInfoMap = Map[String,(Char,Map[String,Char])]();
-    
+    var txCDS : Map[String,(Int,Int)] = Map[String,(Int,Int)]()
+    // returns txArray, txMap, geneInfoMap:
+    // txArray:
+    //     GenomicArrayOfSets -> geneID
+    // txMap:
+    //     Map[(geneID : String) -> (txID : String)]
+    // geneInfoMap:
+    //     Map [ (geneID : String) -> (strand : Char, Map[(txID : String) -> (strand : Char)] ) ]
     
     for(gtfLine <- gtfReader){
-      if(gtfLine.isExon){
+      if(gtfLine.isCDS){
+        val tx = gtfLine.getTxID;
+        txCDS.get(tx) match {
+          case Some((currStart : Int, currEnd : Int)) => {
+            txCDS += ((tx,(math.min(currStart,gtfLine.start),math.max(currEnd,gtfLine.end))))
+          }
+          case None => {
+            txCDS += ((tx,(gtfLine.start,gtfLine.end)))
+          }
+        }
+      } else if(gtfLine.isExon){
         val tx = gtfLine.getTxID;
         val gene = gtfLine.getGeneID;
         val strandedStrand : Char = gtfLine.strandedStrand;
@@ -158,7 +194,7 @@ object prepFlatGtfFile {
         }
       }
     }
-    return ((txArray.finalizeStepVectors, txMap, geneInfoMap));
+    return ((txArray.finalizeStepVectors, txMap, geneInfoMap, txCDS.withDefaultValue((0,0))));
   }
   
   private def buildSpliceJunctionMap(txArray : GenomicArrayOfSets[String]) : (Map[GenomicInterval, Set[String]]) = {
@@ -215,7 +251,9 @@ object prepFlatGtfFile {
                              txMap : Map[String,String], 
                              spliceJunctionMap : Map[GenomicInterval,Set[String]], 
                              aggregateGeneMap : Map[String,String], 
-                             aggregateSet : Set[String], gtfCodes : GtfCodes = new GtfCodes()) : Iterator[FlatGtfLine] = {
+                             aggregateSet : Set[String], 
+                             txCDS : Map[String,(Int,Int)],
+                             gtfCodes : GtfCodes = new GtfCodes()) : Iterator[FlatGtfLine] = {
     //var featureCountMap : Map[String,Int] = Map[String,Int]().withDefault(k => 0);
     //var featureList : Seq[GtfLine] = Seq[GtfLine]();
     
@@ -238,7 +276,6 @@ object prepFlatGtfFile {
         soFar;
       }
     });
-
     
     reportln("    FlatteningGtf: Adding the aggregate genes themselves...("+getDateAndTimeString+")","debug");
     val featureListMap2 = aggregateSet.foldLeft(featureListMap)((soFar, aggregateGene) =>{
@@ -246,8 +283,8 @@ object prepFlatGtfFile {
       val iv = new GenomicInterval(features.head.chromName, features.head.strand, features.head.start - 1, features.last.end);
       
       val (geneStrand, geneCt, txInfoMap) = aggregateInfoMap(aggregateGene);
-        
-      val gtfLine = FlatOutputGtfLine.makeFlatGtfLine_aggregateGene(iv, stranded , aggregateGene , geneStrand, geneCt, txInfoMap, gtfCodes);
+      
+      val gtfLine = FlatOutputGtfLine.makeFlatGtfLine_aggregateGene(iv, stranded , aggregateGene , geneStrand, geneCt, txInfoMap, txCDS, gtfCodes);
       soFar.updated(aggregateGene, gtfLine +: features);
     });
     
@@ -345,10 +382,11 @@ object prepFlatGtfFile {
         //OutputGtfLine(iv : .GenomicInterval, featureType : String, attributeMap : Map[String,String], stranded : Boolean)
   
 
+  //txCDS:Map[String,(Int,Int)]
   
   private def getFlatGtfIterator(infile : String, stranded : Boolean) : Iterator[FlatGtfLine] = {
     reportln("FlatteningGtf: starting...("+getDateAndTimeString+")","debug");
-    val (txArray, txMap, geneInfoMap) : (GenomicArrayOfSets[String], Map[String,String], Map[String, (Char, Map[String,Char])]) = buildGenomicArrayOfSets_Tx_and_Map(stranded,infile);
+    val (txArray, txMap, geneInfoMap, txCDS) : (GenomicArrayOfSets[String], Map[String,String], Map[String, (Char, Map[String,Char])],  Map[String,(Int,Int)]) = buildGenomicArrayOfSets_Tx_and_Map(stranded,infile);
     
     //val txStrandMap = scala.collection.mutable.AnyRefMap[String,Char]();
     
@@ -383,7 +421,7 @@ object prepFlatGtfFile {
     reportln("    FlatteningGtf: Finished Compiling Aggregate Info. ("+getDateAndTimeString+")","debug");
     
     //val sortedFeatureList = buildFeatures(stranded, txArray, txMap , spliceJunctionMap , aggregateGeneMap , aggregateSet );
-    val sortedFeatureIterator : Iterator[internalUtils.GtfTool.FlatGtfLine] = buildFeatures2(stranded,  aggregateInfoMap, txArray, txMap , spliceJunctionMap , aggregateGeneMap , aggregateSet);
+    val sortedFeatureIterator : Iterator[internalUtils.GtfTool.FlatGtfLine] = buildFeatures2(stranded,  aggregateInfoMap, txArray, txMap , spliceJunctionMap , aggregateGeneMap , aggregateSet, txCDS);
     reportln("    FlatteningGtf: Features Built.("+getDateAndTimeString+")","debug");
     return(sortedFeatureIterator);
   }

@@ -2532,7 +2532,7 @@ makePlot.splicing.mismatch <- function(plotter, debugMode = DEFAULTDEBUGMODE,  s
 ####################################################################################
 
 
-makePlot.legend.box <- function(plotter,debugMode = DEFAULTDEBUGMODE, singleEndMode = plotter$res@singleEnd, ...){
+makePlot.legend.box <- function(plotter,debugMode = DEFAULTDEBUGMODE, singleEndMode = plotter$res@singleEnd, cex.legend = NULL, ncol = NULL, ...){
   plot.name <- "legend box";
   plotter.error.wrapper(plot.name, plotterFcn = function(){
     plotter.NVC <- plotter;
@@ -2546,45 +2546,55 @@ makePlot.legend.box <- function(plotter,debugMode = DEFAULTDEBUGMODE, singleEndM
       title.text <- paste0("Sample Highlight:\n",plotter$title.highlight.name,"\nColored by Lane")
       title.cex <- fit.character.vector(title.text);
 
-      text(0.5,1,title.text,adj=c(0.5,1),cex=title.cex, ...);
-      internal.plot.legend(plotter,"lnpt","bottom", ...);
+      #text(0.5,1,title.text,adj=c(0.5,1),cex=title.cex, ...);
+      #internal.plot.legend(plotter,"lnpt","bottom", ...);
       #internal.plot.legend(plotter.NVC,"NVC.both","center");
     } else if(plotter$plot.type == "highlightSample") {
       #internal.plot.legend(plotter.NVC,"NVC.both","center");
       title.text <- paste0("Sample Highlight:\n",plotter$title.highlight.name)
       title.cex <- fit.character.vector(title.text);
 
-      internal.plot.legend(plotter,"lnpt","bottom", ...);
-      text(0.5,1,title.text,adj=c(0.5,1),cex=title.cex, ...);
+      #internal.plot.legend(plotter,"lnpt","bottom", ...);
+      #text(0.5,1,title.text,adj=c(0.5,1),cex=title.cex, ...);
     } else if(plotter$plot.type == "colorBySample") {
       title.text <- paste0("Summary Plots, By Sample")
       title.cex <- fit.character.vector(title.text);
-      text(0.5,1,title.text,adj=c(0.5,1),cex=title.cex, ...);
-      internal.plot.legend(plotter,"lnpt","bottom", ...);
+      #text(0.5,1,title.text,adj=c(0.5,1),cex=title.cex, ...);
+      #internal.plot.legend(plotter,"lnpt","bottom", ...);
     } else if(plotter$plot.type == "summary"){
       title.text <- paste0("All\nQuality Control\nSummary Plots")
       title.cex <- fit.character.vector(title.text);
       text(0.5,0.5,title.text,adj=c(0.5,0.5),cex=title.cex, ...);
+      return("");
     } else if(plotter$plot.type == "colorByLane"){
       title.text <- paste0("Summary Plots, By Lane")
       title.cex <- fit.character.vector(title.text);
-      text(0.5,1,title.text,adj=c(0.5,1),cex=title.cex, ...);
-      internal.plot.legend(plotter,"lnpt","bottom", ...);
+      #text(0.5,1,title.text,adj=c(0.5,1),cex=title.cex, ...);
+      #internal.plot.legend(plotter,"lnpt","bottom", ...);
     } else if(plotter$plot.type == "colorByGroup"){
       title.text <- paste0("Summary Plots, By Group")
       title.cex <- fit.character.vector(title.text);
-      text(0.5,1,title.text,adj=c(0.5,1),cex=title.cex, ...);
-      internal.plot.legend(plotter,"lnpt","bottom", ...);
-    } else {
+      #text(0.5,1,title.text,adj=c(0.5,1),cex=title.cex, ...);
+      #internal.plot.legend(plotter,"lnpt","bottom", ...);
+    } #else {
       #Do nothing.
-      return("");
+    #  return("");
+    #}
+    text(0.5,1,title.text,adj=c(0.5,1),cex=title.cex, ...);
+    
+    if(is.null(cex.legend)){
+      autofit.limits <- device.limits();
+      autofit.limits[4] <- par("usr")[4] - strheight(paste0(title.text,"\n"),cex = title.cex);
+      internal.plot.legend(plotter,"lnpt","bottom",autofit.limits=autofit.limits, ncol=ncol, ...);
+    } else {
+      internal.plot.legend(plotter,"lnpt","bottom", cex = cex.legend, ncol=ncol, ...);
     }
   })
 }
 
-makePlot.legend.over <- function(position, plotter, debugMode = DEFAULTDEBUGMODE, singleEndMode = plotter$res@singleEnd, ...) {
+makePlot.legend.over <- function(position, plotter, debugMode = DEFAULTDEBUGMODE, singleEndMode = plotter$res@singleEnd,ncol = NULL, ...) {
   plotter.NVC <- plotter;
-  internal.plot.legend(plotter, "lnpt", position, ...);
+  internal.plot.legend(plotter, "lnpt", position,ncol=ncol, ...);
 }
 
 get.summary.table <- function(res, outfile = NULL, debugMode = DEFAULTDEBUGMODE){

@@ -479,9 +479,9 @@ fit.vert <- function(title.text, default.cex = par("cex.ylab")){
   }
 }
 
-fit.character.vector <- function(strs, min.width = 0.6, max.width = 0.95, max.width.per.char = 0.15){
+fit.character.vector <- function(strs, min.width = 0.6, max.width = 0.95, max.width.per.char = 0.15, max.height = NULL){
    curr.cex <- 1;
-   return(fit.character.vector.helper(strs, curr.cex = curr.cex, min.width = min.width, max.width = max.width, max.width.per.char = max.width.per.char));
+   return(fit.character.vector.helper(strs, curr.cex = curr.cex, min.width = min.width, max.width = max.width, max.width.per.char = max.width.per.char,max.height=max.height));
    
 }
 
@@ -502,17 +502,28 @@ fit.character.vector <- function(strs, min.width = 0.6, max.width = 0.95, max.wi
 #   }
 #}
 
-fit.character.vector.helper <- function(strs, curr.cex, min.width, max.width, max.width.per.char){
+fit.character.vector.helper <- function(strs, curr.cex, min.width, max.width, max.width.per.char, max.height = NULL){
    curr.width <- max(strwidth(strs, cex = curr.cex));
+   curr.height <- max(strheight(strs, cex = curr.cex));
    strs.nchar <- max(nchar(strs));
    
    curr.width.per.char <- curr.width / strs.nchar;
    
    desired.width <- ((max.width - min.width) / 2) + min.width;
-   new.cex <- curr.cex * (desired.width / curr.width);
    
+   new.cex <- curr.cex * (desired.width / curr.width);
    new.width <- max(strwidth(strs, cex = new.cex));
+   new.height <- max(strheight(strs,cex=new.cex));
    new.width.per.char <- new.width / strs.nchar;
+   
+   if(! is.null(max.height)){
+     if(new.height > max.height){
+       new.cex <- new.cex * (max.height / new.height);
+       new.width <- max(strwidth(strs, cex = new.cex));
+       new.height <- max(strheight(strs,cex=new.cex));
+       new.width.per.char <- new.width / strs.nchar;
+     }
+   }
    
    if(new.width.per.char > max.width.per.char){
       desired.width.per.char <- max.width.per.char;

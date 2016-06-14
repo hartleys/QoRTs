@@ -9,8 +9,8 @@
    Plots the universal legend for a given plotter object.
 }
 \usage{
-makePlot.legend.box(plotter, debugMode, singleEndMode, \dots)
-makePlot.legend.over(position, plotter, debugMode, singleEndMode, \dots)
+makePlot.legend.box(plotter, debugMode, singleEndMode, cex.legend, ncol, \dots)
+makePlot.legend.over(position, plotter, debugMode, singleEndMode, ncol, \dots)
 }
 \arguments{
   \item{plotter}{
@@ -30,6 +30,14 @@ makePlot.legend.over(position, plotter, debugMode, singleEndMode, \dots)
       Logical. Determines whether the dataset consists of single-ended reads. 
       By default this is determined from the data. Thus, this parameter should 
       never need to be set by the user.
+  }
+  \item{cex.legend}{
+      Numeric. The cex expansion factor passed to \code{legend}. By default
+      the cex is autofitted to fill the available space.
+  }
+  \item{ncol}{
+      Integer value. The number of columns in the legend. By default this will be
+      selected automatically depending on the number of items in the legend.
   }
   \item{\dots}{ 
     Arguments to be passed to methods, such as

@@ -1510,7 +1510,12 @@ makePlot.generic.points <- function(plot.name, tf.list, plotter, plot.type = "po
 
     if(is.null(cex.x.axis)){
       cex.x.axis <- par("cex.axis");
-      cex.x.axis <- fit.character.vector.helper(x.titles, cex.x.axis, min.width = 0.6, max.width = 0.95, max.width.per.char = 0.15);
+      bottom.margin.size <- abs(device.limits()[3] - par("usr")[3]);
+      max.x.axis.title.height <- bottom.margin.size;
+      if(! any(grepl("\n",x.titles,fixed=TRUE))){
+        max.x.axis.title.height <- bottom.margin.size * 0.5;
+      }
+      cex.x.axis <- fit.character.vector.helper(x.titles, cex.x.axis, min.width = 0.6, max.width = 0.95, max.width.per.char = 0.15, max.height = max.x.axis.title.height);
     }
     
     text(1:xlim.max,rep(y.abs.min,xlim.max),labels = x.titles, adj=c(0.5,1.05) , xpd=T, cex = cex.x.axis, ...);
@@ -1592,8 +1597,14 @@ makePlot.generic.points.right <- function(plot.name, tf.list, plotter, plot.type
 
     if(is.null(cex.x.axis)){
       cex.x.axis <- par("cex.axis");
-      cex.x.axis <- fit.character.vector.helper(x.titles, cex.x.axis, min.width = 0.6, max.width = 0.95, max.width.per.char = 0.15);
+      bottom.margin.size <- abs(device.limits()[3] - par("usr")[3]);
+      max.x.axis.title.height <- bottom.margin.size;
+      if(! any(grepl("\n",x.titles,fixed=TRUE))){
+        max.x.axis.title.height <- bottom.margin.size * 0.5;
+      }
+      cex.x.axis <- fit.character.vector.helper(x.titles, cex.x.axis, min.width = 0.6, max.width = 0.95, max.width.per.char = 0.15, max.height = max.x.axis.title.height);
     }
+    
     text((xlim.min + 1):xlim.max,rep(y.abs.min,length(x.titles)),labels = x.titles, adj=c(0.5,1.05) , xpd=T, cex = cex.x.axis, ...);
     axis(1,at=((xlim.min + 1):xlim.max - 0.5),labels=F, lwd = -1, lwd.ticks = par("lwd"), ...);
     axis(1,at=((xlim.min + 1):xlim.max + 0.5),labels=F, lwd = -1, lwd.ticks = par("lwd"), ...);
@@ -1622,7 +1633,9 @@ makePlot.generic.points.right <- function(plot.name, tf.list, plotter, plot.type
 ################ Plotter internals:
 
 internal.plot.legend <- function(plotter, legend.type, legend.pos, 
-                                 #autofit.limits = NULL, 
+                                 autofit.limits = NULL, 
+                                 ncol = NULL,
+                                 lwd = NULL,
                                  ...){
   if(plotter$plot.type == "highlightSample.colorByLane"){
     
@@ -1644,44 +1657,102 @@ internal.plot.legend <- function(plotter, legend.type, legend.pos,
     return("");
   }
 
+
+
   if(legend.type == "lnpt"){
-    ncol <- 1;
-    if(length(plotter$legend.params$name) >= 6) ncol <- 2;
+    if(is.null(ncol)){
+      ncol <- 1;
+      if(length(plotter$legend.params$name) >= 6) ncol <- 2;
+    }
+    if(is.null(lwd)){
+      lwd <- max(plotter$lanebam.params$lines.lwd) * 1.5
+      pt.lwd <- max(plotter$lanebam.params$lines.lwd)
+    } else {
+      lwd <- lwd;
+      pt.lwd <- lwd;
+    }
     
-    #if(is.null(autofit.limits)){
+    if(is.null(autofit.limits)){
       legend(legend.pos,
            legend=plotter$legend.params$name,
            lty=plotter$legend.params$lines.lty, 
            col=plotter$legend.params$lines.col, 
            pch=plotter$legend.params$points.pch,
-           ncol = ncol,
+           ncol = ncol,xpd=NA,
+           lwd = lwd, pt.lwd = pt.lwd,
            ...);
-    #} else {
-    #  x <- legend(legend.pos,
-    #       legend=plotter$legend.params$name,
-    #       lty=plotter$legend.params$lines.lty, 
-    #       col=plotter$legend.params$lines.col, 
-    #       pch=plotter$legend.params$points.pch,
-    #       ncol = ncol,
-    #       plot=FALSE,
-    #       ...);
-    #  isTooBig <- function(x){
-    #    x$rect$left < autofit.limits[1] || x$rect$left + x$rect$w > autofit.limits[2] || x$rect$top .....TODO
-    #  }
-    #}
+    } else {
+      x <- legend(legend.pos,
+           legend=plotter$legend.params$name,
+           lty=plotter$legend.params$lines.lty, 
+           col=plotter$legend.params$lines.col, 
+           pch=plotter$legend.params$points.pch,
+           ncol = ncol,xpd=NA,
+           plot=FALSE,
+           lwd = lwd, pt.lwd = pt.lwd,
+           ...);
+      isTooBig <- function(x){
+        x$rect$left < autofit.limits[1] || x$rect$left + x$rect$w > autofit.limits[2] || x$rect$top > autofit.limits[4] || x$rect$top - x$rect$h < autofit.limits[3];
+      }
+      #isTooBig <- function(x){
+      #  x$rect$w > abs(autofit.limits[1] - autofit.limits[2]) || x$rect$h > abs(autofit.limits[3] - autofit.limits[4]);
+      #}
+      if(isTooBig(x)){
+        new.cex <- 1;
+        while(isTooBig(x)){
+          new.cex <- new.cex * 0.9;
+          x <- legend(legend.pos,
+                 legend=plotter$legend.params$name,
+                 lty=plotter$legend.params$lines.lty, 
+                 col=plotter$legend.params$lines.col, 
+                 pch=plotter$legend.params$points.pch,
+                 ncol = ncol,
+                 plot=FALSE,xpd=NA,
+                 cex = new.cex,
+                 lwd = lwd, pt.lwd = pt.lwd,
+                 ...);
+        }
+      } else {
+        test.cex <- 1;
+        new.cex <- 1;
+        while(! isTooBig(x)){
+          new.cex <- test.cex;
+          test.cex <- new.cex * 1.1;
+          x <- legend(legend.pos,
+                 legend=plotter$legend.params$name,
+                 lty=plotter$legend.params$lines.lty, 
+                 col=plotter$legend.params$lines.col, 
+                 pch=plotter$legend.params$points.pch,
+                 ncol = ncol,
+                 plot=FALSE,xpd=NA,
+                 cex = test.cex,
+                 lwd = lwd, pt.lwd = pt.lwd,
+                 ...);
+        }
+      }
+      legend(legend.pos,
+                 legend=plotter$legend.params$name,
+                 lty=plotter$legend.params$lines.lty, 
+                 col=plotter$legend.params$lines.col, 
+                 pch=plotter$legend.params$points.pch,
+                 ncol = ncol,xpd=NA,
+                 cex = new.cex,
+                 lwd = lwd, pt.lwd = pt.lwd,
+                 ...);
+    }
     
   } else if(legend.type == "lines"){
-    legend(legend.pos,legend=plotter$legend.params$name,lty=plotter$legend.params$lines.lty, col=plotter$legend.params$lines.col, ...);
+    legend(legend.pos,legend=plotter$legend.params$name,lty=plotter$legend.params$lines.lty, col=plotter$legend.params$lines.col,xpd=NA, ...);
   } else if(legend.type == "points"){
-    legend(legend.pos,legend=plotter$legend.params$name,pch=plotter$legend.params$points.pch, col=plotter$legend.params$points.col, ...);
+    legend(legend.pos,legend=plotter$legend.params$name,pch=plotter$legend.params$points.pch, col=plotter$legend.params$points.col,xpd=NA, ...);
   } else if(legend.type == "NVC.curr"){
     labels <- c(paste0(plotter$title.highlight.name,":"),names(plotter$nvc.colors));
     col <- c("transparent",unlist(plotter$nvc.colors));
-    legend(legend.pos,legend=labels,lty=rep(plotter$legend.params$lines.lty[1], length(labels)), col=col, lwd = rep(plotter$legend.params$lines.lwd[1], length(labels)), ...);
+    legend(legend.pos,legend=labels,lty=rep(plotter$legend.params$lines.lty[1], length(labels)), col=col, xpd=NA, lwd = rep(plotter$legend.params$lines.lwd[1], length(labels)), ...);
   } else if(legend.type == "NVC.other"){
     labels <- c(paste0("Other Samples",":"),names(plotter$nvc.colors.light));
     col <- c("transparent",unlist(plotter$nvc.colors.light));
-    legend(legend.pos,legend=labels,lty=rep(plotter$legend.params$lines.lty[2], length(labels)), col=col, ...);
+    legend(legend.pos,legend=labels,lty=rep(plotter$legend.params$lines.lty[2], length(labels)), col=col,xpd=NA, ...);
   } else if(legend.type == "NVC.both"){
     labels.1 <- c(paste0(plotter$title.highlight.name,":"),names(plotter$nvc.colors));
     col.1 <- c("transparent",unlist(plotter$nvc.colors));
@@ -1697,7 +1768,7 @@ internal.plot.legend <- function(plotter, legend.type, legend.pos,
            lty=c(lty.1,lty.2), 
            col=c(col.1,col.2), 
            lwd = c(lwd.1,lwd.2),
-           ncol=2,
+           ncol=2, xpd=NA,
            ...);
   }
 }

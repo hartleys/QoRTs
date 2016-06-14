@@ -1131,7 +1131,7 @@ object runAllQC {
     
     summaryWriter.write("KEPT_NOT_UNIQUE_ALIGNMENT	"+keptMultiMappedCt+"\n");
     summaryWriter.write("minObservedReadLength\t"+minObsReadLength + "\n");
-    summaryWriter.write("maxObservedReadLength\t"+minObsReadLength + "\n");
+    summaryWriter.write("maxObservedReadLength\t"+maxObsReadLength + "\n");
     summaryWriter.write("maxLegalPhredScore\t"+maxPhredScore + "\n");
     
     if(isSingleEnd){

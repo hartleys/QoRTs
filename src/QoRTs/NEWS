@@ -1,4 +1,11 @@
-## v1.1.0:
+## v1.1.6:
+Minor additions and tweaks:
+* Added new optional tag to "flattened" GFF file, containing transcript coding region information. This is intended for use by a future update to JunctionSeq.
+* Fixed x-axis label autofitting to not produce oversized x-axis labels when there is only one column to label.
+* Legend plot now autofits and autoselects the number of columns. Added cex.legend and ncol parameters to these functions to allow users to override this behavior.
+* Fixed bug with maxObsReadLength field.
+
+## v1.1.2:
 New features, updates, and bug-fixes.
 * Major bugfix: Fixed the geneCounts file so that UTR/CDS counts are no longer switched. Thanks to Roy Francis!
 * Added "rasterize.medium.plots" parameter to all makeMultiPlot functions. This option will 

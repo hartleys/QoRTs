@@ -69,6 +69,8 @@ object GtfTool {
      val JS_AGGREGATEGENE_TXCT = "tx_ct";
      val JS_AGGREGATEGENE_TXSTRANDS = "tx_strands";
      
+     val JS_TRANSCRIPT_CDS_SPANS = "tx_cds_spans";
+     
      val JS_FEATURETYPE_CODEMAP = Map(JS_FEATURETYPE_GENE -> "A", JS_FEATURETYPE_EXON -> "E", JS_FEATURETYPE_KNOWNSPLICE -> "J", JS_FEATURETYPE_NOVELSPLICE -> "N");
      
      def getJSFeatureName(gtfLine : GtfLine) : String = {
@@ -100,7 +102,8 @@ object GtfTool {
                        JS_AGGREGATEGENE_CT : String = defaultGtfCodes.JS_AGGREGATEGENE_CT,
                        JS_AGGREGATEGENE_TXCT : String = defaultGtfCodes.JS_AGGREGATEGENE_TXCT,
                        JS_AGGREGATEGENE_TXSTRANDS : String = defaultGtfCodes.JS_AGGREGATEGENE_TXSTRANDS,
-                       BIOTYPE_ATTRIBUTE_KEY : String = defaultGtfCodes.BIOTYPE_ATTRIBUTE_KEY
+                       BIOTYPE_ATTRIBUTE_KEY : String = defaultGtfCodes.BIOTYPE_ATTRIBUTE_KEY,
+                       JS_TRANSCRIPT_CDS_SPANS : String = defaultGtfCodes.JS_TRANSCRIPT_CDS_SPANS
                        ) {
      
      val KEY_SORTING : List[String] = List[String](  GENE_ID_ATTRIBUTE_KEY, 
@@ -112,6 +115,7 @@ object GtfTool {
                                                      JS_AGGREGATEGENE_CT,
                                                      JS_AGGREGATEGENE_TXCT,
                                                      JS_AGGREGATEGENE_TXSTRANDS,
+                                                     JS_TRANSCRIPT_CDS_SPANS,
                                                      BIOTYPE_ATTRIBUTE_KEY
                                                      );
    }
@@ -167,15 +171,19 @@ object GtfTool {
        new FlatOutputGtfLine(iv.chromName, DEF_FEATURESOURCE, featureType, iv.start + 1, iv.end, DEF_SCORE, iv.strand, attributeMap, DEF_ATTRBREAK, stranded, Some(codes.KEY_SORTING), codes);
      }
      
-     def makeFlatGtfLine_aggregateGene(iv : internalUtils.commonSeqUtils.GenomicInterval, stranded : Boolean, aggregateGene : String, geneStrand : Char, geneCt : Int, txInfoMap : Map[String,Char], codes : GtfCodes = new GtfCodes()) : FlatOutputGtfLine = {
+     def makeFlatGtfLine_aggregateGene(iv : internalUtils.commonSeqUtils.GenomicInterval, stranded : Boolean, aggregateGene : String, geneStrand : Char, geneCt : Int, txInfoMap : Map[String,Char], txCDS : Map[String,(Int,Int)], codes : GtfCodes = new GtfCodes()) : FlatOutputGtfLine = {
        val attributeMap = Map[String,String](codes.GENE_ID_ATTRIBUTE_KEY -> aggregateGene, 
                                              codes.JS_EXONIC_PART_NUMBER_ATTRIBUTE_KEY -> "000", 
                                              codes.JS_AGGREGATEGENE_STRAND -> geneStrand.toString,
                                              codes.JS_AGGREGATEGENE_CT -> geneCt.toString,
                                              codes.JS_AGGREGATEGENE_TXCT -> txInfoMap.keySet.size.toString,
                                              codes.JS_TX_ID_ATTRIBUTE_KEY -> txInfoMap.keySet.toVector.sorted.mkString("+"),
-                                             codes.JS_AGGREGATEGENE_TXSTRANDS -> txInfoMap.keySet.toVector.sorted.map(txInfoMap(_).toString).mkString(",")
-                                             );
+                                             codes.JS_AGGREGATEGENE_TXSTRANDS -> txInfoMap.keySet.toVector.sorted.map(txInfoMap(_).toString).mkString(","),
+                                             codes.JS_TRANSCRIPT_CDS_SPANS -> txInfoMap.keySet.toVector.sorted.map((txID : String) => {
+                                                                                 val (s,e) = txCDS(txID);
+                                                                                 s + "_" + e;
+                                                                              }).mkString(",")
+                                             )
        return makeFlatGtfLine(iv,codes.JS_FEATURETYPE_GENE, attributeMap, stranded, codes);
      }
      
@@ -188,7 +196,9 @@ object GtfTool {
        
        return makeFlatGtfLine(iv, featureType, attributeMap, stranded, codes);
      }
-
+     
+     
+     
    }
    
    var ERROR_COUNT_SORTING = 0;
