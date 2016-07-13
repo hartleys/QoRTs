@@ -5,27 +5,20 @@ import net.sf.samtools._
 object testing {
   println("Welcome to the Scala worksheet")       //> Welcome to the Scala worksheet
   "Hello".substring(0,2)                          //> res0: String = He
+  "Hello".substring(1)                            //> res1: String = ello
   
-  scala.math.log(10.0)                            //> res1: Double = 2.302585092994046
+  scala.math.log(10.0)                            //> res2: Double = 2.302585092994046
   
   //val reader =  new SAMFileReader(new java.io.File("C:\\Users\\hartleys\\work\\nihwork\\home_copy\\projects\\ZZZ-ExampleDataset\\TestSets\\readLength50\\inputData\\fastq\\SAMP1_RG1.50bp.1.fq.gz"));
   
-  "Hello+World".split("\\+")                      //> res2: Array[String] = Array(Hello, World)
+  "Hello+World".split("\\+")                      //> res3: Array[String] = Array(Hello, World)
   
-  Range(0,10).toVector                            //> res3: Vector[Int] = Vector(0, 1, 2, 3, 4, 5, 6, 7, 8, 9)
+  Range(0,10).toVector                            //> res4: Vector[Int] = Vector(0, 1, 2, 3, 4, 5, 6, 7, 8, 9)
   
-  Vector("hi").tail                               //> res4: scala.collection.immutable.Vector[String] = Vector()
+  Vector("hi").tail                               //> res5: scala.collection.immutable.Vector[String] = Vector()
 
-  scala.math.log(0).isInfinite                    //> res5: Boolean = true
+  scala.math.log(0).isInfinite                    //> res6: Boolean = true
 
-  val splitstr = "Gene = \"HRG10;2\"; TX = \"Blah\"; exon = 1; variant = \"3\";"
-                                                  //> splitstr  : String = Gene = "HRG10;2"; TX = "Blah"; exon = 1; variant = "3";
-                                                  //| 
-  
-  
-  splitstr.split(";(?=([^\"]*\"[^\"]*\")*[^\"]*$)")
-                                                  //> res6: Array[String] = Array(Gene = "HRG10;2", " TX = "Blah"", " exon = 1", "
-                                                  //|  variant = "3"")
 
   print(Vector("Hello","World","How","Are","You"));
                                                   //> Vector(Hello, World, How, Are, You)
@@ -132,6 +125,34 @@ System.getProperty("sun.arch.data.model")         //> res17: String = 64
   
   
    Seq(1,2,3,4,5).filter(_ < 3)                   //> res25: Seq[Int] = List(1, 2)
+  
+  
+  val splitstr = "Gene = \"HRG10;2\"; TX = \"Blah\"; exon = 1; variant = \"3\"; Gene = \"Say \\\"Hello\\\"\";"
+                                                  //> splitstr  : String = Gene = "HRG10;2"; TX = "Blah"; exon = 1; variant = "3"
+                                                  //| ; Gene = "Say \"Hello\"";
+  
+  internalUtils.stdUtils.splitRespectQuote(splitstr,";")
+                                                  //> res26: Array[String] = Array(Gene = "HRG10;2", " TX = "Blah"", " exon = 1",
+                                                  //|  " variant = "3"", " Gene = "Say \"Hello\""")
+
+   
+  internalUtils.stdUtils.parseTokens(splitstr,';').toList.foreach((s : String) => println("'"+s+"'"))
+                                                  //> 'Gene = "HRG10;2"'
+                                                  //| ' TX = "Blah"'
+                                                  //| ' exon = 1'
+                                                  //| ' variant = "3"'
+                                                  //| ' Gene = "Say \"Hello\""'
+  
+  
+  splitstr.split(";(?=([^\"]*\"[^\"]*\")*[^\"]*$)").toList.foreach((s : String) => println("'"+s+"'"))
+                                                  //> 'Gene = "HRG10;2"'
+                                                  //| ' TX = "Blah"'
+                                                  //| ' exon = 1'
+                                                  //| ' variant = "3"'
+                                                  //| ' Gene = "Say \"Hello\""'
+
+  
+  
   
   
 }

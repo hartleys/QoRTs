@@ -16,7 +16,10 @@ makePlot.biotype.rates <- function(plotter,
                                    log.y = TRUE,
                                    return.table = FALSE, 
                                    debugMode = DEFAULTDEBUGMODE,  
-                                   singleEndMode = plotter$res@singleEnd, ...){
+                                   singleEndMode = plotter$res@singleEnd,
+                                   showTypes = NULL,
+                                   plot = TRUE,
+                                   ...){
   plot.name <- "Biotype Rates";
   count.type <- match.arg(count.type);
   readLabel <- if(singleEndMode){ "Reads" } else {"Read-Pairs"}
@@ -27,7 +30,9 @@ makePlot.biotype.rates <- function(plotter,
     if(debugMode){ ts <- timestamp() }
     if(is.null(plotter$res@qc.data[["biotype.counts"]])){
       message(paste0("Warning: Skipping ",plot.name," plotting. Data not found!"));
-      blank.plot(c(plot.name,"Data Not Found\nSkipping..."));
+      if(plot){
+        blank.plot(c(plot.name,"Data Not Found\nSkipping..."));
+      }
     } else {
       tryCatch({
         bt.cts <- plotter$res@qc.data[["biotype.counts"]];
@@ -37,6 +42,37 @@ makePlot.biotype.rates <- function(plotter,
         
         x.titles <- bt.cts[[1]]$BIOTYPE;
         names(x.titles) <- x.titles;
+        
+        if(! is.null(showTypes)){
+          keepVector <- x.titles %in% showTypes;
+          
+          bt.cts <- lapply(bt.cts,function(td){
+            if(! all(td$BIOTYPE == names(x.titles))){
+              message("WARNING WARNING WARNING: Biotype list not identical across all samples!");
+              warning("WARNING WARNING WARNING: Biotype list not identical across all samples!");
+            }
+            td[keepVector,];
+          });
+          x.titles <- x.titles[keepVector];
+        }
+        
+        if(! plot){
+          tf.list <- lapply(1:length(bt.cts), function(i){
+            td <- bt.cts[[i]];
+            cts <- if(count.type == "all"){ td$TOTAL } else { td$COUNT }
+           
+            if(! all(td$BIOTYPE == names(x.titles))){
+              message("WARNING WARNING WARNING: Biotype list not identical across all samples!");
+              warning("WARNING WARNING WARNING: Biotype list not identical across all samples!");
+            }
+            cts;
+          });
+          resMatrix <- do.call(cbind.data.frame, tf.list);
+          rownames(resMatrix) <- x.titles;
+          colnames(resMatrix) <- plotter$res@lanebam.list;
+          return(resMatrix);
+        }
+        
         x.titles <- sapply(x.titles, wordwrap.string, width = 8)
         
         tf.list <- lapply(1:length(bt.cts), function(i){
@@ -62,6 +98,7 @@ makePlot.biotype.rates <- function(plotter,
            df;
         });
         names(tf.list) <- names(bt.cts);
+        
         if(log.y){
           min.y <- min(sapply(tf.list,function(td){ ifelse(is.infinite(td$y), Inf,td$y) }),na.rm=T);
           max.y <- max(sapply(tf.list,function(td){ ifelse(is.infinite(td$y),-Inf,td$y) }),na.rm=T);
@@ -73,27 +110,28 @@ makePlot.biotype.rates <- function(plotter,
         }
       }, error = function(e){ errorPlot(plot.name,e, code = 0); stop(e);});
       #makePlot.generic.points(plot.name,tf.list,plotter,pre.plot.func=pre.plot.func, label.y = F, ylim = c(min.y,max.y), family="mono",...)
-      makePlot.generic.points(plot.name,tf.list,plotter,pre.plot.func=pre.plot.func, label.y = F, family="mono",...)
       
-      if(log.y){
-        abline(h=ceiling(min.y):ceiling(max.y), col="gray",lty=3,...);
-        abline(h=min.y, col="gray",lty=3,...);
-        abline(h=NINF.VALUE, col="gray",lty=3,...);
-        draw.logyaxis.stdScalePlot(  ylim.truncate = c(min.y,max.y)  );
-        qorts.axis.break(axis=2,breakpos = min.y - abs(min.y-NINF.VALUE)/2, fill = TRUE, cex = 0.75,...);
-        qorts.axis.break(axis=4,breakpos = min.y - abs(min.y-NINF.VALUE)/2, fill = TRUE, cex = 0.75,...);
-        axis(2,at=NINF.VALUE,labels=0, tcl = -0.5,lwd = -1, lwd.ticks = par("lwd"), las=2,...);
-      } else {
-        axis(2);
-      }
-      
-      
-      if(plot.rates){
-        title(ylab=paste0(readLabel," per Million"));
-        internal.plot.main.title("Coverage for each \"Biotype\"", plotter, ...);
-      } else {
-        title(ylab=paste0(readLabel));
-        internal.plot.main.title("Coverage for each \"Biotype\"", plotter, ...);
+      if(plot){
+        makePlot.generic.points(plot.name,tf.list,plotter,pre.plot.func=pre.plot.func, label.y = F, family="mono",...)
+
+        if(log.y){
+          abline(h=ceiling(min.y):ceiling(max.y), col="gray",lty=3,...);
+          abline(h=min.y, col="gray",lty=3,...);
+          abline(h=NINF.VALUE, col="gray",lty=3,...);
+          draw.logyaxis.stdScalePlot(  ylim.truncate = c(min.y,max.y)  );
+          qorts.axis.break(axis=2,breakpos = min.y - abs(min.y-NINF.VALUE)/2, fill = TRUE, cex = 0.75,...);
+          qorts.axis.break(axis=4,breakpos = min.y - abs(min.y-NINF.VALUE)/2, fill = TRUE, cex = 0.75,...);
+          axis(2,at=NINF.VALUE,labels=0, tcl = -0.5,lwd = -1, lwd.ticks = par("lwd"), las=2,...);
+        } else {
+          axis(2);
+        }
+        if(plot.rates){
+          title(ylab=paste0(readLabel," per Million"));
+          internal.plot.main.title("Coverage for each \"Biotype\"", plotter, ...);
+        } else {
+          title(ylab=paste0(readLabel));
+          internal.plot.main.title("Coverage for each \"Biotype\"", plotter, ...);
+        }
       }
       if(debugMode){ message("Finished: ",plot.name," plot.",getTimeAndDiff(ts)); }
       

@@ -4,24 +4,21 @@ import net.sf.samtools._
 
 object testing {;import org.scalaide.worksheet.runtime.library.WorksheetSupport._; def main(args: Array[String])=$execute{;$skip(109); 
   println("Welcome to the Scala worksheet");$skip(25); val res$0 = 
-  "Hello".substring(0,2);System.out.println("""res0: String = """ + $show(res$0));$skip(26); val res$1 = 
+  "Hello".substring(0,2);System.out.println("""res0: String = """ + $show(res$0));$skip(23); val res$1 = 
+  "Hello".substring(1);System.out.println("""res1: String = """ + $show(res$1));$skip(27); val res$2 = 
   
-  scala.math.log(10.0);System.out.println("""res1: Double = """ + $show(res$1));$skip(235); val res$2 = 
+  scala.math.log(10.0);System.out.println("""res2: Double = """ + $show(res$2));$skip(235); val res$3 = 
   
   //val reader =  new SAMFileReader(new java.io.File("C:\\Users\\hartleys\\work\\nihwork\\home_copy\\projects\\ZZZ-ExampleDataset\\TestSets\\readLength50\\inputData\\fastq\\SAMP1_RG1.50bp.1.fq.gz"));
   
-  "Hello+World".split("\\+");System.out.println("""res2: Array[String] = """ + $show(res$2));$skip(26); val res$3 = 
+  "Hello+World".split("\\+");System.out.println("""res3: Array[String] = """ + $show(res$3));$skip(26); val res$4 = 
   
-  Range(0,10).toVector;System.out.println("""res3: Vector[Int] = """ + $show(res$3));$skip(23); val res$4 = 
+  Range(0,10).toVector;System.out.println("""res4: Vector[Int] = """ + $show(res$4));$skip(23); val res$5 = 
   
-  Vector("hi").tail;System.out.println("""res4: scala.collection.immutable.Vector[String] = """ + $show(res$4));$skip(32); val res$5 = 
+  Vector("hi").tail;System.out.println("""res5: scala.collection.immutable.Vector[String] = """ + $show(res$5));$skip(32); val res$6 = 
 
-  scala.math.log(0).isInfinite;System.out.println("""res5: Boolean = """ + $show(res$5));$skip(82); 
+  scala.math.log(0).isInfinite;System.out.println("""res6: Boolean = """ + $show(res$6));$skip(54); 
 
-  val splitstr = "Gene = \"HRG10;2\"; TX = \"Blah\"; exon = 1; variant = \"3\";";System.out.println("""splitstr  : String = """ + $show(splitstr ));$skip(58); val res$6 = 
-  
-  
-  splitstr.split(";(?=([^\"]*\"[^\"]*\")*[^\"]*$)");System.out.println("""res6: Array[String] = """ + $show(res$6));$skip(53); 
 
   print(Vector("Hello","World","How","Are","You"));$skip(20); ;
   print(Some("Hi"));$skip(123); 
@@ -117,7 +114,21 @@ System.getProperty("sun.arch.data.model");System.out.println("""res17: String = 
   X.toDouble / Y.toDouble;System.out.println("""res24: Double = """ + $show(res$24));$skip(38); val res$25 = 
   
   
-   Seq(1,2,3,4,5).filter(_ < 3);System.out.println("""res25: Seq[Int] = """ + $show(res$25))}
+   Seq(1,2,3,4,5).filter(_ < 3);System.out.println("""res25: Seq[Int] = """ + $show(res$25));$skip(117); 
+  
+  
+  val splitstr = "Gene = \"HRG10;2\"; TX = \"Blah\"; exon = 1; variant = \"3\"; Gene = \"Say \\\"Hello\\\"\";";System.out.println("""splitstr  : String = """ + $show(splitstr ));$skip(60); val res$26 = 
+  
+  internalUtils.stdUtils.splitRespectQuote(splitstr,";");System.out.println("""res26: Array[String] = """ + $show(res$26));$skip(107); 
+
+   
+  internalUtils.stdUtils.parseTokens(splitstr,';').toList.foreach((s : String) => println("'"+s+"'"));$skip(109); 
+  
+  
+  splitstr.split(";(?=([^\"]*\"[^\"]*\")*[^\"]*$)").toList.foreach((s : String) => println("'"+s+"'"))}
+
+  
+  
   
   
 }

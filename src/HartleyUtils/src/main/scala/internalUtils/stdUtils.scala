@@ -24,6 +24,54 @@ object stdUtils {
     scala.util.Random.alphanumeric.slice(0,len).toVector.mkString("");
   }
   
+  //splits delim characters, unless they appear between two double-quotes.
+  // Does NOT properly deal with escaped-double-quotes.
+  def splitRespectQuote(s : String, delim : String) : Array[String] = {
+    s.split(delim+"(?=([^\"]*\"[^\"]*\")*[^\"]*$)");
+  }
+  
+  def parseTokens(s : String, delim : Char, strict : Boolean = false, quoteChar : Char = '"') : Array[String] = {
+    var tokens : List[String] = List[String]();
+    
+    var inEscape : Boolean = false;
+    var inQuote : Boolean = false;
+    var buffer : String = "";
+    
+    for(c <- s){
+      if(c == quoteChar){
+        if(! inEscape){
+          inQuote = ! inQuote;
+        }
+        buffer += c;
+      } else if(inQuote){
+        buffer += c;
+      } else if(c == delim){
+        tokens = tokens :+ buffer;
+        buffer = "";
+      } else {
+        buffer += c;
+      }
+      
+      if((! inEscape) && c == '\\'){
+        inEscape = true;
+      } else {
+        inEscape = false;
+      }
+    }
+    
+    if(strict){
+      if(inEscape){
+        error("PARSING ERROR: excape character found at end of parse!");
+      }
+      if(inQuote){
+        error("PARSING ERROR: unmatched quote!")
+      }
+    }
+    
+    return tokens.toArray;
+  }
+  
+  
   /**************************************************************************************************************************
    * Specialty:
    **************************************************************************************************************************/
@@ -172,6 +220,61 @@ object stdUtils {
     return ((peek, Iterator[A](peek) ++ iter  ));
   }
   
+  /*def peekIterator[A](iter : Iterator[A], peekCt : Int) : (Vector[A], Iterator[A]) = {
+    var peek : Vector[A] = Vector[A]();
+    var i : Int = 0;
+    while(iter.hasNext && i < peekCt){
+      peek = peek :+ iter.next;
+      i += 1;
+    }
+    return (( peek, peek.iterator ++ iter));
+  }*/
+
+  def peekIterator[B](iter : Iterator[B], peekCt : Int) : (Vector[B],Iterator[B]) = {
+    var soFar : Vector[B] = Vector[B]();
+    for(i <- Range(0,peekCt)){
+      if(iter.hasNext){
+        soFar = soFar :+ iter.next;
+      } else {
+        return (soFar, soFar.iterator);
+      }
+    }
+    return (soFar, soFar.iterator ++ iter);
+  }
+  
+  def splitIterator[A](iter : Iterator[A], p : (A) => Boolean) : (Vector[A], Iterator[A]) = {
+    var peek : Vector[A] = Vector[A]();
+    var itr : Iterator[A] = iter;
+    if(! iter.hasNext) return ((Vector[A](), Iterator[A]()));
+    var curr = iter.next;
+    
+    while(itr.hasNext && p(curr)){
+      peek = peek :+ curr;
+      curr = itr.next;
+    }
+    if(p(curr)){
+      peek = peek :+ curr;
+    } else {
+      itr = Iterator[A](curr) ++ itr;
+    }
+    return (( peek ,  itr ));
+  }
+
+
+
+  
+  def transposeMatrix[A](m : Seq[Seq[A]]) : Seq[Seq[A]] = {
+    if(m.exists((seq : Seq[A]) => {
+      seq.length != m(0).length;
+    })) error("Error transposing matrix: not all elements in the matrix are of the same length.");
+    
+    Range(0,m(0).length).map((i : Int) => {
+      m.map((seq : Seq[A]) => {
+        seq(i);
+      });
+    });
+  }
+  
   def bufferIterator[A](iter : Iterator[A], bufferSize : Int) : Iterator[A] = {
     return new Iterator[A](){
       val groupIter = iter.grouped(bufferSize);
@@ -272,17 +375,7 @@ object stdUtils {
     }
   }
   
-  def peekIterator[B](iter : Iterator[B], peekCt : Int) : (Vector[B],Iterator[B]) = {
-    var soFar : Vector[B] = Vector[B]();
-    for(i <- Range(0,peekCt)){
-      if(iter.hasNext){
-        soFar = soFar :+ iter.next;
-      } else {
-        return (soFar, soFar.iterator);
-      }
-    }
-    return (soFar, soFar.iterator ++ iter);
-  }
+
   
   /**************************************************************************************************************************
    * Iterator progress reporting

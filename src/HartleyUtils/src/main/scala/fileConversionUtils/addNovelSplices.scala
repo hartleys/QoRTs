@@ -122,6 +122,10 @@ object addNovelSplices {
      val idCol = decoderTitleLine.indexOf("sample.ID");
      val sfCol = decoderTitleLine.indexOf("size.factor");
      
+     if(idCol == -1){
+       reportln("WARNING WARNING WARNING: no column found with title 'sample.ID' in the size factor / decoder file. The size factor / decoder file must contain a column titled 'sample.ID'. Fatal errors will almost certainly follow.","warn");
+     }
+     
      val sampleSF : Seq[(String,Double)] = if(sfCol == -1){
        reportln("decoderTitleLine: "+decoderTitleLine,"debug");
        reportln("idCol: "+idCol,"debug");

@@ -14,7 +14,10 @@
               log.y = TRUE,
               return.table = FALSE, 
               debugMode = DEFAULTDEBUGMODE,  
-              singleEndMode = plotter$res@singleEnd, ...)
+              singleEndMode = plotter$res@singleEnd,
+              showTypes,
+              plot = TRUE,
+              ...)
 }
 \arguments{
   \item{plotter}{
@@ -42,6 +45,14 @@
       Logical. Determines whether the dataset consists of single-ended reads. 
       By default this is determined from the data. Thus, this parameter should 
       never need to be set by the user.
+  }
+  \item{showTypes}{
+      Character vector. An optional list of biotypes to include in the plot. By
+      default all observed biotypes will be plotted.
+  }
+  \item{plot}{
+      Logical. Default is \code{TRUE}. If \code{FALSE}, then do NOT plot any results, 
+      instead just return a data table.
   }
   \item{\dots}{ 
     Arguments to be passed to methods, such as

@@ -9,8 +9,8 @@ import internalUtils.commandLineUI._;
 
 object runner {
   
-  final val QORTS_VERSION = "1.1.6"; // REPLACE_THIS_QORTS_VERSION_VARIABLE_WITH_VERSION_NUMBER          (note this exact text is used in a search-and-replace. Do not change it.)
-  final val QORTS_COMPILE_DATE = "Tue Jun 14 15:00:02 EDT 2016"; // REPLACE_THIS_QORTS_DATE_VARIABLE_WITH_DATE          (note this exact text is used in a search-and-replace. Do not change it.)
+  final val QORTS_VERSION = "1.1.8"; // REPLACE_THIS_QORTS_VERSION_VARIABLE_WITH_VERSION_NUMBER          (note this exact text is used in a search-and-replace. Do not change it.)
+  final val QORTS_COMPILE_DATE = "Wed Jul 13 13:35:00 EDT 2016"; // REPLACE_THIS_QORTS_DATE_VARIABLE_WITH_DATE          (note this exact text is used in a search-and-replace. Do not change it.)
   
   //final val FOR_HELP_STRING = "For help, use command: "
   
