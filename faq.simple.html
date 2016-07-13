@@ -1,7 +1,7 @@
 <h1>Frequently Asked Questions</h1>
 
-<p>v1.1.6
-Revised Tue Jun 14 15:00:02 EDT 2016</p>
+<p>v1.1.8
+Revised Wed Jul 13 13:35:00 EDT 2016</p>
 
 <h2>What if none of these answers solve my problem?</h2>
 
@@ -196,6 +196,20 @@ You might also be able to infer outliers in the rRNA quantities by checking for 
 <p>If you use QoRTs and find it helpful, you can cite it in your publications as:</p>
 
 <p>Hartley SW, Mullikin JC. <a href="http://www.ncbi.nlm.nih.gov/pmc/articles/PMC4506620/"><strong>QoRTs: a comprehensive toolset for quality control and data processing of RNA-Seq experiments.</strong></a> <a href="http://www.biomedcentral.com/bmcbioinformatics"><em>BMC Bioinformatics.</em></a> doi: 10.1186/s12859-015-0670-5</p>
+
+<h2>Specific errors and what they mean</h2>
+
+<p>Truncated input: the error listed below occurs when the bam file is truncated.
+    ============================FATAL<em>ERROR============================
+    QoRTs encountered a FATAL ERROR. For general help, use command:
+          java -jar path/to/jar/QoRTs.jar --man
+    ============================FATAL</em>ERROR============================
+    Error info:
+    Exception in thread "main" net.sf.samtools.FileTruncatedException: Premature end of file
+            at net.sf.samtools.util.BlockCompressedInputStream.readBlock(BlockCompressedInputStream.java:382)
+            at net.sf.samtools.util.BlockCompressedInputStream.available(BlockCompressedInputStream.java:127)
+            at net.sf.samtools.util.BlockCompressedInputStream.read(BlockCompressedInputStream.java:252)
+            at java.io.DataInputStream.read(DataInputStream.java:149)</p>
 
 <h2>LEGAL:</h2>
 

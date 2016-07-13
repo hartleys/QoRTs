@@ -1,6 +1,6 @@
 # Frequently Asked Questions
-v1.1.6
-Revised Tue Jun 14 15:00:02 EDT 2016
+v1.1.8
+Revised Wed Jul 13 13:35:00 EDT 2016
 
 ## What if none of these answers solve my problem?
 
@@ -175,6 +175,21 @@ And by checking the section in the vignette.
 If you use QoRTs and find it helpful, you can cite it in your publications as:
 
 Hartley SW, Mullikin JC. [**QoRTs: a comprehensive toolset for quality control and data processing of RNA-Seq experiments.**](http://www.ncbi.nlm.nih.gov/pmc/articles/PMC4506620/) [*BMC Bioinformatics.*](http://www.biomedcentral.com/bmcbioinformatics) doi: 10.1186/s12859-015-0670-5
+
+##Specific errors and what they mean
+
+Truncated input: the error listed below occurs when the bam file is truncated.
+    ============================FATAL_ERROR============================
+    QoRTs encountered a FATAL ERROR. For general help, use command:
+          java -jar path/to/jar/QoRTs.jar --man
+    ============================FATAL_ERROR============================
+    Error info:
+    Exception in thread "main" net.sf.samtools.FileTruncatedException: Premature end of file
+            at net.sf.samtools.util.BlockCompressedInputStream.readBlock(BlockCompressedInputStream.java:382)
+            at net.sf.samtools.util.BlockCompressedInputStream.available(BlockCompressedInputStream.java:127)
+            at net.sf.samtools.util.BlockCompressedInputStream.read(BlockCompressedInputStream.java:252)
+            at java.io.DataInputStream.read(DataInputStream.java:149)
+
 
 ##LEGAL:
 This software is "United States Government Work" under the terms of the United 
