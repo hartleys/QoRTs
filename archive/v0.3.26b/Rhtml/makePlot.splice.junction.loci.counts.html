@@ -1,0 +1,87 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head><title>R: Splice Junction Loci Count Plot</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<link rel="stylesheet" type="text/css" href="R.css">
+</head><body>
+
+<table width="100%" summary="page for makePlot.splice.junction.loci.counts {QoRTs}"><tr><td>makePlot.splice.junction.loci.counts {QoRTs}</td><td align="right">R Documentation</td></tr></table>
+
+<h2>
+Splice Junction Loci Count Plot
+</h2>
+
+<h3>Description</h3>
+
+<p>Plots the rate at which splice junction loci
+fall into various categories.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre>
+makePlot.splice.junction.loci.counts(plotter, 
+                                 calc.rate = FALSE, 
+                                 high.low.cutoff = 4,
+                                 debugMode, singleEndMode, ...)
+</pre>
+
+
+<h3>Arguments</h3>
+
+<table summary="R argblock">
+<tr valign="top"><td><code>plotter</code></td>
+<td>
+
+<p>A <code>QoRT_Plotter</code> reference object. See <code><a href="build.plotter.html">build.plotter</a></code>.
+</p>
+</td></tr>
+<tr valign="top"><td><code>calc.rate</code></td>
+<td>
+
+<p>Logical. If TRUE, the proportion of loci in each category will be calculated and plotted, rather than the raw number.
+</p>
+</td></tr>
+<tr valign="top"><td><code>high.low.cutoff</code></td>
+<td>
+
+<p>(For advanced users only!) The cutoff between &quot;high&quot; and &quot;low&quot; expression junction loci. Note that this must match the cutoff used by the jarfile QC execution.
+</p>
+</td></tr>
+<tr valign="top"><td><code>debugMode</code></td>
+<td>
+
+<p>Logical. If TRUE, debugging data will be printed to the console.
+</p>
+</td></tr>
+<tr valign="top"><td><code>singleEndMode</code></td>
+<td>
+
+<p>Logical. Determines whether the dataset consists of single-ended reads. 
+By default this is determined from the data. Thus, this parameter should 
+never need to be set by the user.
+</p>
+</td></tr>
+<tr valign="top"><td><code>...</code></td>
+<td>
+ 
+<p>Arguments to be passed to methods, such as
+<a href="../../graphics/html/par.html">graphical parameters</a> (see <code><a href="../../graphics/html/par.html">par</a></code>).
+</p>
+</td></tr>
+</table>
+
+
+<h3>Details</h3>
+
+<p>This function plots the number (y-axis) of splice junction <EM>loci</EM> of each type that appear in the bam-file's reads. Splice junctions are split into 4 groups, first by whether the splice junction appears in the transcript annotation gtf (&quot;known&quot; vs &quot;novel&quot;), and then by whether the splice junction has 4 or more reads covering it, or 1-3 reads (&quot;Hi&quot; vs &quot;Lo&quot;).
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code><a href="build.plotter.html">build.plotter</a></code>, <code><a href="makePlot.splice.junction.event.html">makePlot.splice.junction.event</a></code>
+</p>
+
+<hr><div align="center">[Package <em>QoRTs</em> version 0.3.26 <a href="00Index.html">Index</a>]</div>
+</body></html>

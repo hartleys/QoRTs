@@ -1,0 +1,75 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head><title>R: Get summary data tables</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<link rel="stylesheet" type="text/css" href="R.css">
+</head><body>
+
+<table width="100%" summary="page for get.summary.table {QoRTs}"><tr><td>get.summary.table {QoRTs}</td><td align="right">R Documentation</td></tr></table>
+
+<h2>
+Get summary data tables
+</h2>
+
+<h3>Description</h3>
+
+<p>Retrieves and compiles a summary data table.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre>
+  get.summary.table(res, outfile, debugMode);
+  
+  get.size.factors(res, 
+       sf.method = c("DESeq2","DESeq2_GEO","TC",
+                     "edgeR","edgeR_TMM","edgeR_UQ","edgeR_RLE"), 
+       outfile, debugMode)
+</pre>
+
+
+<h3>Arguments</h3>
+
+<table summary="R argblock">
+<tr valign="top"><td><code>res</code></td>
+<td>
+
+<p>A <code>QoRT_QC_Results</code> object, created by <code><a href="read.qc.results.data.html">read.qc.results.data</a></code>.
+</p>
+</td></tr>
+<tr valign="top"><td><code>outfile</code></td>
+<td>
+
+<p>Optional. A file name where the table should be written.
+</p>
+</td></tr>
+<tr valign="top"><td><code>sf.method</code></td>
+<td>
+
+<p>The size factor method to use. Note that most of these methods (except &quot;TC&quot;) are reliant
+on external packages not included with QoRTs. You will need to install DESeq2 and edgeR
+to use these methods.
+</p>
+</td></tr>
+<tr valign="top"><td><code>debugMode</code></td>
+<td>
+
+<p>Logical. If TRUE, debugging data will be printed to the console.
+</p>
+</td></tr>
+</table>
+
+
+<h3>Details</h3>
+
+<p>Returns summary data in table form.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code><a href="read.qc.results.data.html">read.qc.results.data</a></code> 
+</p>
+
+<hr><div align="center">[Package <em>QoRTs</em> version 1.0.1 <a href="00Index.html">Index</a>]</div>
+</body></html>

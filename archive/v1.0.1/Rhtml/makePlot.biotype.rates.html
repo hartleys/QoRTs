@@ -1,0 +1,107 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head><title>R: Plot Biotype rates</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<link rel="stylesheet" type="text/css" href="R.css">
+</head><body>
+
+<table width="100%" summary="page for makePlot.biotype.rates {QoRTs}"><tr><td>makePlot.biotype.rates {QoRTs}</td><td align="right">R Documentation</td></tr></table>
+
+<h2>
+Plot Biotype rates
+</h2>
+
+<h3>Description</h3>
+
+<p>Plots counts for each gene biotype. This plot is only useful and informative when QoRTs is run on a GTF file that contains &quot;gene_biotype&quot; tags.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre>
+  makePlot.biotype.rates(plotter, 
+              plot.rates = TRUE,
+              count.type = c("all","unambigOnly"),
+              log.y = TRUE,
+              return.table = FALSE, 
+              debugMode = DEFAULTDEBUGMODE,  
+              singleEndMode = plotter$res@singleEnd, ...)
+</pre>
+
+
+<h3>Arguments</h3>
+
+<table summary="R argblock">
+<tr valign="top"><td><code>plotter</code></td>
+<td>
+
+<p>A <code>QoRT_Plotter</code> reference object. See <code><a href="build.plotter.html">build.plotter</a></code>.
+</p>
+</td></tr>
+<tr valign="top"><td><code>plot.rates</code></td>
+<td>
+
+<p>A logical value. If <code>TRUE</code>, then reads/read-pairs 
+per million should be plotted, rather than raw counts. 
+Default is <code>TRUE</code>.
+</p>
+</td></tr>
+<tr valign="top"><td><code>count.type</code></td>
+<td>
+
+<p>A logical value. If <code>TRUE</code>, then both ambiguous and unambiguous
+reads will be counted. Otherwise only unambiguous reads will be counted.
+</p>
+</td></tr>
+<tr valign="top"><td><code>log.y</code></td>
+<td>
+
+<p>A logical value indicating that the y-axis should be log-scaled.
+</p>
+</td></tr>
+<tr valign="top"><td><code>return.table</code></td>
+<td>
+
+<p>Logical. If <code>TRUE</code>, then return a data table.
+</p>
+</td></tr>
+<tr valign="top"><td><code>debugMode</code></td>
+<td>
+
+<p>Logical. If TRUE, debugging data will be printed to the console.
+</p>
+</td></tr>
+<tr valign="top"><td><code>singleEndMode</code></td>
+<td>
+
+<p>Logical. Determines whether the dataset consists of single-ended reads. 
+By default this is determined from the data. Thus, this parameter should 
+never need to be set by the user.
+</p>
+</td></tr>
+<tr valign="top"><td><code>...</code></td>
+<td>
+ 
+<p>Arguments to be passed to methods, such as
+<a href="../../graphics/html/par.html">graphical parameters</a> (see <code><a href="../../graphics/html/par.html">par</a></code>).
+</p>
+</td></tr>
+</table>
+
+
+<h3>Details</h3>
+
+<p>x-axis: Gene &quot;BioTypes&quot;, from the annotation GTF.
+</p>
+<p>y-axis: Total read counts across all genes in the BioType, 
+measured either in reads or reads-per-million.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code><a href="build.plotter.html">build.plotter</a></code>
+</p>
+
+<hr><div align="center">[Package <em>QoRTs</em> version 1.0.1 <a href="00Index.html">Index</a>]</div>
+</body></html>

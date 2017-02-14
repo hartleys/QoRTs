@@ -1,0 +1,94 @@
+\begin{thebibliography}{10}
+
+\bibitem{QoRTs}
+Stephen~W Hartley and James~C Mullikin.
+\newblock Qorts: a comprehensive toolset for quality control and data
+  processing of rna-seq experiments.
+\newblock {\em BMC bioinformatics}, 16(1):224, 2015.
+\newblock URL: \url{http://www.ncbi.nlm.nih.gov/pmc/articles/PMC4506620/}.
+
+\bibitem{DESeq}
+Simon Anders and Wolfgang Huber.
+\newblock {D}ifferential expression analysis for sequence count data.
+\newblock {\em Genome Biology}, 11:R106, 2010.
+\newblock URL: \url{http://genomebiology.com/2010/11/10/R106}.
+
+\bibitem{DESeq2}
+Simon~Anders Michael I~Love, Wolfgang~Huber.
+\newblock Moderated estimation of fold change and dispersion for rna-seq data
+  with deseq2.
+\newblock {\em Genome Biology}, 15:550, 2014.
+\newblock URL: \url{http://www.genomebiology.com/content/15/12/550}.
+
+\bibitem{edgeR}
+Mark~D. Robinson and Gordon~K. Smyth.
+\newblock Moderated statistical tests for assessing differences in tag
+  abundance.
+\newblock {\em Bioinformatics}, 23:2881, 2007.
+\newblock URL:
+  \url{http://bioinformatics.oxfordjournals.org/cgi/content/abstract/23/21/288%
+1}, \href
+  {http://arxiv.org/abs/http://bioinformatics.oxfordjournals.org/cgi/reprint/2%
+3/21/2881.pdf}
+  {\path{arXiv:http://bioinformatics.oxfordjournals.org/cgi/reprint/23/21/2881%
+.pdf}}, \href {http://dx.doi.org/10.1093/bioinformatics/btm453}
+  {\path{doi:10.1093/bioinformatics/btm453}}.
+
+\bibitem{DEXSeq}
+Simon Anders, Alejandro Reyes, and Wolfgang Huber.
+\newblock Detecting differential usage of exons from {RNA-seq} data.
+\newblock {\em Genome Research}, 22:2008, 2012.
+\newblock \href {http://dx.doi.org/10.1101/gr.133744.111}
+  {\path{doi:10.1101/gr.133744.111}}.
+
+\bibitem{STAR}
+Alexander Dobin, Carrie~A. Davis, Felix Schlesinger, Jorg Drenkow, Chris
+  Zaleski, Sonali Jha, Philippe Batut, Mark Chaisson, and Thomas~R. Gingeras.
+\newblock {STAR}: ultrafast universal {RNA-seq} aligner.
+\newblock {\em Bioinformatics}, 29(1):15--21, 2013.
+\newblock URL:
+  \url{http://bioinformatics.oxfordjournals.org/content/29/1/15.abstract},
+  \href
+  {http://arxiv.org/abs/http://bioinformatics.oxfordjournals.org/content/29/1/%
+15.full.pdf+html}
+  {\path{arXiv:http://bioinformatics.oxfordjournals.org/content/29/1/15.full.p%
+df+html}}, \href {http://dx.doi.org/10.1093/bioinformatics/bts635}
+  {\path{doi:10.1093/bioinformatics/bts635}}.
+
+\bibitem{GSNAP}
+Thomas~D. Wu and Serban Nacu.
+\newblock Fast and {SNP}-tolerant detection of complex variants and splicing in
+  short reads.
+\newblock {\em Bioinformatics}, 26(7):873--881, 2010.
+\newblock URL:
+  \url{http://bioinformatics.oxfordjournals.org/content/26/7/873.abstract},
+  \href
+  {http://arxiv.org/abs/http://bioinformatics.oxfordjournals.org/content/26/7/%
+873.full.pdf+html}
+  {\path{arXiv:http://bioinformatics.oxfordjournals.org/content/26/7/873.full.%
+pdf+html}}, \href {http://dx.doi.org/10.1093/bioinformatics/btq057}
+  {\path{doi:10.1093/bioinformatics/btq057}}.
+
+\bibitem{TopHat2}
+Daehwan Kim, Geo Pertea, Cole Trapnell, Harold Pimentel, Ryan Kelley, and
+  Steven Salzberg.
+\newblock Tophat2: accurate alignment of transcriptomes in the presence of
+  insertions, deletions and gene fusions.
+\newblock {\em Genome Biology}, 14(4):R36, 2013.
+\newblock URL: \url{http://genomebiology.com/2013/14/4/R36}, \href
+  {http://dx.doi.org/10.1186/gb-2013-14-4-r36}
+  {\path{doi:10.1186/gb-2013-14-4-r36}}.
+
+\bibitem{edgeRsoftware}
+McCarthy~DJ Robinson~MD and Smyth GK.
+\newblock edger: a bioconductor package for differential expression analysis of
+  digital gene expression data.
+\newblock {\em Bioinformatics}, 26:139--140, 2010.
+
+\bibitem{edgeRGLM}
+Davis~J. McCarthy, Yunshun Chen, and Gordon~K. Smyth.
+\newblock Differential expression analysis of multifactor {RNA-Seq} experiments
+  with respect to biological variation.
+\newblock {\em Nucleic Acids Research}, 40:4288--4297, 2012.
+
+\end{thebibliography}

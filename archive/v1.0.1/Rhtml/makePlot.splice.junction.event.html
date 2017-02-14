@@ -1,0 +1,125 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head><title>R: Plot Splice Junction Event Rates</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<link rel="stylesheet" type="text/css" href="R.css">
+</head><body>
+
+<table width="100%" summary="page for makePlot.splice.junction.event.rates {QoRTs}"><tr><td>makePlot.splice.junction.event.rates {QoRTs}</td><td align="right">R Documentation</td></tr></table>
+
+<h2>
+Plot Splice Junction Event Rates
+</h2>
+
+<h3>Description</h3>
+
+<p>Plots the rates at which splice junctions occur.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre>
+   makePlot.splice.junction.event.counts(plotter,
+                                    high.low.cutoff = 4, 
+                                    debugMode, singleEndMode, 
+                                    ...)
+   makePlot.splice.junction.event.ratesPerRead(plotter,
+                                    high.low.cutoff = 4, 
+                                    debugMode, singleEndMode,
+                                    ...)   
+   makePlot.splice.junction.event.proportions(plotter,
+                                    high.low.cutoff = 4, 
+                                    debugMode, singleEndMode,
+                                    ...) 
+   makePlot.splice.junction.event.proportionsByType(plotter, 
+                                    high.low.cutoff = 4, 
+                                    debugMode, singleEndMode,
+                                    ...)
+</pre>
+
+
+<h3>Arguments</h3>
+
+<table summary="R argblock">
+<tr valign="top"><td><code>plotter</code></td>
+<td>
+
+<p>A <code>QoRT_Plotter</code> reference object. See <code><a href="build.plotter.html">build.plotter</a></code>.
+</p>
+</td></tr>
+<tr valign="top"><td><code>high.low.cutoff</code></td>
+<td>
+
+<p>For Advanced users only! The cutoff between high and low expression splice junctions. Note that in order to function, this same cutoff MUST be used by the QoRTs jar utility that generates these counts.
+</p>
+</td></tr>
+<tr valign="top"><td><code>debugMode</code></td>
+<td>
+
+<p>Activates debug mode, which causes more verbose reporting.
+</p>
+</td></tr>
+<tr valign="top"><td><code>singleEndMode</code></td>
+<td>
+
+<p>Logical. Determines whether the dataset consists of single-ended reads. 
+By default this is determined from the data. Thus, this parameter should 
+never need to be set by the user.
+</p>
+</td></tr>
+<tr valign="top"><td><code>...</code></td>
+<td>
+ 
+<p>Arguments to be passed to methods, such as
+<a href="../../graphics/html/par.html">graphical parameters</a> (see <code><a href="../../graphics/html/par.html">par</a></code>).
+</p>
+</td></tr>
+</table>
+
+
+<h3>Details</h3>
+
+<p>These functions plot various metrics for the rate at which splice junction &quot;events&quot; occur. A splice junction &quot;event&quot; is an occurrance of a mapped read-pair bridging a splice junction. Some read-pairs may contain multiple splice junction events, and some read-pairs may contain none.
+</p>
+<p>Splice junctions are characterized into six categories:
+</p>
+
+<ul>
+<li><p> Known: The splice junction locus is found in the supplied transcript annotation gtf file.
+</p>
+</li>
+<li><p> Novel: The splice junction locus is NOT found in the supplied transcript annotation gtf file.
+</p>
+</li>
+<li><p> Known, 1-3 reads: The locus is known, and is only covered by 1-3 read-pairs.
+</p>
+</li>
+<li><p> Known, 4+ reads: The locus is known, and is covered by 4 or more read-pairs.
+</p>
+</li>
+<li><p> Novel, 1-3 reads: The locus is novel, and is only covered by 1-3 read-pairs.
+</p>
+</li>
+<li><p> Novel, 4+ reads: The locus is novel, and is covered by 4 or more read-pairs.
+</p>
+</li></ul>
+
+<p><code>makePlot.splice.junction.event.counts</code> plots the number (y-axis) of all splice junction events falling into each of six categories. Note that because different samples/runs may have different total read counts and/or library sizes, this function is generally not the best for comparing between samples. For most purposes, <code>makePlot.splice.junction.event.ratesPerRead</code> will be preferable.
+</p>
+<p><code>makePlot.splice.junction.event.ratesPerRead</code> plots the rate (y-axis) at which each type of splice junction events appear, per read-pair. 
+</p>
+<p><code>makePlot.splice.junction.event.proportions</code> plots the proportion (y-axis) of all splice junction events falling into the six categories.
+</p>
+<p><code>makePlot.splice.junction.event.proportionsByType</code> plots the proportion (y-axis) at which splice junction events appear on known vs novel splice junction loci, the proportion of known splice junction events that occur on low-coverage junctions (1-3 read-pairs) vs high-coverage junctions (4 or more read-pairs), and the proportion of novel splice junction events that occur on low vs high coverage junctions.
+</p>
+<p>All of these plots are generally used to detect whether sample-specific or batch effects have a substantial or biased effect on splice junction appearance, either due to differences in the original RNA, or due to artifacts that alter the rate at which the aligner maps across splice junctions.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code><a href="build.plotter.html">build.plotter</a></code>, <code><a href="makePlot.splice.junction.loci.counts.html">makePlot.splice.junction.loci.counts</a></code>
+</p>
+
+<hr><div align="center">[Package <em>QoRTs</em> version 1.0.1 <a href="00Index.html">Index</a>]</div>
+</body></html>

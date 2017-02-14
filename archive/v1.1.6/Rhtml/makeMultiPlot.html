@@ -1,0 +1,417 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><title>R: Generating summary multi-plots</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<link rel="stylesheet" type="text/css" href="R.css" />
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.3/styles/github.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.3/highlight.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.3/languages/r.min.js"></script>
+<script>hljs.initHighlightingOnLoad();</script>
+</head><body>
+
+<table width="100%" summary="page for makeMultiPlot {QoRTs}"><tr><td>makeMultiPlot {QoRTs}</td><td style="text-align: right;">R Documentation</td></tr></table>
+
+<h2>
+Generating summary multi-plots
+</h2>
+
+<h3>Description</h3>
+
+<p>Creates a large multi-frame summary plot, or a report PDF file.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre>
+  makeMultiPlot.basic(res, outfile,
+                      outfile.dir = "./", 
+                      outfile.prefix = "plot-basic",
+                      outfile.ext,
+                      plotter.params = list(), 
+                      plot.device.name = "curr", 
+                      plotting.device.params = list(),
+                      verbose = TRUE, 
+                      debugMode,
+                      rasterize.large.plots,
+                      rasterize.medium.plots,
+                      raster.height = 1000, 
+                      raster.width = 1000,
+                      separatePlots = FALSE,
+                      exclude.autosomes.chrom.rate.plot = TRUE,
+                      chromosome.name.style = "UCSC",
+                      fig.res = 150, fig.base.height.inches = 7,
+                      insertSize.plot.xlim,
+                      ...)
+                      
+  makeMultiPlot.colorByGroup(res, outfile,
+                      outfile.dir = "./", 
+                      outfile.prefix = "plot-colorByGroup",
+                      outfile.ext,
+                      plotter.params = list(), 
+                      plot.device.name = "curr", 
+                      plotting.device.params = list(),
+                      verbose = TRUE, 
+                      debugMode,
+                      rasterize.large.plots,
+                      rasterize.medium.plots,
+                      raster.height = 1000, 
+                      raster.width = 1000,
+                      separatePlots = FALSE,
+                      exclude.autosomes.chrom.rate.plot = TRUE,
+                      chromosome.name.style = "UCSC",
+                      fig.res = 150, fig.base.height.inches = 7,
+                      insertSize.plot.xlim,
+                      ...)
+                      
+  makeMultiPlot.colorByLane(res, outfile,
+                      outfile.dir = "./", 
+                      outfile.prefix = "plot-colorByLane",
+                      outfile.ext, 
+                      plotter.params = list(), 
+                      plot.device.name = "curr", 
+                      plotting.device.params = list(),
+                      verbose = TRUE, 
+                      debugMode,
+                      rasterize.large.plots,
+                      rasterize.medium.plots,
+                      raster.height = 1000, 
+                      raster.width = 1000,
+                      separatePlots = FALSE,
+                      exclude.autosomes.chrom.rate.plot = TRUE,
+                      chromosome.name.style = "UCSC",
+                      fig.res = 150, fig.base.height.inches = 7,
+                      insertSize.plot.xlim,
+                      ...)                
+
+  makeMultiPlot.colorBySample(res, outfile,
+                      outfile.dir = "./", 
+                      outfile.prefix = "plot-colorBySample",
+                      outfile.ext, 
+                      plotter.params = list(), 
+                      plot.device.name = "curr", 
+                      plotting.device.params = list(),
+                      verbose = TRUE, 
+                      debugMode,
+                      rasterize.large.plots,
+                      rasterize.medium.plots,
+                      raster.height = 1000, 
+                      raster.width = 1000,
+                      separatePlots = FALSE,
+                      exclude.autosomes.chrom.rate.plot = TRUE,
+                      chromosome.name.style = "UCSC",
+                      fig.res = 150, fig.base.height.inches = 7,
+                      insertSize.plot.xlim,
+                      ...)  
+
+  makeMultiPlot.highlightSample(res,
+                      curr.sample,
+                      outfile,
+                      outfile.dir = "./", 
+                      outfile.prefix,
+                      outfile.ext, 
+                      plotter.params = list(), 
+                      plot.device.name = "curr", 
+                      plotting.device.params = list(),
+                      verbose = TRUE, 
+                      debugMode,
+                      rasterize.large.plots,
+                      rasterize.medium.plots,
+                      raster.height = 1000, 
+                      raster.width = 1000,
+                      separatePlots = FALSE,
+                      exclude.autosomes.chrom.rate.plot = TRUE,
+                      chromosome.name.style = "UCSC",
+                      fig.res = 150, fig.base.height.inches = 7,
+                      insertSize.plot.xlim,
+                      ...)   
+
+  makeMultiPlot.highlightSample.colorByLane(res,
+                      curr.sample,
+                      outfile,
+                      outfile.dir = "./", 
+                      outfile.prefix,
+                      outfile.ext, 
+                      plotter.params = list(), 
+                      plot.device.name = "curr", 
+                      plotting.device.params = list(),
+                      verbose = TRUE, 
+                      debugMode,
+                      rasterize.large.plots,
+                      rasterize.medium.plots,
+                      raster.height = 1000, 
+                      raster.width = 1000,
+                      separatePlots = FALSE,
+                      exclude.autosomes.chrom.rate.plot = TRUE,
+                      chromosome.name.style = "UCSC",
+                      fig.res = 150, fig.base.height.inches = 7,
+                      insertSize.plot.xlim,
+                      ...)   
+
+</pre>
+
+
+<h3>Arguments</h3>
+
+<table summary="R argblock">
+<tr valign="top"><td><code>res</code></td>
+<td>
+
+<p>A <code>QoRT_QC_Results</code> object, created by 
+<code><a href="read.qc.results.data.html">read.qc.results.data</a></code>.
+</p>
+</td></tr>
+<tr valign="top"><td><code>curr.sample</code></td>
+<td>
+
+<p>A character string. For the sample highlight summary plots,
+this should be the sample.ID of the sample that is to be
+highlighted.
+</p>
+</td></tr>
+<tr valign="top"><td><code>outfile</code></td>
+<td>
+
+<p>The output file can be specified in two ways: first, by 
+setting the outfile parameter, which should be the full path
+for the output file. Alternatively, the file path will
+be the concatenation of the three parameters:
+outfile.dir, outfile.prefix, and outfile.ext.
+</p>
+<p>If plot.device.name == &quot;curr&quot;, then all the outfile 
+parameters will be nonfunctional.
+</p>
+</td></tr>
+<tr valign="top"><td><code>outfile.dir</code></td>
+<td>
+
+<p>A prefix to be appended to the output filename. Usually 
+the path to the destination directory. By default, this
+will be the current working directory.
+</p>
+</td></tr>
+<tr valign="top"><td><code>outfile.prefix</code></td>
+<td>
+
+<p>A second prefix to be appended to the output filename, after
+outfile.dir. This is usually the name of the file, without
+the file extension. By default, a reasonable file name will be
+selected.
+</p>
+</td></tr>
+<tr valign="top"><td><code>outfile.ext</code></td>
+<td>
+
+<p>The file extension. By default, this will be set to match
+the selected graphics device.
+</p>
+</td></tr>
+<tr valign="top"><td><code>plotter.params</code></td>
+<td>
+
+<p>Additional parameters (advanced) used in creation of the Plotter 
+objects. See <a href="build.plotter.html">build.plotter</a>.
+</p>
+</td></tr>
+<tr valign="top"><td><code>plot.device.name</code></td>
+<td>
+ 
+<p>The method to use to save plots. Several formats and devices are supported:
+</p>
+
+<ul>
+<li> <p><code>"curr"</code> (default) Do not create output files. Plot directly to the current or default device.
+</p>
+</li>
+<li> <p><code>"png"</code> for standard png compression.
+</p>
+</li>
+<li> <p><code>"CairoPNG"</code> for png compression using package Cairo. Note that this requires the package Cairo.
+</p>
+</li>
+<li> <p><code>"tiff"</code> for the tiff device.
+</p>
+</li>
+<li> <p><code>"jpeg"</code> for the jpeg device (<em>not recommended!</em>)
+</p>
+</li>
+<li> <p><code>"svg"</code> for the vector svg device. Note that for all vector devices, by default, certain large plots will be rasterized if the <code>png</code> package is found. If not, the function will still work, but output files may be very large and may have trouble rendering and printing.
+</p>
+</li>
+<li> <p><code>"pdf"</code> for a multi-page pdf report. 
+</p>
+</li>
+<li> <p><code>"CairoPDF"</code> for a multi-page pdf report using package Cairo. Note that this requires the package Cairo. 
+</p>
+</li></ul>
+
+</td></tr>
+<tr valign="top"><td><code>plotting.device.params</code></td>
+<td>
+ 
+<p>A named list of parameters to be passed to the graphics device.
+For example:
+</p>
+
+<ul>
+<li> <p><code>width = 2000</code>
+</p>
+</li>
+<li> <p><code>height = 2000</code>
+</p>
+</li>
+<li> <p><code>units = "px"</code>
+</p>
+</li></ul>
+
+<p>Reasonable values for height, width, and pointsize will be chosen
+by default. Generally all raster plots will be set to 1000 by 1000 
+pixels, and all vector plots will be set to 7 inches by 7 inches.
+</p>
+</td></tr>
+<tr valign="top"><td><code>verbose</code></td>
+<td>
+
+<p>Logical. If TRUE, more information will be printed to the console.
+</p>
+</td></tr>
+<tr valign="top"><td><code>debugMode</code></td>
+<td>
+
+<p>Logical. If TRUE, debugging data will be printed to the console.
+</p>
+</td></tr>
+<tr valign="top"><td><code>rasterize.large.plots</code></td>
+<td>
+
+<p>Logical. If TRUE, then if the currently selected plotting device
+is a vector device (or the &quot;curr&quot; device), then certain large plots
+will have their plotting areas rasterized. The axis labels, titles,
+and text will all remain vectorized, only the plotting areas will
+be flattened. <em>Note that this requires the png package.</em>
+</p>
+<p>By default, this parameter will be set to TRUE when a vector
+device is selected.
+</p>
+</td></tr>
+<tr valign="top"><td><code>rasterize.medium.plots</code></td>
+<td>
+
+<p>Logical. as rasterize.large.plots, but applies to moderately-large plots. By default, this parameter will be set to TRUE for pdf/CairoPDF output only.
+</p>
+</td></tr>
+<tr valign="top"><td><code>raster.height</code></td>
+<td>
+
+<p>Numeric. If rasterize.plotting.area is TRUE, then this is the
+height of the plotting area raster image, in pixels.
+</p>
+</td></tr>
+<tr valign="top"><td><code>raster.width</code></td>
+<td>
+
+<p>Numeric. If rasterize.plotting.area is TRUE, then this is the
+width of the plotting area raster image, in pixels. Double-pane plots
+will be twice this width.
+</p>
+</td></tr>
+<tr valign="top"><td><code>separatePlots</code></td>
+<td>
+
+<p>Logical. If TRUE, then separate image files will be saved for 
+each individual plot, rather than saving one large multi-pane 
+plot. Note that this is not compatible with the &quot;curr&quot; device.
+Also note: if this parameter is set to TRUE, then the output
+files will be saved using the outfile.dir, outfile.prefix
+and outfile.ext parameters. The &quot;outfile&quot; parameter cannot be
+set. The files will be saved to the contatenation of 
+outfile.dir, outfile.prefix, the name of the plot type, 
+and then outfile.ext.
+</p>
+</td></tr>
+<tr valign="top"><td><code>exclude.autosomes.chrom.rate.plot</code></td>
+<td>
+
+<p>A logical value indicating whether to exclude autosomes from the plot.
+See <code><a href="makePlot.chrom.type.rates.html">makePlot.chrom.type.rates</a></code>
+</p>
+</td></tr>
+<tr valign="top"><td><code>chromosome.name.style</code></td>
+<td>
+
+<p>A string value indicating the style of the chromosome names, 
+and also how to split up the categories. See 
+<code><a href="makePlot.chrom.type.rates.html">makePlot.chrom.type.rates</a></code>
+</p>
+</td></tr>
+<tr valign="top"><td><code>fig.res</code></td>
+<td>
+
+<p>Numeric value. The number of pixels per &quot;inch&quot; (for raster devices only).
+For some plotting devices the figure height will be in pixels not inches, and
+will equal this value multiplied by the fig.base.height.inches value.
+</p>
+</td></tr>
+<tr valign="top"><td><code>fig.base.height.inches</code></td>
+<td>
+
+<p>Numeric value. The base height, in inches, of each sub-figure in the plot. This
+will be equal to the height for vector devices, or used to calculate the height
+in pixels using the fig.res value (see above).
+</p>
+</td></tr>
+<tr valign="top"><td><code>insertSize.plot.xlim</code></td>
+<td>
+
+<p>A numeric vector of length 2. The x-axis limits for the insert size plot. By default QoRTs will attempt to find reasonable values for this, 
+but there are always situations where the default behavior is not ideal. Using this parameter you can set
+it explicitly.
+</p>
+</td></tr>
+<tr valign="top"><td><code>...</code></td>
+<td>
+ 
+<p>Arguments to be passed to methods, such as
+<a href="../../graphics/html/par.html">graphical parameters</a> (see <code><a href="../../graphics/html/par.html">par</a></code>).
+</p>
+</td></tr>
+</table>
+
+
+<h3>Details</h3>
+
+<p>Produces large, multi-frame summary plots, with a large number of different
+plots and graphs.
+</p>
+<p>For devices pdf and CairoPDF, this function will produce a multi-page document
+suitable for printing, with 6 panels on each page.
+</p>
+<p>Note that for all vector devices (svg, pdf, and CairoPDF), by default, 
+QoRTs will attempt to load the <code>png</code> package. If this package is 
+found, then certain large plots (the NVC plots and the cumulative 
+diversity plots) will be rasterized within the plotting area. The labels
+and text will still be vectorized. If the <code>png</code> package is not installed, 
+the function will still work, but output files may be very large and may 
+have trouble rendering and printing.
+</p>
+<p>Rasteration of large plots can be turned off via the rasterize.large.plots option.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code><a href="build.plotter.html">build.plotter</a></code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="r">  ## Not run: 
+##D     data(res,package=&quot;QoRTsExampleData&quot;);
+##D     makeMultiPlot.colorByGroup(res);
+##D   
+## End(Not run)
+</code></pre>
+
+
+<hr /><div style="text-align: center;">[Package <em>QoRTs</em> version 1.1.6 <a href="00Index.html">Index</a>]</div>
+</body></html>

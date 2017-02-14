@@ -1,0 +1,80 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
+
+<!--Converted with LaTeX2HTML 2012 (1.2)
+original version by:  Nikos Drakos, CBLU, University of Leeds
+* revised and updated by:  Marcus Hennecke, Ross Moore, Herb Swan
+* with significant contributions from:
+  Jens Lippmann, Marek Rouchal, Martin Wilck and others -->
+<HTML>
+<HEAD>
+<TITLE>Quick Start</TITLE>
+<META NAME="description" CONTENT="Quick Start">
+<META NAME="keywords" CONTENT="QoRTs-vignette">
+<META NAME="resource-type" CONTENT="document">
+<META NAME="distribution" CONTENT="global">
+
+<META NAME="Generator" CONTENT="LaTeX2HTML v2012">
+<META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
+
+<LINK REL="STYLESHEET" HREF="QoRTs-vignette.css">
+
+<LINK REL="next" HREF="node7.html">
+<LINK REL="previous" HREF="node5.html">
+<LINK REL="up" HREF="QoRTs-vignette.html">
+<LINK REL="next" HREF="node7.html">
+</HEAD>
+
+<BODY > <div id=wrap>
+<!--Navigation Panel-->
+<A NAME="tex2html243"
+  HREF="node7.html">
+<IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next" SRC="next.png"></A> 
+<A NAME="tex2html239"
+  HREF="QoRTs-vignette.html">
+<IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up" SRC="up.png"></A> 
+<A NAME="tex2html233"
+  HREF="node5.html">
+<IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous" SRC="prev.png"></A> 
+<A NAME="tex2html241"
+  HREF="node1.html">
+<IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents" SRC="contents.png"></A>  
+<BR>
+<B> Next:</B> <A NAME="tex2html244"
+  HREF="node7.html">Dataset Organization</A>
+<B> Up:</B> <A NAME="tex2html240"
+  HREF="QoRTs-vignette.html">QoRTs Package User Manual</A>
+<B> Previous:</B> <A NAME="tex2html234"
+  HREF="node5.html">Preparations</A>
+ &nbsp; <B>  <A NAME="tex2html242"
+  HREF="node1.html">Contents</A></B> 
+<BR>
+<BR>
+<!--End of Navigation Panel-->
+
+<H1><A NAME="SECTION00060000000000000000"></A>  <A NAME="sec:quickstart"></A>
+<BR>
+Quick Start
+</H1>
+<P>
+<FONT COLOR="#585858">In order to produce quality control metrics, plots, and pdf reports on a single replicate, simply use the command:
+</FONT>
+<P>
+<PRE>
+java -Xmx4G -jar /path/to/jarfile/QoRTs.jar QC \
+                   --generatePlots  \
+                   mybamfile.bam  \
+                   transcriptAnnotationFile.gtf.gz  \
+                   /qc/data/dir/path/
+</PRE>
+<P>
+<FONT COLOR="#585858">Note: This command must be executed as a single line. Additional options may be required depending on the nature of the dataset. For single-ended data, the <code>--singleEnded</code> option should be included. For strand-specific data, the <code>--stranded</code> option should be included, and possibly also the <code>--fr_secondStrand</code> option depending on the stranded library type. For position-sorted data, the <code>--coordSorted</code> option should be used. See <A HREF="node8.html#sec:initialProcessing">7</A>, or the QC utility documentation<A NAME="tex2html8"
+  HREF="footnode.html#foot1577"><SUP>5</SUP></A> for more information on the available options.
+</FONT>
+<P>
+<BR><HR>
+<ADDRESS>
+Dr Stephen William Hartley
+2016-06-14
+</ADDRESS>
+</div></BODY>
+</HTML>

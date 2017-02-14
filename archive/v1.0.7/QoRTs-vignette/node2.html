@@ -1,0 +1,117 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
+
+<!--Converted with LaTeX2HTML 2012 (1.2)
+original version by:  Nikos Drakos, CBLU, University of Leeds
+* revised and updated by:  Marcus Hennecke, Ross Moore, Herb Swan
+* with significant contributions from:
+  Jens Lippmann, Marek Rouchal, Martin Wilck and others -->
+<HTML>
+<HEAD>
+<TITLE>Overview</TITLE>
+<META NAME="description" CONTENT="Overview">
+<META NAME="keywords" CONTENT="QoRTs-vignette">
+<META NAME="resource-type" CONTENT="document">
+<META NAME="distribution" CONTENT="global">
+
+<META NAME="Generator" CONTENT="LaTeX2HTML v2012">
+<META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
+
+<LINK REL="STYLESHEET" HREF="QoRTs-vignette.css">
+
+<LINK REL="next" HREF="node3.html">
+<LINK REL="previous" HREF="node1.html">
+<LINK REL="up" HREF="QoRTs-vignette.html">
+<LINK REL="next" HREF="node3.html">
+</HEAD>
+
+<BODY > <div id=wrap>
+<!--Navigation Panel-->
+<A NAME="tex2html192"
+  HREF="node3.html">
+<IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next" SRC="next.png"></A> 
+<A NAME="tex2html188"
+  HREF="QoRTs-vignette.html">
+<IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up" SRC="up.png"></A> 
+<A NAME="tex2html182"
+  HREF="node1.html">
+<IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous" SRC="prev.png"></A> 
+<A NAME="tex2html190"
+  HREF="node1.html">
+<IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents" SRC="contents.png"></A>  
+<BR>
+<B> Next:</B> <A NAME="tex2html193"
+  HREF="node3.html">Requirements</A>
+<B> Up:</B> <A NAME="tex2html189"
+  HREF="QoRTs-vignette.html">QoRTs Package User Manual</A>
+<B> Previous:</B> <A NAME="tex2html183"
+  HREF="node1.html">Contents</A>
+ &nbsp; <B>  <A NAME="tex2html191"
+  HREF="node1.html">Contents</A></B> 
+<BR>
+<BR>
+<!--End of Navigation Panel-->
+
+<H1><A NAME="SECTION00020000000000000000"></A> <A NAME="sec:praeludium"></A>
+<BR>
+Overview
+</H1>
+
+<P>
+The http://hartleys.github.io/QoRTs/QoRTs software package[<A
+ HREF="node12.html#QoRTs">1</A>] is a fast, efficient, and portable multifunction toolkit designed to assist in the analysis, quality control, and data management of RNA-Seq datasets. Its primary function is to aid in the detection and identification of errors, biases, and artifacts produced by paired-end high-throughput RNA-Seq technology. In addition, it can produce count data designed for use with differential expression <A NAME="tex2html1"
+  HREF="footnode.html#foot1573"><SUP>1</SUP></A> and differential exon usage tools <A NAME="tex2html2"
+  HREF="footnode.html#foot1574"><SUP>2</SUP></A>, as well as individual-sample and/or group-summary genome track files suitable for use with the UCSC genome browser (or any compatible browser).
+
+<P>
+In its primary role as a QC tool it can produce a wide variety of graphs, plots, and tables that allow the data to be visualized in various ways. Data can be compiled and contrasted in multiple ways to allow systematic errors or artifacts to reveal themselves more easily. While it will not directly assign pass/fail status, it is a powerful tool for bioinformaticians to detect and identify features in the data. In (hopefully) most cases, these plots and graphs will not reveal anything other than mixed statistical noise. Next-Gen sequencing technologies have matured to the point where gross systematic errors and batch-specific biases are relatively modest and rare. However: mistakes can still occur, and basing conclusions on flawed data can be disastrous.
+
+<P>
+Across the field of bioinformatics there are numerous cases where biases, artifacts, and other data quality or bioinformatic issues have called results into question, sometimes resulting in retractions. In many of these cases the problems were only identified after the study came under intense scrutiny when the results were interesting and/or contentious, and the specific issues at fault were generally not well-characterized until afterwards. The primary purpose of QoRTs is to cast a wide net, characterizing the data in as many ways as is feasible so that quality issues that would otherwise be obscured can be recognized and dealt with, even if these issues have not been previously encountered.
+
+<P>
+The QoRTs package is composed of two parts: a java jar-file (for data processing) and a companion R package (for generating tables, figures, and plots). The java utility is written in the Scala programming language (v2.11.1), however, it has been compiled to java byte-code and does not require an installation of Scala (or any other external libraries) in order to function. The entire QoRTs toolkit can be used on almost any operating system that supports java and R. While not explicitly required, the use of a 64-bit version of java is recommended.
+
+<P>
+This vignette primarily covers the quality control functionality of QoRTs, and briefly covers the other functions and capabilities. For more information on these other functions, and on further analysis using the QoRTs pipeline, see the comprehensive walktrhough, below.
+
+<P>
+The most recent release of QoRTs is available on the QoRTs github page (<TT><A NAME="tex2html3"
+  HREF="http://hartleys.github.io/QoRTs/">http://hartleys.github.io/QoRTs/</A></TT>), along with additional help and documentation.
+
+<P>
+http://hartleys.github.io/JunctionSeq/doc/example-walkthrough.pdfA comprehensive walkthrough is available online that describes the entire analysis pipeline from aligned reads through analysis with other tools such as DESeq2, edgeR, DEXSeq, and JunctionSeq, as well as the creation of plots and browser tracks. The example dataset used by this walkthrough is https://dl.dropboxusercontent.com/u/103621176/pipelineWalkthrough/QoRTsPipelineWalkthrough.zipavailable online (280mb download), including the https://dl.dropboxusercontent.com/u/103621176/pipelineWalkthrough/bamfiles.zipbam files (&nbsp;1gb download).
+
+<P>
+A UCSC browser session produced in this pipeline is also https://genome.ucsc.edu/cgi-bin/hgTracks?hgS_doOtherUser=submit&amp;hgS_otherUserName=stephen.hartley&amp;hgS_otherUserSessionName=rn6_pipelineWalkthrough_finalTracksavailable online, along with https://dl.dropboxusercontent.com/u/103621176/pipelineWalkthrough/trackHub/index.htmlthe trackhub used to create this session.
+
+<P>
+<HR>
+<!--Navigation Panel-->
+<A NAME="tex2html192"
+  HREF="node3.html">
+<IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next" SRC="next.png"></A> 
+<A NAME="tex2html188"
+  HREF="QoRTs-vignette.html">
+<IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up" SRC="up.png"></A> 
+<A NAME="tex2html182"
+  HREF="node1.html">
+<IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous" SRC="prev.png"></A> 
+<A NAME="tex2html190"
+  HREF="node1.html">
+<IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents" SRC="contents.png"></A>  
+<BR>
+<B> Next:</B> <A NAME="tex2html193"
+  HREF="node3.html">Requirements</A>
+<B> Up:</B> <A NAME="tex2html189"
+  HREF="QoRTs-vignette.html">QoRTs Package User Manual</A>
+<B> Previous:</B> <A NAME="tex2html183"
+  HREF="node1.html">Contents</A>
+ &nbsp; <B>  <A NAME="tex2html191"
+  HREF="node1.html">Contents</A></B> 
+<!--End of Navigation Panel-->
+<ADDRESS>
+Dr Stephen William Hartley
+2016-01-28
+</ADDRESS>
+</div></BODY>
+</HTML>

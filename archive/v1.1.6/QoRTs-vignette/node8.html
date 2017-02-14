@@ -1,0 +1,179 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
+
+<!--Converted with LaTeX2HTML 2012 (1.2)
+original version by:  Nikos Drakos, CBLU, University of Leeds
+* revised and updated by:  Marcus Hennecke, Ross Moore, Herb Swan
+* with significant contributions from:
+  Jens Lippmann, Marek Rouchal, Martin Wilck and others -->
+<HTML>
+<HEAD>
+<TITLE>Processing of aligned RNA-Seq data</TITLE>
+<META NAME="description" CONTENT="Processing of aligned RNA-Seq data">
+<META NAME="keywords" CONTENT="QoRTs-vignette">
+<META NAME="resource-type" CONTENT="document">
+<META NAME="distribution" CONTENT="global">
+
+<META NAME="Generator" CONTENT="LaTeX2HTML v2012">
+<META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
+
+<LINK REL="STYLESHEET" HREF="QoRTs-vignette.css">
+
+<LINK REL="next" HREF="node9.html">
+<LINK REL="previous" HREF="node7.html">
+<LINK REL="up" HREF="QoRTs-vignette.html">
+<LINK REL="next" HREF="node9.html">
+</HEAD>
+
+<BODY > <div id=wrap>
+<!--Navigation Panel-->
+<A NAME="tex2html268"
+  HREF="node9.html">
+<IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next" SRC="next.png"></A> 
+<A NAME="tex2html264"
+  HREF="QoRTs-vignette.html">
+<IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up" SRC="up.png"></A> 
+<A NAME="tex2html258"
+  HREF="node7.html">
+<IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous" SRC="prev.png"></A> 
+<A NAME="tex2html266"
+  HREF="node1.html">
+<IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents" SRC="contents.png"></A>  
+<BR>
+<B> Next:</B> <A NAME="tex2html269"
+  HREF="node9.html">Visualization</A>
+<B> Up:</B> <A NAME="tex2html265"
+  HREF="QoRTs-vignette.html">QoRTs Package User Manual</A>
+<B> Previous:</B> <A NAME="tex2html259"
+  HREF="node7.html">Dataset Organization</A>
+ &nbsp; <B>  <A NAME="tex2html267"
+  HREF="node1.html">Contents</A></B> 
+<BR>
+<BR>
+<!--End of Navigation Panel-->
+<!--Table of Child-Links-->
+<A NAME="CHILD_LINKS"><STRONG>Subsections</STRONG></A>
+
+<UL>
+<LI><A NAME="tex2html270"
+  HREF="node8.html#SECTION00081000000000000000">Memory Usage</A>
+</UL>
+<!--End of Table of Child-Links-->
+<HR>
+
+<H1><A NAME="SECTION00080000000000000000"></A>  <A NAME="sec:initialProcessing"></A>
+<BR>
+Processing of aligned RNA-Seq data
+</H1><FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858"></FONT></FONT></FONT>
+<P>
+<FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858">The first step is to process the aligned RNA-Seq data. The bulk of the data-processing is performed by the QoRTs.jar java utility. This tool produces an array of output files, analyzing and tabulating the data in various ways. This utility requires about 10-20gb of RAM for most genomes, and takes roughly 4-7 minutes to process 1 million read-pairs.
+</FONT></FONT></FONT></FONT>
+<P>
+<FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858"></FONT></FONT></FONT><PRE>
+java -jar /path/to/jarfile/QoRTs.jar QC \
+                   mybamfile.bam \
+                   transcriptAnnotationFile.gtf.gz \
+                   /qc/data/dir/path/
+</PRE><FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858"></FONT></FONT></FONT>
+<P>
+<FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858">In the above command (which must be entered as a single line), you must replace <code>/path/to/jarfile/</code> with the file-path to the directory in which the jar file is kept. The path <code>/qc/data/dir/path/</code> should be replaced with the path you want the QC data to be written. This should match the path located in the decoder in the qc.data.dir column for this sample-run.
+</FONT></FONT></FONT></FONT>
+<P>
+<FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858">The bam processing tool includes numerous options. A full description of these options can be found in the online documentation of the jar utility<A NAME="tex2html10"
+  HREF="footnode.html#foot1578"><SUP>6</SUP></A>, or by entering the command:
+</FONT></FONT></FONT></FONT><PRE>
+java -jar /path/to/jarfile/QoRTs.jar QC --man
+</PRE><FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858"></FONT></FONT></FONT>
+<P>
+<FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858">There are a number of crucial points that require attention when using the QoRTs.jar QC command.
+</FONT></FONT></FONT></FONT>
+<P>
+<FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858"></FONT></FONT></FONT>
+<UL>
+<LI><I>MAPQ filter:</I> Most aligners designed for RNA-Seq use the MAPQ field to define whether or not a read is multi-mapped. However, different aligners use different conventions. By default QoRTs assumes the RNA-STAR convention in which a MAPQ of 255 indicates a unique alignment. For TopHat, the <code>--minMAPQ</code> parameter must be set to 50. For GSNAP, the MAPQ behavior is not well documented (or at least I have been unable to find such documentation), but a MAPQ filtering threshold of 30 appears to work.
+</LI>
+<LI><I>Stranded Data:</I> By default, QoRTs assumes that the data is <I>NOT</I> strand-specific. For strand-specific data, the <code>--stranded</code> option must be used.
+</LI>
+<LI><I>Stranded Library Type:</I> The <code>--fr_secondStrand</code> option may be required depending on the stranded library type. QoRTs does not attempt to automatically detect the platform and protocol used for stranded data. There are two types of strand-specific protocols, which are described by the TopHat/CuffLinks documentation at <TT><A NAME="tex2html12"
+  HREF="http://cufflinks.cbcb.umd.edu/manual.html#library">http://cufflinks.cbcb.umd.edu/manual.html#library</A></TT> as <code>fr-firststrand</code> and <code>fr-secondstrand</code>. In HTSeq, these same library type options are defined as <code>-s reverse</code> and <code>-s yes</code> respectively. According to the CuffLinks manual, <code>fr-firststrand</code> (the default used by QoRTs for stranded data) applies to dUTP, NSR, and NNSR protocols, whereas <code>fr-secondstrand</code> applies to "Directional Illumina (ligation)" and "Standard SOLiD" protocols. If you are unsure which library type applies to your dataset, don't worry: one of the tests will report stranded library type. If you use this test to determine library type, be aware that you may have to re-run QoRTs with the correct library type set.
+</LI>
+<LI><I>Read Groups:</I> Depending on the production pipeline, each biological sample may be run across multiple sequencer lanes. These seperate files can be merged together either before or after analysis with QoRTs (and maybe even before alignment). However, if the merger occurs before analysis with QoRTs, then each bam file will consist of multiple seperate lanes or runs. In this case, it is STRONGLY recommended that seperate QC runs be performed on each "read group", using the <code>--readGroup</code> option. This will prevent run- or lane-specific biases, artifacts, or errors from being obfuscated.
+</LI>
+<LI><I>Read Sorting:</I> For paired-end data reads must be sorted. By default, QoRTs can accept files sorted by name OR by position. Technically QoRTs will accept unsorted data, but the memory usage will be greatly increased.
+</LI>
+<LI><I>Single-end vs paired-end:</I> By default, QoRTs assumes the input bam file consists of paired-end data. For single-end data, the <code>--singleEnded</code> option must be used.
+  
+</LI>
+</UL><FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858"></FONT></FONT></FONT>
+<P>
+<FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858">For example, to read the first read group bam-file for SAMP1 from the example dataset (which is stranded, coordinate-sorted, and uses the <code>fr_firstStrand</code> stranded library type), one would use the following command:
+</FONT></FONT></FONT></FONT>
+<P>
+<FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858"></FONT></FONT></FONT><PRE>
+java -jar /path/to/jarfile/QoRTs.jar QC \
+                   --stranded \
+                   inputData/bamFiles/SAMP1_RG1.bam \
+                   inputData/annoFiles/anno.gtf.gz \
+                   outputData/qortsData/SAMP1_RG1/
+</PRE><FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858"></FONT></FONT></FONT>
+<P>
+<FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858">This command must be run on each bam file (and possibly more than once on each, if each bam file consists of multiple separate read-groups).
+</FONT></FONT></FONT></FONT>
+<P>
+<FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858"></FONT></FONT></FONT>
+<H2><A NAME="SECTION00081000000000000000"></A>  <A NAME="sec:memUsage"></A>
+<BR>
+Memory Usage
+</H2><FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858"></FONT></FONT></FONT>
+<P>
+<FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858"><I>Memory usage:</I> The QoRTs QC utility requires at least 4gb or RAM for most genomes / datasets. Larger genomes, genomes with more annotated genes/transcripts, or larger bam files may require more RAM. You can set the maximum amount of RAM allocated to the JVM using the options <code>-Xmx4000M</code>. This should be included <I>before</I> the <code>-jar</code> in the command line. For example:
+</FONT></FONT></FONT></FONT>
+<P>
+<FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858"></FONT></FONT></FONT><PRE>
+#Set the maximum to the minimum recommended 4 gigabytes:
+java -Xmx4000M -jar /path/to/jarfile/QoRTs.jar QC \
+                   --stranded \
+                   inputData/bamFiles/SAMP1_RG1.bam \
+                   inputData/annoFiles/anno.gtf.gz \
+                   outputData/qortsData/SAMP1_RG1/
+
+#Or Set the maximum to 16 gigabytes:
+java -Xmx16G -jar /path/to/jarfile/QoRTs.jar QC \
+                   --stranded \
+                   inputData/bamFiles/SAMP1_RG1.bam \
+                   inputData/annoFiles/anno.gtf.gz \
+                   outputData/qortsData/SAMP1_RG1/
+</PRE><FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858"></FONT></FONT></FONT>
+<P>
+<FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858">This option can be used with any and all of the QoRTs java utilities.
+</FONT></FONT></FONT></FONT>
+<P>
+<FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858"></FONT></FONT></FONT><HR>
+<!--Navigation Panel-->
+<A NAME="tex2html268"
+  HREF="node9.html">
+<IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next" SRC="next.png"></A> 
+<A NAME="tex2html264"
+  HREF="QoRTs-vignette.html">
+<IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up" SRC="up.png"></A> 
+<A NAME="tex2html258"
+  HREF="node7.html">
+<IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous" SRC="prev.png"></A> 
+<A NAME="tex2html266"
+  HREF="node1.html">
+<IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents" SRC="contents.png"></A>  
+<BR>
+<B> Next:</B> <A NAME="tex2html269"
+  HREF="node9.html">Visualization</A>
+<B> Up:</B> <A NAME="tex2html265"
+  HREF="QoRTs-vignette.html">QoRTs Package User Manual</A>
+<B> Previous:</B> <A NAME="tex2html259"
+  HREF="node7.html">Dataset Organization</A>
+ &nbsp; <B>  <A NAME="tex2html267"
+  HREF="node1.html">Contents</A></B> 
+<!--End of Navigation Panel-->
+<ADDRESS>
+Dr Stephen William Hartley
+2016-06-14
+</ADDRESS>
+</div></BODY>
+</HTML>

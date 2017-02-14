@@ -11,7 +11,7 @@ xcopy /E /I /Q doc archive\v%VER%\doc
 xcopy /E /I /Q jarHtml archive\v%VER%\jarHtml
 xcopy /E /I /Q jarMd archive\v%VER%\jarMd
 xcopy /E /I /Q Rhtml archive\v%VER%\Rhtml
-xcopy /E /I /Q stylesheets archive\v%VER%\stylesheets
+xcopy /E /I /Q archive/v1.1.8/stylesheets archive\v%VER%\stylesheets
 
 xcopy * archive\v%VER%\
 

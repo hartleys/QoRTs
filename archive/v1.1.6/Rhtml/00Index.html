@@ -1,0 +1,146 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head><title>R: Quality of RNA-seq Tool</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<link rel="stylesheet" type="text/css" href="R.css" />
+</head><body>
+<h1> Quality of RNA-seq Tool
+<img class="toplogo" src="http://stat.ethz.ch/R-manual/R-devel/doc/html/logo.jpg" alt="[R logo]" />
+</h1>
+<hr/>
+<div style="text-align: center;">
+<a href="http://stat.ethz.ch/R-manual/R-devel/doc/html/packages.html"><img class="arrow" src="http://stat.ethz.ch/R-manual/R-devel/doc/html/left.jpg" alt="[Up]" /></a>
+<a href="http://stat.ethz.ch/R-manual/R-devel/doc/html/index.html"><img class="arrow" src="http://stat.ethz.ch/R-manual/R-devel/doc/html/up.jpg" alt="[Top]" /></a>
+</div><h2>Documentation for package &lsquo;QoRTs&rsquo; version 1.1.6</h2>
+
+<ul><li><a href="../DESCRIPTION">DESCRIPTION file</a>.</li>
+<li><a href="../doc/index.html">User guides, package vignettes and other documentation.</a></li>
+<li><a href="../NEWS">Package NEWS</a>.</li>
+</ul>
+
+<h2>Help Pages</h2>
+
+
+<table width="100%">
+<tr><td style="width: 25%;"><a href="build.plotter.html">build.plotter</a></td>
+<td>Generating plotters</td></tr>
+<tr><td style="width: 25%;"><a href="build.plotter.html">build.plotter.basic</a></td>
+<td>Generating plotters</td></tr>
+<tr><td style="width: 25%;"><a href="build.plotter.html">build.plotter.colorByGroup</a></td>
+<td>Generating plotters</td></tr>
+<tr><td style="width: 25%;"><a href="build.plotter.html">build.plotter.colorByLane</a></td>
+<td>Generating plotters</td></tr>
+<tr><td style="width: 25%;"><a href="build.plotter.html">build.plotter.colorBySample</a></td>
+<td>Generating plotters</td></tr>
+<tr><td style="width: 25%;"><a href="build.plotter.html">build.plotter.colorByX</a></td>
+<td>Generating plotters</td></tr>
+<tr><td style="width: 25%;"><a href="build.plotter.html">build.plotter.highlightSample</a></td>
+<td>Generating plotters</td></tr>
+<tr><td style="width: 25%;"><a href="build.plotter.html">build.plotter.highlightSample.colorByLane</a></td>
+<td>Generating plotters</td></tr>
+<tr><td style="width: 25%;"><a href="read.qc.results.data.html">completeAndCheckDecoder</a></td>
+<td>Reading QC results data</td></tr>
+<tr><td style="width: 25%;"><a href="get.summary.table.html">get.size.factors</a></td>
+<td>Get summary data tables</td></tr>
+<tr><td style="width: 25%;"><a href="get.summary.table.html">get.summary.table</a></td>
+<td>Get summary data tables</td></tr>
+<tr><td style="width: 25%;"><a href="makeMultiPlot.html">makeMultiPlot</a></td>
+<td>Generating summary multi-plots</td></tr>
+<tr><td style="width: 25%;"><a href="makeMultiPlot.all.html">makeMultiPlot.all</a></td>
+<td>Generating all default plots</td></tr>
+<tr><td style="width: 25%;"><a href="makeMultiPlot.html">makeMultiPlot.basic</a></td>
+<td>Generating summary multi-plots</td></tr>
+<tr><td style="width: 25%;"><a href="makeMultiPlot.html">makeMultiPlot.colorByGroup</a></td>
+<td>Generating summary multi-plots</td></tr>
+<tr><td style="width: 25%;"><a href="makeMultiPlot.html">makeMultiPlot.colorByLane</a></td>
+<td>Generating summary multi-plots</td></tr>
+<tr><td style="width: 25%;"><a href="makeMultiPlot.html">makeMultiPlot.colorBySample</a></td>
+<td>Generating summary multi-plots</td></tr>
+<tr><td style="width: 25%;"><a href="makeMultiPlot.html">makeMultiPlot.highlightSample</a></td>
+<td>Generating summary multi-plots</td></tr>
+<tr><td style="width: 25%;"><a href="makeMultiPlot.highlightSample.all.html">makeMultiPlot.highlightSample.all</a></td>
+<td>Generating sample highlight multi-plots</td></tr>
+<tr><td style="width: 25%;"><a href="makeMultiPlot.html">makeMultiPlot.highlightSample.colorByLane</a></td>
+<td>Generating summary multi-plots</td></tr>
+<tr><td style="width: 25%;"><a href="makeMultiPlot.highlightSample.all.html">makeMultiPlot.highlightSample.colorByLane.all</a></td>
+<td>Generating sample highlight multi-plots</td></tr>
+<tr><td style="width: 25%;"><a href="makePlot.biotype.rates.html">makePlot.biotype.rates</a></td>
+<td>Plot Biotype rates</td></tr>
+<tr><td style="width: 25%;"><a href="makePlot.chrom.type.rates.html">makePlot.chrom.type.rates</a></td>
+<td>Chromosome type rate plot</td></tr>
+<tr><td style="width: 25%;"><a href="makePlot.cigarLength.distribution.html">makePlot.cigarLength.distribution</a></td>
+<td>Plot the length distribution of a given cigar operation</td></tr>
+<tr><td style="width: 25%;"><a href="makePlot.cigarOp.byCycle.html">makePlot.cigarOp.byCycle</a></td>
+<td>Plot Cigar Operator Rate</td></tr>
+<tr><td style="width: 25%;"><a href="makePlot.clipping.html">makePlot.clipping</a></td>
+<td>Plot Alignment Clipping</td></tr>
+<tr><td style="width: 25%;"><a href="makePlot.dropped.rates.html">makePlot.dropped.rates</a></td>
+<td>Read Drop Plot</td></tr>
+<tr><td style="width: 25%;"><a href="makePlot.gc.html">makePlot.gc</a></td>
+<td>Plot GC content</td></tr>
+<tr><td style="width: 25%;"><a href="makePlot.gene.assignment.rates.html">makePlot.gene.assignment.rates</a></td>
+<td>Gene assignment rate plot</td></tr>
+<tr><td style="width: 25%;"><a href="makePlot.gene.cdf.html">makePlot.gene.cdf</a></td>
+<td>Plot the cumulative gene diversity curve</td></tr>
+<tr><td style="width: 25%;"><a href="makePlot.genebody.coverage.html">makePlot.genebody</a></td>
+<td>Plot Gene-Body coverage distribution</td></tr>
+<tr><td style="width: 25%;"><a href="makePlot.genebody.coverage.html">makePlot.genebody.coverage</a></td>
+<td>Plot Gene-Body coverage distribution</td></tr>
+<tr><td style="width: 25%;"><a href="makePlot.genebody.coverage.html">makePlot.genebody.coverage.lowExpress</a></td>
+<td>Plot Gene-Body coverage distribution</td></tr>
+<tr><td style="width: 25%;"><a href="makePlot.genebody.coverage.html">makePlot.genebody.coverage.UMQuartile</a></td>
+<td>Plot Gene-Body coverage distribution</td></tr>
+<tr><td style="width: 25%;"><a href="makePlot.insert.size.html">makePlot.insert.size</a></td>
+<td>Plot Insert Size Distribution.</td></tr>
+<tr><td style="width: 25%;"><a href="makePlot.legend.box.html">makePlot.legend.box</a></td>
+<td>Plot legend</td></tr>
+<tr><td style="width: 25%;"><a href="makePlot.legend.box.html">makePlot.legend.over</a></td>
+<td>Plot legend</td></tr>
+<tr><td style="width: 25%;"><a href="makePlot.mapping.rates.html">makePlot.mapping.rates</a></td>
+<td>Plot mapping rates</td></tr>
+<tr><td style="width: 25%;"><a href="makePlot.raw.NVC.html">makePlot.minus.clipping.NVC</a></td>
+<td>Nucleotide-rate by read cycle plot</td></tr>
+<tr><td style="width: 25%;"><a href="makePlot.missingness.rate.html">makePlot.missingness.rate</a></td>
+<td>Plot N-Rate by read cycle</td></tr>
+<tr><td style="width: 25%;"><a href="makePlot.norm.factors.html">makePlot.norm.factors</a></td>
+<td>Plot Alignment Clipping</td></tr>
+<tr><td style="width: 25%;"><a href="makePlot.norm.factors.html">makePlot.norm.factors.vs.TC</a></td>
+<td>Plot Alignment Clipping</td></tr>
+<tr><td style="width: 25%;"><a href="makePlot.raw.NVC.html">makePlot.NVC</a></td>
+<td>Nucleotide-rate by read cycle plot</td></tr>
+<tr><td style="width: 25%;"><a href="makePlot.NVC.clip.matchByClipPosition.html">makePlot.NVC.clip.matchByClipPosition</a></td>
+<td>Plot clipped nucleotide rates, aligned by the distance from the point of clipping.</td></tr>
+<tr><td style="width: 25%;"><a href="makePlot.NVC.lead.clip.html">makePlot.NVC.lead.clip</a></td>
+<td>Clipped sequence nucleotide-by-position plot</td></tr>
+<tr><td style="width: 25%;"><a href="makePlot.NVC.clip.matchByClipPosition.html">makePlot.NVC.lead.clip.matchByClipPosition</a></td>
+<td>Plot clipped nucleotide rates, aligned by the distance from the point of clipping.</td></tr>
+<tr><td style="width: 25%;"><a href="makePlot.NVC.lead.clip.html">makePlot.NVC.tail.clip</a></td>
+<td>Clipped sequence nucleotide-by-position plot</td></tr>
+<tr><td style="width: 25%;"><a href="makePlot.NVC.clip.matchByClipPosition.html">makePlot.NVC.tail.clip.matchByClipPosition</a></td>
+<td>Plot clipped nucleotide rates, aligned by the distance from the point of clipping.</td></tr>
+<tr><td style="width: 25%;"><a href="makePlot.qual.pair.html">makePlot.qual.pair</a></td>
+<td>Plot quality score by read cycle</td></tr>
+<tr><td style="width: 25%;"><a href="makePlot.raw.NVC.html">makePlot.raw.NVC</a></td>
+<td>Nucleotide-rate by read cycle plot</td></tr>
+<tr><td style="width: 25%;"><a href="makePlot.splice.junction.event.html">makePlot.splice.junction.event</a></td>
+<td>Plot Splice Junction Event Rates</td></tr>
+<tr><td style="width: 25%;"><a href="makePlot.splice.junction.event.html">makePlot.splice.junction.event.counts</a></td>
+<td>Plot Splice Junction Event Rates</td></tr>
+<tr><td style="width: 25%;"><a href="makePlot.splice.junction.event.html">makePlot.splice.junction.event.proportions</a></td>
+<td>Plot Splice Junction Event Rates</td></tr>
+<tr><td style="width: 25%;"><a href="makePlot.splice.junction.event.html">makePlot.splice.junction.event.proportionsByType</a></td>
+<td>Plot Splice Junction Event Rates</td></tr>
+<tr><td style="width: 25%;"><a href="makePlot.splice.junction.event.html">makePlot.splice.junction.event.ratesPerRead</a></td>
+<td>Plot Splice Junction Event Rates</td></tr>
+<tr><td style="width: 25%;"><a href="makePlot.splice.junction.loci.counts.html">makePlot.splice.junction.loci.counts</a></td>
+<td>Splice Junction Loci Count Plot</td></tr>
+<tr><td style="width: 25%;"><a href="makePlot.strandedness.test.html">makePlot.strandedness.test</a></td>
+<td>Strandedness Test Plot</td></tr>
+<tr><td style="width: 25%;"><a href="build.plotter.html">plotter</a></td>
+<td>Generating plotters</td></tr>
+<tr><td style="width: 25%;"><a href="build.plotter.html">QoRTs.default.plotting.params</a></td>
+<td>Generating plotters</td></tr>
+<tr><td style="width: 25%;"><a href="read.qc.results.data.html">read.qc.results.data</a></td>
+<td>Reading QC results data</td></tr>
+</table>
+</body></html>

@@ -1,0 +1,97 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head><title> QoRTs: Quality of RNA-Seq Toolset </title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<link rel="stylesheet" type="text/css" href="../stylesheets/jar.css">
+</head>
+<body>
+<div id="wrap">
+
+<h1>QoRTs: Quality Of Rna-seq Tool Set</h1>
+
+<blockquote>
+  <p>Version 0.3.26 (Updated Fri Nov  6 15:15:18 EST 2015)</p>
+
+<p>(<a href="../index.html">back to main</a>) (<a href="index.html">back to java-utility help</a>)</p>
+</blockquote>
+
+<h2>Help for java command "mergeAllCounts"</h2>
+
+<h2>USAGE:</h2>
+
+<pre><code>java [Java Options] -jar QoRTs.jar mergeAllCounts [options] infileDir decoderFile outfile
+</code></pre>
+
+<h2>DESCRIPTION:</h2>
+
+<p>This tool uses a replicate decoder to merge count/wiggle data of all techical replicates in a dataset, producing sample-wise counts. You must supply a replicate decoder which indicates which replicates are technical replicates of which samples. This tool will then merges each sample's technical replicates using the "mergeCounts" function.</p>
+
+<h2>REQUIRED ARGUMENTS:</h2>
+
+<h3>infileDir:</h3>
+
+<blockquote>
+  <p>The top-level directory in which all the QC output can be found. This concatenated with the qc.data.dir column must equal the path to the raw QC output directories (String)</p>
+</blockquote>
+
+<h3>decoderFile:</h3>
+
+<blockquote>
+  <p>The decoder file, which must conform to the requirements of the QoRT decoder specification. In particular it MUST have two specific columns: 
+"sample.ID": This utility will merge the count data output from all bamfiles that have the same sample.ID
+and
+"qc.data.dir" (OR "unique.ID"): This must be the file path to the output data directory, from the infileDir file location. (String)</p>
+</blockquote>
+
+<h3>outfile:</h3>
+
+<blockquote>
+  <p>The output file directory. (String)</p>
+</blockquote>
+
+<h2>OPTIONAL ARGUMENTS:</h2>
+
+<h3>--sampleID sampid:</h3>
+
+<blockquote>
+  <p>Optional: the id of the specific sample that is to be merged. By default, this utility will merge all samples found in the decoder. With this option selected, it will ONLY merge the one sample named here. (String)</p>
+</blockquote>
+
+<h3>--additionalTrackOptions "track options":</h3>
+
+<blockquote>
+  <p>More options for the wiggle tracks. For more information refer to the wiggle track definition on the UCSC genome browser website. (String)</p>
+</blockquote>
+
+<h3>--wiggleWindow val:</h3>
+
+<blockquote>
+  <p>The window size of the alternate-size wiggle track, if applicable. (Int)</p>
+</blockquote>
+
+<h3>--mergeFiles file1[,file2,...]:</h3>
+
+<blockquote>
+  <p>A comma-delimited list of strings, indicating which file types to attempt to merge. By default, this utility autodetects the presence of all mergable qc files and merges all standard files. Valid codes are:DESeq,DEXSeq,JunctionSeq,NovelSplice,KnownSplice,WiggleTrack,WiggleTrackAltWin (CommaDelimitedListOfStrings)</p>
+</blockquote>
+
+<h3>--verbose:</h3>
+
+<blockquote>
+  <p>Flag to indicate that debugging information and extra progress information should be sent to stderr. (flag)</p>
+</blockquote>
+
+<h3>--quiet:</h3>
+
+<blockquote>
+  <p>Flag to indicate that only errors and warnings should be sent to stderr. (flag)</p>
+</blockquote>
+
+<h2>AUTHORS:</h2>
+
+<p>Stephen W. Hartley, Ph.D. stephen.hartley (at nih dot gov)</p>
+
+<h2>LEGAL:</h2>
+
+<p>This software is "United States Government Work" under the terms of the United States Copyright  Act.  It was written as part of the authors' official duties for the United States Government and  thus cannot be copyrighted.  This software is freely available to the public for use without a  copyright notice.  Restrictions cannot be placed on its present or future use.  Although all reasonable efforts have been taken to ensure the accuracy and reliability of the  software and data, the National Human Genome Research Institute (NHGRI) and the U.S. Government  does not and cannot warrant the performance or results that may be obtained by using this software  or data.  NHGRI and the U.S. Government disclaims all warranties as to performance, merchantability  or fitness for any particular purpose.  In any work or product derived from this material, proper attribution of the authors as the source  of the software or data should be made, using "NHGRI Genome Technology Branch" as the citation.  NOTE: This package includes (internally) the sam-1.113.jar library from picard tools. That package uses the MIT license, which can be accessed using the command:  java -jar thisjarfile.jar help samjdkinfo</p>
+
+</div></body></html>

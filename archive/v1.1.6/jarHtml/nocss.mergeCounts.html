@@ -1,0 +1,84 @@
+<h1>QoRTs: Quality Of Rna-seq Tool Set</h1>
+
+<blockquote>
+  <p>Version 1.1.6 (Updated Tue Jun 14 15:00:22 EDT 2016)</p>
+
+<p>(<a href="../index.html">back to main</a>) (<a href="index.html">back to java-utility help</a>)</p>
+</blockquote>
+
+<h2>Help for java command "mergeCounts"</h2>
+
+<h2>USAGE:</h2>
+
+<pre><code>java [Java Options] -jar QoRTs.jar mergeCounts [options] infileDirs outfilePrefix
+</code></pre>
+
+<h2>DESCRIPTION:</h2>
+
+<p>This utility merges count, wiggle, and similar data from multiple QoRTs QC runs. This is intended for use in merging the data from multiple technical replicates of the same sample/library.This tool will then merge all count data (including gene-level, exon-level, and known/novel splice-junction) counts, as well as wiggle files, assuming all files use the standard naming conventions (for example, the fwd-strand wiggle files must be named: "QC.wiggle.fwd.wig.gz", etc).If any files are missing, they will be skipped.</p>
+
+<h2>REQUIRED ARGUMENTS:</h2>
+
+<h3>infileDirs:</h3>
+
+<blockquote>
+  <p>The replicates' QC output directories (the output directory used with the initial 'QC' step), as a comma-delimited list (no whitespace). (String)</p>
+</blockquote>
+
+<h3>outfilePrefix:</h3>
+
+<blockquote>
+  <p>The output file prefix (or directory) (String)</p>
+</blockquote>
+
+<h2>OPTIONAL ARGUMENTS:</h2>
+
+<h3>--wiggleWindow val:</h3>
+
+<blockquote>
+  <p>The window size of the alternate-size wiggle track, if applicable. (Int)</p>
+</blockquote>
+
+<h3>--additionalTrackOptions "track options":</h3>
+
+<blockquote>
+  <p>More options for the wiggle tracks. For more information refer to the wiggle track definition on the UCSC genome browser website. (String)</p>
+</blockquote>
+
+<h3>--mergeFiles filetype1[,filetype2,...]:</h3>
+
+<blockquote>
+  <p>A comma-delimited list of strings, indicating which file types to attempt to merge. By default, this utility autodetects the presence of all mergable qc files and merges all standard files. Valid codes are: DESeq, DEXSeq, JunctionSeq, NovelSplice, KnownSplice, WiggleTrack, WiggleTrackAltWin (CommaDelimitedListOfStrings)</p>
+</blockquote>
+
+<h3>--noGzip:</h3>
+
+<blockquote>
+  <p>Flag to indicate whether whether input and output data is/will be gzip-compressed. (flag)</p>
+</blockquote>
+
+<h3>--trackTitle options:</h3>
+
+<blockquote>
+  <p>The prefix of the title of the merged wiggle tracks. (String)</p>
+</blockquote>
+
+<h3>--verbose:</h3>
+
+<blockquote>
+  <p>Flag to indicate that debugging information and extra progress information should be sent to stderr. (flag)</p>
+</blockquote>
+
+<h3>--quiet:</h3>
+
+<blockquote>
+  <p>Flag to indicate that only errors and warnings should be sent to stderr. (flag)</p>
+</blockquote>
+
+<h2>AUTHORS:</h2>
+
+<p>Stephen W. Hartley, Ph.D. stephen.hartley (at nih dot gov)</p>
+
+<h2>LEGAL:</h2>
+
+<p>This software is "United States Government Work" under the terms of the United States Copyright  Act.  It was written as part of the authors' official duties for the United States Government and  thus cannot be copyrighted.  This software is freely available to the public for use without a  copyright notice.  Restrictions cannot be placed on its present or future use.  Although all reasonable efforts have been taken to ensure the accuracy and reliability of the  software and data, the National Human Genome Research Institute (NHGRI) and the U.S. Government  does not and cannot warrant the performance or results that may be obtained by using this software  or data.  NHGRI and the U.S. Government disclaims all warranties as to performance, merchantability  or fitness for any particular purpose.  In any work or product derived from this material, proper attribution of the authors as the source  of the software or data should be made, using "NHGRI Genome Technology Branch" as the citation.  NOTE: This package includes (internally) the sam-1.113.jar library from picard tools. That package uses the MIT license, which can be accessed using the command:  java -jar thisjarfile.jar help samjdkinfo</p>

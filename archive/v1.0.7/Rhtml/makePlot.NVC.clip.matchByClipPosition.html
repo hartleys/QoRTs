@@ -1,0 +1,159 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><title>R: Plot clipped nucleotide rates, aligned by the distance from...</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<link rel="stylesheet" type="text/css" href="R.css" />
+</head><body>
+
+<table width="100%" summary="page for makePlot.NVC.clip.matchByClipPosition {QoRTs}"><tr><td>makePlot.NVC.clip.matchByClipPosition {QoRTs}</td><td style="text-align: right;">R Documentation</td></tr></table>
+
+<h2>
+Plot clipped nucleotide rates, aligned by the distance 
+from the point of clipping.
+</h2>
+
+<h3>Description</h3>
+
+<p>WARNING: THESE FUNCTIONS ARE BETA, AND ARE NOT FULLY TESTED OR 
+READY FOR GENERAL USE.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre>
+makePlot.NVC.lead.clip.matchByClipPosition(plotter, 
+            clip.amt,  r2.buffer, 
+            label.majority.bases = TRUE, 
+            label.majority.bases.threshold = 0.5, 
+            label.majority.bases.cex = 1, 
+            rasterize.plotting.area = FALSE, 
+            raster.height = 1000, 
+            raster.width = 1000,
+            show.base.legend = TRUE, 
+            load.results = TRUE, 
+            debugMode, singleEndMode, ...)
+
+makePlot.NVC.tail.clip.matchByClipPosition(plotter, 
+            clip.amt, r2.buffer,
+            label.majority.bases = TRUE, 
+            label.majority.bases.threshold = 0.5, 
+            label.majority.bases.cex = 1, 
+            rasterize.plotting.area = FALSE, 
+            raster.height = 1000, 
+            raster.width = 1000,
+            show.base.legend = TRUE, 
+            debugMode, singleEndMode, ...)
+</pre>
+
+
+<h3>Arguments</h3>
+
+<table summary="R argblock">
+<tr valign="top"><td><code>plotter</code></td>
+<td>
+
+<p>A <code>QoRT_Plotter</code> reference object. See <code><a href="build.plotter.html">build.plotter</a></code>.
+</p>
+</td></tr>
+<tr valign="top"><td><code>clip.amt</code></td>
+<td>
+
+<p>UNDOCUMENTED
+</p>
+</td></tr>
+<tr valign="top"><td><code>r2.buffer</code></td>
+<td>
+
+<p>UNDOCUMENTED
+</p>
+</td></tr>
+<tr valign="top"><td><code>label.majority.bases</code></td>
+<td>
+
+<p>UNDOCUMENTED
+</p>
+</td></tr>
+<tr valign="top"><td><code>label.majority.bases.threshold</code></td>
+<td>
+
+<p>UNDOCUMENTED
+</p>
+</td></tr>
+<tr valign="top"><td><code>label.majority.bases.cex</code></td>
+<td>
+
+<p>UNDOCUMENTED
+</p>
+</td></tr>
+<tr valign="top"><td><code>show.base.legend</code></td>
+<td>
+
+<p>UNDOCUMENTED
+</p>
+</td></tr>
+<tr valign="top"><td><code>rasterize.plotting.area</code></td>
+<td>
+
+<p>Logical. If TRUE, the plotting area will be written to a temp
+png file then drawn to the current device as a raster image.
+This option is generally preferred for vector devices, because
+NVC plots can be very large when drawn in vector format. 
+<em>Note: this requires the <code>png</code> package!</em>
+</p>
+</td></tr>
+<tr valign="top"><td><code>raster.height</code></td>
+<td>
+
+<p>Numeric. If rasterize.plotting.area is TRUE, then this is the
+height of the plotting area raster image, in pixels.
+</p>
+</td></tr>
+<tr valign="top"><td><code>raster.width</code></td>
+<td>
+
+<p>Numeric. If rasterize.plotting.area is TRUE, then this is the
+width of the plotting area raster image, in pixels.
+</p>
+</td></tr>
+<tr valign="top"><td><code>load.results</code></td>
+<td>
+
+<p>UNDOCUMENTED
+</p>
+</td></tr>
+<tr valign="top"><td><code>debugMode</code></td>
+<td>
+
+<p>UNDOCUMENTED
+</p>
+</td></tr>
+<tr valign="top"><td><code>singleEndMode</code></td>
+<td>
+
+<p>Logical. Determines whether the dataset consists of single-ended reads. 
+By default this is determined from the data. Thus, this parameter should 
+never need to be set by the user.
+</p>
+</td></tr>
+<tr valign="top"><td><code>...</code></td>
+<td>
+ 
+<p>Arguments to be passed to methods, such as
+<a href="../../graphics/html/par.html">graphical parameters</a> (see <code><a href="../../graphics/html/par.html">par</a></code>).
+</p>
+</td></tr>
+</table>
+
+
+<h3>Details</h3>
+
+<p>This function is currently BETA, and is not intended for general use. Documentation and testing is still pending.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code><a href="build.plotter.html">build.plotter</a></code>, <code><a href="makePlot.raw.NVC.html">makePlot.NVC</a></code>
+</p>
+
+<hr /><div style="text-align: center;">[Package <em>QoRTs</em> version 1.0.7 <a href="00Index.html">Index</a>]</div>
+</body></html>

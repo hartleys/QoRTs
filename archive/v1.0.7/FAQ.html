@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+
+<html>
+		<head>
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="chrome=1">
+		<title>QoRTs: Quality of RNA-Seq Toolset</title>
+
+		<link rel="stylesheet" href="stylesheets/styles.css">
+		<link rel="stylesheet" href="stylesheets/pygment_trac.css">
+		<script src="javascripts/scale.fix.js"></script>
+		<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+
+		<!--[if lt IE 9]>
+		<script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+		<![endif]-->
+</head>
+
+<body>
+<div class="wrapper">
+
+
+<header>
+			<h1><a href="index.html">QoRTs</a></h1>
+			<p>Quality of RNA-seq Toolset</p>
+			<p class="view"><a href="https://github.com/hartleys/QoRTs">View the Project on GitHub <small>Stephen Hartley</small></a></p>
+			<ul>
+				<li><a href="https://github.com/hartleys/QoRTs/releases/latest">Latest <strong>Release</strong></a></li>
+				<li><a href="https://github.com/hartleys/QoRTs/zipball/master">Download <strong>ZIP File</strong></a></li>
+				<li><a href="https://github.com/hartleys/QoRTs/tarball/master">Download <strong>TAR Ball</strong></a></li>
+				<li><a href="https://github.com/hartleys/QoRTs">View On <strong>GitHub</strong></a></li>
+			</ul>
+</header>
+
+
+<section><h1>Frequently Asked Questions</h1>
+
+<p>v1.0.7
+Revised Thu Jan 28 16:24:04 EST 2016</p>
+
+<h2>What if none of these answers solve my problem?</h2>
+
+<p>No problem. Just email me at qorts-contact at list.nih.gov. If possible attach the output from QoRTs, and run QoRTs with the "--verbose" option to maximize the debugging information.</p>
+
+<h2>Using QoRTs with different aligners:</h2>
+
+<p>Different aligners often use different conventions, in particular with regards to the MAPQ field which is often used to differentiate multi-mapped and uniquely-mapped reads.</p>
+
+<ul>
+<li><strong>RNA-STAR</strong>: QoRTs is designed to work with RNA-STAR without any special options.</li>
+<li><strong>TopHat1</strong>: Prior to version 2.0.0, TopHat used the same MAPQ convention as RNA-STAR now uses. Thus, no special options are needed.</li>
+<li><strong>TopHat2</strong>: TopHat2 uses a MAPQ of 50 to mark reads that are uniquely aligned. Thus, when using TopHat2 aligned data, you must set the --minMAPQ parameter to 50.</li>
+<li><strong>MapSplice</strong>: Under many test conditions MapSplice produces malformed SAM files that violate the <a href="https://samtools.github.io/hts-specs/SAMv1.pdf">current SAM format specification</a>. As such, QoRTs may not be able to properly assess MapSplice output, particularly for paired-ended data.</li>
+<li><strong>GSNAP</strong>: I have been unable to find documentation describing exactly what the MAPQ field means in GSNAP output. However, setting the --minMAPQ parameter to 20 seems to work.</li>
+<li><strong>BowTie, BowTie2, BWA, NOVOALIGN, BLAT, BLAST, or ELEND</strong>: The use of older aligners or aligners not specifically designed for use with RNA-Seq data is NOT recommended or supported. You MIGHT be able to get these alignments to work using --minMAPQ 0.</li>
+</ul>
+
+<h2>How do I install QoRTs?</h2>
+
+<p>The easiest way to install the QoRTs R companion package is using the R command:</p>
+
+<pre><code>&gt; install.packages("http://hartleys.github.io/QoRTs/QoRTs_LATEST.tar.gz",
+                   repos=NULL, 
+                   type="source");
+</code></pre>
+
+<p>You can then download the jar file utility from the <a href="https://github.com/hartleys/QoRTs/releases/latest">latest release</a>. 
+The jar file utility does not need to be installed and is run directly.</p>
+
+<h2>Manual Installation</h2>
+
+<p>Alternatively you can download QoRTs directly from the <a href="https://github.com/hartleys/QoRTs/releases/latest">release page</a>. Download the zip file titled "QoRTs_versionNum.zip". Unzip it and install the R package using the command:</p>
+
+<pre><code>&gt; install.packages("QoRTs_0.3.17.tar.gz",repos=NULL, type="source");
+</code></pre>
+
+<p>Note: If you run into an error that looks like this:</p>
+
+<pre><code>ERROR: cannot extract package from '0.3.17.tar.gz'
+</code></pre>
+
+<p>Then you may be attempting to install the entire github repository archive, rather than the actual R package archive. Download the QoRTs_versionNum.zip file from <a href="https://github.com/hartleys/QoRTs/releases/latest">the most recent release</a>, unzip it, and use the file "QoRTs_0.3.9.tar.gz" to install the R package. Do NOT attempt to install the full repository source in R!</p>
+
+<p>The java jar file does not need to be installed. It can be downloaded from the <a href="https://github.com/hartleys/QoRTs/releases/latest">release page</a>.
+Just execute it using the java command:</p>
+
+<pre><code>java -jar /path/to/jarfile/QoRTs.jar QC input.bam anno.gtf.gz /output/dir/
+</code></pre>
+
+<h2>Permission errors on installation:</h2>
+
+<p>If, during package installation, you encounter an error like:</p>
+
+<pre><code>&gt; Warning in install.packages("QoRTs", lib = "~/.R/library") :
+&gt;  'lib = "~/.R/library"' is not writable
+</code></pre>
+
+<p>Then you may not have write permissions for your package directory. You can install QoRTs to a different directory using the R command:</p>
+
+<pre><code>&gt; install.packages("http://hartleys.github.io/QoRTs/QoRTs_LATEST.tar.gz",
+                   repos=NULL, 
+                   type="source", 
+                   lib="path/to/package/dir");
+</code></pre>
+
+<p>Make sure the "path/to/package/dir" directory exists and is writable. Then you can load this local copy of QoRTs using the R command:</p>
+
+<pre><code>&gt; library("QoRTs",lib.loc="path/to/package/dir")
+</code></pre>
+
+<h2>My PDF report files won't print</h2>
+
+<p>Many printers have trouble with very large vector drawings and may hang when you attempt to print 
+(Adobe acrobat, for example, will usually sit forever while saying "flattening"). While QoRTs does not require any external packages to run, 
+if the <a href="https://cran.r-project.org/web/packages/png/index.html">png</a> package is installed, it will automatically rasterize the larger vector drawings when outputting to a vector format (svg or pdf) 
+in order to make them more printable. You can install the <a href="https://cran.r-project.org/web/packages/png/index.html">png</a> package using the command:</p>
+
+<pre><code>&gt; install.packages("png");
+</code></pre>
+
+<p>Or, if binaries for png are not be available from CRAN for your version of R (they aren't for my "testbed" R installation, for example), 
+then you can try to install from source using the command:</p>
+
+<pre><code>&gt; install.packages("https://cran.r-project.org/src/contrib/png_0.1-7.tar.gz",
+                   repos=NULL, 
+                   type="source");
+</code></pre>
+
+<h2>Why don't my normalization factor plots look like the ones in the manual?</h2>
+
+<p>The full set of normalization plots requires the external packages <a href="http://bioconductor.org/packages/release/bioc/html/DESeq2.html">DESeq2</a> and <a href="http://bioconductor.org/packages/release/bioc/html/edgeR.html">edgeR</a>.
+If these packages are not installed, it will not calculate all the normalization factors.</p>
+
+<p>You can install these packages using the R commands:</p>
+
+<pre><code>&gt; source("https://bioconductor.org/biocLite.R")
+&gt; biocLite("edgeR")
+&gt; biocLite("DESeq2")
+</code></pre>
+
+<h2>Non-standard Phred scores</h2>
+
+<p>If you see an warning that looks like this:</p>
+
+<pre><code>WARNING WARNING WARNING: 
+SAM format check:
+    Phred Qual &gt; 41!
+    You will need to set either --adjustPhredScores or --maxPhredScores
+    in order to compute Phred quality metrics! QoRTs WILL throw an error
+    if quality metrics are attempted!
+</code></pre>
+
+<p>Followed by an error that looks like this:</p>
+
+<pre><code>ERROR! ArrayIndexOutOfBoundsException caught while attempting to store quality score metrics.
+       Most likely cause: quality score found above 41!
+</code></pre>
+
+<p>Then you may have a problem with your Phred score encoding. This can be caused
+by one of two possibilities:</p>
+
+<p>(1) Certain newer Illumina platforms (reportedly) produce Phred scores in excess of 41. 
+While not explicitly forbidden by the Phred encoding specification (such as it is), 
+this is very uncommon at the current time. However, if a Phred score in excess of
+41 is encountered then QoRTs will throw a descriptive error like the one above.</p>
+
+<p>In this case, you will need to use the "--maxPhredScore" parameter, set to the maximum expected
+Phred score. According to one (secondhand) report, Illumina stated that the absolute maximum 
+(as of August 2015) was 45.</p>
+
+<p>(2) Certain older Illumina platforms (~1.3-1.7) used Phred+64 encoding for their phred scores. 
+While technically SAM files should always be converted to Phred+33, QoRTs does offer 
+optional support for reading such malformed input files. Use the "--adjustPhredScore 31"
+option to automatically subtract 31 from all phred scores, thus converting Phred+64 to Phred+33.
+Note that negative Phred scores are NOT supported by QoRTs, and they WILL throw an error.
+See the <a href="https://en.wikipedia.org/wiki/FASTQ_format#Encoding">related wikipedia article</a> for more information. </p>
+
+<h2>BioType plots</h2>
+
+<p>(As of v0.3.26) QoRTs now includes a read-count gene biotype plot. However, this plot is not included in the main battery of plots (as of v0.3.26), as it may require special preparation.</p>
+
+<p>This plot can be generated using the following command:</p>
+
+<pre><code>&gt; makePlot.biotype.rates(plotter);
+</code></pre>
+
+<p>However, for this plot to work correctly you must have included biotype information in your input GTF file fed to QoRTs. For ensembl data this should already be included, but if your annotation comes from elsewhere 
+then you will need to add this information yourself.</p>
+
+<p>The "biotype" is pulled from the GTF annotation file using the optional "gene_biotype" attribute
+tag. This is the tag identifier used by Ensembl in their annotations. This separates RNA transcripts into
+categories such as protein coding mRNAs, lncRNAs, rRNAs, and so on. Unfortunately there are dozens
+if not hundreds of different ways to encode this sort information for various species and institutions,
+and unlike many other features no common standard has yet appeared. If you need to include this sort
+of information, you will need to edit the annotation GTF file yourself. You only need to mark the rRNA
+fields yourself. Any genes that do not have a gene_biotype field will simply be assigned the "UNK"
+biotype, so you only need to add the biotypes that you are interested in testing.</p>
+
+<p>You can even just attach the biotypes for your desired genes to the end of the GTF file simply by adding lines that include the gene ID's and the desired "biotype".
+These can be any genes of interest, gene types, or even ERCC spike-ins. For example, at the end of your GTF file you could append:</p>
+
+<pre><code> chr22  blah this_text      1  2  0 +  .  gene_id "MyGene1"; gene_biotype "GeneGroup1";
+ chr22  blah is_irrelevant  1  2  0 +  .  gene_id "MyGene2"; gene_biotype "GeneGroup1";
+ chr22  blah and_can_be     1  2  0 +  .  gene_id "MyGene3"; gene_biotype "GeneGroup1";
+ chr22  blah anything_but   1  2  0 +  .  gene_id "MyGene4"; gene_biotype "GeneGroup2";
+ chr22  blah exon_or_CDS    1  2  0 +  .  gene_id "MyGene5"; gene_biotype "GeneGroup2";
+</code></pre>
+
+<p>As long as the "feature" column is not equal to "exon" or "CDS", the line will be ignored by QoRTs except to assign featuretype. All the other fields will be ignored.</p>
+
+<p>You do still need those gene ID's and their position info to be listed elsewhere in the GTF.</p>
+
+<p>Notes on usage: This function is more flexible than most of the QoRTs plotting functions, and depending on how it is run you can compile information from numerous genes for many purposes.
+For example by default it should list read counts for rRNA's.</p>
+
+<p>WARNING: Like all QoRTs functions, this only counts for UNIQUELY MAPPED READS. Many of the odd biotypes have MANY copies across the genome and thus few reads will uniquely map to
+these sections. In addition, many mappers will refuse to map reads to too many different loci, and thus even with multi mapping the rates might still be low.
+Ideally, in order to accurately assess rRNA quantities you might need to examine the pre-mapped reads using some other method. 
+Hopefully this tool will be of some service in assessing the approximate relative rRNA quantities.
+You might also be able to infer outliers in the rRNA quantities by checking for unusually low mapping rates or unusually high multi-mapping rates.</p>
+
+<p>Basic help and documentation can be found using the command:</p>
+
+<pre><code>&gt; help(makePlot.biotype.rates);
+</code></pre>
+
+<p>And by checking the section in the vignette.</p>
+
+<h2>How do I cite QoRTs?</h2>
+
+<p>If you use QoRTs and find it helpful, you can cite it in your publications as:</p>
+
+<p>Hartley SW, Mullikin JC. <a href="http://www.ncbi.nlm.nih.gov/pmc/articles/PMC4506620/"><strong>QoRTs: a comprehensive toolset for quality control and data processing of RNA-Seq experiments.</strong></a> <a href="http://www.biomedcentral.com/bmcbioinformatics"><em>BMC Bioinformatics.</em></a> doi: 10.1186/s12859-015-0670-5</p>
+
+<h2>LEGAL:</h2>
+
+<p>This software is "United States Government Work" under the terms of the United 
+States Copyright Act. It was written as part of the authors' official duties 
+for the United States Government and thus QoRT Package User Manual cannot be 
+copyrighted. This software is freely available to the public for use without a 
+copyright notice. Restrictions cannot be placed on its present or future use.</p>
+
+<p>Although all reasonable efforts have been taken to ensure the accuracy and 
+reliability of the software and data, the National Human Genome Research 
+Institute (NHGRI) and the U.S. Government does not and cannot warrant the 
+performance or results that may be obtained by using this software or data. 
+NHGRI and the U.S. Government disclaims all warranties as to performance, 
+merchantability or fitness for any particular purpose.</p>
+
+<p>In any work or product derived from this material, proper attribution of the 
+authors as the source of the software or data should be made, using "NHGRI 
+Genome Technology Branch" as the citation.</p>
+
+<p>NOTE: The scala package includes (internally) the sam-JDK library 
+(sam-1.113.jar), from picard tools, which is covered under the MIT license. 
+The MIT license and copyright information can be accessed using the command:
+java -jar /path/to/jarfile/QoRTs.jar --man samjdkinfo</p>
+
+</section>
+
+
+
+</div>
+
+		<footer> <small>
+		<p>Project maintained by <a href="https://github.com/hartleys/QoRTs">Stephen Hartley</a></p>
+		<p>Hosted on GitHub Pages &mdash; Theme by <a href="https://github.com/orderedlist">orderedlist</a> (modified)</p>
+		</small> </footer>
+
+</body></html>
