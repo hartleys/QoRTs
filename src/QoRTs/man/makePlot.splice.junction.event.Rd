@@ -15,18 +15,22 @@
    makePlot.splice.junction.event.counts(plotter,
                                     high.low.cutoff = 4, 
                                     debugMode, singleEndMode, 
+                                    plot = TRUE,
                                     ...)
    makePlot.splice.junction.event.ratesPerRead(plotter,
                                     high.low.cutoff = 4, 
                                     debugMode, singleEndMode,
+                                    plot = TRUE,
                                     ...)   
    makePlot.splice.junction.event.proportions(plotter,
                                     high.low.cutoff = 4, 
                                     debugMode, singleEndMode,
+                                    plot = TRUE,
                                     ...) 
    makePlot.splice.junction.event.proportionsByType(plotter, 
                                     high.low.cutoff = 4, 
                                     debugMode, singleEndMode,
+                                    plot = TRUE,
                                     ...)
 }
 \arguments{
@@ -43,6 +47,9 @@
       Logical. Determines whether the dataset consists of single-ended reads. 
       By default this is determined from the data. Thus, this parameter should 
       never need to be set by the user.
+  }
+  \item{plot}{
+        Logical. If FALSE, suppress plotting and return \code{TRUE} if and only if the data is present in the dataset to allow plotting. Useful to automatically filter out missing data plots.
   }
   \item{\dots}{ 
     Arguments to be passed to methods, such as

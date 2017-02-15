@@ -16,6 +16,7 @@ makePlot.chrom.type.rates(plotter,
                       custom.chromosome.style.def.function = NULL,
                       return.table = FALSE, 
                       debugMode, singleEndMode,
+                      plot = TRUE,
                       ...)
 }
 \arguments{
@@ -57,10 +58,15 @@ makePlot.chrom.type.rates(plotter,
       By default this is determined from the data. Thus, this parameter should 
       never need to be set by the user.
   }
+  \item{plot}{
+      Logical. If FALSE, suppress plotting and return \code{TRUE} if and only if the data is present in the dataset to allow plotting. Useful to automatically filter out missing data plots.
+  }
   \item{\dots}{ 
     Arguments to be passed to methods, such as
     \link{graphical parameters} (see \code{\link{par}}).
   }
+  
+  
 }
 \details{
    For each sample-run, this function plots the number of read-pairs mapping to each category of chromosome. 

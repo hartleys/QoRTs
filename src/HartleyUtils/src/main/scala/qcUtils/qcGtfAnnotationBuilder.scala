@@ -16,7 +16,7 @@ import internalUtils.optionHolder._;
 import scala.collection.GenMap;
 
 
-class qcGtfAnnotationBuilder(gtffile : String, flatgtffile : Option[String], stranded : Boolean, stdCodes : GtfCodes, flatCodes : GtfCodes){
+class qcGtfAnnotationBuilder(gtffile : String, flatgtffile : Option[String], stranded : Boolean, stdCodes : GtfCodes, flatCodes : GtfCodes, targetRegionBed : Option[String] = None){
   
   def makeStdReader : Iterator[StdGtfLine] = GtfReader.getStdGtfReader(gtffile, stranded, true, "\\s+", stdCodes);
   
@@ -47,12 +47,14 @@ class qcGtfAnnotationBuilder(gtffile : String, flatgtffile : Option[String], str
   lazy val flatExonArray : GenomicArrayOfSets[String] = qcGtfAnnotationBuilder.makeFlatExonMap(stranded,makeFlatReader, flatCodes).finalizeStepVectors;
   lazy val flatGeneSet : Set[String] = qcGtfAnnotationBuilder.makeFlatGeneSet(flatExonArray);
   lazy val geneBiotypeMap : Map[String,String] = qcGtfAnnotationBuilder.getGeneBiotypeMap(gtffile, stdCodes);
+  lazy val (targetArray,targetInfo) :  (Option[GenomicArrayOfSets[Int]],Option[scala.collection.mutable.Map[Int,String]]) = qcGtfAnnotationBuilder.generateTargetArray(targetRegionBed);
   
   lazy val strandedGeneArray = if(stranded) {
     geneArray; 
   } else {
     qcGtfAnnotationBuilder.qcGetGeneCounts_readGtf(true,gtffile, stdCodes).finalizeStepVectors;
   }
+  
   
   def initializationReport() {
     /*reportln("initializationReport: qcInnerDistance_spliceMapTree.size: " + spliceJunctionTreeMap.size + " chromosome/strands with annotated splice Junction sites.", "debug");
@@ -70,6 +72,30 @@ class qcGtfAnnotationBuilder(gtffile : String, flatgtffile : Option[String], str
 }
 
 object qcGtfAnnotationBuilder {
+  
+  def generateTargetArray(targetBedFile : Option[String]) : (Option[GenomicArrayOfSets[Int]],Option[scala.collection.mutable.Map[Int,String]]) = {
+    targetBedFile match {
+      case Some(bedfile) => {
+        val targetArray : GenomicArrayOfSets[Int] = GenomicArrayOfSets[Int](false);
+        val targetInfo = scala.collection.mutable.Map[Int,String]();
+         
+        var targetRegionSpan = 0;
+        getLinesSmartUnzip(bedfile).zipWithIndex.foreach{case (line,lnct) => {
+          val cells = line.split("\t");
+          val iv = new GenomicInterval(cells(0),'.',string2int(cells(1)), string2int(cells(2)));
+          targetArray.addSpan(iv,lnct);
+          val span = string2int(cells(2)) - string2int(cells(1));
+          targetRegionSpan = targetRegionSpan + span;
+          targetInfo.put(lnct,cells(0)+"\t"+cells(1)+"\t"+cells(2)+"\t"+span);
+        }}
+        targetArray.finalizeStepVectors;
+        
+        ((Some(targetArray),Some(targetInfo)));
+      }
+      case None => ((None,None));
+    }
+  }
+  
   
   //UNIMPLEMENTED: For potential future work:
   final val INDEX_REQUIRE_ANNO_SPLICEJUNCTIONTREEMAP = 0;

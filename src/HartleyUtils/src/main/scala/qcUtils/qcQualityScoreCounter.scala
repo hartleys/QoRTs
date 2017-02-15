@@ -100,18 +100,34 @@ class qcQualityScoreCounter(isSingleEnd : Boolean, readLength : Int, maxQualScor
     //readPairCt += 1;
   }
   
-  def writeOutput(outfile : String, summaryWriter : WriterUtil){
+  def writeOutput(outfile : String, summaryWriter : WriterUtil, docWriter : DocWriterUtil = null){
     val pcts = Seq[Double](0.25,0.5,0.75);
-    
-    writeOutput(pcts, qualByPos_r1, outfile + ".quals.r1.txt");
-    
+    val writer = createOutputFile(outfile,"quals.r1.txt","",docWriter,
+             ("readLen","int","The POSITION in the read (an unfortunate misnomer, which can't be fixed without breaking backward compatibility)"),
+             ("min","int","The minimum observed PHRED quality score at the given position."),
+             ("lowerQuartile","int","The lower quartile bound of the PHRED quality scores at the given position"),
+             ("median","int","The median of the PHRED quality scores at the given position."),
+             ("upperQuartile","int","The upper quartile bound of the PHRED quality scores at the given position"),
+             ("max","int","The maximum observed PHRED quality score at the given position.")
+    );
+    writeOutput(pcts, qualByPos_r1, writer );
+
     if(! isSingleEnd){
-      writeOutput(pcts, qualByPos_r2, outfile + ".quals.r2.txt");
+      val writer2 = createOutputFile(outfile,"quals.r2.txt","",docWriter,
+             ("readLen","int","The POSITION in the read (an unfortunate misnomer, which can't be fixed without breaking backward compatibility)"),
+             ("min","int","The minimum observed PHRED quality score at the given position."),
+             ("lowerQuartile","int","The lower quartile bound of the PHRED quality scores at the given position"),
+             ("median","int","The median of the PHRED quality scores at the given position."),
+             ("upperQuartile","int","The upper quartile bound of the PHRED quality scores at the given position"),
+             ("max","int","The maximum observed PHRED quality score at the given position.")
+      );
+      
+      writeOutput(pcts, qualByPos_r2, writer2);
     }
   }
   
   
-  def writeOutput(pcts : Seq[Double], qualByPos : Array[Array[Int]], outfile : String){
+  def writeOutput(pcts : Seq[Double], qualByPos : Array[Array[Int]], writer : WriterUtil){
     val cumulativeSum = qualByPos.map((qualCts : Array[Int]) => {
       qualCts.scanLeft(0)( (sum,ct) => sum + ct);
     }).toSeq;
@@ -123,7 +139,7 @@ class qcQualityScoreCounter(isSingleEnd : Boolean, readLength : Int, maxQualScor
       }).toSeq ++ Seq(qualCS.indexWhere(_ == qualCS.last)))
     }).toSeq
     
-    val writer = openWriterSmart_viaGlobalParam(outfile);
+    //val writer = openWriterSmart_viaGlobalParam(outfile);
     writer.write("readLen	min	lowerQuartile	median	upperQuartile	max\n");
     (0 until out_data.length).map((i : Int) =>{
       writer.write(i + "");

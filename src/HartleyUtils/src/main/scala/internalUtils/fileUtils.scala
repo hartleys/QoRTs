@@ -29,6 +29,37 @@ object fileUtils {
   
   type WriterUtil = Writer;
   
+   class DocWriterUtil(writer : WriterUtil) {
+     //close()
+     //flush()
+     //write(char[] cbuf, int off, int len)
+
+     def flush(){
+       writer.flush();
+     }
+     def write(cbuf : Array[Char],off : Int, len : Int){
+       writer.write(cbuf,off,len);
+     }
+     
+     var fileMap : Map[String,(String,List[(String,String,String)])] = Map[String,(String,List[(String,String,String)])]();
+     
+     def registerFile(fileSuffix : String, fileSummary : String, tableLines : (String,String,String)*){
+       fileMap = fileMap + ((fileSuffix -> (fileSummary,tableLines.toList)));
+     }
+     
+     def close(){
+       fileMap.keys.toList.sorted(ord = internalUtils.stdUtils.AlphabetOrdering).foreach{case (fileSuffix : String) => {
+         val (fileSummary,tableLines) = fileMap(fileSuffix); 
+         writer.write("\nFILE\t"+fileSuffix+"\t"+fileSummary+"\n");
+         tableLines.foreach{case (a,b,c) => {
+           writer.write(a+"\t"+b+"\t"+c+"\n");
+         }}
+       }}
+       
+       writer.close();
+     }
+   }
+  
   def openWriter(filename : String) : WriterUtil = {
     new BufferedWriter(new FileWriter(filename));
   }
@@ -40,6 +71,44 @@ object fileUtils {
     new BufferedWriter(new OutputStreamWriter(new ZipOutputStream(new FileOutputStream(new File(filename)))));
   }
   
+  class SummaryWriter(summaryFile : String, includeDesc : Boolean) {
+    val writer : WriterUtil = openWriter(summaryFile);
+    if(includeDesc){
+      writer.write("FIELD\tCOUNT\tDESC\n");
+    } else {
+      writer.write("FIELD\tCOUNT\n");
+    }
+    def write(field : String, count : String,desc : String = ""){
+      if(includeDesc){
+        writer.write(field+"\t"+count+"\t"+desc+"\n");
+      } else {
+        writer.write(field+"\t"+count+"\n");
+      }
+    }
+    def close(){
+      writer.close();
+    }
+  }
+  
+  def write2Tab(writer : internalUtils.fileUtils.WriterUtil, tableLines : (String,String)*){
+     if(writer == null){
+       //do nothing
+     } else {
+       for((a,b) <- tableLines){
+         writer.write(a+"\t"+b+"\n");
+       }
+     }
+  }
+  
+  def write3Tab(writer : internalUtils.fileUtils.WriterUtil, tableLines : (String,String,String)*){
+     if(writer == null){
+       //do nothing
+     } else {
+       for((a,b,c) <- tableLines){
+         writer.write(a+"\t"+b+"\t"+c+"\n");
+       }
+     }
+  }
   
   def openWriterSmart(filename : String, allowStdout : Boolean = false) : WriterUtil = {
     if(allowStdout && filename == "-"){
@@ -151,6 +220,12 @@ object fileUtils {
       error("File: "+infile +" does not exist. Checked for .gz and .zip variants.");
       return null;
     }
+  }
+  
+  def getLinesSmartUnzipFromSeq(infiles : Seq[String], allowStdin : Boolean = false) : Iterator[String] = {
+    return infiles.tail.foldLeft(getLinesSmartUnzip(infiles.head,allowStdin))((soFar,inf) => {
+      soFar ++ getLinesSmartUnzip(inf,false);
+    });
   }
   
   def getLinesSmartUnzip(infile : String, allowStdin : Boolean = false) : Iterator[String] = {

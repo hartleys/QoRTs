@@ -214,12 +214,12 @@ class qcCigarMatch(readLen : Int) extends QCUtility[Unit] {
   ////val byOverlapCheckArray = Array.ofDim[Int](4,qcCigarMatch.NUM_BINS,readLen + 1);
   ////val overlapBaseCt = new Array[Int](readLen + 1);
 
-  def writeOutput(outfile : String, summaryWriter : WriterUtil){
+  def writeOutput(outfile : String, summaryWriter : WriterUtil, docWriter : DocWriterUtil = null){
     
-    summaryWriter.write("CigChk_staggered	"+staggeredBad+"\n");
-    summaryWriter.write("CigChk_noAlignedOverlap	"+noOverlap+"\n");
-    summaryWriter.write("CigChk_AlignedOverlapMiss	"+misOverlap+"\n");
-    summaryWriter.write("CigChk_AlignedOverlap	"+overlap+"\n");
+    summaryWriter.write("CigChk_staggered	"+staggeredBad+"\t"+"\n");
+    summaryWriter.write("CigChk_noAlignedOverlap	"+noOverlap+"\t"+"\n");
+    summaryWriter.write("CigChk_AlignedOverlapMiss	"+misOverlap+"\t"+"\n");
+    summaryWriter.write("CigChk_AlignedOverlap	"+overlap+"\t"+"\n");
     
     /*
     summaryWriter.write("CigChk_SJ_noOverlap	"+spliceCheckArray(qcCigarMatch.NO_OVERLAPPING_CIGAROP)+"\n");
@@ -230,26 +230,26 @@ class qcCigarMatch(readLen : Int) extends QCUtility[Unit] {
     summaryWriter.write("CigChk_SJ_overlap_mismatch_diffops	"+spliceCheckArray(qcCigarMatch.OVERLAP_MISMATCH_DIFFOP)+"\n");
     */
     
-    summaryWriter.write("CigChk_I_noOverlap	"+                insCheckArray(qcCigarMatch.NO_OVERLAPPING_CIGAROP)+"\n");
-    summaryWriter.write("CigChk_I_overlap	"+                insCheckArray(qcCigarMatch.OVERLAP)+"\n");
-    summaryWriter.write("CigChk_I_overlap_match	"+            insCheckArray(qcCigarMatch.OVERLAP_MATCH)+"\n");
-    summaryWriter.write("CigChk_I_overlap_mismatch	"+        insCheckArray(qcCigarMatch.OVERLAP_MISMATCH)+"\n");
-    summaryWriter.write("CigChk_I_overlap_mismatch_diffnum	"+insCheckArray(qcCigarMatch.OVERLAP_MISMATCH_DIFFNUM)+"\n");
-    summaryWriter.write("CigChk_I_overlap_mismatch_diffops	"+insCheckArray(qcCigarMatch.OVERLAP_MISMATCH_DIFFOP)+"\n");
+    summaryWriter.write("CigChk_I_noOverlap	"+                insCheckArray(qcCigarMatch.NO_OVERLAPPING_CIGAROP)+"\t"+"\n");
+    summaryWriter.write("CigChk_I_overlap	"+                insCheckArray(qcCigarMatch.OVERLAP)+"\t"+"\n");
+    summaryWriter.write("CigChk_I_overlap_match	"+            insCheckArray(qcCigarMatch.OVERLAP_MATCH)+"\t"+"\n");
+    summaryWriter.write("CigChk_I_overlap_mismatch	"+        insCheckArray(qcCigarMatch.OVERLAP_MISMATCH)+"\t"+"\n");
+    summaryWriter.write("CigChk_I_overlap_mismatch_diffnum	"+insCheckArray(qcCigarMatch.OVERLAP_MISMATCH_DIFFNUM)+"\t"+"\n");
+    summaryWriter.write("CigChk_I_overlap_mismatch_diffops	"+insCheckArray(qcCigarMatch.OVERLAP_MISMATCH_DIFFOP)+"\t"+"\n");
     
-    summaryWriter.write("CigChk_D_noOverlap	"+                delCheckArray(qcCigarMatch.NO_OVERLAPPING_CIGAROP)+"\n");
-    summaryWriter.write("CigChk_D_overlap	"+                delCheckArray(qcCigarMatch.OVERLAP)+"\n");
-    summaryWriter.write("CigChk_D_overlap_match	"+            delCheckArray(qcCigarMatch.OVERLAP_MATCH)+"\n");
-    summaryWriter.write("CigChk_D_overlap_mismatch	"+        delCheckArray(qcCigarMatch.OVERLAP_MISMATCH)+"\n");
-    summaryWriter.write("CigChk_D_overlap_mismatch_diffnum	"+delCheckArray(qcCigarMatch.OVERLAP_MISMATCH_DIFFNUM)+"\n");
-    summaryWriter.write("CigChk_D_overlap_mismatch_diffops	"+delCheckArray(qcCigarMatch.OVERLAP_MISMATCH_DIFFOP)+"\n");
+    summaryWriter.write("CigChk_D_noOverlap	"+                delCheckArray(qcCigarMatch.NO_OVERLAPPING_CIGAROP)+"\t"+"\n");
+    summaryWriter.write("CigChk_D_overlap	"+                delCheckArray(qcCigarMatch.OVERLAP)+"\t"+"\n");
+    summaryWriter.write("CigChk_D_overlap_match	"+            delCheckArray(qcCigarMatch.OVERLAP_MATCH)+"\t"+"\n");
+    summaryWriter.write("CigChk_D_overlap_mismatch	"+        delCheckArray(qcCigarMatch.OVERLAP_MISMATCH)+"\t"+"\n");
+    summaryWriter.write("CigChk_D_overlap_mismatch_diffnum	"+delCheckArray(qcCigarMatch.OVERLAP_MISMATCH_DIFFNUM)+"\t"+"\n");
+    summaryWriter.write("CigChk_D_overlap_mismatch_diffops	"+delCheckArray(qcCigarMatch.OVERLAP_MISMATCH_DIFFOP)+"\t"+"\n");
     
-    summaryWriter.write("CigChk_ALL_noOverlap	"+                allCheckArray(qcCigarMatch.NO_OVERLAPPING_CIGAROP)+"\n");
-    summaryWriter.write("CigChk_ALL_overlap	"+                    allCheckArray(qcCigarMatch.OVERLAP)+"\n");
-    summaryWriter.write("CigChk_ALL_overlap_match	"+            allCheckArray(qcCigarMatch.OVERLAP_MATCH)+"\n");
-    summaryWriter.write("CigChk_ALL_overlap_mismatch	"+        allCheckArray(qcCigarMatch.OVERLAP_MISMATCH)+"\n");
-    summaryWriter.write("CigChk_ALL_overlap_mismatch_diffnum	"+allCheckArray(qcCigarMatch.OVERLAP_MISMATCH_DIFFNUM)+"\n");
-    summaryWriter.write("CigChk_ALL_overlap_mismatch_diffops	"+allCheckArray(qcCigarMatch.OVERLAP_MISMATCH_DIFFOP)+"\n");
+    summaryWriter.write("CigChk_ALL_noOverlap	"+                allCheckArray(qcCigarMatch.NO_OVERLAPPING_CIGAROP)+"\t"+"\n");
+    summaryWriter.write("CigChk_ALL_overlap	"+                    allCheckArray(qcCigarMatch.OVERLAP)+"\t"+"\n");
+    summaryWriter.write("CigChk_ALL_overlap_match	"+            allCheckArray(qcCigarMatch.OVERLAP_MATCH)+"\t"+"\n");
+    summaryWriter.write("CigChk_ALL_overlap_mismatch	"+        allCheckArray(qcCigarMatch.OVERLAP_MISMATCH)+"\t"+"\n");
+    summaryWriter.write("CigChk_ALL_overlap_mismatch_diffnum	"+allCheckArray(qcCigarMatch.OVERLAP_MISMATCH_DIFFNUM)+"\t"+"\n");
+    summaryWriter.write("CigChk_ALL_overlap_mismatch_diffops	"+allCheckArray(qcCigarMatch.OVERLAP_MISMATCH_DIFFOP)+"\t"+"\n");
     
     /*
     summaryWriter.write("CigChk_InsertSize_agree	"+insertSize_agree+"\n");

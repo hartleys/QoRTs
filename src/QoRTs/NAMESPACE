@@ -47,6 +47,7 @@ export(
  makePlot.splice.junction.event.counts,
  makePlot.splice.junction.event.proportionsByType,
  
+
  makePlot.strandedness.test,
  makePlot.dropped.rates,
  makePlot.mapping.rates,
@@ -57,6 +58,28 @@ export(
  get.summary.table,
  get.size.factors,
  
+ #
+ makePlot.overlapMismatch.size,
+ makePlot.overlapMismatch.byQual.min,
+ makePlot.overlapMismatch.byQual.read,
+ makePlot.overlapMismatch.byBase,
+ makePlot.overlapMismatch.byBase.atScore,
+ makePlot.overlapMismatch.byCycle,
+
+ makePlot.overlap.coverage,
+
+ makePlot.targetDistribution,
+ makePlot.runTimePerformance,
+ makePlot.onTarget.rates,
+ makePlot.onTarget.counts,
+ 
+ makePlot.referenceMismatch.byScore,
+ makePlot.referenceMismatch.byBase,
+ makePlot.referenceMismatch.byBase.atScore,
+ makePlot.referenceMismatch.byCycle,
+
+ makePlot.readLengthDist,
+ 
  #Multi-plots:
  makeMultiPlot.highlightSample.colorByLane.all,
  makeMultiPlot.highlightSample.colorByLane,
@@ -66,5 +89,18 @@ export(
  makeMultiPlot.colorByGroup,
  makeMultiPlot.colorByLane,
  makeMultiPlot.colorBySample,
+ makeMultiPlot.withPlotter,
  makeMultiPlot.all
 )
+
+  importFrom("grDevices", "as.raster", "col2rgb", "dev.off", "jpeg",
+             "pdf", "png", "rainbow", "rgb", "svg", "tiff")
+  importFrom("graphics", "abline", "axis", "box", "hist", "layout",
+             "legend", "lines", "par", "plot", "plot.new", "plot.window",
+             "points", "polygon", "rasterImage", "rect", "segments",
+             "strheight", "strwidth", "text", "title")
+  importFrom("stats", "density", "dnorm", "pnorm", "quantile", "runif",
+             "sd")
+  importFrom("utils", "object.size", "read.table", "write.table")
+  
+  

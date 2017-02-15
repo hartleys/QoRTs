@@ -355,7 +355,7 @@ object qcInnerDistance {
 
 }
 
-class qcInnerDistance(annoHolder : qcGtfAnnotationBuilder, stranded : Boolean, fr_secondStrand : Boolean, readLength : Int, jumpSplices : Boolean = true)  extends QCUtility[Int] {
+class qcInnerDistance(annoHolder : qcGtfAnnotationBuilder, stranded : Boolean, fr_secondStrand : Boolean, readLength : Int,variableReadLen : Boolean, jumpSplices : Boolean = true)  extends QCUtility[Int] {
   reportln("> Init InsertSize Utility","debug");
   val spliceAnnotation : GenMap[(String,Char),TreeSet[(Int,Int)]] = annoHolder.spliceJunctionTreeMap;
   
@@ -369,11 +369,16 @@ class qcInnerDistance(annoHolder : qcGtfAnnotationBuilder, stranded : Boolean, f
   val insertSizeMap_partialOverlap : scala.collection.mutable.Map[Int,Int] = scala.collection.mutable.Map[Int,Int]().withDefault(i => 0);
   val insertSizeMap_staggeredOverlap : scala.collection.mutable.Map[Int,Int] = scala.collection.mutable.Map[Int,Int]().withDefault(i => 0);
   
+  val insertSizeMapByLen : scala.collection.mutable.Map[(Int,Int,Int),Int] = scala.collection.mutable.Map[(Int,Int,Int),Int]().withDefault(i => 0);
+  
   def runOnReadPair(r1 : SAMRecord, r2 : SAMRecord, readNum : Int) : Int = {
+
     val inSize = qcInnerDistance.getInsertSize(r1,r2, spliceAnnotation, stranded, fr_secondStrand, jumpSplices);
     //reportln("InsertSize = " + inSize + "\n################################################","note");
     insertSizeMap(inSize._1) += 1;
     //insertSizeMap = insertSizeMap.updated(inSize._1, insertSizeMap(inSize._1) + 1);
+    
+    if(variableReadLen) insertSizeMapByLen((inSize._1,r1.getReadLength()+r2.getReadLength(),inSize._2)) += 1;
      
     if(inSize._2 == 1){
       insertSizeMap_noOverlap(inSize._1) += 1;
@@ -396,37 +401,77 @@ class qcInnerDistance(annoHolder : qcGtfAnnotationBuilder, stranded : Boolean, f
     return(inSize._1);
   }
   
-  def writeOutput(outfile : String, summaryWriter : WriterUtil){
+  def writeOutput(outfile : String, summaryWriter : WriterUtil, docWriter : DocWriterUtil = null){
     val maxVal = insertSizeMap.keys.max;
     
     val sizeSeqAll = ((0 until (readLength * 3)).toSet ++  insertSizeMap.keySet).toSeq.sorted;
     val (sizeSeqBad, sizeSeq) = sizeSeqAll.span(_ < 0);
     
     
-    val writer = openWriterSmart_viaGlobalParam(outfile+".insert.size.txt");
+    val writer = createOutputFile(outfile,"insert.size.txt","",docWriter,
+             ("InsertSize","int","The size of the 'insert' (ie. the distance between the start of read 1 and the end of read 2). For DNA-Seq this is the simple genomic distance, for RNA-Seq it is slightly more complex. When the reads do not overlap, QoRTs finds the shortest path between the inner endpoints of each read, skipping any available splice junctions."),
+             ("Ct","int","The number of read-pairs with the given insert size.")
+    );
     writer.write("InsertSize	Ct\n");
     //writer.write("STAGGERED_BAD	"+insertSizeMap(qcInnerDistance.STAGGERED_BAD)+"\n")
     //writer.write("OVERLAP_CIGAR_MISMATCH	"+insertSizeMap(qcInnerDistance.OVERLAP_CIGAR_MISMATCH)+"\n");
-    
     for(s  <- sizeSeq){
         writer.write(s + "	"+insertSizeMap(s)+"\n");
     }
-    
     //for(i <- 0 to maxVal){
     //  writer.write(i + "	"+insertSizeMap(i)+"\n");
     //}
     writer.close();
     
-    val writer2 = openWriterSmart_viaGlobalParam(outfile+".insert.size.debug.txt");
+    val writer2 = createOutputFile(outfile,"insert.size.debug.txt","",docWriter,
+              ("InsertSize","int","The size of the 'insert' (ie. the distance between the start of read 1 and the end of read 2). For DNA-Seq this is the simple genomic distance, for RNA-Seq it is slightly more complex. When the reads do not overlap, QoRTs finds the shortest path between the inner endpoints of each read, skipping any available splice junctions."),
+             ("Ct_noOverlap","int","The number of read-pairs with the given insert size where the reads do not overlap."),
+             ("Ct_staggered","int","The number of read-pairs with the given insert size where the reads have a 'staggered' overlap, in which the forward read alignment starts after the reverse read."),
+             ("Ct_partial","int","The number of read-pairs with the given insert size where the reads overlap normally"),
+             ("Ct","int","The number of read-pairs with the given insert size.")
+    );
     writer2.write("InsertSize	Ct_noOverlap	Ct_staggered	Ct_partial	Ct\n");
     for(i <- sizeSeq){
       writer2.write(i + "	"+insertSizeMap_noOverlap(i) + "	"+insertSizeMap_staggeredOverlap(i) + "	"+insertSizeMap_partialOverlap(i)+"	"+insertSizeMap(i)+"\n");
     }
     writer2.close();
     
-    val writer3 = openWriterSmart_viaGlobalParam(outfile+".insert.size.debug.dropped.txt");
+    if(variableReadLen){
+      val lenSeq = insertSizeMapByLen.keys.map(_._2).toSet.toVector.sorted;
+      val writer4 = createOutputFile(outfile,"insert.size.byReadLen.txt","",docWriter,
+             ("InsertSize","int","The size of the 'insert' (ie. the distance between the start of read 1 and the end of read 2). For DNA-Seq this is the simple genomic distance, for RNA-Seq it is slightly more complex. When the reads do not overlap, QoRTs finds the shortest path between the inner endpoints of each read, skipping any available splice junctions."),
+             ("sumReadLen","int","The sum of the length of read 1 and read 2"),
+             ("Ct_noOverlap","int","The number of read-pairs with the given insert size where the reads do not overlap."),
+             ("Ct_staggered","int","The number of read-pairs with the given insert size where the reads have a 'staggered' overlap, in which the forward read alignment starts after the reverse read."),
+             ("Ct_partial","int","The number of read-pairs with the given insert size where the reads overlap normally"),
+             ("Ct","int","The number of read-pairs with the given insert size.")
+      );
+      writer4.write("InsertSize\tsumReadLen\tCt_noOverlap\tCt_staggered\tCt_partial\tCt\n");
+      for(i <- sizeSeq){
+        for(j <- lenSeq){
+          writer4.write(i+"\t"+j+"\t"+
+              insertSizeMapByLen((i,j,1))+"\t"+
+              insertSizeMapByLen((i,j,0))+"\t"+
+              insertSizeMapByLen((i,j,3))+"\t"+
+              (insertSizeMapByLen((i,j,0))+insertSizeMapByLen((i,j,1))+insertSizeMapByLen((i,j,3)))+
+              "\n");
+        }
+      }
+      writer4.close();
+    }
+
+      
+    val writer3 = createOutputFile(outfile,"insert.size.debug.dropped.txt","",docWriter,
+             ("InsertSize","int","The size of the 'insert' (ie. the distance between the start of read 1 and the end of read 2). For DNA-Seq this is the simple genomic distance, for RNA-Seq it is slightly more complex. When the reads do not overlap, QoRTs finds the shortest path between the inner endpoints of each read, skipping any available splice junctions."),
+             ("Ct_noOverlap","int","The number of read-pairs with the given insert size where the reads do not overlap."),
+             ("Ct_staggered","int","The number of read-pairs with the given insert size where the reads have a 'staggered' overlap, in which the forward read alignment starts after the reverse read."),
+             ("Ct_partial","int","The number of read-pairs with the given insert size where the reads overlap normally"),
+             ("Ct","int","The number of read-pairs with the given insert size."),
+             ("DROPPED_FwdRead_Appears_After_RevRead_Ends","ROW","Read-pair is staggered or possibly the strands are swapped. Forward strand read appears after the reverse strand read."),
+             ("DROPPED_Reads_Overlap_But_Splice_Inconsistantly_On_Overlapping_Sections","ROW","Read-Pairs overlap, but have different spliced alignment."),
+             ("DROPPED_RevRead_Starts_Before_Fwd_And_Too_Many_Adaptor_Bases_Align_Limit_Is_X","ROW","Read-Pairs are staggered by more than X bases.")
+    );
     writer3.write("Category	Ct_noOverlap	Ct_staggered	Ct_partial	Ct_total\n");
-    
     var i = qcInnerDistance.STAGGERED_NO_OVERLAP;
     writer3.write("DROPPED_FwdRead_Appears_After_RevRead_Ends	" +insertSizeMap_noOverlap(i) + "	"+insertSizeMap_staggeredOverlap(i) + "	"+insertSizeMap_partialOverlap(i)+"	"+insertSizeMap(i)+"\n");
     i = qcInnerDistance.OVERLAP_CIGAR_MISMATCH_PARTIAL_OVERLAP;
@@ -439,16 +484,16 @@ class qcInnerDistance(annoHolder : qcGtfAnnotationBuilder, stranded : Boolean, f
     
     val numGood = sizeSeq.map(i => insertSizeMap(i)).sum;
     val numBad = sizeSeqBad.map(i => insertSizeMap(i)).sum;
-    summaryWriter.write("InsertSizeCalc_Kept	"+numGood+"\n");
-    summaryWriter.write("InsertSizeCalc_lt_readLen	"+ Range(0,readLength).foldLeft(0)((soFar,i) => insertSizeMap(i) + soFar)+"\n");
-    summaryWriter.write("InsertSizeCalc_eq_readLen	"+ insertSizeMap(readLength) +"\n");
-    summaryWriter.write("InsertSizeCalc_readLen_to_2xreadLen	"+ Range(readLength+1,readLength*2).foldLeft(0)((soFar,i) => insertSizeMap(i) + soFar) +"\n");
-    summaryWriter.write("InsertSizeCalc_ge_2xreadLen	"+ insertSizeMap.filter{case(s,ct) => s >= readLength*2}.foldLeft(0){case(soFar,(s,ct)) => ct + soFar} +"\n");
+    summaryWriter.write("InsertSizeCalc_Kept\t"+numGood+"\tNumber of read-pairs that satisfied the filters needed to calculate insert size."+"\n");
+    summaryWriter.write("InsertSizeCalc_lt_readLen\t"+ Range(0,readLength).foldLeft(0)((soFar,i) => insertSizeMap(i) + soFar)+"\tNumber of read pairs with insert size less than the read length"+"\n");
+    summaryWriter.write("InsertSizeCalc_eq_readLen\t"+ insertSizeMap(readLength) +"\tNumber of read pairs with insert size equal to the read length\n");
+    summaryWriter.write("InsertSizeCalc_readLen_to_2xreadLen\t"+ Range(readLength+1,readLength*2).foldLeft(0)((soFar,i) => insertSizeMap(i) + soFar) +"\tNumber of read pairs with insert size greater than the read length but less than twice the read length\n");
+    summaryWriter.write("InsertSizeCalc_ge_2xreadLen\t"+ insertSizeMap.filter{case(s,ct) => s >= readLength*2}.foldLeft(0){case(soFar,(s,ct)) => ct + soFar} +"\tNumber of read pairs greater than twice the read length"+"\n");
     
-    summaryWriter.write("InsertSizeCalc_Dropped	"+numBad+"\n");
-    summaryWriter.write("InsertSizeCalc_Dropped_FwdReadAppearsAfterRevReadEnds	"+insertSizeMap(qcInnerDistance.STAGGERED_NO_OVERLAP)+"\n");
-    summaryWriter.write("InsertSizeCalc_Dropped_ReadsOverlapButSpliceInconsistantlyOnOverlappingSections	"+insertSizeMap(qcInnerDistance.OVERLAP_CIGAR_MISMATCH_PARTIAL_OVERLAP)+"\n");
-    summaryWriter.write("InsertSizeCalc_Dropped_RevReadStartsBeforeFwdAndTooManyAdaptorBasesAlign	"+insertSizeMap(qcInnerDistance.STAGGERED_TOO_MUCH_ADAPTOR_ALIGNED)+"\n");
+    summaryWriter.write("InsertSizeCalc_Drop_TOTAL\t"+numBad+"\tNumber of read-pairs for which insert size could not be successfully calculated"+"\n");
+    summaryWriter.write("InsertSizeCalc_Drop_REASON1\t"+insertSizeMap(qcInnerDistance.STAGGERED_NO_OVERLAP)+"\tDropped because the forward read appears after the reverse read\n"); //FwdReadAppearsAfterRevReadEnds
+    summaryWriter.write("InsertSizeCalc_Drop_REASON2\t"+insertSizeMap(qcInnerDistance.OVERLAP_CIGAR_MISMATCH_PARTIAL_OVERLAP)+"\tDropped because the paired reads have different splicing over the overlapped region\n"); //ReadsOverlapButSpliceInconsistantlyOnOverlappingSections
+    summaryWriter.write("InsertSizeCalc_Drop_REASON3\t"+insertSizeMap(qcInnerDistance.STAGGERED_TOO_MUCH_ADAPTOR_ALIGNED)+"\tDropped because too many adaptor bases are aligned to the reference genome (indicating bad alignment)\n"); //RevReadStartsBeforeFwdAndTooManyAdaptorBasesAlign
     //summaryWriter.write("InsertSizeCalc_Dropped_RevReadStartsBeforeFwdAndRevReadSplicesBeforeOverlapping	"+insertSizeMap(qcInnerDistance.STAGGERED_FULL_BLOCK_OF_ADAPTOR_ALIGNED)+"\n");    
   }
   /*

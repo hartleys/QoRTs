@@ -60,6 +60,12 @@ object bamToWiggle {
                                          arg = List("--noGzipOutput"), // name of value
                                          argDesc = "Flag to indicate that output should NOT be gzipped." // description
                                        ) ::
+                    new UnaryArgument( name = "checkForAlignmentBlocks",
+                                         arg = List("--checkForAlignmentBlocks"), // name of value
+                                         argDesc = "Certain aligners will mark reads 'aligned' even though they have no aligned "+
+                                                   "bases. This option will automatically check for some reads and ignore them, "+
+                                                   "rather than simply crashing."// description
+                                       ) ::   
                     new UnaryArgument(    name = "negativeReverseStrand",
                                          arg = List("--negativeReverseStrand"), // name of value
                                          argDesc = "Flag to indicate that the reverse strand should be counted in negative values. Can be useful for plotting stranded data on a single multiwig track, via trackhubs." // description
@@ -227,7 +233,8 @@ object bamToWiggle {
              parser.get[Option[String]]("rgbColor"),
              parser.get[String]("additionalTrackOptions"),
              ! parser.get[Boolean]("nameSorted"),
-             parser.get[Int]("minMAPQ")
+             parser.get[Int]("minMAPQ"),
+             parser.get[Boolean]("checkForAlignmentBlocks")
            );
          }
      }
@@ -253,7 +260,7 @@ object bamToWiggle {
       includeTrackDef : Boolean,
       rgbColor : Option[String],
       additionalTrackOptions : String,
-      coordSorted : Boolean, minMAPQ : Int){
+      coordSorted : Boolean, minMAPQ : Int, checkForAlignmentBlocks : Boolean){
     
     //registerGlobalParam[Boolean]("noGzipOutput", noGzipOutput);
     internalUtils.optionHolder.OPTION_noGzipOutput = noGzipOutput;
@@ -277,7 +284,7 @@ object bamToWiggle {
     
     for(infile <- infiles){
       //runOnFile(infile , qcBTW , testRun, isSingleEnd, keepMultiMapped, readGroup);
-      runOnFile2(infile, qcBTW, testRun, keepMultiMapped, readGroup, minMAPQ, isSingleEnd, coordSorted);
+      runOnFile2(infile, qcBTW, testRun, keepMultiMapped, readGroup, minMAPQ, isSingleEnd, coordSorted,checkForAlignmentBlocks=checkForAlignmentBlocks);
     }
     
     val postRunStamp = TimeStampUtil();
@@ -299,7 +306,7 @@ object bamToWiggle {
                    readGroup : Option[String],
                    minMAPQ : Int,
                    isSingleEnd : Boolean,
-                   unsorted : Boolean){
+                   unsorted : Boolean,checkForAlignmentBlocks : Boolean){
     
     val peekCt = 2000;
     val reader : SAMFileReader = if(infile == "-"){
@@ -362,6 +369,8 @@ object bamToWiggle {
     if(isSingleEnd) CODA_SINGLE_END_OFF_OPTIONS.foreach( coda_options(_) = false );
     if(keepMultiMapped) coda_options(internalUtils.commonSeqUtils.CODA_NOT_UNIQUE_ALIGNMENT) = false;
     if(! readGroup.isEmpty) coda_options(internalUtils.commonSeqUtils.CODA_NOT_MARKED_RG) = true;
+    if(checkForAlignmentBlocks) coda_options(internalUtils.commonSeqUtils.CODA_NO_ALN_BLOCKS) = true;
+
     
     var readNum = 0;
     val samIterationTimeStamp = TimeStampUtil();
@@ -456,7 +465,7 @@ object bamToWiggle {
                    negativeReverseStrand : Boolean, countPairsTogether : Boolean, 
                    includeTrackDef : Boolean, rgbColor : Option[String],
                    additionalTrackOptions : String) extends QCUtility[Unit] {
-    
+     
     val chromMap : Map[(String,Char),Chrom] = genChrom(chromLengthFile, windowSize, stranded, ! noTruncate);
     var unknownChromSet : Set[String] = Set[String]();
     
@@ -505,7 +514,7 @@ object bamToWiggle {
     
     
     
-    def writeOutput(outfile : String, summaryWriter : WriterUtil){
+    def writeOutput(outfile : String, summaryWriter : WriterUtil, docWriter : DocWriterUtil = null){
       val windowString = if(windowSize == 100) "" else (".Win"+windowSize.toString());
       
       if(stranded){

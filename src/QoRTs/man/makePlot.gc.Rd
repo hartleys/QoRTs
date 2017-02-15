@@ -9,9 +9,10 @@
 }
 \usage{
   makePlot.gc(plotter, plot.medians = NULL, plot.means = TRUE, 
-              plotRate = FALSE, byPair = FALSE,
+              plotRate = FALSE, byPair = FALSE, useFQ = FALSE,
               debugMode, singleEndMode, 
               rasterize.plotting.area = FALSE, raster.height = 1000, raster.width = 1000,
+              plot = TRUE,
               ...)
 }
 \arguments{
@@ -40,6 +41,9 @@
     as completely-overlapped read-pairs will always have an even
     number of G/C nucleotides.
   }
+  \item{useFQ}{
+    Logical. If TRUE, plot the G/C rate from the unaligned FASTQ data. This requires that the FASTQ data was supplied to QoRTs in the QoRTs QC step.
+  }
   \item{debugMode}{
     Logical. If TRUE, debugging data will be printed to the console.
   }
@@ -61,6 +65,9 @@
   \item{raster.width}{
       Numeric integer. If \code{rasterize.plotting.area} is \code{TRUE}, then this
       will set the width of the rasterized plot, in pixels.
+  }
+  \item{plot}{
+        Logical. If FALSE, suppress plotting and return \code{TRUE} if and only if the data is present in the dataset to allow plotting. Useful to automatically filter out missing data plots.
   }
   \item{\dots}{ 
     Arguments to be passed to methods, such as

@@ -19,6 +19,7 @@ makePlot.NVC.lead.clip(plotter, clip.amt,  r2.buffer,
                    raster.width = 1000,
                    show.base.legend = TRUE, 
                    debugMode, singleEndMode,
+                   plot = TRUE,
                    \dots)
 
 
@@ -31,7 +32,9 @@ makePlot.NVC.tail.clip(plotter, clip.amt,  r2.buffer,
                        raster.height = 1000, 
                        raster.width = 1000,
                        show.base.legend = TRUE, 
-                       debugMode, singleEndMode, \dots)
+                       debugMode, singleEndMode,
+                       plot = TRUE,
+                       \dots)
 }
 \arguments{
   \item{plotter}{
@@ -92,6 +95,9 @@ makePlot.NVC.tail.clip(plotter, clip.amt,  r2.buffer,
       Logical. Determines whether the dataset consists of single-ended reads. 
       By default this is determined from the data. Thus, this parameter should 
       never need to be set by the user.
+  }
+  \item{plot}{
+        Logical. If FALSE, suppress plotting and return \code{TRUE} if and only if the data is present in the dataset to allow plotting. Useful to automatically filter out missing data plots.
   }
   \item{\dots}{ 
     Arguments to be passed to methods, such as

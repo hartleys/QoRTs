@@ -9,12 +9,18 @@
    read cycle.
 }
 \usage{
-  makePlot.cigarOp.byCycle(plotter, op, 
-                       r2.buffer = NULL, 
-                       rate.per.million = TRUE, 
-                       debugMode, singleEndMode,
-                       rasterize.plotting.area = FALSE, raster.height = 1000, raster.width = 1000,
-                       ...)
+  makePlot.cigarOp.byCycle(plotter, 
+           op=c("SoftClip","Del","Ins","HardClip","Pad","Splice","Aln"), 
+           r2.buffer = NULL, 
+           rate.per.million = TRUE, 
+           use.readLength.denominator = TRUE, 
+           debugMode, 
+           singleEndMode,
+           rasterize.plotting.area = FALSE, 
+           raster.height = 1000, 
+           raster.width = 1000,
+           plot = TRUE,
+           ...)
 }
 \arguments{
   \item{plotter}{
@@ -40,11 +46,18 @@
     Buffer space to place between the plotting of read 1
     and read 2. By default this will choose a reasonable value.
   }
+  
   \item{rate.per.million}{
     A logical value indicating whether or not to scale the y 
     axis to rate-per-million-reads, rather than rate-per-read.
     Some people may find the results more readable this way, even
     though the plots themselves will appear the same.
+  }
+
+  \item{use.readLength.denominator}{
+    Logical. If TRUE, use the read-length counts as the denominator
+    when calculating op rates. This is only relevant if operating on
+    trimmed reads, where the read length is variable.
   }
   \item{debugMode}{
     Logical. If TRUE, debugging data will be printed to the console.
@@ -67,6 +80,9 @@
   \item{raster.width}{
       Numeric integer. If \code{rasterize.plotting.area} is \code{TRUE}, then this
       will set the width of the rasterized plot, in pixels.
+  }
+  \item{plot}{
+        Logical. If FALSE, suppress plotting and return \code{TRUE} if and only if the data is present in the dataset to allow plotting. Useful to automatically filter out missing data plots.
   }
   \item{\dots}{ 
     Arguments to be passed to methods, such as

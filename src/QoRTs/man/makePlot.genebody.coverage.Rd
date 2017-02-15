@@ -19,6 +19,7 @@
                   debugMode, 
                   singleEndMode, 
                   rasterize.plotting.area = FALSE, raster.height = 1000, raster.width = 1000,
+                  plot = TRUE,
                   ... )
 
   #NOTE: The preferred method to access the below functions
@@ -29,18 +30,21 @@
                        plot.means = TRUE,  
                        debugMode, singleEndMode, 
                        rasterize.plotting.area = FALSE, raster.height = 1000, raster.width = 1000,
+                       plot = TRUE,
                        ...)
   #DEPRECIATED:
   makePlot.genebody.coverage.UMQuartile(plotter, plot.medians, 
                        plot.means = TRUE, 
                        debugMode, singleEndMode, 
                        rasterize.plotting.area = FALSE, raster.height = 1000, raster.width = 1000,
+                       plot = TRUE,
                        ...)
   #DEPRECIATED:
   makePlot.genebody.coverage.lowExpress(plotter, plot.medians, 
                        plot.means = TRUE, 
                        debugMode, singleEndMode,
                        rasterize.plotting.area = FALSE, raster.height = 1000, raster.width = 1000,
+                       plot = TRUE,
                        ...)
 }
 \arguments{
@@ -101,7 +105,9 @@
       Numeric integer. If \code{rasterize.plotting.area} is \code{TRUE}, then this
       will set the width of the rasterized plot, in pixels.
   }
-  
+  \item{plot}{
+        Logical. If FALSE, suppress plotting and return \code{TRUE} if and only if the data is present in the dataset to allow plotting. Useful to automatically filter out missing data plots.
+  }
   \item{\dots}{ 
     Arguments to be passed to methods, such as
     \link{graphical parameters} (see \code{\link{par}}).

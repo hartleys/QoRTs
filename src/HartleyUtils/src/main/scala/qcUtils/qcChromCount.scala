@@ -34,21 +34,24 @@ class qcChromCount(isSingleEnd : Boolean, fr_secondStrand : Boolean) extends QCU
     chromMap = chromMap.updated(cs, chromMap(cs) + 1);
     return chrom + "(" + strand.toString + ")";
   }
-  def writeOutput(outfile : String, summaryWriter : WriterUtil){
-    val writer = openWriterSmart_viaGlobalParam(outfile + ".chromCount.txt");
-    
+  def writeOutput(outfile : String, summaryWriter : WriterUtil, docWriter : DocWriterUtil = null){
+    val writer = createOutputFile(outfile, "chromCount.txt","",docWriter,
+             ("CHROM","String","Chromosome name"),
+             ("FWD_CT","int","Number of reads/read-pairs found on FWD genomic strand"),
+             ("REV_CT","int","Number of reads/read-pairs found on FWD genomic strand"),
+             ("CT","int","Number of reads/read-pairs found on EITHER genomic strand")
+    );
     val chroms = chromMap.keySet.map(_._1).toVector.sorted;
-    
     writer.write("CHROM	FWD_CT	REV_CT	CT\n");
-    
     for(chrom <- chroms){
       val ctp = chromMap((chrom,'+'));
       val ctm = chromMap((chrom,'-'));
       writer.write(chrom +"	"+ ctp+ "	"+  ctm +"	"+(ctp+ctm)+"\n");
     }
-    
     close(writer);
-    summaryWriter.write("NumberOfChromosomesCovered	"+chroms.size+"\n");
+    
+    summaryWriter.write("NumberOfChromosomesCovered\t"+chroms.size+"\tNumber of chromosomes with 1 or more aligned reads.\n");
+    
   }
   
   def getUtilityName : String = "chromCounts";

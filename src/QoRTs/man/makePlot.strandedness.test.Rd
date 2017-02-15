@@ -9,7 +9,7 @@
 }
 \usage{
 makePlot.strandedness.test(plotter, plot.target.boxes = FALSE, 
-                           debugMode, singleEndMode, \dots)
+                           debugMode, singleEndMode, plot = TRUE, \dots)
 
 }
 \arguments{
@@ -26,6 +26,9 @@ makePlot.strandedness.test(plotter, plot.target.boxes = FALSE,
     Logical. Determines whether the dataset consists of single-ended reads. 
     By default this is determined from the data. Thus, this parameter should 
     never need to be set by the user.
+  }
+  \item{plot}{
+      Logical. If FALSE, suppress plotting and return \code{TRUE} if and only if the data is present in the dataset to allow plotting. Useful to automatically filter out missing data plots.
   }
   \item{\dots}{ 
     Arguments to be passed to methods, such as

@@ -15,7 +15,9 @@
                        decoder.files, 
                        calc.DESeq2 = FALSE, 
                        calc.edgeR = FALSE, 
-                       debugMode)
+                       debugMode,
+                       autodetectMissingSamples = FALSE,
+                       skip.files = c())
                        
   completeAndCheckDecoder(decoder, decoder.files)
 }
@@ -38,6 +40,12 @@
   }
   \item{debugMode}{
     Logical. If TRUE, debugging data will be printed to the console.
+  }
+  \item{autodetectMissingSamples}{
+    Logical. If TRUE, automatically drop replicates for which the QC files cannot be found. By default this function will throw an error.
+  }
+  \item{skip.files}{
+    Character vector of QC data file titles to skip. This can be useful for performing a faster data load when only querying a subset of the available QC metrics. See examples below.
   }
 }
 \details{
@@ -115,6 +123,19 @@
                               decoder = c("SAMP1_RG1","SAMP2_RG1",
                                           "SAMP3_RG1","SAMP4_RG1"));
 
+  #The list of available QC names for use with skip.files:
+  names(res@qc.data);
+  #Skip some of the files using a command like this:
+  res.quick <- read.qc.results.data(directory, 
+                              decoder = decoder.data,
+                              skip.files=c(
+                              "QC.NVC.raw.R1.txt.gz",
+                              "QC.NVC.raw.R2.txt.gz",
+                              "QC.NVC.lead.clip.R1.txt.gz",
+                              "QC.NVC.lead.clip.R2.txt.gz",
+                              "QC.NVC.tail.clip.R1.txt.gz",
+                              "QC.NVC.tail.clip.R2.txt.gz"
+                              ));
 }
 
 \seealso{

@@ -1,13 +1,13 @@
-# QoRTs v1.1.8
-(Compiled Wed Jul 13 13:35:00 EDT 2016)
+# QoRTs v1.2.11
+(Compiled Tue Feb 14 17:15:28 EST 2017)
 
 The [QoRTs software package](http://hartleys.github.io/QoRTs/) is a fast, efficient, and portable 
 multifunction toolkit designed to assist in
-the analysis, quality control, and data management of RNA-Seq datasets. Its primary function is to aid
-in the detection and identification of errors, biases, and artifacts produced by paired-end high-throughput
-RNA-Seq technology. In addition, it can produce count data designed for use with differential expression
+the analysis, quality control, and data management of RNA-Seq and DNA-Seq datasets. Its primary function is to aid
+in the detection and identification of errors, biases, and artifacts produced by high-throughput
+sequencing technology. In addition, it can produce count data designed for use with RNA-Seq differential gene expression
 and differential exon usage tools, as well as individual-sample and/or group-summary genome track
-files suitable for use with the UCSC genome browser (or any compatible browser). 
+files suitable for use with the UCSC genome browser (or similar browsers). 
 The entire QoRTs toolkit can be used in almost any operating system that supports java and R.
 For more information visit the [QoRTs project page](http://hartleys.github.io/QoRTs/index.html). 
 
@@ -17,67 +17,12 @@ If you use QoRTs and find it helpful, you can cite it in your publications as:
 Hartley SW, Mullikin JC. [**QoRTs: a comprehensive toolset for quality control and data processing of RNA-Seq experiments.**](http://www.ncbi.nlm.nih.gov/pmc/articles/PMC4506620/) [*BMC Bioinformatics.*](http://www.biomedcentral.com/bmcbioinformatics) doi: 10.1186/s12859-015-0670-5
 
 ##HELP AND DOCUMENTATION:
-Additional help and documentation is available online 
-[here](http://hartleys.github.io/QoRTs/index.html). The creator and maintainer of QoRTs can be reached by emailing "QoRTs-contact" (at) list.nih.gov.
+**Additional help and documentation is available online 
+[here](http://hartleys.github.io/QoRTs/index.html).** 
 
-Issues, bug reports, or feature requests can be posted to the [github issues page](https://github.com/hartleys/QoRTs/issues).
+If you have a question, encounter an error, or have a feature request, we recommend that you create an issue on the [github issues page](https://github.com/hartleys/QoRTs/issues).
 
-##INSTALLATION:
-The R package can be installed in R using the command:
-
-    > install.packages("http://hartleys.github.io/QoRTs/QoRTs_LATEST.tar.gz",
-                       repos=NULL, 
-                       type="source");
-
-The java jar file does not need to be installed, it can simply be downloaded and used directly.
-Just execute it using the java command:
-    
-    java -jar /path/to/jarfile/QoRTs.jar QC input.bam anno.gtf.gz /output/dir/
-
-See the [FAQ](http://hartleys.github.io/QoRTs/FAQ.html) if you have trouble installing QoRTs.
-
-##EXAMPLE DATA:
-The example QC output can be found on the github main page, and installed
-with the command:
-    
-    install.packages("http://hartleys.github.io/QoRTs/QoRTsExampleData_LATEST.tar.gz", 
-                     repos = NULL, 
-                     type="source")
-
-The original bam files are too large to upload to github. 
-These files can be found [here](
-https://dl.dropboxusercontent.com/u/103621176/qorts/exData/QoRTsFullExampleData.zip). 
-(File is ~1.5gb)
-
-There is also a [comprehensive walkthrough](http://hartleys.github.io/JunctionSeq/doc/example-walkthrough.pdf) of 
-the entire analysis pipeline, run on a different 
-[example dataset](https://dl.dropboxusercontent.com/u/103621176/pipelineWalkthrough/QoRTsPipelineWalkthrough.zip) with 
-[example bam files](https://dl.dropboxusercontent.com/u/103621176/pipelineWalkthrough/bamfiles.zip).
-
-##MORE INFORMATION:
-For more information, see the [QoRTs vignette](http://hartleys.github.io/QoRTs/doc/QoRTs-vignette.pdf) or the [QoRTs help and documentation page](http://hartleys.github.io/QoRTs/index.html).
-
-Additional options and syntax information for the main QC java utility 
-can be found using the command:
-
-    java -jar /path/to/jarfile/QoRTs.jar QC --man
-
-Options and information about other sub-utilities within the java package
-can be found using the command:
-
-    java -jar /path/to/jarfile/QoRTs.jar --man
-
-And for each sub-utility:
-
-    java -jar /path/to/jarfile/QoRTs.jar utilname --man
-    
-For help with individual R functions in the R utility, use the R command:
-
-    > help(functionname);
-
-For a full listing of all help topics for the R utility, use the R command: 
-
-    > help(package="QoRTs");
+Alternatively, the creator and maintainer of QoRTs can be reached by emailing "QoRTs-contact" (at) list.nih.gov.
 
 ##LEGAL:
 This software is "United States Government Work" under the terms of the United 

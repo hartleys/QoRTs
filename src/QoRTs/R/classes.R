@@ -17,7 +17,8 @@ setClass("QoRTs_QC_Results",representation(
                                      decoder="data.frame", #decoder has columns: unique.ID	sample.ID	lane.ID	group.ID	cycle.CT	and then any number of user-defined columns (which are ignored internally)
                                      qc.data="list", #List of Lists. Each element corresponds to one qc test, and is composed of a list, one element for each lanebam.
                                      calc.data="list", #List of Lists. Same as above, except it holds data calculated within R rather than raw scala output. Each element corresponds to one qc test, and is composed of a list, one element for each lanebam.
-                                     singleEnd="logical" #Logical. whether any of the samples are single-end. Note that paired-end samples can be plotted in single-end mode, but NOT vice versa.
+                                     singleEnd="logical", #Logical. whether any of the samples are single-end. Note that paired-end samples can be plotted in single-end mode, but NOT vice versa.
+                                     summaryTable="data.frame" #Data frame containing summary information for each sample.
                                      ));
 
 
@@ -93,11 +94,12 @@ QoRTs_Plotter <- setRefClass("QoRTs_Plotter",fields = list(
                        res = "QoRTs_QC_Results",
                        plot.type = "character",
                        title.highlight.name = "character",
+                       title.annotations = "list",
                        legend.params = "data.frame",   #has columns: name	lines.col	lines.lty	lines.lwd	points.pch	points.col
                        showLegend = "logical",
                        nvc.colors = "list",
                        nvc.colors.light = "list",
-                       lanebam.params = "data.frame" #has columns:	plot.priority	unique.ID	lines.col	points.col	points.pch	lines.lty	lines.lwd	lines.alpha	lines.lwd	points.alpha	horiz.offsets	vert.offsets
+                       lanebam.params = "data.frame" #has columns:	plot.priority	unique.ID	lines.col	points.col	points.pch	lines.lty	lines.lwd	lines.alpha	lines.lwd	points.alpha	horiz.offsets	vert.offsets lines.tcol points.tcol
                        ));
 
 #setMethod("show","QoRT_Plotter",
@@ -119,8 +121,14 @@ QoRTs_Plotter <- setRefClass("QoRTs_Plotter",fields = list(
 #   }
 #);
 
-generate.plotter <- function(res, plot.type, title.highlight.name, legend.params, showLegend, nvc.colors, nvc.colors.light, lanebam.params){
-  QoRTs_Plotter$new(res = res, plot.type = plot.type, title.highlight.name = title.highlight.name, legend.params = legend.params, showLegend = showLegend, nvc.colors = nvc.colors, nvc.colors.light = nvc.colors.light, lanebam.params = lanebam.params);
+generate.plotter <- function(res, plot.type, title.highlight.name, legend.params, showLegend, nvc.colors, nvc.colors.light, lanebam.params,randomize.plot.order,title.annotations = list()){
+  if(randomize.plot.order > 0){
+    random.mod <- floor(runif(length(lanebam.params$plot.priority),0,randomize.plot.order));
+    
+    lanebam.params$plot.priority <- lanebam.params$plot.priority * randomize.plot.order * 10;
+    lanebam.params$plot.priority <- lanebam.params$plot.priority + random.mod;
+  }
+  QoRTs_Plotter$new(res = res, plot.type = plot.type, title.highlight.name = title.highlight.name, title.annotations=title.annotations, legend.params = legend.params, showLegend = showLegend, nvc.colors = nvc.colors, nvc.colors.light = nvc.colors.light, lanebam.params = lanebam.params);
 }
 
 #############################################################
@@ -139,24 +147,30 @@ setClass("QoRTs_Compiled_Plotting_Params", representation(
                        highlight.lines.lwd = "numeric",
                        highlight.lines.alpha = "numeric",
                        highlight.points.pch = "numeric",
-                       highlight.points.alpha = "numeric"
+                       highlight.points.alpha = "numeric",
+                       
+                       randomize.plot.order = "numeric",
+                       
+                       plot.annotation = "list"
                        
                        ));
 
 setMethod("show","QoRTs_Compiled_Plotting_Params",
    function(object){
       cat("Master plotting parameters object for QoRTs:\n");
-      cat("by.colors:            [",paste0(object@by.colors,collapse=","),"]\n");
-      cat("by.pch:            [",paste0(object@by.pch,collapse=","),"]\n");
+      cat("by.colors:             [",paste0(object@by.colors,collapse=","),"]\n");
+      cat("by.pch:                [",paste0(object@by.pch,collapse=","),"]\n");
       cat("showLegend:            [",object@showLegend,"]\n");
+      cat("randomize.plot.order:  [",object@randomize.plot.order,"]\n");
+
       cat("nvc.colors:            [",paste0(object@nvc.colors,collapse=","),"]\n");
-      cat("nvc.colors.light:            [",paste0(object@nvc.colors.light,collapse=","),"]\n");
-      cat("highlight.color:            [",paste0(object@highlight.color,collapse=","),"]\n");
-      cat("highlight.lines.lty:            [",paste0(object@highlight.lines.lty,collapse=","),"]\n");
-      cat("highlight.lines.lwd:            [",paste0(object@highlight.lines.lwd,collapse=","),"]\n");
-      cat("highlight.lines.alpha:            [",paste0(object@highlight.lines.alpha,collapse=","),"]\n");
-      cat("highlight.points.pch:            [",paste0(object@highlight.points.pch,collapse=","),"]\n");
-      cat("highlight.points.alpha:            [",paste0(object@highlight.points.alpha,collapse=","),"]\n");
+      cat("nvc.colors.light:      [",paste0(object@nvc.colors.light,collapse=","),"]\n");
+      cat("highlight.color:       [",paste0(object@highlight.color,collapse=","),"]\n");
+      cat("highlight.lines.lty:   [",paste0(object@highlight.lines.lty,collapse=","),"]\n");
+      cat("highlight.lines.lwd:   [",paste0(object@highlight.lines.lwd,collapse=","),"]\n");
+      cat("highlight.lines.alpha: [",paste0(object@highlight.lines.alpha,collapse=","),"]\n");
+      cat("highlight.points.pch:  [",paste0(object@highlight.points.pch,collapse=","),"]\n");
+      cat("highlight.points.alpha:[",paste0(object@highlight.points.alpha,collapse=","),"]\n");
    }
 );
 
@@ -187,6 +201,7 @@ setMethod("show","QoRTs_Compiled_Plotting_Params",
   DEFAULT.PLOT.MASTER.PARAMS_by.colors              <-  c("red","blue","green","orange","magenta","cyan","purple","lightgreen","brown4","yellow3","seagreen4","royalblue","palegreen2", "orangered","lightsalmon","green4","khaki4","darkorchid3","deepskyblue4","darkolivegreen3","cyan4");
   DEFAULT.PLOT.MASTER.PARAMS_by.pch                 <-  c(0,2,5,6,4,3,8,7,9,10,12,13,14,11, 65:90, 97:122);
   DEFAULT.PLOT.MASTER.PARAMS_showLegend             <-  FALSE;
+  DEFAULT.PLOT.MASTER.PARAMS_randomize.plot.order   <-  0;
   DEFAULT.PLOT.MASTER.PARAMS_highlight.lines.lty    <-  c(1,3);
   DEFAULT.PLOT.MASTER.PARAMS_highlight.lines.lwd    <-  c(2,1);
   DEFAULT.PLOT.MASTER.PARAMS_highlight.lines.alpha  <-  c(255,200);
@@ -195,6 +210,7 @@ setMethod("show","QoRTs_Compiled_Plotting_Params",
   DEFAULT.PLOT.MASTER.PARAMS_highlight.points.alpha <-  c(255,200);
   DEFAULT.PLOT.MASTER.PARAMS_nvc.colors             <-  list(A = "green3",T = "red", G = "orange", C = "blue");
   DEFAULT.PLOT.MASTER.PARAMS_nvc.colors.light       <-  list(A = "olivedrab1",T = "lightpink", G = "lightgoldenrod1", C = "deepskyblue");
+  DEFAULT.PLOT.MASTER.PARAMS_plot.annotation        <-  list();
 
 ################################################
 
@@ -243,6 +259,7 @@ setMethod("show","QoRTs_Compiled_Plotting_Params",
 QoRTs.default.plotting.params <- list(           contrasting.colors = DEFAULT.PLOT.MASTER.PARAMS_by.colors,
                                                  contrasting.pch    = DEFAULT.PLOT.MASTER.PARAMS_by.pch,
                                                  show.legend      = DEFAULT.PLOT.MASTER.PARAMS_showLegend,
+                                                 randomize.plot.order = DEFAULT.PLOT.MASTER.PARAMS_randomize.plot.order,
                                                  std.lines.lty    = DEFAULT.PLOT.MASTER.PARAMS_highlight.lines.lty[1],
                                                  std.lines.lwd    = DEFAULT.PLOT.MASTER.PARAMS_highlight.lines.lwd[1],
                                                  std.lines.alpha  = DEFAULT.PLOT.MASTER.PARAMS_highlight.lines.alpha[1],
@@ -256,7 +273,8 @@ QoRTs.default.plotting.params <- list(           contrasting.colors = DEFAULT.PL
                                                  alt.color  = DEFAULT.PLOT.MASTER.PARAMS_highlight.color[2],
                                                  alt.points.pch   = DEFAULT.PLOT.MASTER.PARAMS_highlight.points.pch[2],
                                                  alt.points.alpha = DEFAULT.PLOT.MASTER.PARAMS_highlight.points.alpha[2],
-                                                 alt.NVC.colors   = DEFAULT.PLOT.MASTER.PARAMS_nvc.colors.light);
+                                                 alt.NVC.colors   = DEFAULT.PLOT.MASTER.PARAMS_nvc.colors.light,
+                                                 plot.annotation  = DEFAULT.PLOT.MASTER.PARAMS_plot.annotation);
 
 
 merge.plotting.params <- function(old.params, new.params){
@@ -276,6 +294,7 @@ compile.plotting.params <- function(params){
   master.params@by.colors  <- params[["contrasting.colors"]];
   master.params@by.pch     <- params[["contrasting.pch"]];
   master.params@showLegend <- params[["show.legend"]];
+  master.params@randomize.plot.order <- params[["randomize.plot.order"]];
   master.params@highlight.lines.lty    <- c(params[["std.lines.lty"]],params[["alt.lines.lty"]]);
   master.params@highlight.lines.lwd    <- c(params[["std.lines.lwd"]],params[["alt.lines.lwd"]]);
   master.params@highlight.lines.alpha  <- c(params[["std.lines.alpha"]],params[["alt.lines.alpha"]]);
@@ -284,6 +303,7 @@ compile.plotting.params <- function(params){
   master.params@highlight.points.alpha <- c(params[["std.points.alpha"]],params[["alt.points.alpha"]]);
   master.params@nvc.colors       <- params[["std.NVC.colors"]];
   master.params@nvc.colors.light <- params[["alt.NVC.colors"]];
+  master.params@plot.annotation  <- params[["plot.annotation"]];
   return(master.params);
 }
 
@@ -292,6 +312,7 @@ decompile.plotting.params <- function(compiled.params){
      contrasting.colors = compiled.params@by.colors,
      contrasting.pch    = compiled.params@by.pch,
      show.legend      = compiled.params@showLegend,
+     randomize.plot.order = compiled.params@randomize.plot.order,
      std.lines.lty    = compiled.params@highlight.lines.lty[1],
      std.lines.lwd    = compiled.params@highlight.lines.lwd[1],
      std.lines.alpha  = compiled.params@highlight.lines.alpha[1],
@@ -305,6 +326,7 @@ decompile.plotting.params <- function(compiled.params){
      alt.color  = compiled.params@highlight.color[2],
      alt.points.pch   = compiled.params@highlight.points.pch[2],
      alt.points.alpha = compiled.params@highlight.points.alpha[2],
-     alt.NVC.colors   = compiled.params@nvc.colors.light
+     alt.NVC.colors   = compiled.params@nvc.colors.light,
+     plot.annotation  = compiled.params@plot.annotation
   ));
 }

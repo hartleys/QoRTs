@@ -154,7 +154,7 @@ object Reporter {
    */
  
   private var loggers : List[ReportLogger] = List[ReportLogger]();
-
+  private var inProgressFile : Option[java.io.File] = None;
   
 /*
  * USAGE METHODS:
@@ -226,6 +226,18 @@ object Reporter {
     
   }
   
+  def init_inProgressFile(filename : String = "RUN_IN_PROGRESS"){
+    inProgressFile = Some(new java.io.File(filename));
+    if(inProgressFile.get.exists()){
+      reportln("Warning: run-in-progress file \""+filename+"\" already exists. Is there another QoRTs job running?","warn");
+      inProgressFile = None;
+    } else {
+      val runLockWriter = new java.io.BufferedWriter(new java.io.FileWriter(inProgressFile.get));
+      runLockWriter.write("# Note: if this file EXISTS, then either a QoRTs job is currently running, or else a QoRTs job crashed.");
+      runLockWriter.close();
+    }
+  }
+  
   /*
    * Reporting options:
    */
@@ -240,6 +252,13 @@ object Reporter {
     }
     
     loggers.map((logger) => logger.reportln(str,verb))
+  }
+  
+  def reportln(str : String) {
+    reportln(str,"note");
+  }
+  def report(str : String) {
+    report(str,"note");
   }
   
   def report(str : String, verb : String){
@@ -265,7 +284,9 @@ object Reporter {
     stackTrace.map((ste) => reportln("        " + ste.toString, "error"))
     
     reportln("<==========================>","error");
+    
     closeLogs;
+    
     throw new Exception(str);
   }
   def error(e : Exception){
@@ -278,11 +299,21 @@ object Reporter {
     
     reportln("<==========================>","error");
     closeLogs;
+
     throw e;
   }
   
   def closeLogs() {
     loggers.map((logger) => logger.close);
     loggers = List();
+    
+    inProgressFile match {
+      case Some(pf) => {
+        pf.delete();
+      }
+      case None => {
+        //do nothing!
+      }
+    }
   }
 }

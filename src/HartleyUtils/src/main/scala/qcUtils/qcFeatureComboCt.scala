@@ -215,11 +215,14 @@ class qcFeatureComboCt(anno_holder : qcGtfAnnotationBuilder, stranded : Boolean,
     
   }
 
-  def writeOutput(outfile : String, summaryWriter : WriterUtil){
+  def writeOutput(outfile : String, summaryWriter : WriterUtil, docWriter : DocWriterUtil = null){
     close(writer);
 
-    val writer2 = openWriterSmart_viaGlobalParam(outfile + ".featureComboCt.txt");
-    
+    val writer2 = createOutputFile(outfile , "featureComboCt.txt","",docWriter,
+             ("exonList","List[String]","[[TODO]]"),
+             ("knownJctList","List[String]","[[TODO]]"),
+             ("novelJctList","List[String]","[[TODO]]")
+    );
     writer2.write("exonList\tknownJctList\tnovelJctList\tCT\n");
     for((exons,known,novel) <- comboCounts.keysIterator){
       val ct = comboCounts((exons,known,novel));
@@ -229,10 +232,11 @@ class qcFeatureComboCt(anno_holder : qcGtfAnnotationBuilder, stranded : Boolean,
                    ct + "\n"
       );
     }
-    
     close(writer2);
-    
-    val writer3 = openWriterSmart_viaGlobalParam(outfile + ".TXcount.txt");
+
+    val writer3 = createOutputFile(outfile, "TXcount.txt","",docWriter,
+             ("[[TODO]]","[[TODO]]","[[TODO]]")
+    );
     writer3.write("TX.id\tCT\t"+goodDistance.map("CT_"+_).mkString("\t")+"\n");
     for(tx <- txList){
       writer3.write(
@@ -243,7 +247,9 @@ class qcFeatureComboCt(anno_holder : qcGtfAnnotationBuilder, stranded : Boolean,
     }
     close(writer3);
     
-    val writer4 = openWriterSmart_viaGlobalParam(outfile + ".TXinfo.txt");
+    val writer4 = createOutputFile(outfile, "TXinfo.txt","",docWriter,
+             ("[[TODO]]","[[TODO]]","[[TODO]]")
+    );
     writer4.write("TX.id\tstart\tend\tfeatureList\n");
     for(tx <- txList){
       writer4.write(
@@ -253,12 +259,9 @@ class qcFeatureComboCt(anno_holder : qcGtfAnnotationBuilder, stranded : Boolean,
           "\n"
       );
     }
-    
     close(writer4);
     
     //writer.write("CHROM	FWD_CT	REV_CT	CT\n");
-    
-    
     //summaryWriter.write("NumberOfChromosomesCovered	"+chroms.size+"\n");
   }
   

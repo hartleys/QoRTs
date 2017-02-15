@@ -34,7 +34,8 @@
   build.plotter.highlightSample.colorByLane(curr.sample,
                                   res,
                                   plotter.params = list(),
-                                  merge.offset.outgroup = TRUE)
+                                  merge.offset.outgroup = TRUE,
+                                  lane.column.name = "lane.ID")
 
   build.plotter.colorByX(res, color.by.name,
                          color.by.title.name = color.by.name, 
@@ -95,6 +96,9 @@
   }
   \item{color.by.title.name}{
     (For advanced users) A character string. (TODO: document functionality)
+  }
+  \item{lane.column.name}{
+    The name of the column in the decoder containing the "lane" names.
   }
 }
 \value{

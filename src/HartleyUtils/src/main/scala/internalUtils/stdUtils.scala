@@ -13,6 +13,8 @@ object stdUtils {
   /*
    * Utility Classes:
    */
+  
+
  
   def generalizedTo(f : Int, t : Int) : Seq[Int] = {
     if(f == t) return (f until t);
@@ -214,6 +216,40 @@ object stdUtils {
   /**************************************************************************************************************************
    * Sequence/iterator utilities:
    **************************************************************************************************************************/
+
+  
+  object AlphabetOrderingChar extends Ordering[Char] {
+    def compare(x : Char, y : Char) : Int = {
+      if(x == y) {
+        return 0;
+      } else if(x.toUpper == y.toUpper){
+        if(x.isUpper) return -1;
+        else return 1;
+      } else {
+        scala.math.Ordering.Char.compare(x,y);
+      }
+    }
+  }
+  
+  object AlphabetOrdering extends Ordering[String] {
+    def compare(x : String, y : String) : Int = {
+      if(x == y){
+        return 0;
+      } else {
+        x.toSeq.zip(y.toSeq).find{ case (a,b) => {
+          AlphabetOrderingChar.compare(a,b) != 0;
+        }} match {
+          case Some((a,b)) => {
+            return AlphabetOrderingChar.compare(a,b);
+          }
+          case None => {
+            if(x.length < y.length) return -1;
+            else return 1;
+          }
+        }
+      }
+    }
+  }
   
   def peekIterator[A](iter : Iterator[A]) : (A, Iterator[A]) = {
     val peek : A = iter.next();
@@ -364,6 +400,14 @@ object stdUtils {
     }
   }
   
+  def repString(toCopy : String, times : Int) : String = {
+    if(times == 0) return ""
+    else if(times == 1) return toCopy;
+    else {
+      return (0 until times).foldLeft(""){ case (soFar,i) => { soFar + toCopy } }
+    }
+  }
+  
   def wrapIteratorWithCutoff[B](iter : Iterator[B], cutoff : Int) : Iterator[B] = {
     new Iterator[B] {
       var iterCt = 0;
@@ -414,7 +458,7 @@ object stdUtils {
       }
     }
   }
-  
+  //stdUtils.presetProgressReporters.wrapIterator_readPairs(iter,verbose,cutoff)
   object presetProgressReporters {
     val DEFAULT_ITERATOR_PROGRESS_REPORTER_READPAIRS : IteratorProgressReporter = IteratorProgressReporter_ThreeLevel("Read-Pairs", 100000, 1000000, 1000000);
     

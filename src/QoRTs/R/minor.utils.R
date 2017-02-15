@@ -1,6 +1,138 @@
 
+color2hex <- function(colorNames){
+    rgb(red=col2rgb(colorNames)[1,],green=col2rgb(colorNames)[2,],blue=col2rgb(colorNames)[3,],maxColorValue=255);
+}
+x.na <- function(v, x = 0){
+  ifelse(is.na(v),x,v);
+}
+
+
+charAtOne <- function(s,at){
+  substring(s,at,at);
+}
+charAt <- function(s,at){
+  if(length(s) > 1 & length(at) == 1){
+    at <- rep(at,length(s));
+  }
+  if(length(at) > 1 & length(s) == 1){
+    s <- rep(s,length(at));
+  }
+  if(length(s) > 1){
+    sapply(1:length(s),function(i){ charAtOne(s[[i]],at[[i]]) })
+  } else {
+     charAtOne(s,at)
+  }
+}
+
+
+
+
+#Discrete version of uniform distribution. NOTE: inclusive limits.
+runifd <- function(n,min=0,max=1){
+  floor(runif(n=n,min=min,max=max+1));
+}
+
+draw.arrows <- function(x,y,dir = c("up","down","left","right"),cex=1,...){
+  strht <- strheight("X",cex=cex);
+  strwd <- strwidth("X",cex=cex);
+  
+  dir <- match.arg(dir);
+  
+  if(length(x) == 1 && length(y) > 1){
+    x <- rep(x,length(y));
+  } else if(length(y) == 1 && length(x) > 1){
+    y <- rep(y,length(x));
+  }
+  #x <- as.numeric(x);
+  #y <- as.numeric(y);
+  
+  if(dir == "up"){
+    segments(
+      x0 = x,
+      x1 = x-strwd/2,
+      y0 = y,
+      y1 = y-strht,
+      ...);
+    segments(
+      x0 = x,
+      x1 = x+strwd/2,
+      y0 = y,
+      y1 = y-strht,
+      ...);
+  } else if(dir == "down"){
+    segments(
+      x0 = x,
+      x1 = x-strwd/2,
+      y0 = y,
+      y1 = y+strht,
+      ...);
+    segments(
+      x0 = x,
+      x1 = x+strwd/2,
+      y0 = y,
+      y1 = y+strht,
+      ...);
+  } else if(dir == "left"){
+    segments(
+      x0 = x,
+      x1 = x+strwd,
+      y0 = y,
+      y1 = y+strht/2,
+      ...);
+    segments(
+      x0 = x,
+      x1 = x+strwd,
+      y0 = y,
+      y1 = y-strht/2,
+      ...);
+  } else if(dir == "right"){
+    segments(
+      x0 = x,
+      x1 = x-strwd,
+      y0 = y,
+      y1 = y+strht/2,
+      ...);
+    segments(
+      x0 = x,
+      x1 = x-strwd,
+      y0 = y,
+      y1 = y-strht/2,
+      ...);
+  } else {
+    stop("ERROR: Arrow direction not yet implemented!");
+  }
+}
+
 f.na <- function(x){
   ifelse(is.na(x),FALSE,x);
+}
+
+bad.to.na <- function(x){
+  ifelse(is.nan(x),NA,ifelse(is.finite(x),x,NA));
+}
+
+getAllOrdersOfTen <- function(from,to, skipBase = FALSE){
+  s <- if(skipBase) seq(1,9) else seq(1,10);
+  orders <- seq(floor(log10(from)),ceiling(log10(to)))
+  unlist(lapply(orders,function(ord){
+    s * 10 ^ ord
+  }))
+}
+getAllDecades <- function(from,to, skipBase = FALSE){
+  10 ^ seq(floor(log10(from)),ceiling(log10(to)))
+}
+
+
+getErrorFromPhred <- function(phredScore){
+  as.numeric(10) ^ (as.numeric(phredScore) / as.numeric(-10))
+}
+
+getPhredFromError <- function(errorRate){
+  round((-10) * log10(errorRate))
+}
+
+getNumericPhredFromError <- function(errorRate){
+  ((-10) * log10(errorRate))
 }
 
 wordwrap.string <- function(s, width){
@@ -224,13 +356,16 @@ autoselect.raster.device <- function(debugMode){
      if(debugMode) message(">     (rasterizingPlot) selecting png raster device.");
      rasterDev <- grDevices::png;
      outDev <- function(...){
-       rasterDev(units = "px", ...);
+       rasterDev(units="px",res=150,...);
      }
      return(outDev);
    } else if(is.available.raster.device("CairoPNG")){
      if(debugMode) message("selecting CairoPNG raster device.");
      rasterDev <- Cairo::CairoPNG;
-     return(rasterDev);
+     outDev <- function(...){
+       rasterDev(res=150,...);
+     }
+     return(outDev);
    } else {
      stop("Error: no viable raster (png) device found! Install package CairoPNG or reinstall R with png capabilities activated!");
    }
@@ -261,6 +396,7 @@ make.mixed.raster.vector.function <- function(use.raster.device = NULL, raster.h
   if(debugMode) message(">     (rasterizingPlot) Selecting temp file location: ",usetempfile);
   initRaster <- function(){
     if(debugMode) message(">     (rasterizingPlot) Writing temp file to",usetempfile);
+
     use.raster.device(filename = usetempfile, height=raster.height, width=raster.width, bg = "transparent", ...);
     if(debugMode) message(">     (rasterizingPlot) Temp file built.");
     par(mar = c(0,0,0,0));
@@ -368,6 +504,10 @@ timediff <- function(ts){
    return(as.numeric(Sys.time() - ts, units = "secs"));
 }
 
+
+
+
+
 getTimeAndDiff <- function(ts = NULL){
   if(is.null(ts)){
     return(paste0("[time: ",Sys.time(),"]"));
@@ -383,13 +523,29 @@ getTimeAndDiff <- function(ts = NULL){
   }
 }
 
-reportTimeAndDiff <- function(ts = NULL){
-  message(getTimeAndDiff(ts));
+reportTimeAndDiff <- function(ts = NULL, prefix = ""){
+  message(paste0(prefix, getTimeAndDiff(ts)));
+}
+
+runTimedFunction <- function(expr, title= "",debugMode = TRUE){
+    if(debugMode) cat(paste0(title,"..."));
+    if(debugMode) ts <- timestamp();
+    expr;
+    if(debugMode) message(paste0("done. ",getTimeAndDiff(ts)))
 }
 
 
 ####################################################################################
 ###   Minor Utility functions:
+
+leftPadString <- function(s,col=10){
+    padding <- lapply(pmax(0,col-nchar(s)),function(p){paste0(rep(" ",p),collapse="")});
+    paste0(padding,s);
+}
+rightPadString <- function(s,col=10){
+    padding <- lapply(pmax(0,col-nchar(s)),function(p){paste0(rep(" ",p),collapse="")});
+    paste0(s,padding);
+}
 
 removeLineBreaks <- function(s){
    gsub("\n"," ",s,fixed=TRUE)
@@ -422,29 +578,94 @@ cap.first <- function(w){
    return( paste0(toupper(substring(w,1,1)), substring(w,2)) );
 }
 
-limited.pretty <- function(axisLim){
-   pretty.axis <- pretty(axisLim);
+limited.pretty <- function(axisLim,...){
+   pretty.axis <- pretty(axisLim,...);
    pretty.axis[1] <- max( axisLim[1], pretty.axis[1]);
    pretty.axis[length(pretty.axis)] <- min(pretty.axis[length(pretty.axis)], axisLim[2])
    return(pretty.axis);
 }
+truncated.pretty <- function(axisLim,...){
+   pretty.axis <- pretty(axisLim,...);
+   return(pretty.axis[pretty.axis <= axisLim[2] & pretty.axis >= axisLim[1]]);
+}
 
 
 color2transparent <- function(someColor,alpha){
-  newColor<-col2rgb(someColor)
-  apply(newColor, 2, function(curcoldata){rgb(red=curcoldata[1], green=curcoldata[2],
-    blue=curcoldata[3],alpha=alpha, maxColorValue=255)})
+  newColor <- rbind(col2rgb(someColor),alpha);
+  apply(newColor, 2, function(curcoldata){rgb(red=curcoldata[1], green=curcoldata[2],blue=curcoldata[3],alpha=curcoldata[4], maxColorValue=255)})
 }
 
 
 
+####################################################################################
+#Performance tests:
+
+reportMemoryUsage <- function(res){
+  message("qc.data:");
+  leftCol <- max(c(nchar(names(res@qc.data)),nchar(names(res@calc.data))));
+  
+  mb.size <- sapply(names(res@qc.data),function(n){
+      format(object.size(res@qc.data[[n]]),"Mb");
+  })
+  rightCol <- max(nchar(mb.size));
+  
+  for(i in seq_along(names(res@qc.data))){
+      message("   ",rightPadString(names(res@qc.data)[i],leftCol)," = ",
+                    leftPadString(mb.size[i], rightCol))
+  }
+  
+  message("calc.data:");
+  
+  mb.size <- sapply(names(res@calc.data),function(n){
+      format(object.size(res@calc.data[[n]]),"Mb");
+  })
+  
+  for(i in seq_along(names(res@calc.data))){
+      message("   ",rightPadString(names(res@calc.data)[i],leftCol)," = ",
+                    leftPadString(mb.size[i], rightCol))
+  }
+}
 
 
 ####################################################################################
 ###   Text fitting functions:
 
+title.autofit.main <- function(main = NULL, cex = par("cex.main"), ...){
+  if(! is.null(main)){
+    cex <- fit.title(title.text = main, cex.main = cex);
+    title(main = main,cex.main=cex,...);
+  }
+}
+title.autofit.xlab <- function(xlab = NULL, cex = par("cex.lab"), ...){
+  if(! is.null(xlab)){
+    usr <- par("usr");
+    x.dist <- abs(usr[2] - usr[1]);
+    default.width <- strwidth(xlab, cex = cex);
+    if(default.width > x.dist){
+      cex <- fit.character.vector(strs=xlab, min.width = x.dist * 0.75, max.width = x.dist, max.width.per.char = x.dist / 10,max.cex=cex);
+    }
+    #message("xlab = \"",xlab,"\", cex = ",cex);
+    title(xlab=xlab,cex.lab=cex,...);
+  }
+}
+title.autofit.ylab <- function(ylab = NULL, cex = par("cex.lab"), ...){
+  if(! is.null(ylab)){
+    usr <- par("usr");
+    y.dist <- abs(usr[4] - usr[3]);
+    cex <- shrink.character.vector.VERT(strs=ylab, curr.cex=cex, max.height = y.dist);
+    #message("ylab = \"",ylab,"\", cex = ",cex);
+    title(ylab=ylab,cex.lab=cex,...);
+  }
+}
 
-fit.title <- function(title.text){
+title.autofit <- function(main = NULL, xlab=NULL,ylab=NULL,
+                          cex.main = par("cex.main"),cex.xlab = par("cex.lab"),cex.ylab = par("cex.lab"),...){
+  title.autofit.main(main=main,cex=cex.main,...);
+  title.autofit.xlab(xlab=xlab,cex=cex.xlab,...);
+  title.autofit.ylab(ylab=ylab,cex=cex.ylab,...);
+}
+
+fit.title <- function(title.text,cex.main = par("cex.main")){
   plt <- par("plt");
   usr <- par("usr");
   
@@ -454,22 +675,53 @@ fit.title <- function(title.text){
   extra.frac <- 1 + (1 - x.frac);
   out.dist <- x.dist * extra.frac;  
   
-  default.width <- strwidth(title.text, cex = par("cex.main"))
+  default.width <- strwidth(title.text, cex = cex.main)
   if(default.width > out.dist){
-    return( fit.character.vector.helper(title.text, curr.cex = par("cex.main"), min.width = out.dist * 0.8, max.width = out.dist * 0.975, max.width.per.char = Inf) );
+    return( fit.character.vector.helper(title.text, curr.cex = cex.main, min.width = out.dist * 0.8, max.width = out.dist * 0.975, max.width.per.char = Inf) );
   } else {
-    return(par("cex.main"));
+    return(cex.main);
   }
 }
 
-fit.vert <- function(title.text, default.cex = par("cex.ylab")){
+
+convertWidthToHeight <- function(x){
+  width.per.inch <-  strwidth("X",units="user") / strwidth("X",units="inches")
+  height.per.inch <- strheight("X",units="user") / strheight("X",units="inches")
+  return(x / width.per.inch * height.per.inch)
+}
+convertHeightToWidth <- function(x){
+  width.per.inch <-  strwidth("X",units="user") / strwidth("X",units="inches")
+  height.per.inch <- strheight("X",units="user") / strheight("X",units="inches")
+  return(x / height.per.inch * width.per.inch)
+}
+
+#Alternative version of strheight. Reports the height of a string when plotted with srt = 90. In other words the string width rotated by 90 degrees (in user coordinates).
+strheightSRT90 <- function(s, cex = NULL, ...){
+   return( strwidth(s, cex = cex, ...) *  strwidth("X",units="inches", cex = cex, ...) / strwidth("X",units="user", cex = cex, ...) * strheight("X",units="user", cex = cex, ...) / strheight("X",units="inches", cex = cex, ...) )
+}
+
+shrink.character.vector.VERT <- function(strs, curr.cex, max.height){
+  curr.height <- max(strheightSRT90(strs, cex = curr.cex))
+  while(curr.height > max.height){
+    curr.cex <- curr.cex * 0.9
+    curr.height <- max(strheightSRT90(strs, cex = curr.cex))
+  }
+  return(curr.cex)
+}
+
+fit.vertical <- function(title.text, default.cex = par("cex.lab")){
+  return(default.cex);
+  #TODO:
+  
   plt <- par("plt");
   usr <- par("usr");
   
   x.dist <- abs(usr[4] - usr[3]);
   x.frac <- abs(plt[4] - plt[3]);
   extra.frac <- 1 + (1 - x.frac);
-  out.dist <- x.dist * extra.frac;  
+  out.dist <- x.dist * extra.frac;
+  
+  
   
   default.width <- strwidth(title.text, cex = default.cex)
   if(default.width > out.dist){
@@ -479,10 +731,31 @@ fit.vert <- function(title.text, default.cex = par("cex.ylab")){
   }
 }
 
-fit.character.vector <- function(strs, min.width = 0.6, max.width = 0.95, max.width.per.char = 0.15, max.height = NULL){
+fit.vert <- function(title.text, default.cex = par("cex.lab")){
+  plt <- par("plt");
+  usr <- par("usr");
+  
+  x.dist <- abs(usr[4] - usr[3]);
+  x.frac <- abs(plt[4] - plt[3]);
+  extra.frac <- 1 + (1 - x.frac);
+  out.dist <- x.dist * extra.frac;
+  
+  default.width <- strwidth(title.text, cex = default.cex)
+  if(default.width > out.dist){
+    return( fit.character.vector.helper(title.text, curr.cex = default.cex, min.width = out.dist * 0.8, max.width = out.dist, max.width.per.char = Inf) );
+  } else {
+    return(default.cex);
+  }
+}
+
+fit.character.vector <- function(strs, min.width = 0.6, max.width = 0.95, max.width.per.char = 0.15, max.height = NULL,max.cex = NULL){
    curr.cex <- 1;
-   return(fit.character.vector.helper(strs, curr.cex = curr.cex, min.width = min.width, max.width = max.width, max.width.per.char = max.width.per.char,max.height=max.height));
-   
+   new.cex <- fit.character.vector.helper(strs, curr.cex = curr.cex, min.width = min.width, max.width = max.width, max.width.per.char = max.width.per.char,max.height=max.height)
+   if(!is.null(new.cex)){
+     return(min(c(new.cex,max.cex)))
+   } else {
+     return(new.cex);
+   }
 }
 
 #fit.character.vector.helper <- function(strs, curr.cex, min.width, max.width, max.width.per.char){
@@ -548,7 +821,6 @@ fit.character.vector.helper <- function(strs, curr.cex, min.width, max.width, ma
 
 
 #############################################
-
 #Expansion of axis.break from the plotrix package
 # adds the ability to modify additional graphical parameters, and fixes a bug where
 # this function globally overrides certain graphical parameters via par().
@@ -678,3 +950,43 @@ qorts.axis.break <- function (axis = 1, breakpos = NULL, pos = NA, bgcol = "whit
     
     #par(xpd = FALSE)
 }
+
+
+
+
+cheat.sheet <- function(lim = 122,cex=1,cex.text=cex){
+  if(lim <= 25){
+    pch.set <- 1:lim;
+  } else {
+    pch.set <- c(1:25,32:lim);
+  }
+  lim <- length(pch.set);
+  
+  plot.new();
+  plot.window(xlim=c(0,1),ylim=c(0,1));
+  charht <- strheight("A",cex=cex.text) * 1.3;
+  charwd <- strwidth("A",cex=cex.text)
+  ht <- abs(par("usr")[4] - par("usr")[3])
+  col.len <- ceiling(ht / charht)
+  nc <- ceiling(lim/ col.len);
+  
+  chunks <- split(pch.set, ceiling(nc * seq_along(1:lim)/ (lim) ))
+  col.len <- length(chunks[[1]]);
+  col.Y <- rev(seq(from=par("usr")[3] + charht,to=par("usr")[4] - charht,length.out=col.len));
+  col.X <- seq(from=par("usr")[1]+charwd,to=par("usr")[2]-charwd,length.out=nc + 1);
+  
+  for(j in seq_len(nc)){
+    chunk <- chunks[[j]];
+    points(rep(col.X[j],length(chunk)),col.Y[1:length(chunk)],pch=chunk);
+    text(rep(col.X[j],length(chunk)) + charwd * 1.5,col.Y[1:length(chunk)],paste0(" ",chunk));
+  }
+  points(mean(par("usr")[1:2]),par("usr")[3]-charht,pch=3,col="gray",xpd=NA);
+  text(mean(par("usr")[1:2]),par("usr")[3]-charht,"(0,0)",adj=c(0,0),xpd=NA);
+  text(mean(par("usr")[1:2]),par("usr")[3]-charht,"(0,1)",adj=c(0,1),xpd=NA);
+  text(mean(par("usr")[1:2]),par("usr")[3]-charht,"(1,0)",adj=c(1,0),xpd=NA);
+  text(mean(par("usr")[1:2]),par("usr")[3]-charht,"(1,1)",adj=c(1,1),xpd=NA);
+  text(mean(par("usr")[1:2]) - charwd * 4,par("usr")[3]-charht,"adj: ",xpd=NA);
+}
+
+
+

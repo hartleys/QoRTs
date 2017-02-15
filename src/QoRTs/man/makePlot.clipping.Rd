@@ -9,11 +9,16 @@
    aligned reads.
 }
 \usage{
-  makePlot.clipping(plotter, rate.per.million = FALSE, 
-                r2.buffer = NULL, 
-                debugMode, singleEndMode,
-                rasterize.plotting.area = FALSE, raster.height = 1000, raster.width = 1000,
-                ...)
+  makePlot.clipping(plotter, 
+                 rate.per.million = FALSE,
+                 use.readLength.denominator = TRUE, 
+                 r2.buffer,
+                 debugMode, 
+                 singleEndMode, 
+                 rasterize.plotting.area = FALSE, 
+                 raster.height = 1000, 
+                 raster.width = 1000, 
+                 plot= TRUE, ...)
 }
 \arguments{
   \item{plotter}{
@@ -24,6 +29,9 @@
     axis to rate-per-million-reads, rather than rate-per-read.
     Some people may find the results more readable this way, even
     though the plots themselves will appear the same.
+  }
+  \item{use.readLength.denominator}{
+    Logical. If TRUE, then use the total number of reads with at least the given position's length as the denominator of the rate. This is only relevant when the dataset has variable-length trimming prior to alignment.
   }
   \item{r2.buffer}{
     Buffer space to place between the plotting of read 1
@@ -50,6 +58,9 @@
   \item{raster.width}{
       Numeric integer. If \code{rasterize.plotting.area} is \code{TRUE}, then this
       will set the width of the rasterized plot, in pixels.
+  }
+  \item{plot}{
+        Logical. If FALSE, suppress plotting and return \code{TRUE} if and only if the data is present in the dataset to allow plotting. Useful to automatically filter out missing data plots.
   }
   \item{\dots}{ 
     Arguments to be passed to methods, such as

@@ -32,8 +32,8 @@ object qcCigarDistribution {
   val cigarOpList : Vector[CigarOperator] = Vector(CigarOperator.DELETION, CigarOperator.HARD_CLIP, CigarOperator.INSERTION, CigarOperator.MATCH_OR_MISMATCH, CigarOperator.PADDING, CigarOperator.SKIPPED_REGION, CigarOperator.SOFT_CLIP);
 
   
-  def writePositionOpDistribution(pod : Array[scala.collection.mutable.Map[(CigarOperator,Int),Int]], outfile : String){
-    val writer = openWriterSmart_viaGlobalParam(outfile);
+  def writePositionOpDistribution(pod : Array[scala.collection.mutable.Map[(CigarOperator,Int),Int]], writer : WriterUtil){
+    //val writer = openWriterSmart_viaGlobalParam(outfile);
     
     writer.write("CYCLE");
     for(op <- cigarOpList){
@@ -50,10 +50,10 @@ object qcCigarDistribution {
     
     writer.close();
   }
-  def writeOpLengthDistribution(old : scala.collection.mutable.Map[(CigarOperator,Int),Int], outfile : String){
-    val writer = openWriterSmart_viaGlobalParam(outfile);
+  def writeOpLengthDistribution(old : scala.collection.mutable.Map[(CigarOperator,Int),Int], writer : WriterUtil){
+    //val writer = openWriterSmart_viaGlobalParam(outfile);
     
-    writer.write("OP	LEN	CT\n");
+    writer.write("OP\tLEN\tCT\n");
     for(op <- cigarOpList){
        val keys = ((old.keys.toSeq.filter((x) => x._1 == op)).toSet ++ Set((op,1))).toSeq.sorted;
        
@@ -101,7 +101,7 @@ object qcCigarDistribution {
 
 }
 
-class qcCigarDistribution(isSingleEnd : Boolean, readLen : Int)  extends QCUtility[Unit]  {
+class qcCigarDistribution(isSingleEnd : Boolean, readLen : Int,variableReadLen : Boolean)  extends QCUtility[Unit]  {
   reportln("> Init CigarOpDistribution Utility","debug");
 
   val readLength : Int = readLen;
@@ -116,25 +116,97 @@ class qcCigarDistribution(isSingleEnd : Boolean, readLen : Int)  extends QCUtili
   val opLengthDistribution1 : scala.collection.mutable.Map[(CigarOperator,Int),Int] = new AnyRefMap[(CigarOperator,Int),Int]().withDefault(x => 0);
   val opLengthDistribution2 : scala.collection.mutable.Map[(CigarOperator,Int),Int] = new AnyRefMap[(CigarOperator,Int),Int]().withDefault(x => 0);
   
+  val readLenDistribution1 : Array[Int] = Array.ofDim[Int](readLen+1);
+  val readLenDistribution2 : Array[Int] = Array.ofDim[Int](readLen+1);
+  
+  
+  
+  
   def runOnReadPair(r1 : SAMRecord, r2 : SAMRecord, readNum : Int){
       //if(useRead(r1) & useRead(r2)){
         val r1c = r1.getCigar();
         qcCigarDistribution.readCigar(r1c,positionOpDistribution1, opLengthDistribution1, r1.getReadNegativeStrandFlag());
+        if(variableReadLen) readLenDistribution1(r1.getReadLength()) += 1;
         
         if(! isSingleEnd){
           val r2c = r2.getCigar();
           qcCigarDistribution.readCigar(r2c,positionOpDistribution2, opLengthDistribution2, r2.getReadNegativeStrandFlag());
+          if(variableReadLen) readLenDistribution2(r2.getReadLength()) += 1;
         }
       //}
   }
   
-  def writeOutput(outfile : String, summaryWriter : WriterUtil){
-    qcCigarDistribution.writePositionOpDistribution( positionOpDistribution1 , outfile + ".cigarOpDistribution.byReadCycle.R1.txt");
-    qcCigarDistribution.writeOpLengthDistribution(opLengthDistribution1, outfile + ".cigarOpLengths.byOp.R1.txt");
+  def writeOutput(outfile : String, summaryWriter : WriterUtil, docWriter : DocWriterUtil = null){
+    
+    //for(op <- cigarOpList){
+    //  writer.write("	"+op.toString + "_S	"+op.toString + "_M	"+op.toString +"_E	"+op.toString+"_B");
+    //}
+    
+          /*
+          (List(("CYCLE","String","The read cycle (ie, position in the read)")) ++ qcCigarDistribution.cigarOpList.foldLeft(List()){ case (soFar,op) => 
+            soFar ++ List[String]((op.toString+"_S","",""),
+                                  (op.toString+"_M","",""),
+                                  (op.toString+"_E","",""),
+                                  (op.toString+"_B","","")
+                                 ) 
+          }):_**/
+    
+    if(true){
+      val writer = createOutputFile(outfile,"cigarOpDistribution.byReadCycle.R1.txt","",docWriter,
+          ("CYCLE","int","The read cycle (ie, position in the read)"),
+          ("<X>_<Y>","int","The number of reads with cigar op <X> of type <Y> at position <CYCLE>. <X> indicates the cigar operation, <Y> indicates whether it is the start, end, middle, or a single-base cigar op."),
+          ("<X>_S","int","The number of reads that have cigar op <X> START at position <CYCLE>."),
+          ("<X>_M","int","The number of reads that have cigar op <X> that span position <CYCLE>."),
+          ("<X>_E","int","The number of reads that have cigar op <X> END at position <CYCLE>."),
+          ("<X>_B","int","The number of reads with a single-base-pair-long op <X> at position <CYCLE>"),
+          ("D_<Y>","int","The 'D' cigar operation, indicating a DELETION"),
+          ("H_<Y>","int","The 'H' cigar operation, indicating HARD CLIP"),
+          ("I_<Y>","int","The 'I' cigar operation, indicating INSERTION"),
+          ("M_<Y>","int","The 'M' cigar operation, indicating ALIGNED REGION (match or mismatch)"),
+          ("P_<Y>","int","The 'P' cigar operation, indicating PADDING"),
+          ("N_<Y>","int","The 'N' cigar operation, indicating SKIPPED REGION"),
+          ("S_<Y>","int","The 'H' cigar operation, indicating SOFT CLIP")
+      );
+      qcCigarDistribution.writePositionOpDistribution( positionOpDistribution1 , writer);
+    }
+    if(true){
+      val writer = createOutputFile(outfile,"cigarOpLengths.byOp.R1.txt","",docWriter,
+          ("OP","char","The cigar operation"),
+          ("LEN","int","The length"),
+          ("CT","int","The number of occurances of a cigar operation of type <OP> and length <LEN>.")
+      );
+      qcCigarDistribution.writeOpLengthDistribution(opLengthDistribution1, writer);
+    }
     
     if(! isSingleEnd){
-      qcCigarDistribution.writePositionOpDistribution( positionOpDistribution2 , outfile + ".cigarOpDistribution.byReadCycle.R2.txt");
-      qcCigarDistribution.writeOpLengthDistribution(   opLengthDistribution2,    outfile + ".cigarOpLengths.byOp.R2.txt");
+      if(true){
+        val writer = createOutputFile(outfile,"cigarOpDistribution.byReadCycle.R2.txt","",docWriter,
+          ("CYCLE","int","The read cycle (ie, position in the read)"),
+          ("<X>_<Y>","int","The number of reads with cigar op <X> of type <Y> at position <CYCLE>. <X> indicates the cigar operation, <Y> indicates whether it is the start, end, middle, or a single-base cigar op."),
+          ("<X>_S","int","The number of reads that have cigar op <X> START at position <CYCLE>."),
+          ("<X>_M","int","The number of reads that have cigar op <X> that span position <CYCLE>."),
+          ("<X>_E","int","The number of reads that have cigar op <X> END at position <CYCLE>."),
+          ("<X>_B","int","The number of reads with a single-base-pair-long op <X> at position <CYCLE>"),
+          ("D_<Y>","int","The 'D' cigar operation, indicating a DELETION"),
+          ("H_<Y>","int","The 'H' cigar operation, indicating HARD CLIP"),
+          ("I_<Y>","int","The 'I' cigar operation, indicating INSERTION"),
+          ("M_<Y>","int","The 'M' cigar operation, indicating ALIGNED REGION (match or mismatch)"),
+          ("P_<Y>","int","The 'P' cigar operation, indicating PADDING"),
+          ("N_<Y>","int","The 'N' cigar operation, indicating SKIPPED REGION"),
+          ("S_<Y>","int","The 'H' cigar operation, indicating SOFT CLIP")
+        );
+        qcCigarDistribution.writePositionOpDistribution( positionOpDistribution2 , writer);
+      }
+      if(true){
+        val writer = createOutputFile(outfile,"cigarOpLengths.byOp.R2.txt","",docWriter,
+          ("OP","char","The cigar operation"),
+          ("LEN","int","The length"),
+          ("CT","int","The number of occurances of a cigar operation of type <OP> and length <LEN>.")
+        );
+        qcCigarDistribution.writeOpLengthDistribution(opLengthDistribution2, writer);
+      }
+      //qcCigarDistribution.writePositionOpDistribution( positionOpDistribution2 , outfile + ".cigarOpDistribution.byReadCycle.R2.txt");
+      //qcCigarDistribution.writeOpLengthDistribution(   opLengthDistribution2,    outfile + ".cigarOpLengths.byOp.R2.txt");
     }
   }
   

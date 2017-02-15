@@ -22,7 +22,7 @@ object qcStrandTest {
     });
   }
   
-  def strandTestPair(r1 : SAMRecord, r2 : SAMRecord, featureArray : GenomicArrayOfSets[String]) : (Int, Int) = {
+  def strandTestPair(r1 : SAMRecord, r2 : SAMRecord, featureArray : GenomicArrayOfSets[String]) : Option[(Int, Int)] = {
     // 0 = no feature.
     // 1 = feature on read strand
     // 2 = feature on opposite strand
@@ -36,7 +36,7 @@ object qcStrandTest {
     val r1t = if(r1A && r1B) 3 else if(r1A) 1 else if(r1B) 2 else 0;
     val r2t = if(r2A && r2B) 3 else if(r2A) 2 else if(r2B) 1 else 0;
     
-    return (r1t, r2t);
+    return Some((r1t, r2t));
     
     //(strandTestSingleRead(r1,featureArray),strandTestSingleRead(r2,featureArray));
   }
@@ -68,10 +68,10 @@ class qcStrandTest(isSingleEnd : Boolean, anno_holder : qcGtfAnnotationBuilder, 
   var ambig_noFeature = 0;
   var ambig_other = 0;
   
+   
   def runOnReadPair(r1 : SAMRecord, r2 : SAMRecord, readNum : Int) : String = {
     if(! isSingleEnd){
-      val (r1t, r2t) = qcStrandTest.strandTestPair(r1,r2,strandedGeneArray);
-    
+      val (r1t, r2t) = qcStrandTest.strandTestPair(r1,r2,strandedGeneArray).get;
       if( r1t == 1 && r2t == 2){
         fr_secondStrand += 1;
         return("fr_secondStrand");
@@ -108,7 +108,7 @@ class qcStrandTest(isSingleEnd : Boolean, anno_holder : qcGtfAnnotationBuilder, 
       }
     }
   }
-  def writeOutput(outfile : String, summaryWriter : WriterUtil){
+  def writeOutput(outfile : String, summaryWriter : WriterUtil, docWriter : DocWriterUtil = null){
     val total = fr_firstStrand + fr_secondStrand;
     val ratio = fr_firstStrand.toDouble / total.toDouble;
 
@@ -169,12 +169,12 @@ class qcStrandTest(isSingleEnd : Boolean, anno_holder : qcGtfAnnotationBuilder, 
                  "         is very wrong with your dataset and/or transcript annotation.","warn");
     }
     
-    summaryWriter.write("StrandTest_frFirstStrand	"+fr_firstStrand+"\n");
-    summaryWriter.write("StrandTest_frSecondStrand	"+fr_secondStrand+"\n");
-    summaryWriter.write("StrandTest_ambig_genesFountOnBothStrands	"+ambig_featuresFoundOnBothStrands+"\n");
-    summaryWriter.write("StrandTest_ambig_noGenes	"+ambig_noFeature+"\n");
-    summaryWriter.write("StrandTest_ambig_other	"+ambig_other+"\n");
-    summaryWriter.write("StrandTest_STRANDEDNESS_MATCHES_INFERRED	" + strandedness_ok +"\n")
+    summaryWriter.write("StrandTest_frFirstStrand	"+fr_firstStrand+"\tNumber of reads or read-pairs that match the fr_FirstStrand strandedness rule\n");
+    summaryWriter.write("StrandTest_frSecondStrand	"+fr_secondStrand+"\tNumber of reads or read-pairs that match the fr_secondstrand strandedness rule\n");
+    summaryWriter.write("StrandTest_ambig_genesFountOnBothStrands	"+ambig_featuresFoundOnBothStrands+"\tNumber of reads or read-pairs where the strandedness is ambiguous due to there being genes on both strands\n");
+    summaryWriter.write("StrandTest_ambig_noGenes	"+ambig_noFeature+"\tNumber of reads or read-pairs where the strandedness is ambiguous due to there being no known genes.\n");
+    summaryWriter.write("StrandTest_ambig_other	"+ambig_other+"\tNumebr of reads or read-pairs where the strandedness is ambiguous due to other reasons\n");
+    summaryWriter.write("StrandTest_STRANDEDNESS_MATCHES_INFERRED	" + strandedness_ok +"\t1 if the strandedness appears to match the strandedness mode, 0 otherwise.\n")
   }
   
   def getUtilityName : String = "StrandCheck";

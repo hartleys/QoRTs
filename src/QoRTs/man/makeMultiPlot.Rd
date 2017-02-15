@@ -7,6 +7,7 @@
 \alias{makeMultiPlot.colorBySample}
 \alias{makeMultiPlot.highlightSample}
 \alias{makeMultiPlot.highlightSample.colorByLane}
+\alias{makeMultiPlot.withPlotter}
 \title{
    Generating summary multi-plots
 }
@@ -14,137 +15,212 @@
    Creates a large multi-frame summary plot, or a report PDF file.
 }
 \usage{
-  makeMultiPlot.basic(res, outfile,
-                      outfile.dir = "./", 
-                      outfile.prefix = "plot-basic",
-                      outfile.ext,
-                      plotter.params = list(), 
-                      plot.device.name = "curr", 
-                      plotting.device.params = list(),
-                      verbose = TRUE, 
-                      debugMode,
-                      rasterize.large.plots,
-                      rasterize.medium.plots,
-                      raster.height = 1000, 
-                      raster.width = 1000,
-                      separatePlots = FALSE,
-                      exclude.autosomes.chrom.rate.plot = TRUE,
-                      chromosome.name.style = "UCSC",
-                      fig.res = 150, fig.base.height.inches = 7,
-                      insertSize.plot.xlim,
-                      \dots)
-                      
-  makeMultiPlot.colorByGroup(res, outfile,
-                      outfile.dir = "./", 
-                      outfile.prefix = "plot-colorByGroup",
-                      outfile.ext,
-                      plotter.params = list(), 
-                      plot.device.name = "curr", 
-                      plotting.device.params = list(),
-                      verbose = TRUE, 
-                      debugMode,
-                      rasterize.large.plots,
-                      rasterize.medium.plots,
-                      raster.height = 1000, 
-                      raster.width = 1000,
-                      separatePlots = FALSE,
-                      exclude.autosomes.chrom.rate.plot = TRUE,
-                      chromosome.name.style = "UCSC",
-                      fig.res = 150, fig.base.height.inches = 7,
-                      insertSize.plot.xlim,
-                      \dots)
-                      
-  makeMultiPlot.colorByLane(res, outfile,
-                      outfile.dir = "./", 
-                      outfile.prefix = "plot-colorByLane",
+  makeMultiPlot.basic(res,
+                      outfile, 
+                      outfile.dir = "./",
+                      outfile.prefix = "plot-basic", 
                       outfile.ext, 
                       plotter.params = list(), 
                       plot.device.name = "curr", 
                       plotting.device.params = list(),
                       verbose = TRUE, 
-                      debugMode,
-                      rasterize.large.plots,
+                      debugMode, 
+                      rasterize.large.plots, 
                       rasterize.medium.plots,
-                      raster.height = 1000, 
-                      raster.width = 1000,
+                      raster.height = 1050, 
+                      raster.width = 1050,
                       separatePlots = FALSE,
                       exclude.autosomes.chrom.rate.plot = TRUE,
                       chromosome.name.style = "UCSC",
                       fig.res = 150, fig.base.height.inches = 7,
                       insertSize.plot.xlim,
-                      \dots)                
+                      sequencing.type = c("RNA","Exome","Genome"),
+                      nvc.mark.points = TRUE,
+                      maxColumns,
+                      maxRows,
+                      plotList,
+                      labelPlots = TRUE,
+                      plot = TRUE,
+                      \dots)
+                      
+  makeMultiPlot.colorByGroup(res,
+                      outfile, 
+                      outfile.dir = "./",
+                      outfile.prefix = "plot-colorByGroup", 
+                      outfile.ext, 
+                      plotter.params = list(), 
+                      plot.device.name = "curr", 
+                      plotting.device.params = list(),
+                      verbose = TRUE, 
+                      debugMode, 
+                      rasterize.large.plots, 
+                      rasterize.medium.plots,
+                      raster.height = 1050, 
+                      raster.width = 1050,
+                      separatePlots = FALSE,
+                      exclude.autosomes.chrom.rate.plot = TRUE,
+                      chromosome.name.style = "UCSC",
+                      fig.res = 150, fig.base.height.inches = 7,
+                      insertSize.plot.xlim,
+                      sequencing.type = c("RNA","Exome","Genome"),
+                      nvc.mark.points = TRUE,
+                      maxColumns,
+                      maxRows,
+                      plotList,
+                      labelPlots = TRUE,
+                      plot = TRUE,
+                      ...)
+                      
+  makeMultiPlot.colorByLane(res,
+                      outfile, 
+                      outfile.dir = "./",
+                      outfile.prefix = "plot-colorByLane", 
+                      outfile.ext, 
+                      plotter.params = list(), 
+                      plot.device.name = "curr", 
+                      plotting.device.params = list(),
+                      verbose = TRUE, 
+                      debugMode, 
+                      rasterize.large.plots, 
+                      rasterize.medium.plots,
+                      raster.height = 1050, 
+                      raster.width = 1050,
+                      separatePlots = FALSE,
+                      exclude.autosomes.chrom.rate.plot = TRUE,
+                      chromosome.name.style = "UCSC",
+                      fig.res = 150, fig.base.height.inches = 7,
+                      insertSize.plot.xlim,
+                      sequencing.type = c("RNA","Exome","Genome"),
+                      nvc.mark.points = TRUE,
+                      maxColumns,
+                      maxRows,
+                      plotList,
+                      labelPlots = TRUE,
+                      plot = TRUE,
+                      \dots)               
 
-  makeMultiPlot.colorBySample(res, outfile,
-                      outfile.dir = "./", 
-                      outfile.prefix = "plot-colorBySample",
+  makeMultiPlot.colorBySample(res,
+                      outfile, 
+                      outfile.dir = "./",
+                      outfile.prefix = "plot-colorByLane", 
                       outfile.ext, 
                       plotter.params = list(), 
                       plot.device.name = "curr", 
                       plotting.device.params = list(),
                       verbose = TRUE, 
-                      debugMode,
-                      rasterize.large.plots,
+                      debugMode, 
+                      rasterize.large.plots, 
                       rasterize.medium.plots,
-                      raster.height = 1000, 
-                      raster.width = 1000,
+                      raster.height = 1050, 
+                      raster.width = 1050,
                       separatePlots = FALSE,
                       exclude.autosomes.chrom.rate.plot = TRUE,
                       chromosome.name.style = "UCSC",
                       fig.res = 150, fig.base.height.inches = 7,
                       insertSize.plot.xlim,
+                      sequencing.type = c("RNA","Exome","Genome"),
+                      nvc.mark.points = TRUE,
+                      maxColumns,
+                      maxRows,
+                      plotList,
+                      labelPlots = TRUE,
+                      plot = TRUE,
+                      \dots)
+
+  makeMultiPlot.highlightSample(res, curr.sample,
+                      outfile, 
+                      outfile.dir = "./",
+                      outfile.prefix = paste0("plot-sampleHL-",curr.sample), 
+                      outfile.ext, 
+                      plotter.params = list(), 
+                      plot.device.name = "curr", 
+                      plotting.device.params = list(),
+                      verbose = TRUE, 
+                      debugMode, 
+                      rasterize.large.plots, 
+                      rasterize.medium.plots,
+                      raster.height = 1050, 
+                      raster.width = 1050,
+                      separatePlots = FALSE,
+                      exclude.autosomes.chrom.rate.plot = TRUE,
+                      chromosome.name.style = "UCSC",
+                      fig.res = 150, fig.base.height.inches = 7,
+                      insertSize.plot.xlim,
+                      sequencing.type = c("RNA","Exome","Genome"),
+                      nvc.mark.points = TRUE,
+                      maxColumns,
+                      maxRows,
+                      plotList,
+                      labelPlots = TRUE,
+                      plot = TRUE,
+                      \dots) 
+
+  makeMultiPlot.highlightSample.colorByLane(res, curr.sample,
+                      outfile, 
+                      outfile.dir = "./",
+                      outfile.prefix = paste0("plot-sampleHL-coloredByLane-",curr.sample), 
+                      outfile.ext, 
+                      plotter.params = list(), 
+                      plot.device.name = "curr", 
+                      plotting.device.params = list(),
+                      verbose = TRUE, 
+                      debugMode, 
+                      rasterize.large.plots, 
+                      rasterize.medium.plots,
+                      raster.height = 1050, 
+                      raster.width = 1050,
+                      separatePlots = FALSE,
+                      exclude.autosomes.chrom.rate.plot = TRUE,
+                      chromosome.name.style = "UCSC",
+                      fig.res = 150, fig.base.height.inches = 7,
+                      insertSize.plot.xlim,
+                      sequencing.type = c("RNA","Exome","Genome"),
+                      nvc.mark.points = TRUE,
+                      maxColumns,
+                      maxRows,
+                      plotList,
+                      labelPlots = TRUE,
+                      plot = TRUE,
                       \dots)  
 
-  makeMultiPlot.highlightSample(res,
-                      curr.sample,
-                      outfile,
-                      outfile.dir = "./", 
-                      outfile.prefix,
+  makeMultiPlot.withPlotter(plotter, 
+                      res = plotter$res, 
+                      outfile,  
+                      outfile.dir = "./",
+                      outfile.prefix = "plot-custom", 
                       outfile.ext, 
                       plotter.params = list(), 
                       plot.device.name = "curr", 
                       plotting.device.params = list(),
                       verbose = TRUE, 
-                      debugMode,
-                      rasterize.large.plots,
+                      debugMode, 
+                      rasterize.large.plots, 
                       rasterize.medium.plots,
-                      raster.height = 1000, 
-                      raster.width = 1000,
+                      raster.height = 1050, 
+                      raster.width = 1050,
                       separatePlots = FALSE,
                       exclude.autosomes.chrom.rate.plot = TRUE,
                       chromosome.name.style = "UCSC",
                       fig.res = 150, fig.base.height.inches = 7,
                       insertSize.plot.xlim,
-                      \dots)   
-
-  makeMultiPlot.highlightSample.colorByLane(res,
-                      curr.sample,
-                      outfile,
-                      outfile.dir = "./", 
-                      outfile.prefix,
-                      outfile.ext, 
-                      plotter.params = list(), 
-                      plot.device.name = "curr", 
-                      plotting.device.params = list(),
-                      verbose = TRUE, 
-                      debugMode,
-                      rasterize.large.plots,
-                      rasterize.medium.plots,
-                      raster.height = 1000, 
-                      raster.width = 1000,
-                      separatePlots = FALSE,
-                      exclude.autosomes.chrom.rate.plot = TRUE,
-                      chromosome.name.style = "UCSC",
-                      fig.res = 150, fig.base.height.inches = 7,
-                      insertSize.plot.xlim,
-                      \dots)   
+                      sequencing.type = c("RNA","Exome","Genome"),
+                      nvc.mark.points = TRUE,
+                      maxColumns,
+                      maxRows,
+                      plotList,
+                      labelPlots = TRUE,
+                      plot = TRUE,
+                      \dots)
 
 }
 \arguments{
 
-
   \item{res}{
     A \code{QoRT_QC_Results} object, created by 
     \code{\link{read.qc.results.data}}.
+  }
+  \item{plotter}{
+    A \code{QoRT_Plotter} reference object. See \code{\link{build.plotter}}.
   }
   \item{curr.sample}{
     A character string. For the sample highlight summary plots,
@@ -268,6 +344,27 @@
     but there are always situations where the default behavior is not ideal. Using this parameter you can set
     it explicitly.
   }
+  \item{nvc.mark.points}{
+    Logical. If TRUE, then points should be marked with shapes on the NVC plots.
+  }
+  \item{sequencing.type}{
+      The type of sequencing data being analyzed. This only changes the default plot set, which can be overriden with the \code{plotList} parameter.
+  }
+  \item{maxColumns}{
+    If set, QoRTs will attempt to create a multiplot that has (at most) maxColumns columns. Extra rows will be added to fit all the plots, as needed.
+  }
+  \item{maxRows}{
+    If set, QoRTs will attempt to create a multiplot that has (at most) maxRows rows. Extra columns will be added to fit all the plots as needed. To set the number of rows and columns manually, you can set both maxColumns and maxRows.
+  }
+  \item{plotList}{
+    The list of desired plots.
+  }
+  \item{labelPlots}{
+    Logical. If TRUE, then label each plot with a letter.
+  }
+  \item{plot}{
+    Logical. If FALSE, do not create any plots. (In other words, do nothing but test the ability to create plots).
+  } 
   \item{\dots}{ 
     Arguments to be passed to methods, such as
     \link{graphical parameters} (see \code{\link{par}}).
@@ -278,7 +375,7 @@
     plots and graphs.
     
     For devices pdf and CairoPDF, this function will produce a multi-page document
-    suitable for printing, with 6 panels on each page.
+    suitable for printing, with (by default) 6 panels on each page.
     
     Note that for all vector devices (svg, pdf, and CairoPDF), by default, 
     QoRTs will attempt to load the \code{png} package. If this package is 

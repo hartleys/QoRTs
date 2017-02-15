@@ -24,7 +24,7 @@ import internalUtils.optionHolder._;
 import scala.collection.parallel.immutable.ParVector;
 
 object runAllQC {
-  
+   
   final val QC_DEFAULT_ON_FUNCTION_MAP : scala.collection.immutable.Map[String,String] = Map(
                       ("InsertSize"                -> "Insert size distribution (paired-end data only)."),
                       ("NVC"                       -> "Nucleotide-vs-Cycle counts."),
@@ -45,10 +45,20 @@ object runAllQC {
                       ("writeClippedNVC"           -> "Write NVC file containing clipped sequences."),
                       ("writeBiotypeCounts"        -> "Write a table listing read counts for each gene BioType (uses the optional \"gene_biotype\" GTF attribute)."),
                       ("chromCounts"               -> "Calculate chromosome counts"),
-                      ("writeSpliceExon"           -> "Synonym for function \"writeJunctionSeqCounts\" (for backwards-compatibility)")
+                      ("readLengthDistro"          -> "Tabulates the distribution of read lengths. "),
+                      ("writeSpliceExon"           -> "Synonym for function \"writeJunctionSeqCounts\" (for backwards-compatibility)"),
+                      ("cigarLocusCounts"          -> "BETA: This function is still undergoing basic testing. It is not intended for production use at this time."),
+                      ("overlapMatch"              -> "BETA: This function calculates the matching of overlapping sections of paired reads.")
   );
   
   final val QC_DEFAULT_OFF_FUNCTION_MAP : scala.collection.immutable.Map[String,String] = Map(
+                      ("calcOnTarget"              -> "BETA: requires --targetRegionBed parameter. This function calculates the rates at which reads intersect with the On-Target area. Intended for whole exome sequencing data. Make sure to use the --targetRegionBed parameter or else this function will deactivate! (Default: ON iff targetRegionBed param is found)"),
+                      ("referenceMatch"            -> "BETA: requires --genomeFA parameter. This function calculates the matching against the reference. Requires the specification of genome fasta file(s). REQUIRES COORDINATE-SORTED BAM FILES! REQUIRES THAT FA AND BAM HAVE THE SAME CHROMOSOME ORDERING! (Default: ON iff genomeFA param is found)"),
+                      ("fastqUtils"                -> "BETA: requires --rawfastq parameter.  Adds additional tests that use the supplied raw fastq file. Requires that one (or two) fastq files be supplied. (Default: ON iff rawfastq param is found)"),
+
+                      ("writeDocs"                 -> "Writes a QC.documentation.txt file that documents all output files."),
+                      
+
                       ("FPKM"                      -> "Write FPKM values. Note: FPKMs are generally NOT the recommended normalization method. We recommend using a more advanced normalization as provided by DESeq, edgeR, CuffLinks, or similar (default: OFF)"),
                       ("annotatedSpliceExonCounts" -> "Write counts for exons, known-splice-junctions, and genes, with annotation columns indicating chromosome, etc (default: OFF)"),
                       ("makeWiggles"               -> "Write \"wiggle\" coverage files with 100-bp window size. Note: this REQUIRES that the --chromSizes parameter be included! (default: OFF)"),
@@ -56,10 +66,14 @@ object runAllQC {
                       ("makeAllBrowserTracks"      -> "Write both the \"wiggle\" and the splice-junction bed files (default: OFF)"),
                       ("calcDetailedGeneCounts"    -> "Calculate more detailed read counts for each gene, counting the number of reads that cover introns, cross-strand, etc (default: OFF)"),
                       ("cigarMatch"                -> "Work-In-Progress: this function is a placeholder for future functionality, and is not intended for use at this time. (default: OFF)"),
-                      ("cigarLocusCounts"          -> "BETA: This function is still undergoing basic testing. It is not intended for production use at this time. (default: OFF)")
+                      ("writeGeneBodyIv"           -> "Writes an optional additional file detailing the intervals used in the gene-body coverage calculations (\"QC.geneBodyCoverage.DEBUG.intervals.txt.gz\") (default: OFF)"),
+                      ("testDataDump"              -> "EXPERIMENTAL: This function dumps a bunch of information for internal testing purposes. NOT FOR GENERAL USE! (default: OFF)"),
+                      ("mismatchEngine"            -> "Internal module that runs overlap/reference mismatch calculations. Automatically included on any runs that include these functions.")
   );
   
   final val QC_HIDDEN_BETA_FUNCTION_MAP : scala.collection.immutable.Map[String,String] = Map(
+                      ("outputFastqFile" -> "UTILITY METHOD! Simply outputs fastq file(s)"),
+                      ("outputBAMFile"   -> "UTILITY METHOD! Simply outputs BAM file with all PF reads.")
                       //("featureComboCount" -> "Write a table including all combinations of exon/junction features, and the counts. (BETA FUNCTION! NOT FOR PRODUCTION USE!)")
       );
   
@@ -94,12 +108,13 @@ object runAllQC {
                                                              "cigarLocusCounts");*/
   final val QC_FUNCTION_LIST : scala.collection.immutable.Set[String] = QC_DEFAULT_ON_FUNCTION_LIST ++ QC_DEFAULT_OFF_FUNCTION_LIST;
   final val COMPLETED_OK_FILENAME = ".QORTS_COMPLETED_OK";
+  final val IN_PROGRESS_FILENAME = ".QORTS_RUNNING";
   final val COMPLETED_WARN_FILENAME = ".QORTS_COMPLETED_WARN";
   //final val MASTERLEVEL_FUNCTION_LIST = List[String]("GeneCalcs", "InsertSize","NVC","CigarOpDistribution","QualityScoreDistribution","GCDistribution","JunctionCalcs","StrandCheck","chromCounts","cigarMatch","makeWiggles");
   
   
   final val QC_INCOMPATIBLE_WITH_SINGLE_END_FUNCTION_LIST : scala.collection.immutable.Set[String] = scala.collection.immutable.Set(
-      "InsertSize","cigarMatch"
+      "InsertSize","cigarMatch","overlapMatch"
   );
   
   //"InsertSize","NVC","CigarOpDistribution","QualityScoreDistribution","GCDistribution","GeneCalcs",
@@ -109,7 +124,6 @@ object runAllQC {
       ("writeDESeq" -> Set("GeneCalcs")),
       ("writeGeneCounts" -> Set("GeneCalcs")),
       ("writeGenewiseGeneBody" -> Set("writeGeneBody")),
-      ("writeGenewiseGeneBody" -> Set("GeneCalcs")),
       ("writeGeneBody" -> Set("GeneCalcs")),
       ("writeDEXSeq" -> Set("JunctionCalcs")),
       ("writeJunctionSeqCounts" -> Set("writeSpliceExon")), //backwards compatible synonym "writeSpliceExon"
@@ -119,7 +133,10 @@ object runAllQC {
       ("annotatedSpliceExonCounts" -> Set("JunctionCalcs")),
       ("writeClippedNVC" -> Set("NVC")),
       ("makeAllBrowserTracks" -> Set("makeJunctionBed","makeWiggles")),
-      ("writeBiotypeCounts" -> Set("GeneCalcs"))
+      ("writeBiotypeCounts" -> Set("GeneCalcs")),
+      ("referenceMatch" -> Set("mismatchEngine")),
+      ("overlapMatch" -> Set("mismatchEngine")),
+      ("writeGeneBodyIv" -> Set("writeGeneBody"))
   );
   
   final val SAM_PEEK_LINECT = 10000;
@@ -260,14 +277,15 @@ object runAllQC {
                                                    ""+
                                                    ""
                                         ) ::
-                    new BinaryOptionArgument[String](
+                    new BinaryOptionArgument[List[String]](
                                          name = "rawfastq", 
                                          arg = List("--rawfastq"), 
-                                         valueName = "myfastq.fq.gz",  
-                                         argDesc = "(Optional) The raw fastq, prior to alignment. This is used ONLY to calculate the number of pre-alignment reads (or read-pairs) simply by counting the number of lines and dividing by 4. "+
+                                         valueName = "myfastq.1.fq.gz,myfastq.2.fq.gz",  
+                                         argDesc = "(Optional) The raw fastq, prior to alignment. In normal operation, this is used ONLY to calculate the number of pre-alignment reads (or read-pairs) simply by counting the number of lines and dividing by 4. "+
                                                    "Alternatively, the number of pre-alignment read-pairs can be included explicitly via the --seqReadCt option, or added in the "+
                                                    "plotting / cross-comparison step by including the input.read.pair.count column in the replicate decoder."+
                                                    "In general, the --seqReadCt option is recommended when available.\n"+
+                                                   "Certain optional QC functions are also available that utilize the raw Fastq file in other ways. "+
                                                    "If the filename ends with \".gz\" or \".zip\", the file will be parsed using the appropriate decompression method."
                                         ) ::
                     new BinaryOptionArgument[String](
@@ -368,7 +386,19 @@ object runAllQC {
                                                     ""+
                                                     ""
                                         ) ::*/
-
+                    new BinaryArgument[String](   name = "summaryFileName",
+                                               arg = List("--summaryFileSuffix"),  
+                                               valueName = ".summary.txt", 
+                                               argDesc = "The suffix of the 'summary' file. This is useful to set if you want to run multiple QC runs in parallel "+
+                                                         "to reduce runtime, without overwriting one another's summary files."+
+                                                         "In particular, the NVC metrics often take a long time to run, so splitting those "+
+                                                         "off using the --runFunctions parameter might speed things up considerably. "+
+                                                         "Note that 'QC' will be appended in the actual filename. "+
+                                                         "THIS OPTION IS BETA!", 
+                                               defaultValue = Some(".summary.txt")
+                                           ) ::
+                                        
+                                        
                    new BinaryOptionArgument[String](
                                          name = "extractReadsByMetric", 
                                          arg = List("--extractReadsByMetric"), 
@@ -380,6 +410,24 @@ object runAllQC {
                                                     ""+
                                                     ""
                                         ) ::
+                    new UnaryArgument( name = "keepOnTarget",
+                                         arg = List("--keepOnlyOnTarget"), // name of value
+                                         argDesc = "Experimental flag. Ignores reads that DO NOT fall within the target region (specified by the required bedfile using the --targetRegionBed parameter)."+
+                                                   "" // description
+                                       ) ::
+                    new UnaryArgument( name = "dropOnTarget",
+                                         arg = List("--dropOnTarget"), // name of value
+                                         argDesc = "Experimental flag. Ignores reads that DO fall within the target region (specified by the required bedfile using the --targetRegionBed parameter)."+
+                                                   "" // description
+                                       ) ::
+                    new BinaryOptionArgument[Double](
+                                         name = "randomSubsample", 
+                                         arg = List("--randomSubsample"), 
+                                         valueName = "1.00",  
+                                         argDesc =  "If this option is set, QoRTs will ignore a random fraction of the input read pairs. This can drastically reduce runtime, though it may reduce the accuracy of the output QC metrics."
+                                        ) ::
+                                       
+                                        
                     new BinaryOptionArgument[String](
                                          name = "restrictToGeneList", 
                                          arg = List("--restrictToGeneList"), 
@@ -408,10 +456,53 @@ object runAllQC {
                                                     "GC content plots sometimes contain visible spikes caused by small transcripts / RNA's with extremely high expression levels."+
                                                     "ADDITIONAL WARNING: This feature is in BETA, and is not yet fully tested."
                                         ) ::   
+                    new UnaryArgument( name = "WholeExomeSeq",
+                                         arg = List("--DNA"), // name of value
+                                         argDesc = "BETA: This flag makes various changes to allow QoRTs to "+
+                                                   "run on whole-exome or whole-genome DNA-Seq data."+
+                                                   "" // description
+                                       ) :: 
+                    new UnaryArgument( name = "isRNASeq",
+                                         arg = List("--RNA"), // name of value
+                                         argDesc = "Indicates that the data is RNA-Seq (the default: flag does nothing)."+
+                                                   "" // description
+                                       ) :: 
 
+                    new BinaryOptionArgument[List[String]](
+                                         name = "genomeFA", 
+                                         arg = List("--genomeFA"), 
+                                         valueName = "chr.fa.gz[,chr2.fa,...]",  
+                                         argDesc = "Provides a genome fasta (or multiple fasta's) for the genome. "+
+                                                   "This is used by certain experimental sub-utilities. "+
+                                                   "Comma delimited, no spaces. "+
+                                                   "Fasta files can be gzipped or zipped."+
+                                                   ""
+                                        ) ::                              
+                                        
+                    new BinaryArgument[Int](   name = "genomeBufferSize",
+                                                        arg = List("--genomeBufferSize"),  
+                                                        valueName = "val", 
+                                                        argDesc = "The size of the genome fasta buffer. If this is too small, then errors may randomly occur."+
+                                                                  ""+
+                                                                  ""+
+                                                                  ""+
+                                                                  "", 
+                                                        defaultValue = Some(10000)
+                                                        ) ::
+                                        
+                    new BinaryOptionArgument[List[String]](
+                                         name = "outfilePrefix", 
+                                         arg = List("--outfilePrefix"), 
+                                         valueName = "sampID",  
+                                         argDesc = "Prefix to be prepended to all output files. If this is set, all output files will use the format: \"outfiledir/prefix.QC.qcfilename.txt.gz\""+
+                                                   ""
+                                        ) ::      
+                                        
+//DEPRECIATED or BETA OPTIONS:
+                                       
                     new UnaryArgument( name = "nameSorted",
                                          arg = List("--nameSorted"), // name of value
-                                         argDesc = "Relevant for paired-end reads only. \n"+
+                                         argDesc = "DEPRECATED: Relevant for paired-end reads only. \n"+
                                                    "This flag is used to run QoRTs in \"name-sorted\" mode. This flag is optional, as under the "+"default mode QoRTs will accept BAM files sorted by either name OR position. "+
                                                    "However, "+
                                                    "The only actual requirement in this mode is that "+
@@ -420,12 +511,12 @@ object runAllQC {
                                                    ""+
                                                    ""+
                                                    "" // description
-                                       ) ::                                        
-//DEPRECIATED OPTIONS:
+                                       ) ::    
+                                       
                     new UnaryArgument( name = "coordSorted",
                                          arg = List("--coordSorted"), // name of value
                                          argDesc = ""+
-                                                   "DEPRECIATED: this mode is now subsumed by the default mode and as such this parameter is now nonfunctional.\n"+
+                                                   "DEPRECATED: this mode is now subsumed by the default mode and as such this parameter is now nonfunctional.\n"+
                                                    "Note that, in the default mode, for paired-end data QoRTs will accept "+
                                                    "EITHER coordinate-sorted OR name-sorted bam files. In \"--nameSorted\" mode, QoRTs ONLY accepts "+
                                                    "name-sorted bam files.\n"+
@@ -437,11 +528,11 @@ object runAllQC {
                                        ) ::
                     new UnaryArgument( name = "noMultiMapped",
                                          arg = List("--fileContainsNoMultiMappedReads"), // name of value
-                                         argDesc = "DEPRECIATED. Flag to indicate that the input sam/bam file contains only primary alignments (ie, no multi-mapped reads). This flag is ALWAYS OPTIONAL, but when applicable this utility will run (slightly) faster when using this argument. (DEPRECIATED! The performance improvement was marginal)" // description
+                                         argDesc = "DEPRECATED. Flag to indicate that the input sam/bam file contains only primary alignments (ie, no multi-mapped reads). This flag is ALWAYS OPTIONAL, but when applicable this utility will run (slightly) faster when using this argument. (DEPRECIATED! The performance improvement was marginal)" // description
                                        ) ::
                     new UnaryArgument( name = "parallelFileRead",
                                          arg = List("--parallelFileRead"), // name of value
-                                         argDesc = "DEPRECIATED: DO NOT USE. Flag to indicate that bam file reading should be run in paralell for increased speed. Note that in this mode you CANNOT read from stdin. Also note that for this to do anything useful, the numThreads option must be set to some number greater than 1. Also note that additional threads above 9 will have no appreciable affect on speed." // description
+                                         argDesc = "DEPRECATED: DO NOT USE. Flag to indicate that bam file reading should be run in paralell for increased speed. Note that in this mode you CANNOT read from stdin. Also note that for this to do anything useful, the numThreads option must be set to some number greater than 1. Also note that additional threads above 9 will have no appreciable affect on speed." // description
                                        ) ::    
                     new BinaryArgument[Int](name = "numThreads",
                                                         arg = List("--numThreads"),  
@@ -449,8 +540,38 @@ object runAllQC {
                                                         argDesc = "DEPRECIATED, nonfunctional.", 
                                                         defaultValue = Some(1)
                                                         ) :: 
+                    new UnaryArgument( name = "checkForAlignmentBlocks",
+                                         arg = List("--checkForAlignmentBlocks"), // name of value
+                                         argDesc = "Certain aligners will mark reads 'aligned' even though they have no aligned "+
+                                                   "bases. This option will automatically check for some reads and ignore them, "+
+                                                   "rather than throwing an error."// description
+                                       ) ::
+                    new BinaryOptionArgument[String](
+                                         name = "targetRegionBed", 
+                                         arg = List("--targetRegionBed"), 
+                                         valueName = "targetRegion.bed",  
+                                         argDesc =  "For whole exome sequencing, this specifies the exome target regions."
+                                        ) :: 
+                    new BinaryOptionArgument[Int](
+                                         name = "stopAfterNReads", 
+                                         arg = List("--stopAfterNReads"), 
+                                         valueName = "n",  
+                                         argDesc =  "Stop after reading in n reads or read-pairs."
+                                        ) :: 
+                    new BinaryOptionArgument[Long](
+                                         name = "randomSeed", 
+                                         arg = List("--randomSeed"), 
+                                         valueName = "n",  
+                                         argDesc =  "Use specified random seed."
+                                        ) :: 
+                    new UnaryArgument(
+                                         name = "parseIlluminaStyleReadIDs", 
+                                         arg = List("--parseIlluminaStyleReadIDs"), 
+                                         argDesc =  "Specifies that the read-names are in the illumina style. CURRENTLY NONFUNCTIONAL!"
+                                        ) ::               
+                                       
 //MANDATORY OPTIONS:
-                    new FinalArgument[String]( 
+                    new FinalArgument[String](
                                          name = "infile",
                                          valueName = "infile",
                                          argDesc = "The input .bam or .sam file of aligned sequencing reads. Or \'-\' to read from stdin."
@@ -497,6 +618,7 @@ object runAllQC {
     
     def run(args : Array[String]){
       val out = parser.parseArguments(args.toList.tail);
+
       
       if(out){
       runAllQC.run(parser.get[String]("infile"),
@@ -523,7 +645,7 @@ object runAllQC {
           ! parser.get[Boolean]("nameSorted"),
           parser.get[Option[Int]]("maxReadLength"),
           parser.get[Option[Int]]("seqReadCt"),
-          parser.get[Option[String]]("rawfastq"),
+          parser.get[Option[List[String]]]("rawfastq"),
           parser.get[Option[String]]("chromSizes"),
           parser.get[String]("title"),
           parser.get[Boolean]("generatePlots") | parser.get[Boolean]("generateMultiPlot"),
@@ -531,7 +653,19 @@ object runAllQC {
           parser.get[Boolean]("generatePlots") | parser.get[Boolean]("generatePdfReport"),
           parser.get[Option[String]]("extractReadsByMetric"),
           parser.get[Int]("adjustPhredScore"),
-          parser.get[Int]("maxPhredScore")
+          parser.get[Int]("maxPhredScore"),
+          parser.get[Boolean]("WholeExomeSeq"),
+          parser.get[Boolean]("checkForAlignmentBlocks"),
+          parser.get[String]("summaryFileName"),
+          parser.get[Option[String]]("targetRegionBed"),
+          parser.get[Option[Int]]("stopAfterNReads"),
+          parser.get[Option[List[String]]]("genomeFA"),
+          parser.get[Boolean]("dropOnTarget"),
+          parser.get[Boolean]("keepOnTarget"),
+          parser.get[Option[Double]]("randomSubsample"),
+          parser.get[Option[Long]]("randomSeed"),
+          parser.get[Option[String]]("outfilePrefix"),
+          parser.get[Int]("genomeBufferSize")
       );
       }
     }
@@ -561,7 +695,7 @@ object runAllQC {
           unsorted : Boolean,
           maxReadLength : Option[Int],
           seqReadCt : Option[Int],
-          rawfastq : Option[String],
+          rawfastq : Option[List[String]],
           chromSizes : Option[String],
           trackTitlePrefix : String,
           generateMultiPlot : Boolean,
@@ -569,17 +703,39 @@ object runAllQC {
           generatePdfReport : Boolean,
           extractReadsByMetric : Option[String],
           adjustPhredScore : Int,
-          maxPhredScore : Int){
+          maxPhredScore : Int,
+          isWES : Boolean,
+          checkForAlignmentBlocks : Boolean,
+          summaryFileName : String,
+          targetRegionBed : Option[String],
+          stopAfterNReads : Option[Int],
+          genomeFA : Option[List[String]],
+          dropOnTarget : Boolean,
+          keepOnTarget : Boolean,
+          randomSubsample : Option[Double],
+          randomSeed : Option[Long],
+          outfilePrefix : Option[String],
+          genomeBufferSize : Int){
+    
+    randomSeed match {
+      case Some(seed) => scala.util.Random.setSeed(seed);
+      case None => {
+        //do nothing
+      }
+    }
     
     val outDirFile = new File(outdir);
     if(! outDirFile.exists()){
       reportln("Creating Directory: "+ outdir,"note");
       outDirFile.mkdir();
     }
-    val outfile = outdir + "/" + "QC";
+    val outfile = outdir + "/" + (if(outfilePrefix.isEmpty){""} else {outfilePrefix.get + "."}) + "QC";
+    
     val logfile = outfile +"."+ internalUtils.stdUtils.getRandomString(12) + ".log";
     internalUtils.Reporter.init_completeLogFile(logfile);
     reportln("Created Log File: " + logfile,"note");
+    
+    internalUtils.Reporter.init_inProgressFile(outfile + IN_PROGRESS_FILENAME);
     
     val gigsMaxMem = getMaxMemoryXmxInGigs;
     if(gigsMaxMem < 4){
@@ -616,27 +772,44 @@ object runAllQC {
       else         reportln("QoRTs is Running in name-sorted mode.","note");
     }
     
-
-    
     val dropChrom = dropChromList.toSet;
     
-    val defaultFunctonList = if(chromSizes.isEmpty){
+    val defaultFunctonList : Set[String] = (if(chromSizes.isEmpty){
       QC_DEFAULT_ON_FUNCTION_LIST;
     } else {
+      reportln("Chromosome size file added. Adding target wiggle plot generation.","debug");
       QC_DEFAULT_ON_FUNCTION_LIST ++ Set("makeWiggles");
-    }
+    }) ++ (if(targetRegionBed.isEmpty){
+      Set[String]();
+    } else {
+      reportln("Target BED file specified. Adding target bed file testing.","debug");
+      Set[String]("calcOnTarget");
+    }) ++ (if(rawfastq.isEmpty){
+      Set[String]();
+    } else {
+      reportln("Raw fastq files specified. Adding fastq testing.","debug");
+      Set[String]("fastqUtils");
+    }) ++ (if(genomeFA.isEmpty){
+      reportln("No parameter --genomeFA found.","debug");
+      Set[String]();
+    } else {
+      reportln("Parameter --genomeFA found. Adding reference mismatch testing.","debug");
+      Set[String]("referenceMatch");
+    })
     
-    val runFunc_initial = if(runFunctions.isEmpty){
+    reportln("Default functions: " + wrapSimpleLineWithIndent_staggered(defaultFunctonList.toList.sorted.mkString(", "), 68, "        ", ""),"debug");
+    
+    val runFunc_initial = (if(runFunctions.isEmpty){
       (defaultFunctonList ++ addFunctions.toSet) -- dropFunctions.toSet;
     } else {
       runFunctions.toSet -- dropFunctions.toSet;
-    }
+    }) -- ( if(! isSingleEnd) Set() else QC_INCOMPATIBLE_WITH_SINGLE_END_FUNCTION_LIST )
     
     val runFuncTEMP : scala.collection.immutable.Set[String] = (if(restrictToGeneList.isEmpty & dropGeneList.isEmpty) scala.collection.immutable.Set[String]() else {
       reportln("NOTE: Options \"--restrictToGeneList\" and \"--dropGeneList\" require function \"GeneCalcs\". Adding \"GeneCalcs\" to the active function list...","note")
       scala.collection.immutable.Set[String]("GeneCalcs");
     });
-    
+        
     def addDependencies(currFunc : String, soFar : scala.collection.immutable.Set[String]) : scala.collection.immutable.Set[String] = {
       QC_FUNCTION_DEPENDANCIES.get(currFunc) match {
         case Some(reqFuncSet) => {
@@ -654,23 +827,8 @@ object runAllQC {
       }
     }
     
-    //val runFuncTEMP2 = 
-    
     val runFuncTEMP2 = (runFunc_initial ++ runFuncTEMP).foldLeft(runFunc_initial ++ runFuncTEMP)((soFar,currFunc) => {
       addDependencies(currFunc,soFar);
-      /*QC_FUNCTION_DEPENDANCIES.get(currFunc) match {
-        case Some(reqFunc) => {
-          if(soFar.contains(reqFunc)){
-            soFar;
-          } else {
-            reportln("Function \"" + currFunc +"\" requires top-level function \"" + reqFunc+ "\". Adding the required function to the active function list.","note");
-            soFar + reqFunc;
-          }
-        }
-        case None => {
-          soFar;
-        }
-      }*/
     });
     val runFunc = if(! isSingleEnd) runFuncTEMP2 else {
       runFuncTEMP2 -- QC_INCOMPATIBLE_WITH_SINGLE_END_FUNCTION_LIST;
@@ -685,9 +843,12 @@ object runAllQC {
       error("Error: function makeWiggles REQUIRES the chromSizes parameter! Set parameter '--chromSizes' or turn off function 'makeWiggles'.");
     }
     
+    if(runFunc.contains("referenceMatch") && genomeFA.isEmpty){
+       error("Error: function referenceMatch REQUIRES the genomeFA parameter! Set parameter '--genomeFA' or turn off function 'referenceMatch'.");
+    }
     
     //wrapSimpleLineWithIndent_staggered(line : String, width : Int, indent : String, firstLineIndent : String)
-    reportln("Running functions: " + wrapSimpleLineWithIndent_staggered(runFunc.mkString(", "), 68, "        ", ""),"progress");
+    reportln("Running functions: " + wrapSimpleLineWithIndent_staggered(runFunc.toList.sorted.mkString(", "), 68, "        ", ""),"progress");
     
     //reportln("infile: " + infile , "note");
     //reportln("outfile: " + outfile , "note");
@@ -721,7 +882,7 @@ object runAllQC {
     }
     
     setQcOptions(noGzipOutput);
-    val anno_holder = new qcGtfAnnotationBuilder(gtffile , flatgtffile , stranded , stdGtfCodes, flatGtfCodes);
+    val anno_holder = new qcGtfAnnotationBuilder(gtffile , flatgtffile , stranded , stdGtfCodes, flatGtfCodes, targetRegionBed);
     
     //Add extract genes by metric function:
     //StrandTestStatus, InsertSize and GCcount
@@ -771,7 +932,8 @@ object runAllQC {
       reportln("ERROR ERROR ERROR: parallel file read is NOT IMPLEMENTED AT THIS TIME!","warn");
       //runOnSeqFile_PAR(initialTimeStamp = initialTimeStamp, infile = infile, outfile = outfile, anno_holder = anno_holder, testRun = testRun, runFunc = runFunc, stranded = stranded, fr_secondStrand = fr_secondStrand, dropChrom = dropChrom, keepMultiMapped = keepMultiMapped, noMultiMapped = noMultiMapped, numThreads = numThreads, readGroup )
     } else {
-      runOnSeqFile(initialTimeStamp = initialTimeStamp, infile = infile, outfile = outfile, anno_holder = anno_holder, testRun = testRun, 
+      runOnSeqFile(initialTimeStamp = initialTimeStamp, infile = infile, outfile = outfile, anno_holder = anno_holder, 
+          testRun = testRun || (! stopAfterNReads.isEmpty), 
           runFunc = runFunc, stranded = stranded, fr_secondStrand = fr_secondStrand, dropChrom = dropChrom, keepMultiMapped = keepMultiMapped, 
           noMultiMapped = noMultiMapped, numThreads = numThreads, readGroup , minMAPQ = minMAPQ, geneKeepFunc = geneKeepFunc, 
           isSingleEnd = isSingleEnd, unsorted = unsorted, maxReadLength = maxReadLength,
@@ -784,7 +946,13 @@ object runAllQC {
           extractReadsFunction = extractReadsFunction,
           adjustPhredScore = adjustPhredScore,
           maxPhredScore = maxPhredScore,
-          calcDetailedGeneCounts = runFunc.contains("calcDetailedGeneCounts"))
+          calcDetailedGeneCounts = runFunc.contains("calcDetailedGeneCounts"),
+          isWES = isWES,checkForAlignmentBlocks=checkForAlignmentBlocks,
+          summaryFileName =summaryFileName,
+          targetRegionBed=targetRegionBed,
+          stopAfterNReads=stopAfterNReads,
+          genomeFA = genomeFA,dropOnTarget=dropOnTarget,keepOnTarget=keepOnTarget,randomSubsample=randomSubsample,
+          genomeBufferSize = genomeBufferSize)
     }
   }
   
@@ -807,7 +975,7 @@ object runAllQC {
                    unsorted : Boolean,
                    maxReadLength : Option[Int],
                    seqReadCt : Option[Int],
-                   rawfastq : Option[String],
+                   rawfastq : Option[List[String]],
                    chromSizes : Option[String],
                    trackTitlePrefix : String,
                    outdir : String,
@@ -817,48 +985,19 @@ object runAllQC {
                    extractReadsFunction : Option[((String, Int, (Int,Int)) => Boolean)],
                    adjustPhredScore : Int,
                    maxPhredScore : Int,
-                   calcDetailedGeneCounts : Boolean){
-    
-    val inputReadCt : Option[Int] = seqReadCt match {
-      case Some(ct) => Some(ct);
-      case None => {
-        rawfastq match {
-          case Some(fqfile) => {
-            // Count the reads, and make sure the given file is a valid fastq file:
-            reportln("Starting fastq readthrough","debug");
-            standardStatusReport(initialTimeStamp, verbosity = "debug")
-            val everyFourth = internalUtils.fileUtils.getLinesSmartUnzip(fqfile).zipWithIndex.filter{ case (line : String, i : Int) => { i % 4 == 0 }}
-            val out = Some(everyFourth.foldLeft(0)( (soFar, curr) => {
-              val (line, i) = curr;
-              if(line.startsWith("@")){
-                soFar + 1;
-              } else {
-                error("Malformed fastq file: fastq file read-block does not begin with \"@\". (Read #"+i+") (Line #"+i*4+")");
-                -1;
-              }
-            }));
-            reportln("Finished fastq readthrough","debug");
-            standardStatusReport(initialTimeStamp, verbosity = "debug");
-            out;
-            
-            //Simpler variation: Does not check fastq format:
-            //reportln("Starting fastq readthrough","debug");
-            //standardStatusReport(initialTimeStamp, verbosity = "debug")
-            //val out = Some(internalUtils.fileUtils.getLinesSmartUnzip(fqfile).length / 4);
-            //reportln("Finished fastq readthrough","debug");
-            //standardStatusReport(initialTimeStamp, verbosity = "debug");
-            //out;
-          }
-          case None => None;
-        }
-      }
-    }
-    if(inputReadCt.isEmpty){
-      reportln("Pre-alignment read count unknown (Set --seqReadCt or --rawfastq)","note");
-    } else {
-      reportln("Pre-alignment read count: "+inputReadCt.get,"note");
-    }
-    
+                   calcDetailedGeneCounts : Boolean,
+                   isWES : Boolean,
+                   checkForAlignmentBlocks : Boolean,
+                   summaryFileName : String,
+                   targetRegionBed : Option[String],
+                   stopAfterNReads : Option[Int],
+                   genomeFA : Option[List[String]],
+                   dropOnTarget : Boolean,
+                   keepOnTarget : Boolean,
+                   randomSubsample : Option[Double],
+                   genomeBufferSize : Int
+                   ){
+
     
     reportln("Checking first " + SAM_PEEK_LINECT + " reads. Checking SAM file for formatting errors...","note");
     val reader : SAMFileReader = if(infile == "-"){
@@ -868,7 +1007,8 @@ object runAllQC {
     }
     
     val peekCt = SAM_PEEK_LINECT;
-    val testRunLineCt = SAM_TESTRUN_LINECT
+    val testRunLineCt = stopAfterNReads.getOrElse(SAM_TESTRUN_LINECT);
+
     val COMPLETED_OK_FILEPATH = outfile + COMPLETED_OK_FILENAME;
     val COMPLETED_WARN_FILEPATH = outfile + COMPLETED_WARN_FILENAME;
     val (samFileAttributes, recordIter) = initSamRecordIterator(reader, peekCt);
@@ -879,7 +1019,6 @@ object runAllQC {
     val isSortedByPosition = samFileAttributes.isSortedByPosition;
     val isDefinitelyPairedEnd = samFileAttributes.isDefinitelyPairedEnd;
     val minReadLength = samFileAttributes.minReadLength;
-    
     
     //Debugging info:
     reportln("   Stats on the first "+peekCt+ " reads:","debug");
@@ -903,7 +1042,7 @@ object runAllQC {
                "      if quality metrics are attempted!","warn");
     }
     
-    if(readLength != minReadLength){reportln("NOTE: Read length is not consistent.\n"+
+    if(readLength != minReadLength){ reportln("NOTE: Read length is not consistent.\n"+
                                              "   In the first "+peekCt+" reads, read length varies from "+minReadLength+" to " +maxObservedReadLength+" (param maxReadLength="+readLength+")\n"+
                                              "Note that using data that is hard-clipped prior to alignment is NOT recommended, because this makes it difficult (or impossible) "+
                                              "to determine the sequencer read-cycle of each nucleotide base. This may obfuscate cycle-specific artifacts, trends, or errors, the detection of which is one of the primary purposes of QoRTs!"+
@@ -916,6 +1055,8 @@ object runAllQC {
                "      to set the maximum possible read length, or else errors may occur if/when \n"+
                "      reads longer than "+readLength+ " appear.","warn")
     }
+    
+    val variableReadLen = readLength != minReadLength || (! maxReadLength.isEmpty);
      
     if(samFileAttributes.allReadsMarkedPaired & isSingleEnd) reportln("   WARNING WARNING WARNING! Running in single-end mode, but reads appear to be paired-end! Errors may follow.\n"+
                                                                       "           Strongly recommend removing the '--isSingleEnd' option!","warn");
@@ -923,6 +1064,14 @@ object runAllQC {
                                                                           "           Strongly recommend using the '--isSingleEnd' option","warn");
     if(samFileAttributes.mixedSingleAndPaired) reportln("   WARNING WARNING WARNING! Data appears to be a mixture of single-end and paired-end reads!\n"+
                                                         "           QoRTs was not designed to function under these conditions. Errors may follow!","warn");
+    
+    
+    /*
+     * Start Fastq Read:
+     */
+    //val FQSU = if(! rawfastq.isEmpty) new fqcStdUtils(readLength,isSingleEnd) else new NullFqcUtility();
+    
+    
     
     if(! isSingleEnd){ 
       reportln("   Note: Data appears to be paired-ended.","debug");
@@ -974,7 +1123,7 @@ object runAllQC {
     if(internalUtils.Reporter.hasWarningOccurred()){
       reportln("Done checking first " + SAM_PEEK_LINECT + " reads. WARNINGS FOUND!","note");
     } else{
-      reportln("Done checking first " + SAM_PEEK_LINECT + " reads. No major problems detected.","note");
+      reportln("Done checking first " + SAM_PEEK_LINECT + " reads. No major problems detected!","note");
     }
     
     val pairedIter : Iterator[(SAMRecord,SAMRecord)] = 
@@ -982,7 +1131,12 @@ object runAllQC {
         if(testRun) samRecordPairIterator_withMulti_singleEnd(recordIter, true, testRunLineCt) else samRecordPairIterator_withMulti_singleEnd(recordIter);
       } else {
         if(unsorted){
-          if(testRun) samRecordPairIterator_unsorted(recordIter, true, testRunLineCt) else samRecordPairIterator_unsorted(recordIter)
+          if(runFunc.contains("referenceMatch")){
+             if(testRun) samRecordPairIterator_resorted(recordIter, true, testRunLineCt) else samRecordPairIterator_resorted(recordIter)
+          } else {
+             //if(testRun) samRecordPairIterator_unsorted(recordIter, true, testRunLineCt) else samRecordPairIterator_unsorted(recordIter)
+             if(testRun) samRecordPairIterator_resorted(recordIter, true, testRunLineCt) else samRecordPairIterator_resorted(recordIter)
+          }
         // Faster noMultiMapped running is DEPRECIATED!
         //} else if(noMultiMapped){
         //  if(testRun) samRecordPairIterator(recordIter, true, 200000) else samRecordPairIterator(recordIter)
@@ -999,29 +1153,98 @@ object runAllQC {
     if(isSingleEnd) CODA_SINGLE_END_OFF_OPTIONS.foreach( coda_options(_) = false );
     if(keepMultiMapped) coda_options(internalUtils.commonSeqUtils.CODA_NOT_UNIQUE_ALIGNMENT) = false;
     if(! readGroup.isEmpty) coda_options(internalUtils.commonSeqUtils.CODA_NOT_MARKED_RG) = true;
+    if(checkForAlignmentBlocks) coda_options(internalUtils.commonSeqUtils.CODA_NO_ALN_BLOCKS) = true;
     
     //"writeKnownSplices","writeNovelSplices","writeSpliceExon", "writeDESeq","writeDEXSeq","writeGenewiseGeneBody"
     //  final val QC_FUNCTION_LIST : Seq[String] = Seq("InsertSize","NVC","CigarOpDistribution","QualityScoreDistribution","GCDistribution","GeneCounts","JunctionCounts");
-    val qcGGC:  QCUtility[String] =   if(runFunc.contains("GeneCalcs"))                 new qcGetGeneCounts(stranded,fr_secondStrand,anno_holder,coda,coda_options,40, runFunc.contains("FPKM"), runFunc.contains("writeGenewiseGeneBody"), runFunc.contains("writeDESeq"), runFunc.contains("writeGeneCounts"), runFunc.contains("writeGeneBody"), runFunc.contains("writeBiotypeCounts"), geneKeepFunc, calcDetailedGeneCounts= calcDetailedGeneCounts) else QCUtility.getBlankStringUtil;
-    val qcIS :  QCUtility[Int]    =   if(runFunc.contains("InsertSize"))                new qcInnerDistance(anno_holder, stranded, fr_secondStrand, readLength)        else QCUtility.getBlankIntUtil;
+    
+    //FASTQ READTHROUGH:
+    
+    val (fqLineCount,fqUtilSeq) = rawfastq match {
+       case Some(fqfile) => {
+         reportln("Starting fastq readthrough.","debug");
+         
+         val fq1 = new FastqReader(fqfile(0), maxPhredScore = maxPhredScore, adjustPhredScore = adjustPhredScore, strict  = true, allowStdin = false);
+         val fq2 = if((! isSingleEnd) && fqfile.length > 1) new FastqReader(fqfile(1), maxPhredScore = maxPhredScore, adjustPhredScore = adjustPhredScore, strict  = true, allowStdin = false) else new EmptyFastqReader;
+         val SE = isSingleEnd || fqfile.length < 2
+         
+         val fqLines = if(testRun) presetProgressReporters.wrapIterator_readPairs(fq1.zip(fq2),verbose=true,cutoff=testRunLineCt) 
+                       else        presetProgressReporters.wrapIterator_readPairs(fq1.zip(fq2),verbose=true);
+         
+         val fqcGC =    if(runFunc.contains("GCDistribution"))           new fqcGC(readLength, SE) else fqcUtility.NullFqcUtility;
+         val fqcQS =    if(runFunc.contains("QualityScoreDistribution")) new fqcQualScores(readLength, SE, maxPhredScore) else fqcUtility.NullFqcUtility;
+         val fqcNVC =   if(runFunc.contains("QualityScoreDistribution")) new fqcNVC(readLength, SE) else fqcUtility.NullFqcUtility;
+         val fqUtilSeq : Vector[fqcUtility[Any]] = if(runFunc.contains("fastqUtils")) Vector(fqcGC,fqcQS,fqcNVC) else Vector();
+         
+         var lnct = 0;
+         for((f1,f2) <- fqLines){
+           fqUtilSeq.foreach(u => { u.runOnReadPair(f1,f2,lnct) });
+           lnct += 1;
+           //if(lnct % 100000 == 0){ if(lnct % 500000 == 0) { if(lnct % 1000000 == 0) report(".["+lnct+" FQ blocks processed] [Time: "+getDateAndTimeString+"] \n","progress"); else report(". ","progress"); } else { report(".","progress");}}
+         }
+         reportln("Finished fastq readthrough.","debug");
+         (Some(lnct),fqUtilSeq);
+       }
+       case None => {
+         (None,Seq[qcUtils.fqcUtility[Nothing]]())
+       }
+    }
+    
+    val inputReadCt : Option[Int] = seqReadCt match {
+      case Some(ct) => Some(ct);
+      case None => {
+        fqLineCount match {
+          case Some(ct) => Some(ct);
+          case None => None;
+        }
+      }
+    }
+
+    val dumpfile = if(runFunc.contains("testDataDump")) Some(outfile + ".testDataDump.txt") else None;
+    
+    val qcGGC:  QCUtility[String] =   if(runFunc.contains("GeneCalcs"))                 new qcGetGeneCounts(stranded,fr_secondStrand,anno_holder,coda,coda_options,40, runFunc.contains("FPKM"), runFunc.contains("writeGenewiseGeneBody"), runFunc.contains("writeDESeq"), runFunc.contains("writeGeneCounts"), runFunc.contains("writeGeneBody"), runFunc.contains("writeBiotypeCounts"), geneKeepFunc, calcDetailedGeneCounts= calcDetailedGeneCounts, writeGeneBodyIv=runFunc.contains("writeGeneBodyIv")) else QCUtility.getBlankStringUtil;
+    val qcIS :  QCUtility[Int]    =   if(runFunc.contains("InsertSize"))                new qcInnerDistance(anno_holder, stranded, fr_secondStrand, readLength,variableReadLen=variableReadLen, jumpSplices = ! isWES)        else QCUtility.getBlankIntUtil;
     val qcCS :  QCUtility[Unit]   =   if(runFunc.contains("NVC"))                       new qcNVC(isSingleEnd, readLength, runFunc.contains("writeClippedNVC"))                     else QCUtility.getBlankUnitUtil;
-    val qcJD :  QCUtility[Unit]   =   if(runFunc.contains("CigarOpDistribution"))       new qcCigarDistribution(isSingleEnd, readLength)                                            else QCUtility.getBlankUnitUtil;
+    val qcJD :  QCUtility[Unit]   =   if(runFunc.contains("CigarOpDistribution"))       new qcCigarDistribution(isSingleEnd, readLen = readLength,variableReadLen=variableReadLen)                                            else QCUtility.getBlankUnitUtil;
     val qcQSC : QCUtility[Unit]   =   if(runFunc.contains("QualityScoreDistribution"))  new qcQualityScoreCounter(isSingleEnd, readLength, maxPhredScore, adjustPhredScore) else QCUtility.getBlankUnitUtil;
     val qcGC :  QCUtility[(Int,Int)]= if(runFunc.contains("GCDistribution"))      new qcGCContentCount(isSingleEnd, readLength)                                               else QCUtility.getBlankIntPairUtil;
     val qcJC :  QCUtility[Unit]   =   if(runFunc.contains("JunctionCalcs"))             new qcJunctionCounts(anno_holder, stranded, fr_secondStrand, runFunc.contains("writeDEXSeq"), runFunc.contains("writeSpliceExon"), runFunc.contains("writeKnownSplices"), runFunc.contains("writeNovelSplices"), runFunc.contains("annotatedSpliceExonCounts"))                   else QCUtility.getBlankUnitUtil;
     val qcST :  QCUtility[String] =   if(runFunc.contains("StrandCheck"))               new qcStrandTest(isSingleEnd, anno_holder, stranded, fr_secondStrand)                       else QCUtility.getBlankStringUtil;
     val qcCC :  QCUtility[String] =   if(runFunc.contains("chromCounts"))               new qcChromCount(isSingleEnd, fr_secondStrand)                                              else QCUtility.getBlankStringUtil;
     val qcCM :  QCUtility[Unit]   =   if(runFunc.contains("cigarMatch"))                new qcCigarMatch(readLength)                                                   else QCUtility.getBlankUnitUtil;
-    val qcCLC : QCUtility[(Int,Int)]= if(runFunc.contains("cigarLocusCounts"))      new qcCigarLocusCounts(stranded,fr_secondStrand,true,true,5)                                    else QCUtility.getBlankIntPairUtil;
-    val qcWIG : QCUtility[Unit]   =   if(runFunc.contains("makeWiggles"))               new fileConversionUtils.bamToWiggle.QcBamToWig(trackTitlePrefix,
+    val qcCLC : QCUtility[(Int,Int)]= if(runFunc.contains("cigarLocusCounts"))          new qcCigarLocusCounts(stranded,fr_secondStrand,true,true,5)                                    else QCUtility.getBlankIntPairUtil;
+    val qcWIG : QCUtility[Unit]   =  if(runFunc.contains("makeWiggles"))                 new fileConversionUtils.bamToWiggle.QcBamToWig(trackTitlePrefix,
                                                                                                                    chromSizes.get,false,100,
                                                                                                                    isSingleEnd, stranded, fr_secondStrand, 
                                                                                                                    1.0, true, true, true, None, "") else QCUtility.getBlankUnitUtil;
+    val qcMAT : QCUtility[Unit] =     if(runFunc.contains("mismatchEngine"))  new qcOverlapMatch(readLength,dumpfile,
+                                                                                               maxQualScore=maxPhredScore, adjustPhredScore=adjustPhredScore,isSingleEnd=isSingleEnd,
+                                                                                               calcReferenceMatch=runFunc.contains("referenceMatch"),
+                                                                                               calcOverlapMismatch = runFunc.contains("overlapMatch"),
+                                                                                               genomeFa=genomeFA,genomeBufferSize=genomeBufferSize)  else QCUtility.getBlankUnitUtil;
+    
+    val outputFastqFile = if(runFunc.contains("outputFastqFile")) Some(outfile) else None;
+    val outputBAMFile   = if(runFunc.contains("outputBAMFile")) Some(outfile) else None;
+
+    val qcMU : QCUtility[Unit] = if(true) new qcMinorUtils(isSingleEnd =isSingleEnd, stranded =stranded, fr_secondStrand_bool =fr_secondStrand,readLen =readLength,
+                                              writeChromList =true,
+                                              writeReadLengthDistro = runFunc.contains("readLengthDistro"),
+                                              outputFastqFile = outputFastqFile,
+                                              outputBAMFile = outputBAMFile) else QCUtility.getBlankUnitUtil;
+    
+    if(runFunc.contains("calcOnTarget") && targetRegionBed.isEmpty) error("FATAL ERROR: CANNOT CALCULATE ON-TARGET REGION WITHOUT TARGET BED FILE! Use parameter --targetRegionBed");
+    if(targetRegionBed.isEmpty && (dropOnTarget || keepOnTarget)) error("FATAL ERROR: CANNOT USE dropOnTarget or keepOnTarget without specified target region bed file. Use parameter --targetRegionBed");
+     
+    //val iv1 = getGenomicIntervalsFromRead(r1, false,false).toVector;
+    //val iv2 = getGenomicIntervalsFromRead(r2, false,false).toVector;
+    //val ivB = mergeGenomicIntervalSets(iv1 ++ iv2);
+    //val targets = getTargetSet(ivB);
+    
+    val qcOT : QCUtility[Boolean] = if(runFunc.contains("calcOnTarget"))                new qcOnTargetRegion(anno_holder , isSingleEnd ) else new QCUtility.blankBooleanQCUtility;
     
     //Special super secret utility: 
     //val qcFCC :  QCUtility[Unit]   =   if(runFunc.contains("featureComboCount"))        new qcFeatureComboCt(anno_holder, stranded, fr_secondStrand,  outfile = outfile)                   else QCUtility.getBlankUnitUtil;
-
-    
+        
     val extractWriter : Option[WriterUtil] = extractReadsFunction match {
       case Some(f) => Some(openWriter(outfile + ".extractedReads.sam"));
       case None => None;
@@ -1041,7 +1264,7 @@ object runAllQC {
     
     
     //val qcALL = parConvert(Vector(qcGGC, qcIS, qcCS, qcJD, qcQSC, qcGC, qcJC, qcST, qcCC, qcCM), numThreads);
-    val qcALL = Vector(qcGGC, qcIS, qcCS, qcJD, qcQSC, qcGC, qcJC, qcST, qcCC, qcCM, qcCLC);
+    val qcALL = Vector(qcGGC, qcIS, qcCS, qcJD, qcQSC, qcGC, qcJC, qcST, qcCC, qcCM, qcCLC,qcOT,qcMAT,qcMU);
     
     reportln("QC Utilities Generated!","note");
     standardStatusReport(initialTimeStamp);
@@ -1052,12 +1275,14 @@ object runAllQC {
     var minObsReadLength = readLength;
     var maxObsReadLength = readLength;
     val samIterationTimeStamp = TimeStampUtil();
+    //while(pairedIter.hasNext){
     for(pair <- pairedIter){
     //for((pair,readNum) <- numberedIter){
+    //  val pair = pairedIter.next;      
       val (r1,r2) = pair;
       readNum += 1;
       try{
-        if(internalUtils.commonSeqUtils.useReadPair(r1,r2,coda, coda_options, dropChrom, readGroup, minMAPQ)){
+        if(internalUtils.commonSeqUtils.useReadPair(r1,r2,coda, coda_options, dropChrom, readGroup, minMAPQ, dropOnTarget=dropOnTarget,keepOnTarget=keepOnTarget,randomSubsample=randomSubsample,anno_holder=anno_holder)){
             val gene = qcGGC.runOnReadPair(r1,r2,readNum);
             
             if( geneKeepFunc(gene) ){
@@ -1065,7 +1290,9 @@ object runAllQC {
               minObsReadLength = math.min(minObsReadLength, math.min(r1.getReadLength(), r2.getReadLength()));
               maxObsReadLength = math.max(maxObsReadLength, math.max(r1.getReadLength(), r2.getReadLength()));
               
+              val onTarget = qcOT.runOnReadPair(r1,r2,readNum);
               val ins = qcIS.runOnReadPair(r1,r2,readNum);
+              qcMU.runOnReadPair(r1,r2,readNum);
               qcCS.runOnReadPair(r1,r2,readNum);
               qcJD.runOnReadPair(r1,r2,readNum);
               qcQSC.runOnReadPair(r1,r2,readNum);
@@ -1076,6 +1303,7 @@ object runAllQC {
               qcCM.runOnReadPair(r1,r2,readNum);
               qcCLC.runOnReadPair(r1,r2,readNum);
               qcWIG.runOnReadPair(r1,r2,readNum);
+              qcMAT.runOnReadPair(r1,r2,readNum);
               //qcFCC.runOnReadPair(r1,r2,readNum);
               useReadNum += 1;
               
@@ -1117,42 +1345,45 @@ object runAllQC {
     reportln("Finished reading SAM. Used: " + useReadNum + " reads/read-pairs.","note");
     standardStatusReport(initialTimeStamp);
     
-    
-    
     val outputIterationTimeStamp = TimeStampUtil();
     report("> Read Stats:\n" + stripFinalNewline(indentifyLines(internalUtils.commonSeqUtils.causeOfDropArrayToString(coda, coda_options),">   ")),"note");
     
     val summaryWriter = openWriter(outfile + ".summary.txt");
+    val docWriter = if(runFunc.contains("writeDocs")) new DocWriterUtil(openWriter(outfile + ".documentation.txt")) else null;
+    //val summaryWriter = SummaryWriter(outfile + summaryFileName);
+    
     val strandedCode = if(! stranded){ 0 } else {if(fr_secondStrand) 2; else 1;}
 
-    summaryWriter.write("FIELD	COUNT\n");
-    summaryWriter.write("Stranded_Rule_Code	"+strandedCode+"\n");
+    summaryWriter.write("FIELD\tCOUNT\tDESC\n");
+    summaryWriter.write("Stranded_Rule_Code	"+strandedCode+"\t"+"Code for the strandedness rule used. 0 if data is unstranded, 1 if data is fr_firstStrand, 2 if data is fr_secondStrand."+"\n");
     summaryWriter.write(internalUtils.commonSeqUtils.causeOfDropArrayToStringTabbed(coda, coda_options));
     
-    summaryWriter.write("KEPT_NOT_UNIQUE_ALIGNMENT	"+keptMultiMappedCt+"\n");
-    summaryWriter.write("minObservedReadLength\t"+minObsReadLength + "\n");
-    summaryWriter.write("maxObservedReadLength\t"+maxObsReadLength + "\n");
-    summaryWriter.write("maxLegalPhredScore\t"+maxPhredScore + "\n");
+    summaryWriter.write("KEPT_NOT_UNIQUE_ALIGNMENT	"+keptMultiMappedCt+"\t"+"Number of reads or read-pairs kept despite not being uniquely aligned."+"\n");
+    summaryWriter.write("minObservedReadLength\t"+minObsReadLength +"\t"+"The base-pair length of the smallest read"+ "\n");
+    summaryWriter.write("maxObservedReadLength\t"+maxObsReadLength +"\t"+"The base-pair length of the largest read"+ "\n");
+    summaryWriter.write("maxLegalPhredScore\t"+maxPhredScore +"\t"+"The largest observed PHRED score."+ "\n");
     
     if(isSingleEnd){
-      summaryWriter.write("IS_SINGLE_END	1\n");
+      summaryWriter.write("IS_SINGLE_END	1"+"\t"+"0 if data is paired-ended, 1 if data is single-ended"+"\n");
     } else {
-      summaryWriter.write("IS_SINGLE_END	0\n");
+      summaryWriter.write("IS_SINGLE_END	0"+"\t"+"0 if data is paired-ended, 1 if data is single-ended"+"\n");
     }
     
     if(inputReadCt.isEmpty){
-      summaryWriter.write("PREALIGNMENT_READ_CT\t-1\n");
+      reportln("Pre-alignment read count unknown (Set --seqReadCt or --rawfastq)","note");
+      summaryWriter.write("PREALIGNMENT_READ_CT\t-1"+"\t"+"The number of reads found pre-alignment. Can be set using --seqReadCt or --rawfastq. -1 if unknown."+"\n");
     } else {
-      summaryWriter.write("PREALIGNMENT_READ_CT\t"+inputReadCt.get+"\n");
+      reportln("Pre-alignment read count: "+inputReadCt.get,"note");
+      summaryWriter.write("PREALIGNMENT_READ_CT\t"+inputReadCt.get+"\t"+"The number of reads found pre-alignment. Can be set using --seqReadCt or --rawfastq. -1 if unknown."+"\n");
     }
     
     val iterationMinutes = (outputIterationTimeStamp.compareTo(samIterationTimeStamp) / 1000).toDouble / 60.toDouble;
     val minutesPerMillion = iterationMinutes / (readNum.toDouble / 1000000.toDouble);
     val minutesPerMillionPF = iterationMinutes / ((coda(internalUtils.commonSeqUtils.CODA_READ_PAIR_OK)).toDouble / 1000000.toDouble);
     
-    summaryWriter.write("BENCHMARK_MinutesOnSamIteration	" + "%1.2f".format(iterationMinutes) + "\n");
-    summaryWriter.write("BENCHMARK_MinutesPerMillionReads	" + "%1.2f".format(minutesPerMillion) + "\n");
-    summaryWriter.write("BENCHMARK_MinutesPerMillionGoodReads	" + "%1.2f".format(minutesPerMillionPF) + "\n");
+    summaryWriter.write("BENCHMARK_MinutesOnSamIteration	" + "%1.2f".format(iterationMinutes) +"\t"+"The number of minutes spent on the SAM iteration step."+ "\n");
+    summaryWriter.write("BENCHMARK_MinutesPerMillionReads	" + "%1.2f".format(minutesPerMillion) +"\t"+"The number of minutes per million reads spent on the SAM iteration step"+ "\n");
+    summaryWriter.write("BENCHMARK_MinutesPerMillionGoodReads	" + "%1.2f".format(minutesPerMillionPF) +"\t"+"The number of minutes per million reads that passed the initial filtering step."+ "\n");
     
     if(useReadNum == 0) reportln("WARNING WARNING WARNING: Zero \"usable\" reads found! This could be due to a number of factors: \n"+
           "If the reads were not aligned via one of the standard RNA-Seq aligners such as RNA-STAR or TopHat/TopHat2, then "+
@@ -1167,9 +1398,12 @@ object runAllQC {
           "\n","warn");
 
     reportln("Writing Output...","note");
-    qcALL.seq.foreach( _.writeOutput(outfile, summaryWriter) );
+    val qcAllOut = qcALL ++ fqUtilSeq;
     
-    qcWIG.writeOutput(outfile + ".wiggle", summaryWriter);
+    
+    qcAllOut.seq.foreach( _.writeOutput(outfile, summaryWriter, docWriter = docWriter) );
+    
+    qcWIG.writeOutput(outfile + ".wiggle", summaryWriter, docWriter = docWriter);
     //qcGGC.writeOutput(outfile, summaryWriter);
     //qcCS.writeOutput(outfile, summaryWriter);
     //qcJD.writeOutput(outfile, summaryWriter);
@@ -1214,22 +1448,31 @@ object runAllQC {
       reportln("Done making browser tracks.","note");
     }
     
-    summaryWriter.write("READ_LENGTH	"+readLength+"\n");
+    summaryWriter.write("READ_LENGTH	"+readLength+"\t"+"The read length."+"\n");
     
     if(internalUtils.Reporter.hasWarningOccurred()){
-      summaryWriter.write("COMPLETED_WITHOUT_WARNING	0\n");
+      summaryWriter.write("COMPLETED_WITHOUT_WARNING\t0\t"+"0 if complete without throwing any warnings. 1 if warnings were thrown."+"\n");
       reportln("QoRTs completed WITH WARNINGS! See log for details.","warn");
       val completedWarnWriter = openWriter(COMPLETED_WARN_FILEPATH);
       completedWarnWriter.write("# Note: if this file EXISTS, then QoRTs QC completed WITH WARNINGS. Warning messages follow:\n");
       completedWarnWriter.write(internalUtils.Reporter.getWarnings+"\n");
       completedWarnWriter.close();
     } else {
-      summaryWriter.write("COMPLETED_WITHOUT_WARNING	1\n");
+      summaryWriter.write("COMPLETED_WITHOUT_WARNING	1\t"+"0 if complete without throwing any warnings. 1 if warnings were thrown."+"\n");
       reportln("QoRTs QC complete with no problems.","note");
     }
     
-    summaryWriter.write("COMPLETED_WITHOUT_ERROR	1\n");
+    summaryWriter.write("QoRTs_initTimeStamp\t"+initialTimeStamp.ts+"\t"+"Time stamp for when QoRTs QC began."+"\n");
+    summaryWriter.write("QoRTs_samDoneTimeStamp\t"+outputIterationTimeStamp.ts+"\t"+"Time stamp for when QoRTs QC finished SAM iteration."+"\n");
+    summaryWriter.write("QoRTs_majorVer\t"+runner.runner.QORTS_MAJOR_VERSION+"\t"+"QoRTs major version number"+"\n");
+    summaryWriter.write("QoRTs_minorVer\t"+runner.runner.QORTS_MINOR_VERSION+"\t"+"QoRTs minor version number"+"\n");
+    summaryWriter.write("QoRTs_patchVer\t"+runner.runner.QORTS_PATCH_VERSION+"\t"+"QoRTs patch version number"+"\n");
+    summaryWriter.write("QoRTs_compileTimeStamp\t"+runner.runner.QORTS_COMPILE_TIME+"\t"+"The timestamp for when the version of QoRTs was built."+"\n");
     
+    summaryWriter.write("COMPLETED_WITHOUT_ERROR\t1\t1 if QoRTs completed without errors. If QoRTs encountered an error, this file should not exist.\n");
+    
+    
+    if(docWriter != null) docWriter.close();
     close(summaryWriter);
     
     if(generateMultiPlot | generateSeparatePlots | generatePdfReport){

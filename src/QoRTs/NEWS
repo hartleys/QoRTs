@@ -1,3 +1,27 @@
+## v1.2.0:
+HUGE UPDATE:
+
+ * Added support for whole-exome or whole-genome datasets in addition to RNA-Seq. (Maybe rename the tool?)
+ * Added numerous metrics which may be relevant to variant calling.
+
+Added an array of new metrics:
+ * "Overlap Mismatch": various metrics relating to the rate at which overlapped paired-end reads are mismatching. Also calculates mismatch rates at specific qual scores.
+ * "Reference Mismatch": various metrics relating to the rate at which reads have point-mismatches with the reference genome. Requires that a genome fasta file (via the --genomeFA parameter for the QoRTs QC step).
+ * "On-Target Rate": For Exome data only. Uses a target bed file to calculate rate of on-target reads. Can also be used to filter reads to only on-target reads. Requires a target BED file (set via the --targetRegionBed parameter)
+ * "Read Length Rates": Rates of observed read lengths. Useful if data is hard-trimmed prior to alignment.
+ * Performance Plot: Plot shows the runtime performance of the QoRTs QC run.
+ * Raw FASTQ QC: Added modules to QoRTs QC that allow the specification of a fastq file. QoRTs will run some basic QC on the FASTQ file (NVC, missingness rate, GC rate, read-length distribution, and quality score metrics).
+
+New Plotting Functionality:
+ * Added more flexible multiplotting. Can now arbitrarily set the number of rows or columns of multiplots, and QoRTs will automatically fit the requested plots in the requested plots.
+ * Can now change which plots to include in multiplots. Plotters will automatically resize and reorganize sub-plots.
+ * By default, makemultiplot will automatically remove plots that cannot be created due to missing data.
+ * Can now create more flexible plotters with manually-set coloration and highlighting.
+
+Internal changes:
+ * Improved performance of several internal utilities (in particular, NVC calculator is now almost twice as fast). Most of the improvement is offset by the addition of new metrics, so with all new modules active runtime is roughly the same as in 1.1.
+ * New paired iterator that sorts pairs by the lowest genomic position. This is necessary for the fast and efficient calculation of reference mismatches, but somewhat reduces performance and increases memory usage. Therefore it is only used when reference mismatch rates are calculated.
+
 ## v1.1.6:
 Minor additions and tweaks:
 * Added new optional tag to "flattened" GFF file, containing transcript coding region information. This is intended for use by a future update to JunctionSeq.

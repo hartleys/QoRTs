@@ -3,11 +3,13 @@ package qcUtils
 import net.sf.samtools._
 import internalUtils.fileUtils._;
 
-abstract class QCUtility[+B <: Any] {
+abstract class QCUtility[+B <: Any] extends genUtility {
    def runOnReadPair(r1 : SAMRecord, r2 : SAMRecord, readNum : Int) : B;
-   def writeOutput(outfile : String, summaryWriter : WriterUtil);
+   def writeOutput(outfile : String, summaryWriter : WriterUtil, docWriter : DocWriterUtil = null);
    def getUtilityName : String;
    def priority : Int = 255;
+   
+
 }
 
 object QCUtility {
@@ -32,22 +34,34 @@ object QCUtility {
   //def getBlankUtil[T] : QCUtility[T] = {
     
   //}
+  /*
+  class blankQCUtility extends QCUtility[Nothing] {
+   def runOnReadPair(r1 : SAMRecord, r2 : SAMRecord, readNum : Int) : Nothing = {
+     return Nothing;
+   }
+   def writeOutput(outfile : String, summaryWriter : WriterUtil){
+     //do nothing!
+   }
+   def getUtilityName : String = "blankQCUtility";
+  }*/
+  
+  
   
   class blankIntPairQCUtility extends QCUtility[(Int,Int)] {
     def runOnReadPair(r1 : SAMRecord, r2 : SAMRecord, readNum : Int) : (Int,Int) = {
       (-1, -1);
     }
-    def writeOutput(outfile : String, summaryWriter : WriterUtil){
+    def writeOutput(outfile : String, summaryWriter : WriterUtil, docWriter : DocWriterUtil = null){
       //do nothing!
     }
     def getUtilityName : String = "blankIntPairQCUtility";
   }
-  
+   
   class blankIntQCUtility extends QCUtility[Int] {
     def runOnReadPair(r1 : SAMRecord, r2 : SAMRecord, readNum : Int) : Int = {
       -1;
     }
-    def writeOutput(outfile : String, summaryWriter : WriterUtil){
+    def writeOutput(outfile : String, summaryWriter : WriterUtil, docWriter : DocWriterUtil = null){
       //do nothing!
     }
     def getUtilityName : String = "blankIntQCUtility";
@@ -58,7 +72,7 @@ object QCUtility {
       //do nothing!
       ""
     }
-    def writeOutput(outfile : String, summaryWriter : WriterUtil){
+    def writeOutput(outfile : String, summaryWriter : WriterUtil, docWriter : DocWriterUtil = null){
       //do nothing!
     }
     def getUtilityName : String = "blankStringQCUtility";
@@ -68,7 +82,17 @@ object QCUtility {
     def runOnReadPair(r1 : SAMRecord, r2 : SAMRecord, readNum : Int){
       //do nothing!
     }
-    def writeOutput(outfile : String, summaryWriter : WriterUtil){
+    def writeOutput(outfile : String, summaryWriter : WriterUtil, docWriter : DocWriterUtil = null){
+      //do nothing!
+    }
+    def getUtilityName : String = "blankUnitQCUtility";
+  }
+  
+  class blankBooleanQCUtility extends QCUtility[Boolean] {
+    def runOnReadPair(r1 : SAMRecord, r2 : SAMRecord, readNum : Int) : Boolean = {
+      return true;
+    }
+    def writeOutput(outfile : String, summaryWriter : WriterUtil, docWriter : DocWriterUtil = null){
       //do nothing!
     }
     def getUtilityName : String = "blankUnitQCUtility";

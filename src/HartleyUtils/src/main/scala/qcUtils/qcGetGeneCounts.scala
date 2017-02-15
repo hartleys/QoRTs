@@ -45,7 +45,34 @@ object qcGetGeneCounts {
     }
   }*/
   
+
+  def getIndelSet(r1 : SAMRecord, r2 : SAMRecord, stranded : Boolean, fr_secondStrand : Boolean) : Set[GenomicInterval] = {
+    getIndelSetFromRead(r1,stranded,fr_secondStrand) ++ getIndelSetFromRead(r2,stranded,fr_secondStrand)
+  }
+  def getIndelSetFromRead(r : SAMRecord, stranded : Boolean, fr_secondStrand : Boolean) : Set[GenomicInterval] = {
+    val cigOps : Stream[CigOp] = CigarHolder(r : SAMRecord, stranded : Boolean, fr_secondStrand : Boolean).cigOps;
+    
+    cigOps.filter(c => c.op == CigarOperator.DELETION || c.op == CigarOperator.INSERTION).map(_.ref_iv).toSet;
+  }
   
+  def getDeletionSet(r1 : SAMRecord, r2 : SAMRecord, stranded : Boolean, fr_secondStrand : Boolean) : Set[GenomicInterval] = {
+    getDeletionSetFromRead(r1,stranded,fr_secondStrand) ++ getDeletionSetFromRead(r2,stranded,fr_secondStrand)
+  }
+  
+  def getInsertionSet(r1 : SAMRecord, r2 : SAMRecord, stranded : Boolean, fr_secondStrand : Boolean) : Set[GenomicInterval] = {
+    getInsertionSetFromRead(r1,stranded,fr_secondStrand) ++ getInsertionSetFromRead(r2,stranded,fr_secondStrand)
+  }
+  
+  def getDeletionSetFromRead(r : SAMRecord, stranded : Boolean, fr_secondStrand : Boolean) : Set[GenomicInterval] = {
+    val cigOps : Stream[CigOp] = CigarHolder(r : SAMRecord, stranded : Boolean, fr_secondStrand : Boolean).cigOps;
+    
+    cigOps.filter( _.op == CigarOperator.DELETION).map(_.ref_iv).toSet;
+  }
+  def getInsertionSetFromRead(r : SAMRecord, stranded : Boolean, fr_secondStrand : Boolean) : Set[GenomicInterval] = {
+    val cigOps : Stream[CigOp] = CigarHolder(r : SAMRecord, stranded : Boolean, fr_secondStrand : Boolean).cigOps;
+    
+    cigOps.filter( _.op == CigarOperator.INSERTION).map(_.ref_iv).toSet;
+  }
   
   def calculateGeneBodyCoverage(geneAssignment : String, r1 : SAMRecord, r2 : SAMRecord, geneBodyCoverageMap : GenMap[String, Array[Int]], intervalMap : Map[String, Vector[TreeSet[GenomicInterval]]]){
     if(geneAssignment != "_no_feature" && geneAssignment != "_ambiguous"){
@@ -218,8 +245,8 @@ object qcGetGeneCounts {
     }
   }
   
-  def writeGeneBodyCoverage_genewise(outfile : String, geneBody_intervalBreaks : Seq[Double], geneCounts : scala.collection.mutable.Map[String,Int], geneBody_CoverageCountArrays : scala.collection.mutable.Map[String,Array[Int]]){
-    val writer = openWriterSmart_viaGlobalParam(outfile+".geneBodyCoverage.genewise.txt");
+  def writeGeneBodyCoverage_genewise(writer : WriterUtil, geneBody_intervalBreaks : Seq[Double], geneCounts : scala.collection.mutable.Map[String,Int], geneBody_CoverageCountArrays : scala.collection.mutable.Map[String,Array[Int]]){
+    //val writer = openWriterSmart_viaGlobalParam(outfile+".geneBodyCoverage.genewise.txt");
     
     writer.write("GENE_ID	" + geneBody_intervalBreaks.tail.mkString("	")+"\n");
     for(gene <- geneBody_CoverageCountArrays.keys.toVector.sorted){
@@ -228,8 +255,8 @@ object qcGetGeneCounts {
     }
     close(writer);
   }
-  def debug_writeGeneBodySpans(outfile : String, geneBody_intervalBreaks : Seq[Double], geneBody_CoverageIntervalMap : Map[String, Vector[TreeSet[GenomicInterval]]]){
-    val writer = openGzipWriter(outfile+".geneBodyCoverage.DEBUG.intervals.txt.gz");
+  def debug_writeGeneBodySpans(writer : WriterUtil, geneBody_intervalBreaks : Seq[Double], geneBody_CoverageIntervalMap : Map[String, Vector[TreeSet[GenomicInterval]]]){
+    //val writer = openGzipWriter(outfile+".geneBodyCoverage.DEBUG.intervals.txt.gz");
     writer.write("GENE_ID	" + geneBody_intervalBreaks.tail.mkString("	")+"\n");
     for((gene,treeVector) <- geneBody_CoverageIntervalMap){
       writer.write(gene +"	"+ treeVector.map( (pp) => {
@@ -244,7 +271,7 @@ object qcGetGeneCounts {
   val default_coverageLevelThresholds = Seq(("1.bottomHalf",0.5),("2.upperMidQuartile",0.75),("3.75to90",0.9),("4.high",1.0));
   
   //UNFINISHED?
-  def geneBody_calculateGeneBodyCoverage_summaries(outfile : String, geneBody_intervalBreaks : Seq[Double], coverageLevelThresholds : Seq[(String,Double)], geneBody_CoverageCountArrays : GenMap[String,Array[Int]], geneCounts : scala.collection.mutable.Map[String,Int]){
+  def geneBody_calculateGeneBodyCoverage_summaries(writer : WriterUtil, writer2 : WriterUtil, geneBody_intervalBreaks : Seq[Double], coverageLevelThresholds : Seq[(String,Double)], geneBody_CoverageCountArrays : GenMap[String,Array[Int]], geneCounts : scala.collection.mutable.Map[String,Int]){
     val geneBody_IntervalCount = geneBody_intervalBreaks.length - 1;
     val totalGeneBodyCoverage_simple = geneBody_CoverageCountArrays.foldLeft(repToSeq(0,geneBody_IntervalCount))((sofar, currPair) =>{
       (0 until sofar.length).map(i => {
@@ -274,7 +301,7 @@ object qcGetGeneCounts {
       })
     });
     
-    val writer = openWriterSmart_viaGlobalParam(outfile+".geneBodyCoverage.by.expression.level.txt");
+    //val writer = openWriterSmart_viaGlobalParam(outfile+".geneBodyCoverage.by.expression.level.txt");
     writer.write("QUANTILE	" + coverageLevelThresholds.map(_._1).mkString("	") + "\n");
     for(i <- 0 until geneBody_IntervalCount){
       writer.write(geneBody_intervalBreaks.tail(i) + "	" + (0 until coverageLevelThresholds.length).map(j => {
@@ -305,7 +332,7 @@ object qcGetGeneCounts {
         sofar.zip(cca).map(p => p._1 + (p._2.toDouble / sliceSize.toDouble));
       })
     });
-    val writer2 = openWriterSmart_viaGlobalParam(outfile+".geneBodyCoverage.byExpr.avgPct.txt");
+    //val writer2 = openWriterSmart_viaGlobalParam(outfile+".geneBodyCoverage.byExpr.avgPct.txt");
     writer2.write("QUANTILE\t" +"TOTAL\t"+ coverageLevelThresholds.map(_._1).mkString("\t") + "\n");
     for(i <- 0 until geneBody_IntervalCount){
       writer2.write(geneBody_intervalBreaks.tail(i) + "\t" + totalGeneBodyCoverage_PCT(i) +"\t"+ (0 until coverageLevelThresholds.length).map(j => {
@@ -372,7 +399,9 @@ class qcGetGeneCounts( stranded : Boolean,
                        geneBodyIntervalCount : Int, 
                        calcRPKM : Boolean, writeGenewiseGeneBody : Boolean, writeDESeq : Boolean, writeGeneCounts : Boolean, writeGeneBody : Boolean,
                        writeBiotypeCounts : Boolean,
-                       geneKeepFunc : (String => Boolean), calcDetailedGeneCounts : Boolean = false) extends QCUtility[String] {
+                       geneKeepFunc : (String => Boolean),
+                       calcDetailedGeneCounts : Boolean = false,
+                       writeGeneBodyIv : Boolean = false) extends QCUtility[String] {
   
   reportln("> Init GeneCalcs Utility","debug");
   
@@ -453,8 +482,28 @@ class qcGetGeneCounts( stranded : Boolean,
   var detailed_strandSwap = 0;
   var detailed_strandSwapIntron = 0;
   
+  var delMap : GenMap[GenomicInterval,Int] = (Map[GenomicInterval,Int]()).withDefault(k => 0);
+  var insMap : GenMap[GenomicInterval,Int] = (Map[GenomicInterval,Int]()).withDefault(k => 0);
+
+  def countDeletions(indel : Set[GenomicInterval]){
+    for(iv <- indel){
+      val ct = delMap(iv);
+      delMap = delMap + ((iv, ct + 1));
+    }
+  }
+  def countInsertions(indel : Set[GenomicInterval]){
+    for(iv <- indel){
+      val ct = insMap(iv);
+      insMap = insMap + ((iv, ct + 1));
+    }
+  }
+  
+  
   def runOnReadPair(r1 : SAMRecord, r2 : SAMRecord, readNum : Int) : String = {
     val readGenes = qcGetGeneCounts.getPairFeatures(r1,r2,stranded,fr_secondStrand,geneArray);
+    
+    //if(writeDeletions)  countDeletions( qcGetGeneCounts.getDeletionSet(r1,r2,stranded,fr_secondStrand));
+    //if(writeInsertions) countInsertions(qcGetGeneCounts.getInsertionSet(r1,r2,stranded,fr_secondStrand));
     
     if(readGenes.size == 0){
       //utilCounts("_no_feature") += 1;
@@ -565,37 +614,60 @@ class qcGetGeneCounts( stranded : Boolean,
  // var readMiddleOfNowhere : Int = 0;
   //def geneArea_CDS_getReadGenes(r : SAMRecord, stranded : Boolean, fr_secondStrand : Boolean) : 
   
-  def writeOutput(outfile : String, summaryWriter : WriterUtil){
+  def writeOutput(outfile : String, summaryWriter : WriterUtil, docWriter : DocWriterUtil = null){
     
     ////Start with the summary:
+    
+    /*if(writeDeletions){
+      val writer2 = openWriterSmart_viaGlobalParam(outfile + ".deletionCounts.txt");
+      writer2.write("chrom	strand	start	end	CT\n");
+      for(iv <- delMap.keys.toVector.sorted){
+        val ct = delMap(iv);
+        writer2.write(iv.chromName+"	"+iv.strand+"	"+iv.start+"	"+iv.end+"	"+ct+"\n");
+      }
+      writer2.close();
+    }*/
+    
+    /*if(writeInsertions){
+      val writer2 = openWriterSmart_viaGlobalParam(outfile + ".deletionCounts.txt");
+      writer2.write("chrom	strand	start	end	CT\n");
+      for(iv <- insMap.keys.toVector.sorted){
+        val ct = insMap(iv);
+        writer2.write(iv.chromName+"	"+iv.strand+"	"+iv.start+"	"+iv.end+"	"+ct+"\n");
+      }
+      writer2.close();
+    }*/
     
     ////val writerSummary = openWriter(outfile + ".geneMappingSummary.txt");
 
     //summaryWriter.write(internalUtils.commonSeqUtils.causeOfDropArrayToStringTabbed(coda, coda_options));
     ////summaryWriter.write("ReadPairs_AmbigGene	"+utilCounts("_ambiguous")+"\n");
-    summaryWriter.write("ReadPairs_AmbigGene	"+readAmbiguous+"\n");
-    summaryWriter.write("ReadPairs_UniqueGene	"+readExonCount+"\n");
-    summaryWriter.write("ReadPairs_UniqueGene_CDS	"+readCdsCount+"\n");
-    summaryWriter.write("ReadPairs_UniqueGene_UTR	"+readUtrCount+"\n");
+    summaryWriter.write("ReadPairs_AmbigGene	"+readAmbiguous+"\tNumber of reads or read-pairs that map to a genomic area that includes regions covered by more than one gene."+"\n");
+    summaryWriter.write("ReadPairs_UniqueGene	"+readExonCount+"\tNumber of reads or read-pairs that map to a genomic area covered by exactly one gene"+"\n");
+    summaryWriter.write("ReadPairs_UniqueGene_CDS	"+readCdsCount+"\tNumber of reads or read-pairs that map to a genomic area covered by exactly one gene, and intersect at least partially with the coding region of that gene."+"\n");
+    summaryWriter.write("ReadPairs_UniqueGene_UTR	"+readUtrCount+"\tNumber of reads or read-pairs that map to a genomic area covered by exactly one gene, but that only cover the UTR (non-coding) regions."+"\n");
     //summaryWriter.write("ReadPairs_NoGene	"+utilCounts("_no_feature")+"\n");
-    summaryWriter.write("ReadPairs_NoGene	"+readNoFeature+"\n");
-    summaryWriter.write("ReadPairs_NoGene_Intron	"+readIntronCount+"\n");
-    summaryWriter.write("ReadPairs_NoGene_OneKbFromGene	"+readOneKb+"\n");
-    summaryWriter.write("ReadPairs_NoGene_TenKbFromGene	"+readTenKb+"\n");
-    summaryWriter.write("ReadPairs_NoGene_MiddleOfNowhere	"+readMiddleOfNowhere+"\n");
+    summaryWriter.write("ReadPairs_NoGene	"+readNoFeature+"\tNumber of reads or read-pairs that are not assigned to any gene."+"\n");
+    summaryWriter.write("ReadPairs_NoGene_Intron	"+readIntronCount+"\tNumber of reads or read-pairs that are not assigned to any gene, and that occur within an intronic region of one or more genes."+"\n");
+    summaryWriter.write("ReadPairs_NoGene_OneKbFromGene	"+readOneKb+"\tNumber of reads or read-pairs that are not assigned to any gene, and that are within 1kb from one or more genes."+"\n");
+    summaryWriter.write("ReadPairs_NoGene_TenKbFromGene	"+readTenKb+"\tNumber of reads or read-pairs that are not assigned to any gene, and that are within 10kb from one or more genes."+"\n");
+    summaryWriter.write("ReadPairs_NoGene_MiddleOfNowhere	"+readMiddleOfNowhere+"\tNumber of reads or read-pairs that are not assigned to any gene, and that are more than 10kb from the nearest gene"+"\n");
     
     val nonzero_genes = geneCounts.count( pair => { pair._2 > 0 });
     val zero_genes = geneCounts.size - nonzero_genes;
-    summaryWriter.write("Genes_Total	" + geneCounts.size +"\n");
-    summaryWriter.write("Genes_WithZeroCounts	" + zero_genes +"\n");
-    summaryWriter.write("Genes_WithNonzeroCounts	" + nonzero_genes +"\n");
+    summaryWriter.write("Genes_Total	" + geneCounts.size +"\tNumber of known genes"+"\n");
+    summaryWriter.write("Genes_WithZeroCounts	" + zero_genes +"\tNumber of genes with zero observed reads"+"\n");
+    summaryWriter.write("Genes_WithNonzeroCounts	" + nonzero_genes +"\tNumber of genes with 1 or more observed reads"+"\n");
 
     
     //close(writerSummary);
     
     //SUMMARY DONE.
     if(writeDESeq){
-      val writer2 = openWriterSmart_viaGlobalParam(outfile + ".geneCounts.formatted.for.DESeq.txt");
+      val writer2 = createOutputFile(outfile ,"geneCounts.formatted.for.DESeq.txt","",docWriter,
+             ("Column1","String","Gene ID"),
+             ("Column2","Int","Number of reads or read-pairs that uniquely maps to only the given gene")  
+      );
       for(key <- geneCounts.keys.toVector.sorted){
         writer2.write(key + "	"+geneCounts(key) +"\n");
       }
@@ -609,9 +681,15 @@ class qcGetGeneCounts( stranded : Boolean,
       close(writer2);
     }
     if(writeGeneCounts){
-      val writer = openWriterSmart_viaGlobalParam(outfile + ".geneCounts.txt");
+      val writer = createOutputFile(outfile, "geneCounts.txt","",docWriter,
+             ("GENEID","String","Gene ID"),
+             ("COUNT","int","Number of reads or read-pairs that uniquely maps to only the given gene (ie: does not intersect with any other known gene)."),
+             ("COUNT_CDS","int","Number of reads that map at least partially to coding region of uniquely maps to only the given gene."),
+             ("COUNT_UTR","int","Number of reads that map to only the UTR region of the given gene."),
+             ("COUNT_AMBIG_GENE","int","Number of reads that map to this gene and to an area that overlaps with one or more other gene(s).")
+      );
       //writer.write("");
-      writer.write("GENEID	COUNT	COUNT_CDS	COUNT_UTR	COUNT_AMBIG_GENE\n");
+      writer.write("GENEID\tCOUNT\tCOUNT_CDS\tCOUNT_UTR\tCOUNT_AMBIG_GENE\n");
       for(key <- geneCounts.keys.toVector.sorted){
         writer.write(key + "\t"+geneCounts(key) +"\t"+geneArea_cdsCounts(key)+"\t"+geneCounts_utr(key)+"\t"+geneCounts_ambig(key)+"\n");
       }
@@ -620,9 +698,26 @@ class qcGetGeneCounts( stranded : Boolean,
       writer.write("_total_no_feature\t"+ readNoFeature + "\t0\t0\t0\n");
       writer.write("_total_ambiguous\t"+ readAmbiguous + "\t0\t0\t0\n");
       close(writer);
+      
     }
     if(calcDetailedGeneCounts){
-      val writer = openWriterSmart_viaGlobalParam(outfile + ".geneCounts.detailed.txt");
+      val writer = createOutputFile(outfile , "geneCounts.detailed.txt","",docWriter,
+             ("GENEID","String","Gene ID"),
+             ("COUNT","int","Number of reads or read-pairs that uniquely maps to only the given gene (ie: does not intersect with any other known gene)."),
+             ("COUNT_CDS","int","Number of reads or read-pairs that map at least partially to coding region of uniquely maps to only the given gene."),
+             ("COUNT_UTR","int","Number of reads or read-pairs that map to only the UTR region of the given gene."),
+             ("COUNT_AMBIG_GENE","int","Number of reads or read-pairs that map to this gene and to an area that overlaps with one or more other gene(s)."),
+             ("intronic","int","Number of reads or read-pairs that map to the intronic region of this (and only this) gene."),
+             ("intronic_AMBIG","int","Number of reads or read-pairs that map to the intronic region of this and other genes."),
+             ("nearby","int","Number of reads or read-pairs that map to near this and only this gene (<1k bp)"),
+             ("nearby_AMBIG","int","Number of reads or read-pairs that map to near this and other genes (<1k bp)"),
+             ("far","int","Number of reads or read-pairs that map to within 10k of this and only this gene."),
+             ("far_AMBIG","int","Number of reads or read-pairs that map to within 10k of this and other genes"),
+             ("wrongStrand","int","Number of reads or read-pairs that map to the wrong strand of the given gene (stranded data only)"),
+             ("wrongStrand_AMBIG","int","Number of reads or read-pairs that map to the wrong strand of the given gene and other genes (stranded data only)"),
+             ("wrongStrandAndIntron","int","Number of reads or read-pairs that map to the wrong strand and an intronic region of the given gene."),
+             ("wrongStrandAndIntron_AMBIG","int","Number of reads or read-pairs that map to the wrong strand and an intronic region of the given gene and other genes")
+      );
       //writer.write("");
       val titleString = "GENEID\tCOUNT\tCOUNT_CDS\tCOUNT_UTR\tCOUNT_AMBIG_GENE\t"+
                         "intronic\tintronic_AMBIG\tnearby\tnearby_AMBIG\tfar\tfar_AMBIG"+ 
@@ -641,32 +736,61 @@ class qcGetGeneCounts( stranded : Boolean,
                    "\n"
         writer.write(line);
       }
-      summaryWriter.write("ReadPairs_ADV_NoGene_Intron\t" + detailed_readIntronCount +"\n");
-      summaryWriter.write("ReadPairs_ADV_NoGene_OneKbFromGene\t" + detailed_readOneKb +"\n");
-      summaryWriter.write("ReadPairs_ADV_NoGene_TenKbFromGene\t" + detailed_readTenKb +"\n");
-      summaryWriter.write("ReadPairs_ADV_NoGene_MiddleOfNowhere\t" + detailed_readMiddleOfNowhere +"\n");
-      summaryWriter.write("ReadPairs_ADV_NoGene_swappedStrand\t" + detailed_strandSwap +"\n");
-      summaryWriter.write("ReadPairs_ADV_NoGene_swappedStrandIntron\t" + detailed_strandSwapIntron +"\n");
-      
-      close(writer);
+      summaryWriter.write("ReadPairs_ADV_NoGene_Intron\t" + detailed_readIntronCount +"\tNumber of reads or read-pairs that are not assigned to any gene, and that occur within an intronic region of one or more genes."+"\n");
+      summaryWriter.write("ReadPairs_ADV_NoGene_OneKbFromGene\t" + detailed_readOneKb +"\tNumber of reads or read-pairs that are not assigned to any gene, and that are within 1kb from one or more genes."+"\n");
+      summaryWriter.write("ReadPairs_ADV_NoGene_TenKbFromGene\t" + detailed_readTenKb +"\tNumber of reads or read-pairs that are not assigned to any gene, and that are within 10kb from one or more genes."+"\n");
+      summaryWriter.write("ReadPairs_ADV_NoGene_MiddleOfNowhere\t" + detailed_readMiddleOfNowhere +"\tNumber of reads or read-pairs that are not assigned to any gene, and that are more than 10kb from the nearest gene"+"\n");
+      summaryWriter.write("ReadPairs_ADV_NoGene_swappedStrand\t" + detailed_strandSwap +"\tNumber of reads or read-pairs that are not assigned to any gene, but that are on the opposite strand of a known gene."+"\n");
+      summaryWriter.write("ReadPairs_ADV_NoGene_swappedStrandIntron\t" + detailed_strandSwapIntron +"\tNumber of reads or read-pairs that are not assigned to any gene, but that are on the opposite strand of a known gene's intronic region."+"\n");
+      close(writer);      
     }
     
-    //delete this later:
     if(writeGeneBody){
-      debug_writeGeneBodySpans(outfile);
-      if(writeGenewiseGeneBody){
-        writeGeneBodyCoverage_genewise(outfile);
+      if(writeGeneBodyIv){
+        val writerX = createOutputFile(outfile,"geneBodyCoverage.DEBUG.intervals.txt.gz","",docWriter,
+             ("GENE_ID","String","Gene ID"),
+             ("<X>","String","Genomic interval for the gene-body quantile with upper limit <X>.")
+        );
+        debug_writeGeneBodySpans(writerX);
       }
-      writeGeneBodyCoverage_summaryByExpressionLevel(outfile);
+      if(writeGenewiseGeneBody){
+        val writerX = createOutputFile(outfile,"geneBodyCoverage.genewise.txt","",docWriter,
+             ("GENE_ID","String","Gene ID"),
+             ("<X>","String","For the given gene, number of reads or read-pairs for the gene-body quantile with upper limit <X>.")
+        );
+        writeGeneBodyCoverage_genewise(writerX);
+      }
+      
+        val writerX = createOutputFile(outfile,"geneBodyCoverage.by.expression.level.txt","",docWriter,
+             ("QUANTILE","String","Upper limit of the gene-body quantile. Each gene is split into 40 equal-sized quantiles."),
+             ("1.bottomHalf","Int","Genes are broken up into groups by expression level. This column counts only genes in the bottom two quantiles of expression. Column contains the number of reads or read-pairs that overlap with the given gene-body quantile."),
+             ("1.upperMidQuartile","Int","For genes in the upper-middle quartile, column contains the number of reads or read-pairs that overlap with the given gene-body quantile."),
+             ("3.75to90","Int","75 to 90 percentiles, column contains the number of reads or read-pairs that overlap with the given gene-body quantile."),
+             ("1.high","Int","For genes in the top 10%, column contains the number of reads or read-pairs that overlap with the given gene-body quantile.")
+        );
+        val writerY = createOutputFile(outfile,"geneBodyCoverage.byExpr.avgPct.txt","",docWriter,
+             ("QUANTILE","String","Upper limit of the gene-body quantile. Each gene is split into 40 equal-sized quantiles."),
+             ("1.bottomHalf","double","Genes are broken up into groups by expression level. This column counts only genes in the bottom two quantiles of expression. Column contains the average of the fraction of reads or read-pairs that overlap with the given gene-body quantile."),
+             ("1.upperMidQuartile","double","For genes in the upper-middle quartile, column contains the average of the fraction of reads or read-pairs that overlap with the given gene-body quantile."),
+             ("3.75to90","double","75 to 90 percentiles, column contains the average of the fraction of reads or read-pairs that overlap with the given gene-body quantile."),
+             ("1.high","double","For genes in the top 10%, column contains the average of the fraction of reads or read-pairs that overlap with the given gene-body quantile.")
+        );
+        
+      writeGeneBodyCoverage_summaryByExpressionLevel(writerX,writerY);
+
     }
     
     if(writeBiotypeCounts){
       val biotypeMap = anno_holder.geneBiotypeMap;
       val biotypeSet = (biotypeMap.map(_._2).toSet + "UNK");
       
-      val writer = openWriterSmart_viaGlobalParam(outfile + ".biotypeCounts.txt");
+      val writer = createOutputFile(outfile , "biotypeCounts.txt","",docWriter,
+             ("BIOTYPE","String","Gene biotype (if available in input GTF file)"),
+             ("COUNT","int","Number of reads or read-pairs that map uniquely to a single gene that has this biotype."),
+             ("COUNT_AMBIG","int","Number of reads or read-pairs that map to multiple genes, at least one of which has this biotype."),
+             ("COUNT_TOTAL","int","The sum of the previous two columns.")
+      );
       writer.write("BIOTYPE\tCOUNT\tCOUNT_AMBIG_GENE\tTOTAL\n");
-      
       for(bt <- biotypeSet.toVector.sorted){
         val count =       geneCounts.filter((x : (String,Int)) => biotypeMap(x._1) == bt).map(_._2).sum;
         val ambig = geneCounts_ambig.filter((x : (String,Int)) => biotypeMap(x._1) == bt).map(_._2).sum;
@@ -676,10 +800,11 @@ class qcGetGeneCounts( stranded : Boolean,
     }
     
     if(calcRPKM){
-      val writerRPKM = openWriterSmart_viaGlobalParam(outfile + ".FPKM.txt");
-      
+      val writerRPKM = createOutputFile(outfile , "FPKM.txt","",docWriter,
+            ("GENEID","String","Gene ID"),
+            ("FPKM","Int","Fragments per kilobase per million. Number of reads mapping uniquely to the given gene, divided by the length of the gene (in kb), divided by the number of reads in the sample (in millions).")             
+      );
       val M = readExonCount.toDouble / 1000000.toDouble;
-      
       writerRPKM.write("GENEID	FPKM\n");
       for(key <- geneCounts.keys.toSeq.sorted){
         val K = anno_holder.geneLengthMap(key).toDouble / 1000.toDouble;
@@ -687,22 +812,22 @@ class qcGetGeneCounts( stranded : Boolean,
         val FPKM = (F / K) / M;
         writerRPKM.write(key + "	"+FPKM+"\n");
       }
-      
       close(writerRPKM);
+      
     }
   }
   
-  def writeGeneBodyCoverage_genewise(outfile :String){
+  def writeGeneBodyCoverage_genewise(writer :WriterUtil){
 //  def writeGeneBodyCoverage_genewise(outfile : String, geneBody_intervalBreaks : Seq[Double], geneCounts : scala.collection.mutable.Map[String,Int], geneBody_CoverageCountArrays : Map[String,Array[Int]]){
-    qcGetGeneCounts.writeGeneBodyCoverage_genewise(outfile, geneBody_intervalBreaks, geneCounts, geneBody_CoverageCountArrays);
+    qcGetGeneCounts.writeGeneBodyCoverage_genewise(writer, geneBody_intervalBreaks, geneCounts, geneBody_CoverageCountArrays);
   }
-  def debug_writeGeneBodySpans(outfile : String){
-    qcGetGeneCounts.debug_writeGeneBodySpans(outfile, geneBody_intervalBreaks, geneBody_CoverageIntervalMap);
+  def debug_writeGeneBodySpans(writer : WriterUtil){
+    qcGetGeneCounts.debug_writeGeneBodySpans(writer, geneBody_intervalBreaks, geneBody_CoverageIntervalMap);
   }
   
-  def writeGeneBodyCoverage_summaryByExpressionLevel(outfile : String){
+  def writeGeneBodyCoverage_summaryByExpressionLevel(writer : WriterUtil, writer2 : WriterUtil){
     //geneBody_calculateGeneBodyCoverage_summaries(outfile : String, geneBody_intervalBreaks : Seq[Double], coverageLevelThresholds : Seq[(String,Double)], geneBody_CoverageCountArrays : Map[String,Array[Int]], geneCounts : scala.collection.mutable.Map[String,Int])
-    qcGetGeneCounts.geneBody_calculateGeneBodyCoverage_summaries(outfile, geneBody_intervalBreaks, qcGetGeneCounts.default_coverageLevelThresholds, geneBody_CoverageCountArrays, geneCounts);
+    qcGetGeneCounts.geneBody_calculateGeneBodyCoverage_summaries(writer,writer2, geneBody_intervalBreaks, qcGetGeneCounts.default_coverageLevelThresholds, geneBody_CoverageCountArrays, geneCounts);
   }
   
   def getUtilityName : String = "GeneCalcs";

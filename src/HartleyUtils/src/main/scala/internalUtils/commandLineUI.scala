@@ -581,6 +581,12 @@ List(
     def argType : String;
     def unsetValue : T;
   }
+  implicit object longStringParser extends StringParser[Long]{
+    def parse(s : String) : Long = string2long(s);
+    def argType : String = "Long";
+    def unsetValue : Long = -1;
+  }
+  
   implicit object stringStringParser extends StringParser[String]{
     def parse(s : String) : String = s;
     def argType : String = "String";

@@ -8,20 +8,25 @@
    Saves MANY compiled QC plots for the given dataset.
 }
 \usage{
-  makeMultiPlot.all(res, outfile.dir = "./", 
-                     plotter.params = list(), 
-                     plot.device.name = "png", 
-                     plotting.device.params = list(), 
-                     debugMode,
-                     rasterize.large.plots,
-                     rasterize.medium.plots,
-                     raster.height = 1000, 
-                     raster.width = 1000,
-                     exclude.autosomes.chrom.rate.plot = TRUE,
-                     chromosome.name.style = "UCSC",
-                     fig.res = 150, fig.base.height.inches = 7,
-                     insertSize.plot.xlim,
-                     \dots)
+makeMultiPlot.all(res, outfile.dir = "./",
+                  plotter.params = list(), 
+                  plot.device.name = "png", 
+                  plotting.device.params = list(), 
+                  debugMode, 
+                  rasterize.large.plots, 
+                  rasterize.medium.plots,
+                  raster.height = 1050, 
+                  raster.width = 1050,
+                  exclude.autosomes.chrom.rate.plot = TRUE,
+                  chromosome.name.style = "UCSC",
+                  fig.res = 150, fig.base.height.inches = 7,
+                  insertSize.plot.xlim ,
+                  sequencing.type = c("RNA","Exome","Genome"),
+                  maxColumns,
+                  maxRows,
+                  plotList,
+                  labelPlots = TRUE,
+                  ...)
 }
 \arguments{
   \item{res}{
@@ -101,6 +106,23 @@
     but there are always situations where the default behavior is not ideal. Using this parameter you can set
     it explicitly.
   }
+  \item{sequencing.type}{
+    The type of sequencing data being analyzed. This only changes the default plot set, which can be overriden with the \code{plotList} parameter.
+  }
+  
+  \item{maxColumns}{
+    If set, QoRTs will attempt to create a multiplot that has (at most) maxColumns columns. Extra rows will be added to fit all the plots, as needed.
+  }
+  \item{maxRows}{
+    If set, QoRTs will attempt to create a multiplot that has (at most) maxRows rows. Extra columns will be added to fit all the plots as needed. To set the number of rows and columns manually, you can set both maxColumns and maxRows.
+  }
+  \item{plotList}{
+    The list of desired plots.
+  }
+  \item{labelPlots}{
+    Logical. If TRUE, then label each plot with a letter.
+  }
+  
   \item{\dots}{ 
     Arguments to be passed to methods, such as
     \link{graphical parameters} (see \code{\link{par}}).

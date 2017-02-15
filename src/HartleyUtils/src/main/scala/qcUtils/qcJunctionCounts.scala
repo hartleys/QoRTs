@@ -31,6 +31,8 @@ object qcJunctionCounts {
     
     cigOps.filter( _.op == CigarOperator.SKIPPED_REGION).map(_.ref_iv).toSet;
   }
+  
+  
   /*
   def makeAnnotatedCountMap(spliceAnnotation : Map[(String,Char),TreeSet[(Int,Int)]]) : scala.collection.mutable.Map[GenomicInterval,Int] = {
     spliceAnnotation.foldLeft( new scala.collection.mutable.HashMap[GenomicInterval,Int]() )( (soFar, curr) =>{
@@ -90,11 +92,13 @@ class qcJunctionCounts(anno_holder : qcGtfAnnotationBuilder, stranded : Boolean,
   var knownCountMap : GenMap[String,(GenomicInterval,Int)] = knownSpliceMap.map( pair => {
       val (iv, spliceID) = pair;
       ((spliceID,((iv,0))));
-    }) 
+    })
+    
   reportln("length of knownSpliceMap after instantiation: " + knownSpliceMap.size,"debug");
   reportln("length of knownCountMap after instantiation: "  + knownCountMap.size,"debug");
   
   var novelCountMap : GenMap[GenomicInterval,Int] = (Map[GenomicInterval,Int]()).withDefault(k => 0);
+  
   
   val flatExonArray : GenomicArrayOfSets[String] = anno_holder.flatExonArray;
   val flatGeneSet   : Set[String] = anno_holder.flatGeneSet;
@@ -108,8 +112,10 @@ class qcJunctionCounts(anno_holder : qcGtfAnnotationBuilder, stranded : Boolean,
   def runOnReadPair(r1 : SAMRecord, r2 : SAMRecord, readNum : Int){
     countSplices( qcJunctionCounts.getSpliceJunctionSet(r1,r2,stranded,fr_secondStrand) );
     countExons(r1,r2);
+    
   }
   
+
   def countSplices(splices : Set[GenomicInterval]){
     for(iv <- splices){
       if(knownSpliceMap.contains(iv)){
@@ -133,11 +139,18 @@ class qcJunctionCounts(anno_holder : qcGtfAnnotationBuilder, stranded : Boolean,
     }
   }
   //writeDEXSeq : Boolean, writeSpliceExon : Boolean, writeKnownSplices : Boolean, writeNovelSplices : Boolean
-  def writeOutput(outfile : String, summaryWriter : WriterUtil){
+  def writeOutput(outfile : String, summaryWriter : WriterUtil, docWriter : DocWriterUtil = null){
     report("length of knownCountMap after run: " + knownCountMap.size,"debug");
     
     if(writeKnownSplices){
-      val writer = openWriterSmart_viaGlobalParam(outfile + ".spliceJunctionCounts.knownSplices.txt");
+      val writer = createOutputFile(outfile , "spliceJunctionCounts.knownSplices.txt","",docWriter,
+             ("spliceName","String","The unique ID assigned to the splice junction."),
+             ("chrom","String","The chromosome."),
+             ("strand","char","The strand (if strand-specific)."),
+             ("start","int","The start genomic position (0-based)."),
+             ("end","int","The end genomic position."),
+             ("CT","int","The number of reads or read-pairs that map across the splice junction.") 
+      );
       writer.write("spliceName	chrom	strand	start	end	CT\n");
       for(spliceID <- knownCountMap.keys.toVector.sorted){
         val (iv,ct) = knownCountMap(spliceID);
@@ -147,7 +160,13 @@ class qcJunctionCounts(anno_holder : qcGtfAnnotationBuilder, stranded : Boolean,
     }
     
     if(writeNovelSplices){
-      val writer2 = openWriterSmart_viaGlobalParam(outfile + ".spliceJunctionCounts.novelSplices.txt");
+      val writer2 = createOutputFile(outfile, "spliceJunctionCounts.novelSplices.txt","",docWriter,
+             ("chrom","String","The chromosome."),
+             ("strand","char","The strand (if strand-specific)."),
+             ("start","int","The start genomic position (0-based)."),
+             ("end","int","The end genomic position."),
+             ("CT","int","The number of reads or read-pairs that map across the splice junction.")
+      );
       writer2.write("chrom	strand	start	end	CT\n");
       for(iv <- novelCountMap.keys.toVector.sorted){
         val ct = novelCountMap(iv);
@@ -158,7 +177,14 @@ class qcJunctionCounts(anno_holder : qcGtfAnnotationBuilder, stranded : Boolean,
     val featureList = flatFeatureList;
 
     if(writeSpliceExon){
-      val writer3 = openWriterSmart_viaGlobalParam(outfile + ".spliceJunctionAndExonCounts.forJunctionSeq.txt");
+      val writer3 = createOutputFile(outfile , "spliceJunctionAndExonCounts.forJunctionSeq.txt","",docWriter,
+             ("COLUMN1","String","The ID of the feature (aggregate-gene, exonic-region, or splice-junction)."),
+             ("COLUMN2","int","The number of reads or read-pairs that map to the given sub-feature"),
+             ("<GENEID>:A000","ROW","The number of reads or read-pairs that map uniquely to gene <GENEID>"),
+             ("<GENEID>:E<NUM>","ROW","The number of reads or read-pairs that map uniquely to exonic region <NUM> of gene <GENEID>"),
+             ("<GENEID>:J<NUM>","ROW","The number of reads or read-pairs that map uniquely to KNOWN splice junction <NUM> of gene <GENEID>"),
+             ("<GENEID>:N<NUM>","ROW","The number of reads or read-pairs that map uniquely to NOVEL splice junction <NUM> of gene <GENEID>. (Note, depending on the parameter settings, there may not be any novel splice junctions included in this file. This does not necessarily mean there are no novel SJ.)")
+      );
       //val featureList = (flatGeneCountMap.keySet.map(_ + ":G000") ++ knownCountMap.keySet ++ exonCountMap.keySet).toSeq.sortBy( k => {
       //  val ks = k.split(":");
       //  val mainID = ks(0);
@@ -182,10 +208,20 @@ class qcJunctionCounts(anno_holder : qcGtfAnnotationBuilder, stranded : Boolean,
     
 
     if(annotatedSpliceExonCounts){
-      val writer4 = openWriterSmart_viaGlobalParam(outfile + ".annoSpliceJunctionAndExonCounts.txt");
+      val writer4 = createOutputFile(outfile , "annoSpliceJunctionAndExonCounts.txt","",docWriter,
+             ("featureID","String","The unique ID for the feature (gene, exon, or splice junction."),
+             ("featureType","String","The feature type (gene, exon, known splice junction, novel splice junction)"),
+             ("chrom","String","The chromosome."),
+             ("strand","char","The strand (if strand-specific)."),
+             ("start","int","The start genomic position (0-based)."),
+             ("end","int","The end genomic position."),
+             ("geneID","String","The unique ID for the gene that the feature is found on."),
+             ("binID","String","The ID number of the feature on the gene."),
+             ("readCount","int","The number of reads or read-pairs that map across the splice junction.")
+      );
       val flatgff = anno_holder.makeFlatReader();
       
-      writer4.write("featureID	featurType	chrom	start	end	strand	geneID	binID	readCount\n");
+      writer4.write("featureID\tfeatureType\tchrom\tstart\tend\tstrand\tgeneID\tbinID\treadCount\n");
       flatgff.foreach( (gffline : FlatGtfLine) => {
         val f = gffline.getFeatureName;
         val featureCode = f.split(":")(1).charAt(0);
@@ -204,7 +240,10 @@ class qcJunctionCounts(anno_holder : qcGtfAnnotationBuilder, stranded : Boolean,
     }
     
     if(writeDEXSeq){
-      val writer4 = openWriterSmart_viaGlobalParam(outfile + ".exonCounts.formatted.for.DEXSeq.txt");
+      val writer4 = createOutputFile(outfile , "exonCounts.formatted.for.DEXSeq.txt","",docWriter,
+             ("COLUMN1","String","The exon ID."),
+             ("COLUMN2","int","The number of reads or read-pairs that map to the given exon.")
+      );
       for(f <- featureList){
         val featureCode = f.split(":")(1).charAt(0);
         if(featureCode == 'E'){
@@ -219,6 +258,7 @@ class qcJunctionCounts(anno_holder : qcGtfAnnotationBuilder, stranded : Boolean,
       writer4.write("_lowaqual	NA\n");
       writer4.write("_notaligned	NA\n");
       close(writer4);
+      
     }
     
     //SUMMARY DATA:
@@ -253,25 +293,25 @@ class qcJunctionCounts(anno_holder : qcGtfAnnotationBuilder, stranded : Boolean,
         else x._2;
     }).sum
     
-    summaryWriter.write("AggregateGenes	"                  + num_aggregate_genes + "\n");
-    summaryWriter.write("AggregateGenes_NoReads	"          + num_aggregate_genes_with_no_reads + "\n");
-    summaryWriter.write("AggregateGenes_WithReads	"      + num_aggregate_genes_with_reads + "\n");
-    summaryWriter.write("SpliceLoci	"                      + (num_known_sj + num_novel_sj) + "\n");    
-    summaryWriter.write("SpliceLoci_Known	"              + num_known_sj + "\n");
-    summaryWriter.write("SpliceLoci_Known_NoReads	"      + num_known_sj_with_no_reads + "\n");
-    summaryWriter.write("SpliceLoci_Known_FewReads	"      + num_known_sj_with_few_reads + "\n");
-    summaryWriter.write("SpliceLoci_Known_ManyReads	"      + num_known_sj_with_many_reads + "\n");
-    summaryWriter.write("SpliceLoci_Novel	"              + num_novel_sj + "\n");
-    summaryWriter.write("SpliceLoci_Novel_FewReads	"      + num_novel_sj_with_few_reads + "\n");
-    summaryWriter.write("SpliceLoci_Novel_ManyReads	"      + num_novel_sj_with_many_reads + "\n");
+    summaryWriter.write("AggregateGenes	"                  + num_aggregate_genes + "\tNumber of aggregate genes\n");
+    summaryWriter.write("AggregateGenes_NoReads	"          + num_aggregate_genes_with_no_reads + "\tNumber of aggregate genes with 0 observed reads\n");
+    summaryWriter.write("AggregateGenes_WithReads	"      + num_aggregate_genes_with_reads + "\tNumber of aggregate genes with 1 or more observed reads\n");
+    summaryWriter.write("SpliceLoci	"                      + (num_known_sj + num_novel_sj) + "\tNumber of splice loci observed\n");    
+    summaryWriter.write("SpliceLoci_Known	"              + num_known_sj + "\tNumber of known splice loci\n");
+    summaryWriter.write("SpliceLoci_Known_NoReads	"      + num_known_sj_with_no_reads + "\tNumber of known splice loci with 0 observed reads\n");
+    summaryWriter.write("SpliceLoci_Known_FewReads	"      + num_known_sj_with_few_reads + "\tNumber of known splice loci with 1-3 observed reads\n");
+    summaryWriter.write("SpliceLoci_Known_ManyReads	"      + num_known_sj_with_many_reads + "\tNumber of known splice loci with 4+ observed reads\n");
+    summaryWriter.write("SpliceLoci_Novel	"              + num_novel_sj + "\tNumber of novel splice loci observed\n");
+    summaryWriter.write("SpliceLoci_Novel_FewReads	"      + num_novel_sj_with_few_reads + "\tNumber of novel splice loci observed with 1-3 observed reads\n");
+    summaryWriter.write("SpliceLoci_Novel_ManyReads	"      + num_novel_sj_with_many_reads + "\tNumber of novel splice loci observed with 4+ observed reads\n");
     
-    summaryWriter.write("SpliceEvents	"                         + (num_events_novel_sj + num_events_known_sj) + "\n");
-    summaryWriter.write("SpliceEvents_KnownLoci	"                 + num_events_known_sj + "\n");
-    summaryWriter.write("SpliceEvents_KnownLociWithFewReads	"     + num_events_known_sj_with_few_reads + "\n");
-    summaryWriter.write("SpliceEvents_KnownLociWithManyReads	" + num_events_known_sj_with_many_reads + "\n");
-    summaryWriter.write("SpliceEvents_NovelLoci	"                 + num_events_novel_sj + "\n");
-    summaryWriter.write("SpliceEvents_NovelLociWithFewReads	"     + num_events_novel_sj_with_few_reads + "\n");
-    summaryWriter.write("SpliceEvents_NovelLociWithManyReads	" + num_events_novel_sj_with_many_reads + "\n");
+    summaryWriter.write("SpliceEvents	"                         + (num_events_novel_sj + num_events_known_sj) + "\tNumber of observed splicing events (each read or read-pair that maps across a splice junction is a splice 'event')\n");
+    summaryWriter.write("SpliceEvents_KnownLoci	"                 + num_events_known_sj + "\tNumber of splice events covering known SJ loci\n");
+    summaryWriter.write("SpliceEvents_KnownLociWithFewReads	"     + num_events_known_sj_with_few_reads + "\tNumber of splice events covering low-coverage known SJ loci\n");
+    summaryWriter.write("SpliceEvents_KnownLociWithManyReads	" + num_events_known_sj_with_many_reads + "\tNumber of splice events covering high-coverage known SJ loci\n");
+    summaryWriter.write("SpliceEvents_NovelLoci	"                 + num_events_novel_sj + "\tNumber of splice events covering noverl SJ loci\n");
+    summaryWriter.write("SpliceEvents_NovelLociWithFewReads	"     + num_events_novel_sj_with_few_reads + "\tNumber of splice events covering low-coverage novel SJ loci\n");
+    summaryWriter.write("SpliceEvents_NovelLociWithManyReads	" + num_events_novel_sj_with_many_reads + "\tNumber of splice events covering high-coverage novel SJ loci\n");
     
   }
   def getUtilityName : String = "JunctionCalcs";

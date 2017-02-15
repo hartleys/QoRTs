@@ -103,7 +103,9 @@ openBitmap = function(nm, rows=1, cols=1, height = 600, width = 800, cex = 1.2) 
 \section{Overview} \label{sec:praeludium}
 %-----------------------------------------------------------
 
-The \href{http://hartleys.github.io/QoRTs/}{QoRTs software package}\cite{QoRTs} is a fast, efficient, and portable multifunction toolkit designed to assist in the analysis, quality control, and data management of RNA-Seq datasets. Its primary function is to aid in the detection and identification of errors, biases, and artifacts produced by paired-end high-throughput RNA-Seq technology. In addition, it can produce count data designed for use with differential expression \footnote{Such as \Biocpkg{DESeq}\cite{DESeq}, \Biocpkg{DESeq2}\cite{DESeq2} or \Biocpkg{edgeR}\cite{edgeR}} and differential exon usage tools \footnote{Such as \Biocpkg{DEXSeq}\cite{DEXSeq} or \href{http://hartleys.github.io/JunctionSeq/}{JunctionSeq}}, as well as individual-sample and/or group-summary genome track files suitable for use with the UCSC genome browser (or any compatible browser).
+The \href{http://hartleys.github.io/QoRTs/}{QoRTs software package}\cite{QoRTs} is a fast, efficient, and portable multifunction toolkit designed to assist in the analysis, quality control, and data management of RNA-Seq datasets. Recently (as of v1.2) it gained added functionality supporting quality control of whole genome and whole exome sequencing as well. 
+
+Its primary function is to aid in the detection and identification of errors, biases, and artifacts produced by paired-end high-throughput RNA-Seq technology. In addition, it can produce count data designed for use with differential expression \footnote{Such as \Biocpkg{DESeq}\cite{DESeq}, \Biocpkg{DESeq2}\cite{DESeq2} or \Biocpkg{edgeR}\cite{edgeR}} and differential exon usage tools \footnote{Such as \Biocpkg{DEXSeq}\cite{DEXSeq} or \href{http://hartleys.github.io/JunctionSeq/}{JunctionSeq}}, as well as individual-sample and/or group-summary genome track files suitable for use with the UCSC genome browser (or any compatible browser).
 
 In its primary role as a QC tool it can produce a wide variety of graphs, plots, and tables that allow the data to be visualized in various ways. Data can be compiled and contrasted in multiple ways to allow systematic errors or artifacts to reveal themselves more easily. While it will not directly assign pass/fail status, it is a powerful tool for bioinformaticians to detect and identify features in the data. In (hopefully) most cases, these plots and graphs will not reveal anything other than mixed statistical noise. Next-Gen sequencing technologies have matured to the point where gross systematic errors and batch-specific biases are relatively modest and rare. However: mistakes can still occur, and basing conclusions on flawed data can be disastrous.
 
@@ -127,9 +129,18 @@ A UCSC browser session produced in this pipeline is also \href{https://genome.uc
 
 \emph{Software:} The QoRTs software package requires \href{http://www.r-project.org/}{R} version 3.0.2 or higher, as well as \href{https://www.java.com}{java} 6 or higher. It is strongly recommended that a 64-bit version of java be used, as the 32-bit versions generally cannot allocate sufficient RAM.
 
-\emph{Annotation:} QoRTs requires transcript annotations in the form of a gtf file. If you are using a annotation-guided aligner (which is STRONGLY recommended) it is likely you already have a transcript gtf file for your reference genome. We recommend you use the same annotation gtf for alignment, QC, and downstream analysis. We have found the Ensembl "Gene Sets" gtf\footnote{Which can be acquired from the Ensembl website at \url{http://www.ensembl.org}} suitable for these purposes. However, any format that adheres to the gtf file specification\footnote{See the gtf file specification at \url{http://genome.ucsc.edu/FAQ/FAQformat.html}} will work.
+\emph{Required Annotation:} QoRTs requires transcript annotations in the form of a gtf file. If you are using a annotation-guided aligner (which is STRONGLY recommended) it is likely you already have a transcript gtf file for your reference genome. We recommend you use the same annotation gtf for alignment, QC, and downstream analysis. We have found the Ensembl "Gene Sets" gtf\footnote{Which can be acquired from the Ensembl website at \url{http://www.ensembl.org}} suitable for these purposes. However, any format that adheres to the gtf file specification\footnote{See the gtf file specification at \url{http://genome.ucsc.edu/FAQ/FAQformat.html}} will work.
 
-\emph{Dataset:} QoRTs requires aligned RNA-Seq data. Data can be paired-end or single-end, unstranded or stranded (using either strandedness rule, see Section \ref{sec:initialProcessing}). It is strongly recommended, but not explicitly required, that the SAM/BAM files be sorted (either by name or position). QoRTs can use additional metadata (such as technical replicate status, case/control status, batch id, etc) to produce comparisons between these replicate groups, but this information is optional.
+\emph{Dataset:} QoRTs requires aligned RNA-Seq or DNA-Seq data. Data can be paired-end or single-end, unstranded or stranded (using either strandedness rule, see Section \ref{sec:initialProcessing}). It is strongly recommended, but not explicitly required, that the SAM/BAM files be sorted (either by name or position). QoRTs can use additional metadata (such as technical replicate status, case/control status, batch id, etc) to produce comparisons between these replicate groups, but this information is optional.
+
+\emph{Optional:} 
+
+  \begin{itemize}
+    \item \emph{Reference Genome FASTA file}: In order to calculate reference mismatch rates, a genomic FASTA file is required. The chromosomes must be listed in the same order that they appear in the BAM file. In addition, the BAM file must be coordinate-sorted.
+    \item \emph{On-Target BED file}: For WES or similar, an on-target bed file can be supplied so that on-target stats can be calculated.
+    \item \emph{Un-aligned FASTQ files}: In addition to processing the aligned BAM data, QoRTs can optionally be passed the raw unaligned FASTQ files as well. QoRTs will then calculate a number of QC metrics based on the raw fastq data.
+  \end{itemize}
+
 
 %-----------------------------------------------------------
 \section{Installation}  \label{sec:install}
@@ -195,6 +206,8 @@ Running in the default mode, QoRTs will accept both name-sorted and position-sor
 
 QoRTs also has a separate mode designed only for name-sorted samples, which can be activated using the "\verb|--nameSorted|" option. Under certain conditions this may improve speed and reduce memory usage. Under typical conditions any improvement is trivial.
 
+\emph{In order to calculate the reference mismatch rate, the BAM files MUST be sorted by coordinate.} In addition, it is recommended that the genome fasta file be sorted in the same chromosome ordering as the BAM files.
+
 %-----------------------------------------------------------
 \section{Quick Start}  \label{sec:quickstart}
 %-----------------------------------------------------------
@@ -210,6 +223,18 @@ java -Xmx4G -jar /path/to/jarfile/QoRTs.jar QC \
 \end{verbatim}
 
 Note: This command must be executed as a single line. Additional options may be required depending on the nature of the dataset. For single-ended data, the \verb|--singleEnded| option should be included. For strand-specific data, the \verb|--stranded| option should be included, and possibly also the \verb|--fr_secondStrand| option depending on the stranded library type. For position-sorted data, the \verb|--coordSorted| option should be used. See \ref{sec:initialProcessing}, or the QC utility documentation\footnote{Found  \href{http://hartleys.github.io/QoRTs/jarHtml/QC.html}{here}.} for more information on the available options.
+
+If the genome fasta file and the raw unaligned fastq files are available, use the additional parameters:
+
+\begin{verbatim}
+java -Xmx4G -jar /path/to/jarfile/QoRTs.jar QC \
+                   --generatePlots  \
+	           --genomeFA genome.fa.gz \
+	           --rawfastq rawreads.1.fq.gz,rawreads.2.fq.gz \
+                   mybamfile.bam  \
+                   transcriptAnnotationFile.gtf.gz  \
+                   /qc/data/dir/path/
+\end{verbatim}
 
 %-----------------------------------------------------------
 \section{Dataset Organization}  \label{sec:dataset}
@@ -298,8 +323,11 @@ There are a number of crucial points that require attention when using the QoRTs
     \item \emph{Read Groups:} Depending on the production pipeline, each biological sample may be run across multiple sequencer lanes. These seperate files can be merged together either before or after analysis with QoRTs (and maybe even before alignment). However, if the merger occurs before analysis with QoRTs, then each bam file will consist of multiple seperate lanes or runs. In this case, it is STRONGLY recommended that seperate QC runs be performed on each "read group", using the \verb|--readGroup| option. This will prevent run- or lane-specific biases, artifacts, or errors from being obfuscated.
     \item \emph{Read Sorting:} For paired-end data reads must be sorted. By default, QoRTs can accept files sorted by name OR by position. Technically QoRTs will accept unsorted data, but the memory usage will be greatly increased.
     \item \emph{Single-end vs paired-end:} By default, QoRTs assumes the input bam file consists of paired-end data. For single-end data, the \verb|--singleEnded| option must be used.
-  \end{itemize}
-
+    \item \emph{genome FASTA file:} By default, QoRTs skips reference mismatch metric calculations. For these calculations to be possible you must supply a genome fasta file using the \verb|--genomeFA| parameter.
+    \item \emph{raw reads FASTQ:} By default, QoRTs only operates on the aligned BAM data. However, it can optionally also generate some QC metrics for the raw unaligned reads if the raw FASTQ files are supplied using the \verb|--rawfastq| parameter.
+    \item \emph{Further documentation:} You can cause QoRTs to create a metric documentation file that documents all output files using the \verb|--addFunction writeDocs| parameter.
+ \end{itemize}
+	           
 For example, to read the first read group bam-file for SAMP1 from the example dataset (which is stranded, coordinate-sorted, and uses the \verb|fr_firstStrand| stranded library type), one would use the following command:
 
 \begin{verbatim}
@@ -431,21 +459,23 @@ Which produces Figure \ref{compileSummaryPlots1-fig}:
 
 This plot includes many sub-plots, all in a single frame. The sub-plots are:
   \begin{itemize}
-    \item \emph{(a)}: Minimum phred quality score, by read position. Described in section \ref{subsec:plotDesc-1} 
-    \item \emph{(b)}: Lower-quartile phred quality score, by read position. Described in section \ref{subsec:plotDesc-1} 
-    \item \emph{(c)}: Median phred quality score, by read position. Described in section \ref{subsec:plotDesc-1} 
-    \item \emph{(d)}: Upper-quartile phred quality score, by read position. Described in section \ref{subsec:plotDesc-1} 
-    \item \emph{(e)}: Maximum phred quality score, by read position. Described in section \ref{subsec:plotDesc-1} 
-    \item \emph{(f)}: Clipping profile. Described in section \ref{subsec:plotDesc-3}
-    \item \emph{(g)}: Deletion profile. Described in section \ref{subsec:plotDesc-4}
-    \item \emph{(h)}: Insertion profile. Described in section \ref{subsec:plotDesc-4}
-    \item \emph{(i)}: Splicing profile. Described in section \ref{subsec:plotDesc-4}
-    \item \emph{(j)}: Insertion length distribution. Described in section \ref{subsec:plotDesc-8}
-    \item \emph{(k)}: Deletion length distribution. Described in section \ref{subsec:plotDesc-8}
-    \item \emph{(l)}: GC content distribution. Described in section \ref{subsec:plotDesc-2}
-    \item \emph{(m)}: N-rate, by read position. Described in section \ref{subsec:plotDesc-7}
-    \item \emph{(n)}: Read drop rate. Described in section \ref{subsec:plotDesc-20}
-    \item \emph{(o)}: Insert size distribution. Described in section \ref{subsec:plotDesc-5}
+    \item \emph{(a)}: Title frame.
+    \item \emph{(b)}: Minimum phred quality score, by read position. Described in section \ref{subsec:plotDesc-1} 
+    \item \emph{(c)}: Lower-quartile phred quality score, by read position. Described in section \ref{subsec:plotDesc-1} 
+    \item \emph{(d)}: Median phred quality score, by read position. Described in section \ref{subsec:plotDesc-1} 
+    \item \emph{(e)}: Upper-quartile phred quality score, by read position. Described in section \ref{subsec:plotDesc-1} 
+    \item \emph{(f)}: Maximum phred quality score, by read position. Described in section \ref{subsec:plotDesc-1} 
+    \item \emph{(g)}: Clipping profile. Described in section \ref{subsec:plotDesc-3}
+    \item \emph{(h)}: Deletion profile. Described in section \ref{subsec:plotDesc-4}
+    \item \emph{(i)}: Insertion profile. Described in section \ref{subsec:plotDesc-4}
+    \item \emph{(j)}: Splicing profile. Described in section \ref{subsec:plotDesc-4}
+    \item \emph{(k)}: Insertion length distribution. Described in section \ref{subsec:plotDesc-8}
+    \item \emph{(l)}: Deletion length distribution. Described in section \ref{subsec:plotDesc-8}
+    \item \emph{(m)}: GC content distribution. Described in section \ref{subsec:plotDesc-2}
+    \item \emph{(n)}: N-rate, by read position. Described in section \ref{subsec:plotDesc-7}
+    \item \emph{(o)}: Read drop rate. Described in section \ref{subsec:plotDesc-20}
+    \item \emph{(p)}: Insert size distribution. Described in section \ref{subsec:plotDesc-5}
+
     \item \emph{(p)}: Cumulative gene assignment diversity. Described in section \ref{subsec:plotDesc-9}
     \item \emph{(q)}: Gene body coverage, overall. Described in section \ref{subsec:plotDesc-6}
     \item \emph{(r)}: Gene body coverage, upper-middle quartile genes. Described in section \ref{subsec:plotDesc-6}
@@ -1327,6 +1357,264 @@ Additionally, size factors used for normalization can be outputted to file:
 Note that by default, \verb|get.size.factors| requires DESeq2. You can use simpler total-count-based size factors by setting sf.method to "TC".
 
 These size factors are used extensively in latter sections of this vignette to generate normalized coverage browser tracks.
+
+\pagebreak
+%----------
+\subsubsection{Read Length Distribution} \label{subsec:plotDesc-39}
+%----------
+
+\myincfig{indivPlot-39}{0.8\textwidth}{Read length distribution}
+
+While QoRTs is ideally intended to be run on non-trimmed data, this plot is intended to plot the amount of trimming that occurs.
+
+This plot can be generated with the command:
+<<indivPlot-39,results="hide", fig.width=12, fig.height=7>>=
+ makePlot.readLengthDist(byLane.plotter);
+@
+
+\begin{framed} \small
+\emph{What it means and what to look for:} Excessive trimming may be indicative of other problems. It may also cause apparent differentials elsewhere (for example, it may reduce the rate at which splice junctions are observed, since long reads are needed to map across splice junctions).
+\end{framed}
+
+\pagebreak
+%----------
+\subsubsection{Runtime Performance} \label{subsec:plotDesc-34}
+%----------
+
+\myincfig{indivPlot-34}{0.8\textwidth}{Runtime Performance}
+
+This plot shows the overlap mismatch rate given the minimum of the two PHRED quality scores for read 1 and read 2.
+
+This plot can be generated with the command:
+<<indivPlot-34,results="hide", fig.width=12, fig.height=7>>=
+ makePlot.runTimePerformance(byLane.plotter);
+@
+
+\begin{framed} \small
+\emph{What it means and what to look for:} This plot is mostly intended for benchmarking.
+\end{framed}
+
+\pagebreak
+%----------
+\subsubsection{Overlap Coverage} \label{subsec:plotDesc-27}
+%----------
+
+\myincfig{indivPlot-27}{0.8\textwidth}{Overlap Coverage}
+
+This plot shows the rate at which bases at each position in paired-end reads overlap with the other read.
+
+This plot can be generated with the command:
+<<indivPlot-27,results="hide", fig.width=12, fig.height=7>>=
+makePlot.overlap.coverage(byLane.plotter);
+@
+
+\begin{framed} \small
+\emph{What it means and what to look for:} This plot may sometimes reveal the underlying causes behind discrepancies in the overlap-mismatch rates. Large differences in the amount of overlap may cause apparent differences in the overlap mismatch rates.
+\end{framed}
+
+\emph{This plot and the related metrics are new and still in beta testing.}
+
+\pagebreak
+%----------
+\subsubsection{Overlap Mismatch Rates} \label{subsec:plotDesc-28}
+%----------
+
+\myincfig{indivPlot-28}{0.8\textwidth}{Overlap Mismatch By Read}
+
+\emph{OVERLAP MISMATCHES:} In paired-end data, paired reads often have substantial overlap. Since the two reads query the same underlying cDNA fragment, these overlapping regions should be identical. We can use this overlapping region to detect sequencing errors.
+
+These plot shows the overlap mismatch rate for the two reads, by read position.
+
+These plots can be generated with the command:
+<<indivPlot-28,results="hide", fig.width=12, fig.height=7>>=
+makePlot.overlapMismatch.byCycle(byLane.plotter);
+@
+
+\begin{framed} \small
+\emph{What it means and what to look for:} Excessive overlap errors may be indicative of excessive sequencing error.
+\end{framed}
+
+\emph{This plot and the related metrics are new and still in beta testing.}
+
+\pagebreak
+%----------
+\subsubsection{Overlap Mismatch Size} \label{subsec:plotDesc-29}
+%----------
+
+\myincfig{indivPlot-29}{0.8\textwidth}{Overlap Mismatch Size}
+
+This plot shows the rate by which read-pairs have a given number of mismatching base-pairs.
+
+This plot can be generated with the command:
+<<indivPlot-29,results="hide", fig.width=12, fig.height=7>>=
+makePlot.overlapMismatch.size(byLane.plotter);
+@
+
+\begin{framed} \small
+\emph{What it means and what to look for:} Excessive overlap errors may be indicative of excessive sequencing error.
+\end{framed}
+
+\emph{This plot and the related metrics are new and still in beta testing.}
+
+\pagebreak
+%----------
+\subsubsection{Overlap Mismatch By Quality Score} \label{subsec:plotDesc-30}
+%----------
+
+\myincfig{indivPlot-30}{0.8\textwidth}{Overlap Mismatch By Quality Score}
+
+This plot shows the overlap mismatch rate for each given PHRED quality score for the two reads.
+
+This plot can be generated with the command:
+<<indivPlot-30,results="hide", fig.width=12, fig.height=7>>=
+makePlot.overlapMismatch.byQual.read(byLane.plotter);
+@
+
+\begin{framed} \small
+\emph{What it means and what to look for:} Excessive overlap errors may be indicative of excessive sequencing error. However, if the excessive errors are all on base-pairs that are marked with low quality, you may be able to filter out such errors and prevent them from impacting downstream analyses.
+\end{framed}
+
+\emph{This plot and the related metrics are new and still in beta testing.}
+
+\pagebreak
+%----------
+\subsubsection{Overlap Mismatch By Min Quality Score} \label{subsec:plotDesc-31}
+%----------
+
+\myincfig{indivPlot-31}{0.8\textwidth}{Overlap Mismatch By Min Quality Score}
+
+This plot shows the overlap mismatch rate given the minimum of the two PHRED quality scores for read 1 and read 2.
+
+This plot can be generated with the command:
+<<indivPlot-31,results="hide", fig.width=12, fig.height=7>>=
+makePlot.overlapMismatch.byQual.min(byLane.plotter);
+@
+
+\begin{framed} \small
+\emph{What it means and what to look for:} Excessive overlap errors may be indicative of excessive sequencing error. However, if the excessive errors are all on base-pairs that are marked with low quality, you may be able to filter out such errors and prevent them from impacting downstream analyses.
+\end{framed}
+
+\emph{This plot and the related metrics are new and still in beta testing.}
+
+\pagebreak
+%----------
+\subsubsection{Overlap Mismatch By Base} \label{subsec:plotDesc-32}
+%----------
+
+\myincfig{indivPlot-32}{0.8\textwidth}{Overlap Mismatch By Base}
+
+This plot shows the overlap mismatch rate for each base-pair swap.
+
+This plot can be generated with the command:
+<<indivPlot-32,results="hide", fig.width=12, fig.height=7>>=
+makePlot.overlapMismatch.byBase(byLane.plotter);
+@
+
+\begin{framed} \small
+\emph{What it means and what to look for:} Sometimes excessive overlap mismatches are disproportionately represented by a specific base-pair swap.
+\end{framed}
+
+\emph{This plot and the related metrics are new and still in beta testing.}
+
+\pagebreak
+%----------
+\subsubsection{Overlap Mismatch By Base, At Quality Score X} \label{subsec:plotDesc-33}
+%----------
+
+\myincfig{indivPlot-33}{0.8\textwidth}{OOverlap Mismatch By Base, At Quality Score 41}
+
+This plot shows the overlap mismatch rate for the given minimum PHRED quality score for each base-pair swap.
+
+This plot can be generated with the command:
+<<indivPlot-33,results="hide", fig.width=12, fig.height=7>>=
+ makePlot.overlapMismatch.byBase.atScore(byLane.plotter,atScore = 41);
+@
+
+\begin{framed} \small
+\emph{What it means and what to look for:} Sometimes excessive overlap mismatches are disproportionately represented by a specific base-pair swap.
+\end{framed}
+
+\emph{This plot and the related metrics are new and still in beta testing.}
+
+\pagebreak
+%----------
+\subsubsection{Reference Mismatch Rates} \label{subsec:plotDesc-35}
+%----------
+
+\myincfig{indivPlot-35}{0.8\textwidth}{Overlap Mismatch By Read}
+
+\emph{REFERENCE MISMATCHES:} If a (optional) genome fasta file is provided, QoRTs will calculate reference mismatch rates. These are the rates of single-base-pair mismatches against the reference genome. These plot show the reference mismatch rates.
+
+These plots can be generated with the command:
+<<indivPlot-35,results="hide", fig.width=12, fig.height=7>>=
+makePlot.referenceMismatch.byCycle(byLane.plotter);
+@
+
+\begin{framed} \small
+\emph{What it means and what to look for:} Excessive reference mismatches may be caused by a wide range of different factors. This includes sequencing error (in which case we would expect to also see excessive overlap mismatches), population inhomogeneity, RNA/DNA degradation, library prep issues, or even the activity (or lack thereof) of DNA repair genes.
+\end{framed}
+
+\emph{This plot and the related metrics are new and still in beta testing.}
+
+\pagebreak
+%----------
+\subsubsection{Reference Mismatch Rates, by Score} \label{subsec:plotDesc-36}
+%----------
+
+\myincfig{indivPlot-36}{0.8\textwidth}{Reference Mismatch Rates, by Score}
+
+This plot shows the reference mismatch rates as a function of PHRED score.
+
+This plot can be generated with the command:
+<<indivPlot-36,results="hide", fig.width=12, fig.height=7>>=
+ makePlot.referenceMismatch.byScore(byLane.plotter);
+@
+
+\begin{framed} \small
+\emph{What it means and what to look for:} In some cases, excessive reference mismatches may be marked with lower PHRED scores. If this is the case, it may be possible to filter for this effect or otherwise reduce its impact. If there are excessive high-quality mismatches, this may be more of a problem.
+\end{framed}
+
+\emph{This plot and the related metrics are new and still in beta testing.}
+
+\pagebreak
+%----------
+\subsubsection{Reference Mismatch Rates, by Base} \label{subsec:plotDesc-37}
+%----------
+
+\myincfig{indivPlot-37}{0.8\textwidth}{Reference Mismatch Rates, by Base}
+
+This plot shows the reference mismatch rates for each base-pair swap.
+
+This plot can be generated with the command:
+<<indivPlot-37,results="hide", fig.width=12, fig.height=7>>=
+ makePlot.referenceMismatch.byBase(byLane.plotter);
+@
+
+\begin{framed} \small
+\emph{What it means and what to look for:} In many cases, excessive reference mismatches may be disproportionately represented by a specific base-pair swap.
+\end{framed}
+
+\emph{This plot and the related metrics are new and still in beta testing.}
+
+\pagebreak
+%----------
+\subsubsection{Reference Mismatch Rates, by Base, at Score} \label{subsec:plotDesc-38}
+%----------
+
+\myincfig{indivPlot-38}{0.8\textwidth}{Reference Mismatch Rates, by base, at score 41}
+
+This plot shows the reference mismatch rates for each base-pair swap at a given PHRED score.
+
+This plot can be generated with the command:
+<<indivPlot-38,results="hide", fig.width=12, fig.height=7>>=
+ makePlot.referenceMismatch.byBase.atScore(byLane.plotter, atScore=41);
+@
+
+\begin{framed} \small
+\emph{What it means and what to look for:} In many cases, excessive reference mismatches may be disproportionately represented by a specific base-pair swap.
+\end{framed}
+
+\emph{This plot and the related metrics are new and still in beta testing.}
 
 \pagebreak
 %-----------------------------------------------------------

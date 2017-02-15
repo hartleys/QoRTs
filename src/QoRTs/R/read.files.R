@@ -38,10 +38,24 @@ DEFAULTDEBUGMODE <- TRUE;
 #            other than these 2 required columns, it can have any other columns desired, as long as the column names are unique.
 #
 
-read.qc.results.data <- function(infile.dir, decoder = NULL, decoder.files = NULL, calc.DESeq2 = FALSE, calc.edgeR = FALSE, debugMode = DEFAULTDEBUGMODE ) {
+read.qc.results.data <- function(infile.dir, 
+                                 decoder = NULL, 
+                                 decoder.files = NULL, 
+                                 calc.DESeq2 = FALSE, 
+                                 calc.edgeR = FALSE, 
+                                 debugMode = DEFAULTDEBUGMODE,
+                                 autodetectMissingSamples = FALSE,
+                                 skip.files = c()
+                                 ) {
    decoder.final <- completeAndCheckDecoder(decoder = decoder, decoder.files = decoder.files);
    
-   return(read.in.results.data.with.decoder(decoder = decoder.final, infile.dir = infile.dir, calc.DESeq2 = calc.DESeq2 , calc.edgeR = calc.edgeR, debugMode = debugMode) );
+   return(read.in.results.data.with.decoder(decoder = decoder.final, 
+                                            infile.dir = infile.dir, 
+                                            calc.DESeq2 = calc.DESeq2 , 
+                                            calc.edgeR = calc.edgeR, 
+                                            debugMode = debugMode,
+                                            autodetectMissingSamples=autodetectMissingSamples,
+                                            skip.files = skip.files) );
 }
 
 completeAndCheckDecoder <- function(decoder = NULL, decoder.files = NULL){
@@ -131,6 +145,12 @@ expandAndCheckDecoder <- function(decoder) {
     decoder$qc.data.dir = decoder$unique.ID;
   }
   
+  decoder$qc.data.dir <- as.character(decoder$qc.data.dir);
+  decoder$group.ID <- as.character(decoder$group.ID);
+  decoder$lane.ID <- as.character(decoder$lane.ID);
+  decoder$sample.ID <- as.character(decoder$sample.ID);
+  decoder$unique.ID <- as.character(decoder$unique.ID);
+  
   #Now do checks for validity:
   
   #These should never be triggered, since these variables were all set above. But just in case:
@@ -217,7 +237,12 @@ get.decoder.from.dual.file <- function(lanebam.decoder, sample.decoder){
 
 ###############################################################
 
-read.in.results.data.with.decoder <- function(decoder, infile.dir = "", calc.DESeq2 = FALSE, calc.edgeR = FALSE , debugMode = DEFAULTDEBUGMODE){
+read.in.results.data.with.decoder <- function(decoder, infile.dir = "", 
+                                              calc.DESeq2 = FALSE, 
+                                              calc.edgeR = FALSE, 
+                                              autodetectMissingSamples = FALSE, 
+                                              skip.files = c(),
+                                              debugMode = DEFAULTDEBUGMODE){
   if(! is.null(decoder$lanebam.ID)){
     decoder$unique.ID <- decoder$lanebam.ID;
   }
@@ -241,12 +266,32 @@ read.in.results.data.with.decoder <- function(decoder, infile.dir = "", calc.DES
   #  message("Note: successfully found multi.mapped.read.pair.count: column. This will be used to plot multi-mapping rates.");
   #}
   
-  for(i in 1:length(decoder$unique.ID)){
-    if(! file.exists(paste0(infile.dir,decoder$qc.data.dir[i]))){
-       stop("Directory not found: ",paste0(infile.dir,decoder$qc.data.dir[i]));
+
+  dataDirs <- paste0(infile.dir,decoder$qc.data.dir);
+  dataDirExists <- file.exists(dataDirs);
+  if(any(! dataDirExists)){
+    message("WARNING: QoRTs run absent! Dir not found: ",paste0(infile.dir,decoder$qc.data.dir[!dataDirExists],""),"!");
+    if(autodetectMissingSamples){
+      message("      Skipping missing samples!");
+      decoder <- decoder[dataDirExists,,drop=FALSE];
+    } else {
+      stop("Fatal error: QoRTs run data not found! Use autodetectMissingSamples = TRUE to automatically skip these runs");
     }
   }
 
+  
+  compFiles <- paste0(infile.dir,decoder$qc.data.dir,"/QC.QORTS_COMPLETED_OK");
+  compFileExists <- file.exists(compFiles)
+  if(any(! compFileExists)){
+    message("WARNING: QoRTs run may be incomplete! File not found: ",paste0(infile.dir,decoder$qc.data.dir[!compFileExists],"/QC.QORTS_COMPLETED_OK"),"!");
+    if(autodetectMissingSamples){
+      message("      Skipping missing samples!");
+      decoder <- decoder[compFileExists,,drop=FALSE];
+    } else {
+      #stop("Fatal error: QoRTs run data not found! Use autodetectMissingSamples = TRUE to automatically skip these runs");
+    }
+  }
+  
   res <- new("QoRTs_QC_Results");
   res@lanebam.list <- decoder$unique.ID;
   res@sample.list <- unique(decoder$sample.ID);
@@ -261,14 +306,20 @@ read.in.results.data.with.decoder <- function(decoder, infile.dir = "", calc.DES
   qc.data.dir.list <- as.list(decoder$qc.data.dir);
   names(qc.data.dir.list) <- decoder$unique.ID
 
-  read.scalaqc.file.helper <- function(scalaqc_file){
+  if(debugMode) message("infile.dir = ",infile.dir);
+  #if(debugMode) message("qc.data.dir.list = ",paste0(qc.data.dir.list,collapse=","));
+  #if(debugMode) message("lanebam.list = ",paste0(lanebam.list,collapse=","));
+
+  read.scalaqc.file.helper <- function(scalaqc_file, sep=""){
+    if(debugMode) message(paste0("scalaqc_file = ",scalaqc_file), appendLF=FALSE);
     if(debugMode) ts <- timestamp();
-    out <- read.in.scalaQC.files(infile.dir,lanebam.list, qc.data.dir.list,scalaqc_file);
-    if(debugMode) reportTimeAndDiff(ts);
+    out <- read.in.scalaQC.files(infile.dir,lanebam.list, qc.data.dir.list,scalaqc_file,sep=sep);
+    if(debugMode) reportTimeAndDiff(ts,prefix="   ");
     out;
   }
   
-  res@qc.data <- list(summary = read.scalaqc.file.helper(QC_INTERNAL_SCALAQC_SUMMARY_FILE));
+  res@qc.data <- list(summary = read.scalaqc.file.helper(QC_INTERNAL_SCALAQC_SUMMARY_FILE,sep='\t'));
+  res@qc.data[["summary"]] <- lapply(res@qc.data[["summary"]],function(sumTable){sumTable[,1:2]})
 
   allSingleEnd <- any(sapply(res@qc.data[["summary"]], function(dl){
     dl$COUNT[dl$FIELD == "IS_SINGLE_END"] == 1;
@@ -283,16 +334,35 @@ read.in.results.data.with.decoder <- function(decoder, infile.dir = "", calc.DES
 
   if(res@singleEnd){
     if(debugMode) message("Autodetected Single-End mode.");
-    res@qc.data <- c(res@qc.data,lapply(QC_INTERNAL_SCALAQC_FILE_LIST_SINGLE_END, FUN=read.scalaqc.file.helper));
+    USE.LIST <- QC_INTERNAL_SCALAQC_FILE_LIST_SINGLE_END
+    #res@qc.data <- c(res@qc.data,lapply(QC_INTERNAL_SCALAQC_FILE_LIST_SINGLE_END, FUN=read.scalaqc.file.helper));
   } else {
     if(debugMode) message("Autodetected Paired-End mode.");
-    res@qc.data <- c(res@qc.data,lapply(QC_INTERNAL_SCALAQC_FILE_LIST, FUN=read.scalaqc.file.helper));
+    USE.LIST <- QC_INTERNAL_SCALAQC_FILE_LIST
+    #res@qc.data <- c(res@qc.data,lapply(QC_INTERNAL_SCALAQC_FILE_LIST, FUN=read.scalaqc.file.helper));
   }
+  if(length(skip.files) > 0){
+      USE.LIST <- USE.LIST[! USE.LIST %in% skip.files];
+      if(debugMode) message("skipping ",length(skip.files)," files.");
+      if(debugMode) message("   (\"",paste0(skip.files,collapse="\",\""),"\")");
+  }
+  
+  
+  read.scalaqc.file.helper <- function(scalaqc_file, sep=""){
+    if(debugMode) message(paste0("(File ",which(USE.LIST == scalaqc_file)," of ",length(USE.LIST),"): ",scalaqc_file), appendLF=FALSE);
+    if(debugMode) ts <- timestamp();
+    out <- read.in.scalaQC.files(infile.dir,lanebam.list, qc.data.dir.list,scalaqc_file,sep=sep);
+    if(debugMode) reportTimeAndDiff(ts,prefix="   ");
+    out;
+  }
+  
+  res@qc.data <- c(res@qc.data,lapply(USE.LIST, FUN=read.scalaqc.file.helper));
+
   res@calc.data <- list();
   
   message("calculating secondary data:");
   if(debugMode) ts <- timestamp();
-  res <- calc.results.data(res, calc.DESeq2 = calc.DESeq2, calc.edgeR = calc.edgeR);
+  res <- calc.results.data(res, calc.DESeq2 = calc.DESeq2, calc.edgeR = calc.edgeR,debugMode=debugMode);
   message("done.");
   if(debugMode) reportTimeAndDiff(ts);
   
@@ -328,7 +398,29 @@ QC_INTERNAL_SCALAQC_FILE_LIST <- list( gc.byPair = "QC.gc.byPair.txt.gz",
                                        NVC.minus.clipping.R2 = "QC.NVC.minus.clipping.R2.txt.gz",
                                        chrom.counts = "QC.chromCount.txt.gz",
                                        biotype.counts = "QC.biotypeCounts.txt.gz",
-                                       geneBodyCoverage.pct = "QC.geneBodyCoverage.byExpr.avgPct.txt.gz"
+                                       geneBodyCoverage.pct = "QC.geneBodyCoverage.byExpr.avgPct.txt.gz",
+                                       #onTarget = "QC.onTarget.txt.gz",
+                                       overlapCoverage = "QC.overlapCoverage.txt.gz",
+                                       #overlapMismatch = "QC.overlapMismatch.txt.gz",
+                                       overlapMismatch.byRead = "QC.overlapMismatch.byRead.txt.gz",
+                                       overlapMismatch.byScore = "QC.overlapMismatch.byScore.txt",
+                                       overlapMismatchCombos = "QC.overlapMismatch.byBase.txt.gz",
+                                       overlapMismatch.byScoreAndBP = "QC.overlapMismatch.byScoreAndBP.txt.gz",
+                                       readLenDist = "QC.readLenDist.txt.gz",
+                                       referenceMismatchCounts="QC.referenceMismatchCounts.txt.gz",
+                                       referenceMismatchRaw.byReadStrand="QC.referenceMismatchRaw.byReadStrand.txt",
+                                       referenceMismatch.byScore="QC.referenceMismatch.byScore.txt",
+                                       referenceMismatch.byScoreAndBP="QC.referenceMismatch.byScoreAndBP.txt",
+                                       mismatchSizeRates="QC.mismatchSizeRates.txt.gz",
+                                       FQ.gc.byRead = "QC.FQ.gc.byRead.txt.gz",
+                                       FQ.gc.byPair = "QC.FQ.gc.byPair.txt.gz",
+                                       FQ.gc.r1 =     "QC.FQ.gc.R1.txt.gz",
+                                       FQ.gc.r2 =     "QC.FQ.gc.R2.txt.gz",
+                                       FQ.NVC.R1 =    "QC.FQ.NVC.R1.txt.gz",
+                                       FQ.NVC.R2 =    "QC.FQ.NVC.R2.txt.gz",
+                                       FQ.quals.r1 =  "QC.FQ.quals.r1.txt.gz",
+                                       FQ.quals.r2 =  "QC.FQ.quals.r2.txt.gz"
+                                       
                                        #,
                                        #spliceJunctionCounts.knownSplices = "scalaQC.spliceJunctionCounts.knownSplices.txt.gz"
                                        #spliceJunctionCounts.novelSplices = "scalaQC.spliceJunctionCounts.novelSplices.txt.gz"
@@ -349,13 +441,22 @@ QC_INTERNAL_SCALAQC_FILE_LIST_SINGLE_END <- list(
                                        NVC.minus.clipping.R1 = "QC.NVC.minus.clipping.R1.txt.gz",
                                        chrom.counts = "QC.chromCount.txt.gz",
                                        biotype.counts = "QC.biotypeCounts.txt.gz",
-                                       geneBodyCoverage.pct = "QC.geneBodyCoverage.byExpr.avgPct.txt.gz"
+                                       geneBodyCoverage.pct = "QC.geneBodyCoverage.byExpr.avgPct.txt.gz",
+                                       #onTarget = "QC.onTarget.txt.gz",
+                                       readLenDist = "QC.readLenDist.txt.gz",
+                                       referenceMismatchCounts="QC.referenceMismatchCounts.txt.gz",
+                                       referenceMismatchRaw.byReadStrand="QC.referenceMismatchRaw.byReadStrand.txt",
+                                       referenceMismatch.byScore="QC.referenceMismatch.byScore.txt",
+                                       referenceMismatch.byScoreAndBP="QC.referenceMismatch.byScoreAndBP.txt",
+                                       mismatchSizeRates="QC.mismatchSizeRates.txt.gz",
+                                       FQ.gc.byRead = "QC.FQ.gc.byRead.txt.gz",
+                                       FQ.NVC.R1 =    "QC.FQ.NVC.R1.txt.gz",
+                                       FQ.quals.r1 =  "QC.FQ.quals.r1.txt.gz"
                                        #,
                                        #spliceJunctionCounts.knownSplices = "scalaQC.spliceJunctionCounts.knownSplices.txt.gz"
                                        #spliceJunctionCounts.novelSplices = "scalaQC.spliceJunctionCounts.novelSplices.txt.gz"
                                        #
 );
-
 
 ##################################################################################################################################
 ##################################################################################################################################
@@ -386,8 +487,8 @@ find.compression.variant.helper <- function(f){
   }
 }
 
-read.in.scalaQC.files <- function(infile.prefix, lanebam.list, qc.data.dir.list, infile.suffix){
-  message(paste0("reading ",infile.suffix," files..."));
+read.in.scalaQC.files <- function(infile.prefix, lanebam.list, qc.data.dir.list, infile.suffix, sep = ""){
+  #message(paste0("reading ",infile.suffix," files"),appendLF=FALSE);
   infiles <- find.compression.variant(paste0(infile.prefix,unlist(qc.data.dir.list),"/", infile.suffix));
   if(! is.na(infiles[1])){
     #print("!")
@@ -396,10 +497,17 @@ read.in.scalaQC.files <- function(infile.prefix, lanebam.list, qc.data.dir.list,
         stop("File not found: ",infiles[i], "()");
       }
     }
+    decade.ct <- 0;
+    laneBamCt <- length(unlist(lanebam.list))
+    #if(laneBamCt >= 10){ message(" [", appendLF=FALSE) }
     out <- lapply(lanebam.list,FUN=function(unique.ID){
       i <- which(unlist(lanebam.list) == unique.ID);
+      if( floor(10 * i / laneBamCt) > decade.ct ){ 
+          message(".", appendLF=FALSE); 
+          decade.ct <<- floor(10 * i / laneBamCt) 
+      }
       d <- tryCatch({
-         read.table(infiles[i],header=T,stringsAsFactors=F);
+         read.table(infiles[i],header=T,stringsAsFactors=F,sep=sep,quote="");
       }, warning = function(w){
          message(paste0("Warning tripped on file: ",infiles[i]));
          #message(w);
@@ -409,13 +517,13 @@ read.in.scalaQC.files <- function(infile.prefix, lanebam.list, qc.data.dir.list,
       }, finally = {
          #do nothing.
       });
-      
       return(d);
     })
+    #if(laneBamCt >= 10){ message("] ", appendLF=FALSE) }
     message("done.");
     return(out);
   } else {
-    message(paste0("Failed: Cannot find file: ",infiles[1],". Skipping tests that use this data."));
+    message(paste0("Failed: Cannot find file: ",paste0(infile.prefix,unlist(qc.data.dir.list),"/", infile.suffix)[[1]],". Skipping tests that use this data."));
     return(NULL);
   }
 }
@@ -461,20 +569,915 @@ check.all.completed.without.error <- function(res){
    }
 }
 
-calc.results.data <- function(res, calc.DESeq2, calc.edgeR ){
-   res <- fix.summary.to.numeric(res);
-   check.all.completed.without.error(res);
-   res <- calc.quals(res);
-   res <- calc.gene.CDF(res);
-   res <- calc.gene.CDF.bySample(res);
-   #res <- calc.raw.NVC(res);
-   res <- calc.mapping.rates(res);
-   res <- calc.samplewise.norm.factors(res, calc.DESeq2,calc.edgeR);
-   res <- calc.lanebamwise.norm.factors(res, calc.DESeq2,calc.edgeR);
-   res <- calc.lanebamwise.bysample.norm.factors(res);
-   res <- add.to.summary(res);
-   return(res);
+calc.results.data <- function(res, calc.DESeq2 = FALSE, calc.edgeR = FALSE, debugMode = FALSE){
+   tryCatch({
+     
+     res <- fix.summary.to.numeric(res);
+     check.all.completed.without.error(res);
+     
+     runTimedFunction(debugMode=debugMode,title="Calculating Quality Score Rates",expr={
+       res <- calc.quals(res);
+     })
+     runTimedFunction(debugMode=debugMode,title="Calculating cumulative gene coverage, by replicate",expr={
+       res <- calc.gene.CDF(res);
+     })
+     
+     runTimedFunction(debugMode=debugMode,title="Calculating cumulative gene coverage, by sample",expr={
+       res <- calc.gene.CDF.bySample(res);
+     })
+     #res <- calc.raw.NVC(res);
+     runTimedFunction(debugMode=debugMode,title="Calculating Mapping Rates",expr={
+       res <- calc.mapping.rates(res);
+     })
+     runTimedFunction(debugMode=debugMode,title="calculating normalization factors, by sample",expr={
+       res <- calc.samplewise.norm.factors(res, calc.DESeq2,calc.edgeR);
+     })
+     runTimedFunction(debugMode=debugMode,title="calculating normalization factors, by replicate",expr={
+       res <- calc.lanebamwise.norm.factors(res, calc.DESeq2,calc.edgeR);
+     })
+     runTimedFunction(debugMode=debugMode,title="calculating normalization factors, by sample/replicate",expr={
+       res <- calc.lanebamwise.bysample.norm.factors(res);
+     })
+     runTimedFunction(debugMode=debugMode,title="Calculating summary stats",expr={
+       res <- add.to.summary(res);
+     })
+     res <- calc.overlap.data(res,debugMode=debugMode);
+     
+     res <- calc.target.data(res,debugMode=debugMode);
+     res <- calc.refmatch.data(res,debugMode=debugMode);
+     
+     runTimedFunction(debugMode=debugMode,title="Calculating summary table",expr={
+       res@summaryTable <- get.summary.table(res);
+     })
+     
+     runTimedFunction(debugMode=debugMode,title="Calculating overlap mismatch combos",expr={
+       res <- add.overlap.mismatch.combos(res,debugMode=debugMode);
+     })
+     res <- calc.NVC.rates(res,debugMode=debugMode);
+     
+     return(res);
+   },error = function(e){
+        message("caught error: ",e);
+        return(res);
+   });
 }
+
+
+#overlapCoverage = "QC.overlapCoverage.txt.gz",
+#overlapMismatch = "QC.overlapMismatch.txt.gz",
+#overlapMismatch.byRead = "QC.overlapMismatch.byRead.txt.gz",
+#readLenDist = "QC.readLenDist.txt.gz"
+
+
+     mismatchCombos <- list(
+c("A","C"),
+c("T","G"),
+c("C","A"),
+c("G","T"),
+
+c("A","G"),
+c("T","C"),
+c("G","A"),
+c("C","T"),
+
+c("A","T"),
+c("T","A"),
+c("C","G"),
+c("G","C")
+);
+
+calc.refmatch.data <- function(res,debugMode = TRUE){
+   tryCatch({
+     #aa
+     #referenceMismatchCounts
+     if(! is.null(res@qc.data[["referenceMismatchCounts"]])){
+       runTimedFunction(debugMode=debugMode,title="Calculating referenceMismatchCounts stats",expr={
+       nameList <- as.list(names(res@qc.data[["referenceMismatchCounts"]]));
+       names(nameList) <- nameList;
+     
+       res@calc.data[["referenceMismatchCounts"]] <- lapply(nameList,function(n){
+         old <- res@qc.data[["referenceMismatchCounts"]][[n]];
+         sumdata <- res@qc.data[["summary"]][[n]];
+         #val bpcountR1 = if(! is.null(res@qc.data[["readLenDist"]])){
+         #  sum( as.numeric(res@qc.data[["readLenDist"]][[n]]$CT_R1) * as.numeric(res@qc.data[["readLenDist"]][[n]]$LEN) )
+         #} else {
+         #  as.numeric(sumdata$COUNT[sumdata$FIELD == "READ_PAIR_OK"] * sumdata$COUNT[sumdata$FIELD == "maxObservedReadLength"]);
+         #}
+         #val bpcountR1 = if(! is.null(res@qc.data[["readLenDist"]])){
+         #  sum( as.numeric(res@qc.data[["readLenDist"]][[n]]$CT_R2) * as.numeric(res@qc.data[["readLenDist"]][[n]]$LEN) )
+         #} else {
+         #  as.numeric(sumdata$COUNT[sumdata$FIELD == "READ_PAIR_OK"] * sumdata$COUNT[sumdata$FIELD == "maxObservedReadLength"]);
+         #}
+         
+         readCt  <- sumdata$COUNT[sumdata$FIELD == "READ_PAIR_OK"]
+         
+         dl <- old;
+                            dl$RATE_R1 = 100 * dl$CT_R1 / dl$MAPPEDCT_R1;
+         if(!res@singleEnd) dl$RATE_R2 = 100 * dl$CT_R2 / dl$MAPPEDCT_R2;
+         
+                            dl$CT_R1_LOG <- log10(dl$CT_R1);
+         if(!res@singleEnd) dl$CT_R2_LOG <- log10(dl$CT_R2);
+         
+                            dl$RATE_R1_LOG <- log10(dl$RATE_R1)
+         if(!res@singleEnd) dl$RATE_R2_LOG <- log10(dl$RATE_R2)
+         
+         dl;
+       });
+       });
+     }
+     
+     if(! is.null(res@qc.data[["referenceMismatch.byScore"]])){
+       runTimedFunction(debugMode=debugMode,title="Calculating referenceMismatch.byScore stats",expr={
+
+       nameList <- as.list(names(res@qc.data[["referenceMismatch.byScore"]]));
+       names(nameList) <- nameList;
+       
+       
+       res@calc.data[["referenceMismatch.byScore"]] <- lapply(nameList,function(n){
+         old <- res@qc.data[["referenceMismatch.byScore"]][[n]];
+         
+         dl <- old[old$QualCoverage_R1 > 0,];
+         
+         dl$RATE_R1 = 100 * dl$MismatchCt_R1 / dl$QualCoverage_R1
+         
+         if(!res@singleEnd) dl$RATE_R2 = 100 * dl$MismatchCt_R2 / dl$QualCoverage_R2;
+         
+                            dl$CT_R1_LOG <- log10(dl$MismatchCt_R1);
+         if(!res@singleEnd) dl$CT_R2_LOG <- log10(dl$MismatchCt_R2);
+         
+                            dl$RATE_R1_LOG <- log10(dl$RATE_R1)
+         if(!res@singleEnd) dl$RATE_R2_LOG <- log10(dl$RATE_R2)
+
+         dl;
+       });
+       })
+     }
+     
+   if(! is.null(res@qc.data[["referenceMismatchRaw.byReadStrand"]])){
+     runTimedFunction(debugMode=debugMode,title="Calculating referenceMismatchRaw.byReadStrand stats",expr={
+
+     nameList <- as.list(names(res@qc.data[["referenceMismatchRaw.byReadStrand"]]));
+     names(nameList) <- nameList;
+     
+     res@calc.data[["referenceMismatchCombos"]] <- lapply(nameList,function(n){
+       old <- res@qc.data[["referenceMismatchRaw.byReadStrand"]][[n]];
+       sumdata <- res@qc.data[["summary"]][[n]];
+       readCt <- sumdata$COUNT[sumdata$FIELD == "READ_PAIR_OK"]
+       old$REFBASE <- as.character(old$REFBASE);
+       old$READBASE <- as.character(old$READBASE);
+       
+       dl <- data.frame(
+         refBase  = character(),
+         readBase  = character(),
+         combo = character(),
+         CT_R1_FWD = numeric(),
+         CT_R1_REV = numeric(),
+         CT_R1 = numeric(),
+         CT_R2_FWD = numeric(),
+         CT_R2_REV = numeric(),
+         CT_R2 = numeric(),stringsAsFactors=FALSE
+       );
+       for(mm in mismatchCombos){
+         i <- nrow(dl)+1;
+         A <- as.character(mm[1]);
+         B <- as.character(mm[2]);
+         dl[i,"refBase"] <- A
+         dl[i,"readBase"] <- B
+         dl[i,"combo"] <- paste0(B,"->",A);
+         dl[i,"CT_R1_FWD"] <- sum(old$CT_R1_FWD[ old$REFBASE == A & old$READBASE == B]);
+         dl[i,"CT_R1_REV"] <- sum(old$CT_R1_REV[ old$REFBASE == A & old$READBASE == B]);
+         dl[i,"CT_R1"] <- sum(old$CT_R1[         old$REFBASE == A & old$READBASE == B]);
+         dl[i,"CT_R2_FWD"] <- sum(old$CT_R2_FWD[ old$REFBASE == A & old$READBASE == B]);
+         dl[i,"CT_R2_REV"] <- sum(old$CT_R2_REV[ old$REFBASE == A & old$READBASE == B]);
+         dl[i,"CT_R2"] <- sum(old$CT_R2[         old$REFBASE == A & old$READBASE == B]);
+         
+         #dl[i,"RATE_R1"] <- dl[i,"CT_R1"] / readCt;
+         #dl[i,"RATE_R2"] <- dl[i,"CT_R2"] / readCt;
+       }
+       dl$CT <- dl$CT_R1 + dl$CT_R2;
+       dl$RATE_R1 <- dl$CT_R1 / readCt;
+       dl$RATE_R2 <- dl$CT_R2 / readCt;
+       dl$RATE <- dl$CT / (readCt * 2);
+       dl;
+     });
+     })
+   }
+     
+   if(! is.null(res@qc.data[["referenceMismatch.byScoreAndBP"]])){
+     runTimedFunction(debugMode=debugMode,title="Calculating referenceMismatch.byScoreAndBP stats",expr={
+     nameList <- as.list(names(res@qc.data[["referenceMismatch.byScoreAndBP"]]));
+     names(nameList) <- nameList;
+     
+     res@calc.data[["referenceMismatch.byScoreAndBP"]] <- lapply(nameList,function(n){
+       old <- res@qc.data[["referenceMismatch.byScoreAndBP"]][[n]];
+       sumdata <- res@qc.data[["summary"]][[n]];
+       readCt <- sumdata$COUNT[sumdata$FIELD == "READ_PAIR_OK"]
+       
+       #Score REFBASE READBASE  CT_R1_FWD CT_R1_REV CT_R2_FWD CT_R2_REV CT_R1 CT_R2
+       names(old)[names(old) == "REFBASE"] <- "refBase";
+       names(old)[names(old) == "READBASE"] <- "readBase";
+       old$CT <- old$CT_R1 + old$CT_R2;
+       old$combo <- paste0(as.character(old$refBase),"->",as.character(old$readBase))
+       
+       sumR1 <- sapply(1:nrow(old),function(i){
+         sum(old$CT_R1[ old$Score == old$Score[[i]] ])
+       })
+       sumR2 <- sapply(1:nrow(old),function(i){
+         sum(old$CT_R2[ old$Score == old$Score[[i]] ])
+       })
+       
+       old$RATE_R1 <- 100 * old$CT_R1 / sumR1;
+       old$RATE_R2 <- 100 * old$CT_R2 / sumR2;
+       old$RATE    <- 100 * old$CT / (sumR1 + sumR2);
+       
+       old$CT_R1_LOG <- log10(old$CT_R1);
+       old$CT_R2_LOG <- log10(old$CT_R2);
+       old$CT_LOG <- log10(old$CT);
+       old$RATE_R1_LOG <- log10(old$RATE_R1);
+       old$RATE_R2_LOG <- log10(old$RATE_R2);
+       old$RATE_LOG <- log10(old$RATE);
+       old;
+     });
+     })
+   }
+
+     return(res)
+   },error = function(e){
+     message("caught error: ",e);
+     return(res);
+   });
+
+}
+
+calc.target.data <- function(res,debugMode = TRUE){
+   nameList <- as.list(names(res@qc.data[["summary"]]));
+   names(nameList) <- nameList;
+   
+   tryCatch({
+   if(! is.null(res@qc.data[["onTarget"]])){
+     
+     res@calc.data[["onTargetCoverage"]] <- lapply(nameList,function(n){
+       old <- res@qc.data[["onTarget"]][[n]];
+       sumdata <- res@qc.data[["summary"]][[n]];
+       readCt  <- sumdata$COUNT[sumdata$FIELD == "READ_PAIR_OK"]
+       
+       coverageDepth <- old$READPAIR_COVERAGE / (old$END - old$START)
+       coverageDepth <- coverageDepth[order(coverageDepth)];
+       dl <- data.frame(
+         quantile = 100 * 1:length(coverageDepth) / length(coverageDepth),
+         pairDepth = coverageDepth
+       )
+       coverageDepth <- old$READ_COVERAGE / (old$END - old$START)
+       coverageDepth <- coverageDepth[order(coverageDepth)];
+       dl$readDepth <- coverageDepth
+       
+       dl$logPairDepth <- log10(dl$pairDepth)
+       dl$logReadDepth <- log10(dl$readDepth)
+       
+       dl;
+     });
+     
+     maxPairCoverage <- max(sapply(res@calc.data[["onTargetCoverage"]],function(dl){ max(dl$pairDepth) }))
+     maxReadCoverage <- max(sapply(res@calc.data[["onTargetCoverage"]],function(dl){ max(dl$readDepth) }))
+     pairBreaks <- seq(0,maxPairCoverage+1);
+     readBreaks <- seq(0,maxReadCoverage+1);
+     res@calc.data[["maxPairCoverage"]] <- maxPairCoverage
+     res@calc.data[["maxReadCoverage"]] <- maxReadCoverage
+     
+     res@calc.data[["onTargetCoverageBinsByRead"]] <- lapply(nameList,function(n){
+       old <- res@qc.data[["onTarget"]][[n]];
+       sumdata <- res@qc.data[["summary"]][[n]];
+       readCt  <- sumdata$COUNT[sumdata$FIELD == "READ_PAIR_OK"];
+       readDepth <- old$READ_COVERAGE / (old$END - old$START)
+       readHist <- hist(readDepth,breaks=readBreaks,plot=F)
+       dl <- data.frame(
+         READBIN=readBreaks[-length(readBreaks)],
+         readCt =readHist$counts,
+         logReadCt = log10(readHist$counts)
+       )
+       dl;
+     });
+     res@calc.data[["onTargetCoverageBinsByPair"]] <- lapply(nameList,function(n){
+       old <- res@qc.data[["onTarget"]][[n]];
+       sumdata <- res@qc.data[["summary"]][[n]];
+       readCt  <- sumdata$COUNT[sumdata$FIELD == "READ_PAIR_OK"];
+       pairDepth <- old$READPAIR_COVERAGE / (old$END - old$START)
+       pairHist <- hist(pairDepth,breaks=pairBreaks,plot=F)
+       dl <- data.frame(
+         PAIRBIN=pairBreaks[-length(pairBreaks)],
+         pairCt =pairHist$counts,
+         logPairCt = log10(pairHist$counts)
+       )
+       dl;
+     });
+     totalSpan <- sum(as.numeric(res@qc.data[["onTarget"]][[1]]$END - res@qc.data[["onTarget"]][[1]]$START));
+     
+     
+     runTimedFunction(debugMode=debugMode,title="Calculating on-target summary info...",expr={
+         res@qc.data[["summary"]] <- lapply(nameList,function(n){
+           old <- res@qc.data[["onTarget"]][[n]];
+           sumdata <- res@qc.data[["summary"]][[n]];
+           readDepth <- sum(as.numeric(old$READ_COVERAGE)) / totalSpan;
+           pairDepth <- sum(as.numeric(old$READPAIR_COVERAGE)) / totalSpan;
+           readCt  <- sumdata$COUNT[sumdata$FIELD == "READ_PAIR_OK"];
+
+           if(! any(sumdata$FIELD == "meanOnTargetReadDepth")) sumdata[nrow(sumdata)+1,"FIELD"] <- "meanOnTargetReadDepth"
+           if(! any(sumdata$FIELD == "meanOnTargetReadPairDepth")) sumdata[nrow(sumdata)+1,"FIELD"] <- "meanOnTargetReadPairDepth"
+           if(! any(sumdata$FIELD == "readDepthPerMillion")) sumdata[nrow(sumdata)+1,"FIELD"] <- "readDepthPerMillion"
+           if(! any(sumdata$FIELD == "pairDepthPerMillion")) sumdata[nrow(sumdata)+1,"FIELD"] <- "pairDepthPerMillion"
+           
+           sumdata[sumdata$FIELD == "meanOnTargetReadDepth",    "COUNT"]   <- readDepth
+           sumdata[sumdata$FIELD == "meanOnTargetReadPairDepth", "COUNT"]   <- pairDepth
+           
+           sumdata[sumdata$FIELD == "readDepthPerMillion", "COUNT"]   <- readDepth / (readCt / 1000000);
+           sumdata[sumdata$FIELD == "pairDepthPerMillion", "COUNT"]   <- pairDepth / (readCt / 1000000);
+
+           sumdata
+         });
+     })
+   }
+     totalSpan <- res@qc.data[["summary"]][[1]][res@qc.data[["summary"]][[1]]$FIELD == "TotalTargetSpan", "COUNT"];
+     
+     if(all(c("fractionOfPairsOnTarget","fractionOfPairsOffTarget","readDepthPerMillion","pairDepthPerMillion","READ_PAIR_OK","OnTargetReadPairBases","OnTargetReadBases") %in% res@qc.data[["summary"]]$FIELD)) {
+       runTimedFunction(debugMode=debugMode,title="Calculating more on-target summary info...",expr={
+           res@qc.data[["summary"]] <- lapply(nameList,function(n){
+             old <- res@qc.data[["onTarget"]][[n]];
+             sumdata <- res@qc.data[["summary"]][[n]];
+
+             readDepth <- sumdata[sumdata$FIELD == "OnTargetReadBases","COUNT"]     / totalSpan;
+             pairDepth <- sumdata[sumdata$FIELD == "OnTargetReadPairBases","COUNT"] / totalSpan;
+             readCt  <- sumdata$COUNT[sumdata$FIELD == "READ_PAIR_OK"];
+
+             if(! any(sumdata$FIELD == "fractionOfPairsOnTarget")) sumdata[nrow(sumdata)+1,"FIELD"] <- "fractionOfPairsOnTarget"
+             if(! any(sumdata$FIELD == "fractionOfPairsOffTarget")) sumdata[nrow(sumdata)+1,"FIELD"] <- "fractionOfPairsOffTarget"
+             if(! any(sumdata$FIELD == "readDepthPerMillion")) sumdata[nrow(sumdata)+1,"FIELD"] <- "readDepthPerMillion"
+             if(! any(sumdata$FIELD == "pairDepthPerMillion")) sumdata[nrow(sumdata)+1,"FIELD"] <- "pairDepthPerMillion"
+
+             sumdata[sumdata$FIELD == "fractionOfPairsOnTarget", "COUNT"]   <- sumdata[sumdata$FIELD == "OnTargetCount", "COUNT"] / (sumdata[sumdata$FIELD == "OnTargetCount", "COUNT"]+sumdata[sumdata$FIELD == "OffTargetCount", "COUNT"]);
+             sumdata[sumdata$FIELD == "fractionOfPairsOffTarget", "COUNT"]   <- sumdata[sumdata$FIELD == "OffTargetCount", "COUNT"] / (sumdata[sumdata$FIELD == "OnTargetCount", "COUNT"]+sumdata[sumdata$FIELD == "OffTargetCount", "COUNT"]);
+             sumdata[sumdata$FIELD == "readDepthPerMillion", "COUNT"]   <- readDepth / (readCt / 1000000);
+             sumdata[sumdata$FIELD == "pairDepthPerMillion", "COUNT"]   <- pairDepth / (readCt / 1000000);
+
+             sumdata
+           });
+       })
+    }
+   
+   
+   return(res);
+   },error = function(e){
+     message("caught error: ",e);
+     return(res);
+   });
+}
+
+calc.overlap.data <- function(res,debugMode = TRUE){
+
+   tryCatch({
+   if(! is.null(res@qc.data[["mismatchSizeRates"]])){
+     nameList <- as.list(names(res@qc.data[["overlapCoverage"]]));
+     names(nameList) <- nameList;
+     runTimedFunction(debugMode=debugMode,title="Calculating overlap mismatch-size rates",expr={
+     
+     res@calc.data[["mismatchSizeRates"]] <- lapply(nameList,function(n){
+            #OVERLAP_SIZE	BASES_MISMATCHED	CT_NOINDEL	CT
+            dl <- res@qc.data[["mismatchSizeRates"]][[n]];
+            sumdata <- res@qc.data[["summary"]][[n]];
+            
+            out <- data.frame(
+              BASES_MISMATCHED = 1:sumdata$COUNT[sumdata$FIELD == "maxObservedReadLength"]
+            );
+            out$CT <- sapply(out$BASES_MISMATCHED,function(bmm){
+              sum(dl$CT[dl$BASES_MISMATCHED == bmm]);
+            })
+            out$CT_NOINDEL <- sapply(out$BASES_MISMATCHED,function(bmm){
+              sum(dl$CT[dl$BASES_MISMATCHED == bmm]);
+            })
+            
+            out$RATE <- 100 * out$CT / sumdata$COUNT[sumdata$FIELD == "READ_PAIR_OK"]
+            out$RATE_NOINDEL <- 100 * out$CT_NOINDEL / sumdata$COUNT[sumdata$FIELD == "READ_PAIR_OK"]
+            
+            out$RATE_LOG <- log10(out$RATE);
+            out$RATE_NOINDEL_LOG <- log10(out$RATE_NOINDEL);
+            out;
+     });
+     })
+   }
+   if(! is.null(res@qc.data[["mismatchSizeRates"]])){
+     nameList <- as.list(names(res@qc.data[["overlapCoverage"]]));
+     names(nameList) <- nameList;
+     #if(debugMode) message("   Calculating cumulative overlap mismatch-size rates...");
+     runTimedFunction(debugMode=debugMode,title="Calculating cumulative overlap mismatch-size rates",expr={
+
+     res@calc.data[["mismatchSizeRatesCumulative"]] <- lapply(nameList,function(n){
+            #OVERLAP_SIZE   BASES_MISMATCHED    CT_NOINDEL  CT
+            dl <- res@qc.data[["mismatchSizeRates"]][[n]];
+            sumdata <- res@qc.data[["summary"]][[n]];
+            
+            out <- data.frame(
+              BASES_MISMATCHED = sumdata$COUNT[sumdata$FIELD == "maxObservedReadLength"]:1
+            );
+            out$CT <- sapply(out$BASES_MISMATCHED,function(bmm){
+              sum(dl$CT[dl$BASES_MISMATCHED >= bmm]);
+            })
+            out$CT_NOINDEL <- sapply(out$BASES_MISMATCHED,function(bmm){
+              sum(dl$CT[dl$BASES_MISMATCHED >= bmm]);
+            })
+            
+            out$RATE <- 100 * out$CT / sumdata$COUNT[sumdata$FIELD == "READ_PAIR_OK"]
+            out$RATE_NOINDEL <- 100 * out$CT_NOINDEL / sumdata$COUNT[sumdata$FIELD == "READ_PAIR_OK"]
+            
+            out$RATE_LOG <- log10(out$RATE);
+            out$RATE_NOINDEL_LOG <- log10(out$RATE_NOINDEL);
+            out;
+     });
+     })
+   }
+   
+   if(! is.null(res@qc.data[["overlapCoverage"]])){
+     nameList <- as.list(names(res@qc.data[["overlapCoverage"]]));
+     names(nameList) <- nameList;
+     #if(debugMode) message("   Calculating overlap coverage Rates...");
+     runTimedFunction(debugMode=debugMode,title="Calculating overlap coverage Rates",expr={
+
+     buf <- lapply(nameList,function(n){
+       dl <- res@qc.data[["overlapCoverage"]][[n]];
+       sumdata <- res@qc.data[["summary"]][[n]];
+       dl$RATE_R1 = 100 * dl$CT_R1 / sumdata$COUNT[sumdata$FIELD == "READ_PAIR_OK"]
+       dl$RATE_R2 = 100 * dl$CT_R2 / sumdata$COUNT[sumdata$FIELD == "READ_PAIR_OK"]
+     });
+     res@calc.data[["overlapCoverage"]] <- buf;
+     
+     res@calc.data[["overlapR1"]] <- lapply(nameList,function(n){
+       old <- res@qc.data[["overlapCoverage"]][[n]]
+       sumdata <- res@qc.data[["summary"]][[n]];
+       dl <- data.frame(
+         POS  = old$POS,
+         CT   = old$CT_R1,
+         RATE = old$CT_R1 / (sumdata$COUNT[sumdata$FIELD == "READ_PAIR_OK"] / 100)
+       );
+     });
+     res@calc.data[["overlapR2"]] <- lapply(nameList,function(n){
+       old <- res@qc.data[["overlapCoverage"]][[n]];
+       sumdata <- res@qc.data[["summary"]][[n]];
+       dl <- data.frame(
+         POS  = old$POS,
+         CT   = old$CT_R2,
+         RATE = old$CT_R2 / (sumdata$COUNT[sumdata$FIELD == "READ_PAIR_OK"] / 100)
+       );
+     });
+     });
+   }
+   if((! is.null(res@qc.data[["overlapMismatch.byRead"]])) && (! is.null(res@qc.data[["overlapCoverage"]]))){
+     nameList <- as.list(names(res@qc.data[["overlapMismatch.byRead"]]));
+     names(nameList) <- nameList;
+     runTimedFunction(debugMode=debugMode,title="Calculating overlap coverage Rates By Read",expr={
+
+     res@calc.data[["overlapMismatchR1"]] <- lapply(nameList,function(n){
+       old <- res@qc.data[["overlapMismatch.byRead"]][[n]]
+       covdata <- res@qc.data[["overlapCoverage"]][[n]];
+
+       dl <- data.frame(
+         POS  = old$POS,
+         CT   = old$CT_R1,
+         RATE = 100* old$CT_R1 / covdata$CT_R1,
+         CT_NOIND = old$CT_NOINDEL_R1,
+         RATE_NOIND = 100* old$CT_NOINDEL_R1 / covdata$CT_NOINDEL_R1
+       );
+       dl$CT_LOG = log10(dl$CT);
+       dl$RATE_LOG = log10(dl$RATE);
+       dl$CT_LOG_NOIND = log10(dl$CT_NOIND);
+       dl$RATE_LOG_NOIND = log10(dl$RATE_NOIND);
+       dl;
+     });
+     res@calc.data[["overlapMismatchR2"]] <- lapply(nameList,function(n){
+       old <- res@qc.data[["overlapMismatch.byRead"]][[n]]
+       covdata <- res@qc.data[["overlapCoverage"]][[n]];
+
+       dl <- data.frame(
+         POS  = old$POS,
+         CT   = old$CT_R2,
+         RATE = 100* old$CT_R2 / covdata$CT_R2,
+         CT_NOIND = old$CT_NOINDEL_R2,
+         RATE_NOIND = 100* old$CT_NOINDEL_R2 / covdata$CT_NOINDEL_R2
+       );
+       dl$CT_LOG = log10(dl$CT);
+       dl$RATE_LOG = log10(dl$RATE);
+       dl$CT_LOG_NOIND = log10(dl$CT_NOIND);
+       dl$RATE_LOG_NOIND = log10(dl$RATE_NOIND);
+       dl;
+     });
+     
+     })
+   }
+
+   if(! is.null(res@qc.data[["readLenDist"]])){
+     nameList <- as.list(names(res@qc.data[["readLenDist"]]));
+     names(nameList) <- nameList;
+     #if(debugMode) message("   Calculating read length distribution...");
+     runTimedFunction(debugMode=debugMode,title="Calculating read length distribution",expr={
+
+     res@calc.data[["readLenDistR1"]] <- lapply(nameList,function(n){
+       old <- res@qc.data[["readLenDist"]][[n]]
+       sumdata <- res@qc.data[["summary"]][[n]];
+       dl <- data.frame(
+         LEN  = old$LEN,
+         CT   = old$CT_R1,
+         RATE = old$CT_R1 / (sumdata$COUNT[sumdata$FIELD == "READ_PAIR_OK"] / 100)
+       );
+       dl$CUMRATE = cumsum(dl$RATE);
+       dl$CUMCT = cumsum(dl$CT);
+       dl;
+     });
+     if(! res@singleEnd){
+         res@calc.data[["readLenDistR2"]] <- lapply(nameList,function(n){
+           old <- res@qc.data[["readLenDist"]][[n]]
+           sumdata <- res@qc.data[["summary"]][[n]];
+           dl <- data.frame(
+             LEN  = old$LEN,
+             CT   = old$CT_R2,
+             RATE = old$CT_R2 / (sumdata$COUNT[sumdata$FIELD == "READ_PAIR_OK"] / 100)
+           );
+           dl$CUMRATE = cumsum(dl$RATE);
+           dl$CUMCT = cumsum(dl$CT);
+           dl;
+         });
+     }
+     })
+   }
+
+   if(! is.null(res@qc.data[["overlapMismatch.byScore"]])){
+     
+     nameList <- as.list(names(res@qc.data[["overlapMismatch.byScore"]]));
+     names(nameList) <- nameList;
+     maxQual <- max(res@qc.data[["overlapMismatch.byScore"]][[1]]$ScoreR1);
+     avgQualSeq <- seq(from = 0, to = maxQual,by=0.5)
+     qualSeq <- seq(from = 0, to = maxQual);
+     
+     runTimedFunction(debugMode=debugMode,title="Calculating overlap by AVG score",expr={
+
+     res@calc.data[["overlapMismatch.byScore.avg"]] <- lapply(nameList,function(n){
+       old <- res@qc.data[["overlapMismatch.byScore"]][[n]]
+       old <- old[old$OverlapCt > 0,]
+       dl <- data.frame(
+         avgQual  = avgQualSeq
+       );
+       avg <- rowMeans(old[,c("ScoreR1","ScoreR2"),drop=FALSE])
+       dl$OverlapCt         <- sapply(avgQualSeq,function(q){ sum(as.numeric(old$OverlapCt[avg == q ])) })
+       dl$OverlapCtNoIndel  <- sapply(avgQualSeq,function(q){ sum(as.numeric(old$OverlapCtNoIndel[avg == q ])) })
+       dl$MismatchCt        <- sapply(avgQualSeq,function(q){ sum(as.numeric(old$MismatchCt[avg == q ])) })
+       dl$MismatchCtNoIndel <- sapply(avgQualSeq,function(q){ sum(as.numeric(old$MismatchCtNoIndel[avg == q ])) })
+       dl$MismatchRate        <- 100 * dl$MismatchCt/dl$OverlapCt;
+       dl$MismatchRateNoIndel <- 100 * dl$MismatchCtNoIndel/dl$OverlapCtNoIndel;
+       dl$MismatchRateLog <- log10(dl$MismatchRate)
+       dl$MismatchRateLogNoIndel <- log10(dl$MismatchRateNoIndel)
+       dl <- dl[dl$OverlapCt > 0,]
+       dl;
+     });
+     })
+     
+     
+          
+     runTimedFunction(debugMode=debugMode,title="Calculating overlap by MIN score",expr={
+     res@calc.data[["overlapMismatch.byScore.min"]] <- lapply(nameList,function(n){
+       old <- res@qc.data[["overlapMismatch.byScore"]][[n]]
+       old <- old[old$OverlapCt > 0,]
+       #avg <- rowMeans(old[,c("ScoreR1","ScoreR2"),drop=FALSE])
+       minqual <- pmin(old$ScoreR1,old$ScoreR2);
+       
+       maxQual <- max(res@qc.data[["overlapMismatch.byScore"]][[1]]$ScoreR1);
+       
+       dl <- data.frame(
+         minQual  = 0:maxQual
+       );
+       
+       dl$OverlapCt         <- sapply(dl$minQual,function(q){ sum(as.numeric(old$OverlapCt[minqual == q ])) })
+       dl$OverlapCtNoIndel  <- sapply(dl$minQual,function(q){ sum(as.numeric(old$OverlapCtNoIndel[minqual == q ])) })
+       dl$MismatchCt        <- sapply(dl$minQual,function(q){ sum(as.numeric(old$MismatchCt[minqual == q ])) })
+       dl$MismatchCtNoIndel <- sapply(dl$minQual,function(q){ sum(as.numeric(old$MismatchCtNoIndel[minqual == q ])) })
+       dl$MismatchRate        <- 100 * dl$MismatchCt/dl$OverlapCt;
+       dl$MismatchRateNoIndel <- 100 * dl$MismatchCtNoIndel/dl$OverlapCtNoIndel;
+       dl$MismatchRateLog <- log10(dl$MismatchRate)
+       dl$MismatchRateLogNoIndel <- log10(dl$MismatchRateNoIndel)
+       dl <- dl[dl$OverlapCt > 0,]
+       dl;
+     });
+     })
+     
+     runTimedFunction(debugMode=debugMode,title="Adding Min score error to summary tables",expr={
+       res@qc.data[["summary"]] <- lapply(nameList,function(n){
+         old <- res@qc.data[["summary"]][[n]]
+         dl <- res@calc.data[["overlapMismatch.byScore.min"]][[n]];
+         for(i in 1:length(dl$minQual)){
+           x <- dl$minQual[i];
+           fieldKey <- paste0("overlapMismatchRate.byMinQual.noIndel_",as.character(x));
+           if(! any(fieldKey == old$FIELD)) old[nrow(old)+1,"FIELD"] <- fieldKey;
+           old[old$FIELD == fieldKey,"COUNT"] <- dl$MismatchRateNoIndel[i];
+         }
+         old;
+       })
+     })
+
+     
+     
+     runTimedFunction(debugMode=debugMode,title="Calculating overlap by R1 score",expr={
+
+     res@calc.data[["overlapMismatch.byScore.R1"]] <- lapply(nameList,function(n){
+       old <- res@qc.data[["overlapMismatch.byScore"]][[n]]
+       old <- old[old$OverlapCt > 0,]
+       dl <- data.frame(
+         qual  = qualSeq
+       );
+       key <- old$ScoreR1;
+       dl$OverlapCt         <- sapply(qualSeq,function(q){ sum(as.numeric(old$OverlapCt[key == q ])) })
+       dl$OverlapCtNoIndel  <- sapply(qualSeq,function(q){ sum(as.numeric(old$OverlapCtNoIndel[key == q ])) })
+       dl$MismatchCt        <- sapply(qualSeq,function(q){ sum(as.numeric(old$MismatchCt[key == q ])) })
+       dl$MismatchCtNoIndel <- sapply(qualSeq,function(q){ sum(as.numeric(old$MismatchCtNoIndel[key == q ])) })
+       dl$MismatchRate        <- 100 * dl$MismatchCt/dl$OverlapCt;
+       dl$MismatchRateNoIndel <- 100 * dl$MismatchCtNoIndel/dl$OverlapCtNoIndel;
+       dl$MismatchRateLog <- log10(dl$MismatchRate)
+       dl$MismatchRateLogNoIndel <- log10(dl$MismatchRateNoIndel)
+       dl <- dl[dl$OverlapCt > 0,]
+       dl;
+     });
+     })
+     
+     runTimedFunction(debugMode=debugMode,title="Calculating overlap by R2 score",expr={
+     res@calc.data[["overlapMismatch.byScore.R2"]] <- lapply(nameList,function(n){
+       old <- res@qc.data[["overlapMismatch.byScore"]][[n]]
+       old <- old[old$OverlapCt > 0,]
+       dl <- data.frame(
+         qual  = qualSeq
+       );
+       key <- old$ScoreR2;
+       dl$OverlapCt         <- sapply(qualSeq,function(q){ sum(as.numeric(old$OverlapCt[key == q ])) })
+       dl$OverlapCtNoIndel  <- sapply(qualSeq,function(q){ sum(as.numeric(old$OverlapCtNoIndel[key == q ])) })
+       dl$MismatchCt        <- sapply(qualSeq,function(q){ sum(as.numeric(old$MismatchCt[key == q ])) })
+       dl$MismatchCtNoIndel <- sapply(qualSeq,function(q){ sum(as.numeric(old$MismatchCtNoIndel[key == q ])) })
+       dl$MismatchRate        <- 100 * dl$MismatchCt/dl$OverlapCt;
+       dl$MismatchRateNoIndel <- 100 * dl$MismatchCtNoIndel/dl$OverlapCtNoIndel;
+       dl$MismatchRateLog <- log10(dl$MismatchRate)
+       dl$MismatchRateLogNoIndel <- log10(dl$MismatchRateNoIndel)
+       dl <- dl[dl$OverlapCt > 0,]
+       dl;
+     });
+     })
+     
+     getPairedError <- function(phred1,phred2){
+       getPhredFromError(1-((1-getErrorFromPhred(phred1)) * (1-getErrorFromPhred(phred2))))
+     }
+   }
+   
+   return(res);
+   },error = function(e){
+     message("caught error: ",e);
+     return(res);
+   });
+}
+
+add.overlap.mismatch.combos <- function(res,debugMode = TRUE){
+  scalaqc_file = "QC.overlapMismatch.byBase.txt.gz";
+
+  lanebam.list <- res@lanebam.list;
+  names(lanebam.list) <- lanebam.list;
+  qc.data.dir.list <- res@decoder$qc.data.dir
+  names(qc.data.dir.list) <- res@decoder$unique.ID;
+  
+  #if(is.null(res@qc.data[["overlapMismatchCombos"]])){
+  #  runTimedFunction(debugMode=debugMode,title="Reading mismatch combo data:",expr={
+  #    res@qc.data[["overlapMismatchCombos"]] <- read.in.scalaQC.files(infile.prefix=infile.dir,lanebam.list = lanebam.list, qc.data.dir.list = qc.data.dir.list,infile.suffix=scalaqc_file)
+  #  });
+  #}
+  #names(res@qc.data[["overlapMismatchCombos"]]) <- lanebam.list
+  
+  if(! is.null(res@qc.data[["overlapMismatchCombos"]])){
+    runTimedFunction(debugMode=debugMode,title="Calculating mismatch combo rates:",expr={
+      res@calc.data[["overlapMismatchCombos"]] <- lapply(lanebam.list,function(n){
+        old <- res@qc.data[["overlapMismatchCombos"]][[n]];
+        covdata <- res@qc.data[["overlapCoverage"]][[n]];
+        totalOverlap <- sum(as.numeric(covdata$CT_R1));
+        totalOverlap_NOINDEL <- sum(as.numeric(covdata$CT_NOINDEL_R1));
+
+        data.frame(
+          r1base  = old$baseA,
+          r2base  = old$baseB,
+          combo = paste0( old$baseA,"/", old$baseB),
+          Ct = old$CT,
+          rate = 100* old$CT / totalOverlap,
+          Ct_NOINDEL = old$CT_NOINDEL,
+          rate_NOINDEL = 100* old$CT_NOINDEL / totalOverlap_NOINDEL,
+          Ct_LOG = log10(old$CT),
+          rate_LOG = log10(100* old$CT / totalOverlap),
+          Ct_NOINDEL_LOG = log10(old$CT_NOINDEL),
+          rate_NOINDEL_LOG = log10(100* old$CT_NOINDEL / totalOverlap_NOINDEL),
+          stringsAsFactors = FALSE
+        );
+      });
+
+      names(res@calc.data[["overlapMismatchCombos"]]) <- lanebam.list
+    });
+  }
+  
+  if(! is.null(res@qc.data[["overlapMismatch.byScoreAndBP"]])){
+    nameList <- as.list(names(res@qc.data[["overlapMismatch.byScoreAndBP"]]));
+    names(nameList) <- nameList;
+    
+    runTimedFunction(debugMode=debugMode,title="Calculating overlapMismatch.byScoreAndBP stats",expr={
+      res@calc.data[["overlapMismatch.byScoreAndBP"]] <- lapply(nameList,function(n){
+        #ScoreR1  ScoreR2 baseR1  baseR2  CT_FWD  CT_REV  CT_NOINDEL_FWD  CT_NOINDEL_REV  CT  CT_NOINDEL
+        
+        old <- res@qc.data[["overlapMismatch.byScoreAndBP"]][[n]];
+        covdata <- res@qc.data[["overlapCoverage"]][[n]];
+        totalOverlap <- sum(as.numeric(covdata$CT_R1));
+        totalOverlap_NOINDEL <- sum(as.numeric(covdata$CT_NOINDEL_R1));
+        
+        old$combos <- paste0( old$baseR1,"/", old$baseR2);
+        old$pmin <- pmin(old$ScoreR1,old$ScoreR2);
+        allCombos <- unique(old$combo);
+        df <- data.frame(
+          score = rep(unique(old$ScoreR1),each=length(allCombos)),
+          combo = rep(allCombos,length(unique(old$ScoreR1))),
+          stringsAsFactors = FALSE
+        )
+        
+        df$CT_MIN <- sapply(1:nrow(df),function(i){
+          sum(old$CT[ old$combos == df$combo[[i]] & old$pmin == df$score[[i]] ])
+        })
+        df$CT_MIN_NOINDEL <- sapply(1:nrow(df),function(i){
+          sum(old$CT_NOINDEL[ old$combos == df$combo[[i]] & old$pmin == df$score[[i]] ])
+        })
+        df$CT_PAIR <- sapply(1:nrow(df),function(i){
+          sum(old$CT[ old$combos == df$combo[[i]] & old$ScoreR1 == df$score[[i]] & old$ScoreR2 == df$score[[i]]])
+        })
+        df$CT_PAIR_NOINDEL <- sapply(1:nrow(df),function(i){
+          sum(old$CT_NOINDEL[ old$combos == df$combo[[i]] & old$ScoreR1 == df$score[[i]] & old$ScoreR2 == df$score[[i]]])
+        })
+        
+        df$RATE_MIN <- 100 * df$CT_MIN / sapply(1:nrow(df),function(i){
+          sum(df$CT_MIN[ df$score == df$score[[i]] ])
+        });
+        df$RATE_MIN_NOINDEL <- 100 * df$CT_MIN_NOINDEL / sapply(1:nrow(df),function(i){
+          sum(df$CT_MIN_NOINDEL[ df$score == df$score[[i]] ])
+        });
+        df$RATE_PAIR <- 100 * df$CT_PAIR / sapply(1:nrow(df),function(i){
+          sum(df$CT_PAIR[ df$score == df$score[[i]] ])
+        });
+        df$RATE_PAIR_NOINDEL <- 100 * df$CT_PAIR_NOINDEL / sapply(1:nrow(df),function(i){
+          sum(df$CT_PAIR_NOINDEL[ df$score == df$score[[i]] ])
+        });
+        
+        df$CT_MIN_LOG <- log10(df$CT_MIN)
+        df$CT_MIN_NOINDEL_LOG <- log10(df$CT_MIN_NOINDEL)
+        df$CT_PAIR_LOG <- log10(df$CT_PAIR)
+        df$CT_PAIR_NOINDEL_LOG <- log10(df$CT_PAIR_NOINDEL)
+        df$RATE_MIN_LOG <- log10(df$RATE_MIN)
+        df$RATE_MIN_NOINDEL_LOG <- log10(df$RATE_MIN_NOINDEL)
+        df$RATE_PAIR_LOG <- log10(df$RATE_PAIR)
+        df$RATE_PAIR_NOINDEL_LOG <- log10(df$RATE_PAIR_NOINDEL)
+        
+        return(df);
+      });
+    });
+  }
+  
+  
+  return(res);
+  
+  #res@calc.data[["mismatchCombos"]] <- lapply(tempList,function(tl){ tl[["mismatchCombos"]] })
+  #res@calc.data[["mismatchCombosNoIndel"]] <- lapply(tempList,function(tl){ tl[["mismatchCombosNoIndel"]] })
+}
+
+
+add.overlap.mismatch.combos.OLD <- function(res,infile.dir,debugMode = TRUE){
+    
+  #overlapMismatch = "QC.overlapMismatch.txt.gz",
+  scalaqc_file = "QC.overlapMismatch.txt.gz";
+  
+   #if(! is.null(res@qc.data[["overlapMismatch"]])){
+     nameList <- as.list(res@lanebam.list);
+     names(nameList) <- nameList;
+     infiles <- paste0(infile.dir,"/",res@decoder$qc.data.dir,"/","QC.overlapMismatch.txt.gz");
+     names(infiles) <- names(nameList);
+     outdirs <- paste0(infile.dir,"/",res@decoder$qc.data.dir,"/");
+     names(outdirs) <- names(nameList);
+     
+     outfile1 <- paste0(outdirs,"/QC.mismatchCombos.txt.gz");
+     names(outfile1) <- names(nameList);
+     outfile2 <- paste0(outdirs,"/QC.mismatchCombosNoIndel.txt.gz");
+     names(outfile2) <- names(nameList);
+
+     runTimedFunction(debugMode=debugMode,title="Calculating mismatch combos",expr={
+
+     message("\n[", appendLF=FALSE);
+     tempList <- lapply(1:length(nameList),function(i){
+
+         n <- nameList[[i]];
+         ibak <- i;
+
+         if(file.exists(outfile1[[n]])){
+           dl.withIndels <- read.table(outfile1[[n]],sep='\t',stringsAsFactors=F,header=TRUE);
+           message("-", appendLF=FALSE);
+         } else {
+           message(".",appendLF=FALSE);
+           old <- read.table(infiles[n],header=T,stringsAsFactors=F);
+           covdata <- res@qc.data[["overlapCoverage"]][[n]];
+           totalOverlap <- sum(as.numeric(covdata$CT_R1));
+           totalOverlap_NOINDEL <- sum(as.numeric(covdata$CT_NOINDEL_R1));
+           
+           dl <- data.frame(
+             r1base  = character(),
+             r2base  = character(),
+             combo = character(),
+             #fwdCt = numeric(),
+             #revCt = numeric(),
+             Ct = numeric(),
+             #fwdRate = numeric(),
+             #revRate = numeric(),
+             rate = numeric(),
+             stringsAsFactors = FALSE
+           );
+           for(mm in mismatchCombos){
+             i <- nrow(dl)+1;
+             dl[i,"r1base"] <- mm[1];
+             dl[i,"r2base"] <- mm[2];
+             dl[i,"combo"] <- paste0(mm[1],"/",mm[2]);
+             #dl[i,"fwdCt"] <- sum(old$CT_FWD[ old$baseA == mm[1] & old$baseB == mm[2]]);
+             #dl[i,"revCt"] <- sum(old$CT_REV[ old$baseA == mm[1] & old$baseB == mm[2]]);
+             dl[i,"Ct"] <- sum(old$CT[ old$baseA == mm[1] & old$baseB == mm[2]]);
+             #dl[i,"fwdRate"] <- 100* dl[i,"fwdCt"] / totalOverlap;
+             #dl[i,"revRate"] <- 100* dl[i,"revCt"] / totalOverlap;
+             dl[i,"rate"] <- 100* dl[i,"Ct"] / totalOverlap;
+           }
+           dl.withIndels <- dl;
+           gz1 <- gzfile(paste0(outdirs[[n]],"/QC.mismatchCombos.txt.gz"), "w")
+           write.table(dl.withIndels,gz1,quote=F,row.names=F,sep='\t');
+           close(gz1);
+         }
+         if(file.exists(outfile2[[n]])){
+           dl <- read.table(outfile2[[n]],sep='\t',stringsAsFactors=F,header=TRUE);
+         } else {
+           dl <- data.frame(
+             r1base  = character(),
+             r2base  = character(),
+             combo = character(),
+             #fwdCt = numeric(),
+             #revCt = numeric(),
+             Ct = numeric(),
+             #fwdRate = numeric(),
+             #revRate = numeric(),
+             rate = numeric(),
+             stringsAsFactors = FALSE
+           );
+           for(mm in mismatchCombos){
+             i <- nrow(dl)+1;
+             dl[i,"r1base"] <- mm[1];
+             dl[i,"r2base"] <- mm[2];
+             dl[i,"combo"] <- paste0(mm[1],"/",mm[2]);
+             #dl[i,"fwdCt"] <- sum(old$CT_NOINDEL_FWD[ old$baseA == mm[1] & old$baseB == mm[2]]);
+             #dl[i,"revCt"] <- sum(old$CT_NOINDEL_REV[ old$baseA == mm[1] & old$baseB == mm[2]]);
+             dl[i,"Ct"] <- sum(old$CT_NOINDEL[ old$baseA == mm[1] & old$baseB == mm[2]]);
+             #dl[i,"fwdRate"] <- 100* dl[i,"fwdCt"] / totalOverlap;
+             #dl[i,"revRate"] <- 100* dl[i,"revCt"] / totalOverlap;
+             dl[i,"rate"] <- 100* dl[i,"Ct"] / totalOverlap;
+           }
+           dl;
+           gz2 <- gzfile(paste0(outdirs[[n]],"/QC.mismatchCombosNoIndel.txt.gz"), "w")
+           write.table(dl,gz2,quote=F,row.names=F,sep='\t');
+           close(gz2);
+         }
+         
+         if(ibak %% 100 == 0){ message(paste0("] (",ibak,") \n["), appendLF=FALSE)
+         } else if(ibak %% 10 == 0){ message("] [", appendLF=FALSE);
+         } else if(ibak %% 5 == 0) message(" ", appendLF=FALSE);
+         
+         list(mismatchCombos = dl.withIndels, mismatchCombosNoIndel = dl);
+     })
+     message("] done!");
+     res@calc.data[["mismatchCombos"]] <- lapply(tempList,function(tl){ tl[["mismatchCombos"]] })
+     res@calc.data[["mismatchCombosNoIndel"]] <- lapply(tempList,function(tl){ tl[["mismatchCombosNoIndel"]] })
+     names(res@calc.data[["mismatchCombos"]]) <- names(res@qc.data[["summary"]]);
+     names(res@calc.data[["mismatchCombosNoIndel"]]) <- names(res@qc.data[["summary"]]);
+     
+     
+     })
+     
+     runTimedFunction(debugMode=debugMode,title="Calculating mismatch combo rates",expr={
+     res@calc.data[["mismatchCombo.rate"]] <- lapply(nameList,function(n){
+       old <- res@calc.data[["mismatchCombos"]][[n]];
+       dl <- data.frame(
+         FIELD = c(old$combo),
+         COUNT = c(old$rate),stringsAsFactors = FALSE
+       );
+     });
+     })
+     
+     return(res);
+   #}
+   return(res);
+ 
+}
+
+
 
 fix.summary.to.numeric <- function(res){
    buf <- res@qc.data[["summary"]];
@@ -542,7 +1545,7 @@ add.to.summary <- function(res){
    # message("debug 7");
      summary <- INTERNAL.calcAndAdd.averages(summary = summary, summary.names = summary.names, data.list = genebodyUM.data.list, x.name = "Quantile", y.name = "GeneBodyCoverage", data.title = "GeneBodyCoverage_UMQuartile");
    # message("debug 8");
-     message("debug 3B");
+    # message("debug 3B");
    }
  
  #message("debug 5");
@@ -613,6 +1616,9 @@ add.to.summary <- function(res){
    
    res@qc.data[["summary"]] <- summary;
    #message("10");
+   
+   res <- fix.summary.to.numeric(res);
+   
    return(res);
 }
 
@@ -648,24 +1654,53 @@ INTERNAL.calc.mean <- function(dl, x.name, y.name){
       );
 }
 
-calc.NVC.rates <- function(res){
-   bases <- c("A","T","G","C");
-   tf <- function(df){
-      dt <- sapply(bases, function(b){
-        df$CT[ df$base == b ];
-      });
-      out <- data.frame(t(apply(dt, 1, function(r){ r / sum(r) })));
-      return(out);
-   }
-   res@calc.data[["rates.NVC.raw.R1"]] <- lapply(res@qc.data[["NVC.raw.R1"]],tf);
-   res@calc.data[["rates.NVC.raw.R2"]] <- lapply(res@qc.data[["NVC.raw.R2"]],tf);
+calc.NVC.rates <- function(res, debugMode = TRUE){
+   runTimedFunction(debugMode=debugMode,title="Calculating NVC rates",expr={
+     bases <- c("A","T","G","C");
+     
+     allBases <- c("A","T","G","C","N");
+     
+     tf <- function(df){
+        dt <- sapply(bases, function(b){
+          df$CT[ df$base == b ];
+        });
+        out <- data.frame(t(apply(dt, 1, function(r){ r / sum(r) })));
+        return(out);
+     }
+     #if(!is.null(res@qc.data[["NVC.raw.R1"]]))
+     if(!is.null(res@qc.data[["NVC.raw.R1"]])) res@calc.data[["NVC.raw.R1"]] <- lapply(res@qc.data[["NVC.raw.R1"]],tf);
+     if(!is.null(res@qc.data[["NVC.raw.R2"]])) res@calc.data[["NVC.raw.R2"]] <- lapply(res@qc.data[["NVC.raw.R2"]],tf);
 
-   res@calc.data[["rates.NVC.lead.clip.R1"]] <- lapply(res@qc.data[["NVC.lead.clip.R1"]],tf);
-   res@calc.data[["rates.NVC.lead.clip.R2"]] <- lapply(res@qc.data[["NVC.lead.clip.R2"]],tf);
-   res@calc.data[["rates.NVC.tail.clip.R1"]] <- lapply(res@qc.data[["NVC.tail.clip.R1"]],tf);
-   res@calc.data[["rates.NVC.tail.clip.R2"]] <- lapply(res@qc.data[["NVC.tail.clip.R2"]],tf);
-   res@calc.data[["rates.NVC.minus.clipping.R1"]] <- lapply(res@qc.data[["NVC.minus.clipping.R1"]],tf);
-   res@calc.data[["rates.NVC.minus.clipping.R2"]] <- lapply(res@qc.data[["NVC.minus.clipping.R2"]],tf);
+     if(!is.null(res@qc.data[["FQ.NVC.R1"]])) res@calc.data[["FQ.NVC.R1"]] <- lapply(res@qc.data[["FQ.NVC.R1"]],tf);
+     if(!is.null(res@qc.data[["FQ.NVC.R2"]])) res@calc.data[["FQ.NVC.R2"]] <- lapply(res@qc.data[["FQ.NVC.R2"]],tf);
+     if(!is.null(res@qc.data[["NVC.minus.clipping.R1"]])) res@calc.data[["NVC.minus.clipping.R1"]] <- lapply(res@qc.data[["NVC.minus.clipping.R1"]],tf);
+     if(!is.null(res@qc.data[["NVC.minus.clipping.R2"]])) res@calc.data[["NVC.minus.clipping.R2"]] <- lapply(res@qc.data[["NVC.minus.clipping.R2"]],tf);
+     
+     tf <- function(df){
+        dt <- sapply(bases, function(b){
+          df$CT[ df$base == b ];
+        });
+        out <- data.frame(t(apply(dt, 1, function(r){ r / sum(r) })));
+        out$readPos     <- df$readPos[ df$base == "A" ];
+        out$leadClipLen <- df$leadClipLen[ df$base == "A" ];
+        return(out);
+     }
+     if(!is.null(res@qc.data[["NVC.lead.clip.R1"]])) res@calc.data[["NVC.lead.clip.R1"]] <- lapply(res@qc.data[["NVC.lead.clip.R1"]],tf);
+     if(!is.null(res@qc.data[["NVC.lead.clip.R2"]])) res@calc.data[["NVC.lead.clip.R2"]] <- lapply(res@qc.data[["NVC.lead.clip.R2"]],tf);
+     
+     tf <- function(df){
+        dt <- sapply(bases, function(b){
+          df$CT[ df$base == b ];
+        });
+        out <- data.frame(t(apply(dt, 1, function(r){ r / sum(r) })));
+        out$readPos     <- df$readPos[ df$base == "A" ];
+        out$tailClipLen <- df$tailClipLen[ df$base == "A" ];
+        return(out);
+     }
+     if(!is.null(res@qc.data[["NVC.tail.clip.R1"]])) res@calc.data[["NVC.tail.clip.R1"]] <- lapply(res@qc.data[["NVC.tail.clip.R1"]],tf);
+     if(!is.null(res@qc.data[["NVC.tail.clip.R2"]])) res@calc.data[["NVC.tail.clip.R2"]] <- lapply(res@qc.data[["NVC.tail.clip.R2"]],tf);
+   });
+   
    return(res);
 }
 

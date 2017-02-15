@@ -20,6 +20,8 @@ makePlot.raw.NVC(plotter,  r2.buffer = NULL,
                          raster.width = 2000,
                          show.base.legend = TRUE, 
                          debugMode, singleEndMode,
+                         useFQ = FALSE,
+                         plot = TRUE,
                          \dots)
                          
 makePlot.minus.clipping.NVC(plotter,  r2.buffer = NULL, 
@@ -32,6 +34,7 @@ makePlot.minus.clipping.NVC(plotter,  r2.buffer = NULL,
                          raster.width = 2000,
                          show.base.legend = TRUE, 
                          debugMode, singleEndMode,
+                         plot = TRUE,
                          \dots)
 }
 \arguments{
@@ -89,6 +92,12 @@ makePlot.minus.clipping.NVC(plotter,  r2.buffer = NULL,
       Logical. Determines whether the dataset consists of single-ended reads. 
       By default this is determined from the data. Thus, this parameter should 
       never need to be set by the user.
+  }
+  \item{useFQ}{
+    Logical. If TRUE, plot the G/C rate from the unaligned FASTQ data. This requires that the FASTQ data was supplied to QoRTs in the QoRTs QC step.
+  }
+  \item{plot}{
+        Logical. If FALSE, suppress plotting and return \code{TRUE} if and only if the data is present in the dataset to allow plotting. Useful to automatically filter out missing data plots.
   }
   \item{\dots}{ 
     Arguments to be passed to methods, such as
