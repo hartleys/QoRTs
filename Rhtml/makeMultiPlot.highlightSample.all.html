@@ -24,37 +24,48 @@ one for every sample.
 <h3>Usage</h3>
 
 <pre>
-  makeMultiPlot.highlightSample.all(res, 
-                     outfile.dir = "./", 
-                     plotter.params = list(), 
-                     plot.device.name = "png", 
-                     plotting.device.params = list(),
-                     verbose = TRUE, debugMode,
-                     rasterize.large.plots,
-                     rasterize.medium.plots,
-                     raster.height = 1000, 
-                     raster.width = 1000,
-                     exclude.autosomes.chrom.rate.plot = TRUE,
-                     chromosome.name.style = "UCSC",
-                     fig.res = 150, fig.base.height.inches = 7,
-                     insertSize.plot.xlim,
-                     ...)
+  makeMultiPlot.highlightSample.all(res, outfile.dir = "./",
+                plotter.params = list(), 
+                plot.device.name = "png", 
+                plotting.device.params = list(), 
+                verbose = TRUE,
+                debugMode , 
+                rasterize.large.plots, 
+                rasterize.medium.plots,
+                raster.height = 1050, 
+                raster.width = 1050,
+                exclude.autosomes.chrom.rate.plot = TRUE,
+                chromosome.name.style = "UCSC",
+                fig.res = 150, fig.base.height.inches = 7,
+                insertSize.plot.xlim,
+                sequencing.type = c("RNA","Exome","Genome"),
+                maxColumns,
+                maxRows,
+                plotList,
+                labelPlots=TRUE,
+                ...)
 
-  makeMultiPlot.highlightSample.colorByLane.all(res, 
-                     outfile.dir = "./", 
-                     plotter.params = list(), 
-                     plot.device.name = "png", 
-                     plotting.device.params = list(),
-                     verbose = TRUE, debugMode,
-                     rasterize.large.plots,
-                     rasterize.medium.plots,
-                     raster.height = 1000, 
-                     raster.width = 1000,
-                     exclude.autosomes.chrom.rate.plot = TRUE,
-                     chromosome.name.style = "UCSC",
-                     fig.res = 150, fig.base.height.inches = 7,
-                     insertSize.plot.xlim,
-                     ...)
+makeMultiPlot.highlightSample.colorByLane.all(res, 
+                outfile.dir = "./",
+                plotter.params = list(), 
+                plot.device.name = "png", 
+                plotting.device.params = list(), 
+                verbose = TRUE, 
+                debugMode ,
+                rasterize.large.plots, 
+                rasterize.medium.plots,
+                raster.height = 1050, 
+                raster.width = 1050,
+                exclude.autosomes.chrom.rate.plot = TRUE,
+                chromosome.name.style = "UCSC",
+                fig.res = 150, fig.base.height.inches = 7,
+                insertSize.plot.xlim,
+                sequencing.type = c("RNA","Exome","Genome"),
+                maxColumns,
+                maxRows,
+                plotList,
+                labelPlots=TRUE,
+                ...)
 </pre>
 
 
@@ -198,6 +209,36 @@ but there are always situations where the default behavior is not ideal. Using t
 it explicitly.
 </p>
 </td></tr>
+<tr valign="top"><td><code>sequencing.type</code></td>
+<td>
+
+<p>The type of sequencing data being analyzed. This only changes the default plot set, which can be overriden with the <code>plotList</code> parameter.
+</p>
+</td></tr>
+<tr valign="top"><td><code>maxColumns</code></td>
+<td>
+
+<p>If set, QoRTs will attempt to create a multiplot that has (at most) maxColumns columns. Extra rows will be added to fit all the plots, as needed.
+</p>
+</td></tr>
+<tr valign="top"><td><code>maxRows</code></td>
+<td>
+
+<p>If set, QoRTs will attempt to create a multiplot that has (at most) maxRows rows. Extra columns will be added to fit all the plots as needed. To set the number of rows and columns manually, you can set both maxColumns and maxRows.
+</p>
+</td></tr>
+<tr valign="top"><td><code>plotList</code></td>
+<td>
+
+<p>The list of desired plots.
+</p>
+</td></tr>
+<tr valign="top"><td><code>labelPlots</code></td>
+<td>
+
+<p>Logical. If TRUE, then label each plot with a letter.
+</p>
+</td></tr>
 <tr valign="top"><td><code>...</code></td>
 <td>
  
@@ -231,5 +272,5 @@ it explicitly.
 </code></pre>
 
 
-<hr /><div style="text-align: center;">[Package <em>QoRTs</em> version 1.1.8 <a href="00Index.html">Index</a>]</div>
+<hr /><div style="text-align: center;">[Package <em>QoRTs</em> version 1.2.11 <a href="00Index.html">Index</a>]</div>
 </body></html>

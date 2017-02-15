@@ -35,12 +35,19 @@
 
 <section><h1>Frequently Asked Questions</h1>
 
-<p>v1.1.8
-Revised Wed Jul 13 13:35:00 EDT 2016</p>
+<p>v1.2.11
+Revised Tue Feb 14 17:15:28 EST 2017 (Unstable)</p>
 
 </section> <h2>What if none of these answers solve my problem?</h2> <section>
 
-<p>No problem. Just email me at qorts-contact at list.nih.gov. If possible attach the output from QoRTs, and run QoRTs with the "--verbose" option to maximize the debugging information.</p>
+<p>No problem. You can either:</p>
+
+<ul>
+<li>Post a new "issue" on the <a href="https://github.com/hartleys/QoRTs/issues">GitHub issue tracker</a>. This is the preferred option, since it may help others solve similar problems.</li>
+<li>Email me at qorts-contact at list.nih.gov. </li>
+</ul>
+
+<p>If possible, attach the logs from QoRTs and run QoRTs with the "--verbose" option to maximize the debugging information.</p>
 
 </section> <h2>Using QoRTs with different aligners:</h2> <section>
 
@@ -52,8 +59,10 @@ Revised Wed Jul 13 13:35:00 EDT 2016</p>
 <li><strong>TopHat2</strong>: TopHat2 uses a MAPQ of 50 to mark reads that are uniquely aligned. Thus, when using TopHat2 aligned data, you must set the --minMAPQ parameter to 50.</li>
 <li><strong>MapSplice</strong>: Under many test conditions MapSplice produces malformed SAM files that violate the <a href="https://samtools.github.io/hts-specs/SAMv1.pdf">current SAM format specification</a>. As such, QoRTs may not be able to properly assess MapSplice output, particularly for paired-ended data.</li>
 <li><strong>GSNAP</strong>: I have been unable to find documentation describing exactly what the MAPQ field means in GSNAP output. However, setting the --minMAPQ parameter to 20 seems to work.</li>
-<li><strong>BowTie, BowTie2, BWA, NOVOALIGN, BLAT, BLAST, or ELEND</strong>: The use of older aligners or aligners not specifically designed for use with RNA-Seq data is NOT recommended or supported. You MIGHT be able to get these alignments to work using --minMAPQ 0.</li>
+<li><strong>BowTie, BowTie2, BWA, BLAT, BLAST, or ELEND</strong>: The use of older aligners or aligners not specifically designed for use with RNA-Seq data is NOT recommended or supported. You MIGHT be able to get these alignments to work using --minMAPQ 0.</li>
 </ul>
+
+<p>QoRTs has been successfully tested on NOVOALIGN whole-exome sequencing (WES). This requires the "--DNA", "--minMAPQ 0", and "--checkForAlignmentBlocks" parameters.</p>
 
 </section> <h2>How do I install QoRTs?</h2> <section>
 

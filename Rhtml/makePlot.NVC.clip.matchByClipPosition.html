@@ -30,7 +30,9 @@ makePlot.NVC.lead.clip.matchByClipPosition(plotter,
             raster.width = 1000,
             show.base.legend = TRUE, 
             load.results = TRUE, 
-            debugMode, singleEndMode, ...)
+            debugMode, singleEndMode, 
+            plot = TRUE,
+            ...)
 
 makePlot.NVC.tail.clip.matchByClipPosition(plotter, 
             clip.amt, r2.buffer,
@@ -41,7 +43,9 @@ makePlot.NVC.tail.clip.matchByClipPosition(plotter,
             raster.height = 1000, 
             raster.width = 1000,
             show.base.legend = TRUE, 
-            debugMode, singleEndMode, ...)
+            debugMode, singleEndMode, 
+            plot = TRUE,
+            ...)
 </pre>
 
 
@@ -134,6 +138,12 @@ By default this is determined from the data. Thus, this parameter should
 never need to be set by the user.
 </p>
 </td></tr>
+<tr valign="top"><td><code>plot</code></td>
+<td>
+
+<p>Logical. If FALSE, suppress plotting and return <code>TRUE</code> if and only if the data is present in the dataset to allow plotting. Useful to automatically filter out missing data plots.
+</p>
+</td></tr>
 <tr valign="top"><td><code>...</code></td>
 <td>
  
@@ -155,5 +165,5 @@ never need to be set by the user.
 <p><code><a href="build.plotter.html">build.plotter</a></code>, <code><a href="makePlot.raw.NVC.html">makePlot.NVC</a></code>
 </p>
 
-<hr /><div style="text-align: center;">[Package <em>QoRTs</em> version 1.1.8 <a href="00Index.html">Index</a>]</div>
+<hr /><div style="text-align: center;">[Package <em>QoRTs</em> version 1.2.11 <a href="00Index.html">Index</a>]</div>
 </body></html>

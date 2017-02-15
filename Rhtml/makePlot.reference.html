@@ -1,0 +1,226 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><title>R: Plot Reference Mismatch Rates</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<link rel="stylesheet" type="text/css" href="R.css" />
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.3/styles/github.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.3/highlight.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.3/languages/r.min.js"></script>
+<script>hljs.initHighlightingOnLoad();</script>
+</head><body>
+
+<table width="100%" summary="page for makePlot.reference {QoRTs}"><tr><td>makePlot.reference {QoRTs}</td><td style="text-align: right;">R Documentation</td></tr></table>
+
+<h2>
+Plot Reference Mismatch Rates
+</h2>
+
+<h3>Description</h3>
+
+<p>Plots various rates of single-base mismatches against the reference genome.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre>
+makePlot.referenceMismatch.byScore(plotter,
+             plot.rates = TRUE,
+             draw.decade.lines = c(FALSE,TRUE),
+             log.y = TRUE,
+             singleEndMode = plotter$res@singleEnd,
+             debugMode = DEFAULTDEBUGMODE,
+             rasterize.plotting.area = FALSE, 
+             raster.height = 1000, 
+             raster.width = 1000,
+             r2.buffer = NULL,
+             plot = TRUE,
+             ...)
+
+makePlot.referenceMismatch.byBase(plotter, 
+             y.rate.per.kb = TRUE, draw.vert.dotted.lines = TRUE,
+             debugMode = DEFAULTDEBUGMODE, 
+             singleEndMode = plotter$res@singleEnd, 
+             plot = TRUE,
+             ...)
+
+makePlot.referenceMismatch.byBase.atScore(plotter, 
+             atScore = 41,
+             forRead = c("BOTH","R1","R2"),
+             plot.rates = TRUE,
+             log.y = FALSE,
+             singleEndMode = plotter$res@singleEnd,
+             rasterize.plotting.area = FALSE, 
+             raster.height = 1000, 
+             raster.width = 1000,
+             debugMode = DEFAULTDEBUGMODE,
+             plot = TRUE,...)
+
+makePlot.referenceMismatch.byCycle(plotter,
+             plot.rates = TRUE,
+             log.y = TRUE,
+             ylim = NULL,
+             singleEndMode = plotter$res@singleEnd,
+             debugMode = DEFAULTDEBUGMODE,
+             rasterize.plotting.area = FALSE, 
+             raster.height = 1000, 
+             raster.width = 1000,
+             r2.buffer = NULL,
+             plot = TRUE,
+             ...)
+</pre>
+
+
+<h3>Arguments</h3>
+
+<table summary="R argblock">
+<tr valign="top"><td><code>plotter</code></td>
+<td>
+
+<p>A <code>QoRT_Plotter</code> reference object. See <code><a href="build.plotter.html">build.plotter</a></code>.
+</p>
+</td></tr>
+<tr valign="top"><td><code>plot.rates</code></td>
+<td>
+
+<p>A logical value indicating whether or not to plot mismatch rates or mismatch counts.
+</p>
+</td></tr>
+<tr valign="top"><td><code>log.y</code></td>
+<td>
+
+<p>Logical. If TRUE, the y-axis will be log-scaled.
+</p>
+</td></tr>
+<tr valign="top"><td><code>draw.decade.lines</code></td>
+<td>
+
+<p>Logical. If TRUE, draw mini tick lines at decade points on the y-axis when plotting in log-scale.
+</p>
+</td></tr>
+<tr valign="top"><td><code>debugMode</code></td>
+<td>
+
+<p>Logical. If TRUE, debugging data will be printed to the console.
+</p>
+</td></tr>
+<tr valign="top"><td><code>singleEndMode</code></td>
+<td>
+
+<p>Logical. Determines whether the dataset consists of single-ended reads. 
+By default this is determined from the data. Thus, this parameter should 
+never need to be set by the user.
+</p>
+</td></tr>
+<tr valign="top"><td><code>rasterize.plotting.area</code></td>
+<td>
+
+<p>Logical. If <code>TRUE</code>, then &quot;flatten&quot; the plotting lines into a raster format. 
+This requires support for png file creation and the installation of the &quot;png&quot; 
+package. Only the plotting lines will be rasterized, the 
+axes and annotations will be vector format. Default is <code>FALSE</code>.
+</p>
+</td></tr>
+<tr valign="top"><td><code>raster.height</code></td>
+<td>
+
+<p>Numeric integer. If <code>rasterize.plotting.area</code> is <code>TRUE</code>, then this
+will set the height of the rasterized plot, in pixels.
+</p>
+</td></tr>
+<tr valign="top"><td><code>raster.width</code></td>
+<td>
+
+<p>Numeric integer. If <code>rasterize.plotting.area</code> is <code>TRUE</code>, then this
+will set the width of the rasterized plot, in pixels.
+</p>
+</td></tr>
+<tr valign="top"><td><code>r2.buffer</code></td>
+<td>
+
+<p>Numeric. The desired distance between the read1/read2 sub-plots.
+</p>
+</td></tr>
+<tr valign="top"><td><code>y.rate.per.kb</code></td>
+<td>
+
+<p>Logical. If TRUE, then y-axis should be labelled as the rate per kilobase.
+</p>
+</td></tr>
+<tr valign="top"><td><code>draw.vert.dotted.lines</code></td>
+<td>
+
+<p>Logical. If TRUE, then draw dotted guide-lines at reasonable intervals.
+</p>
+</td></tr>
+<tr valign="top"><td><code>atScore</code></td>
+<td>
+
+<p>Numeric integer. For <code>makePlot.referenceMismatch.byBase.atScore</code>, this sets the PHRED score.
+</p>
+</td></tr>
+<tr valign="top"><td><code>forRead</code></td>
+<td>
+
+<p>Character string. For <code>makePlot.referenceMismatch.byBase.atScore</code>, this sets whether the plot should be for read 1, read 2, or both side by side.
+</p>
+</td></tr>
+<tr valign="top"><td><code>ylim</code></td>
+<td>
+
+<p>Numeric vector of length 2. This sets the y-axis limits.
+</p>
+</td></tr>
+<tr valign="top"><td><code>plot</code></td>
+<td>
+
+<p>Logical. If FALSE, suppress plotting and return <code>TRUE</code> if and only if the data is present in the dataset to allow plotting. Useful to automatically filter out missing data plots.
+</p>
+</td></tr>
+<tr valign="top"><td><code>...</code></td>
+<td>
+ 
+<p>Arguments to be passed to methods, such as
+<a href="../../graphics/html/par.html">graphical parameters</a> (see <code><a href="../../graphics/html/par.html">par</a></code>).
+</p>
+</td></tr>
+</table>
+
+
+<h3>Details</h3>
+
+<p>These plotting functions create plots that summarize the rate of single-base-pair reference-mismatches of reads against the reference genome. A &quot;reference mismatch&quot;
+is defined as an aligned read base that does not match the genomic base.
+</p>
+<p>These reference mismatches may be caused by a number of different factors and may not necessarily indicate a serious quality issue. To begin with, many
+reference mismatches may be caused by real single nucleotide polymorphisms present in the subject. QoRTs produces several different plots that allow these 
+mismatch rates to be measured in a variety of ways.
+</p>
+<p><em><code>makePlot.referenceMismatch.byCycle</code></em>: Plots the overall reference mismatch rate as a function of read cycle.
+</p>
+<p><em><code>makePlot.referenceMismatch.byBase</code></em>: Plots the overall reference mismatch rate for each of the 12 possible X -&gt; Y base-pair substitutions.
+</p>
+<p><em><code>makePlot.referenceMismatch.byScore</code></em>: Plots the reference mismatch rate as a function of the PHRED score.
+</p>
+<p><em><code>makePlot.referenceMismatch.byBase.atScore</code></em>: Plots the reference mismatch rate for each of the 12 possible X -&gt; Y base-pair substitutions, for the
+subset of bases with PHRED score equal to <code>atScore</code>.
+</p>
+<p><em>NOTE:</em> Creation of the reference mismatch plots requires that the QoRTs QC run be executed with additional optional parameters. The BAM file must be sorted
+by coordinate, and a genome fasta file must be specified via the <code>--genomeFA</code> parameter.
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code><a href="build.plotter.html">build.plotter</a></code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="r">  data(res,package=&quot;QoRTsExampleData&quot;);
+  plotter &lt;- build.plotter.colorByGroup(res);
+</code></pre>
+
+
+<hr /><div style="text-align: center;">[Package <em>QoRTs</em> version 1.2.11 <a href="00Index.html">Index</a>]</div>
+</body></html>

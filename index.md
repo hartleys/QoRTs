@@ -1,6 +1,6 @@
 # QoRTs: Quality of RNA-seq Tool-Set
-v1.1.8
-Revised Wed Jul 13 13:35:00 EDT 2016
+v1.2.11
+Revised Tue Feb 14 17:15:28 EST 2017 (Unstable)
 
 The QoRTs software package is a fast, efficient, and portable multifunction toolkit designed to assist in
 the analysis, quality control, and data management of RNA-Seq datasets. Its primary function is to aid
@@ -19,6 +19,7 @@ The most recent release of QoRTs is available on the [QoRTs github page](http://
 * [Java jar utility help index.](jarHtml/index.html) The Java utility is responsible for the bulk of the data processing, and contains a number of useful tools. It must be run on all replicates.
 * [R package help.](Rhtml/index.html) The R package is responsible for producing visualizations, graphs, plots, and summary tables. (also available as a [pdf](doc/QoRTs-manual.pdf))
 * The [Example QC data](QoRTsExampleData_LATEST.tar.gz) used in the vignette.
+* [Documentation for Older versions of QoRTs](archive.html)
 * [Frequently Asked Questions](FAQ.html): Check here if you run into problems!
 
 For advanced users:
@@ -34,13 +35,21 @@ Hartley SW, Mullikin JC. [**QoRTs: a comprehensive toolset for quality control a
 
 
 ##INSTALLATION:
-The R package can be installed in R using the command:
+The latest version of the R package can be installed in R using the command:
 
     > install.packages("http://hartleys.github.io/QoRTs/QoRTs_LATEST.tar.gz",
                        repos=NULL, 
                        type="source");
 
-The java jar file does not need to be installed, it can simply be downloaded [here](http://hartleys.github.io/QoRTs/QoRTs.jar) and used directly.
+Alternatively, the latest STABLE version can be installed using the command:
+
+    > install.packages("http://hartleys.github.io/QoRTs/QoRTs_STABLE.tar.gz",
+                       repos=NULL, 
+                       type="source");
+
+The stable version may lack new features available in the latest version, but has undergone much more testing and is less likely to have problems.
+
+The java jar file does not need to be installed, it can simply be downloaded [here](http://hartleys.github.io/QoRTs/QoRTs.jar) and used directly. The latest stable version is available [here](http://hartleys.github.io/QoRTs/QoRTs-STABLE.jar).
 Just execute it using the java command:
     
     java -jar /path/to/jarfile/QoRTs.jar QC input.bam anno.gtf.gz /output/dir/
@@ -87,6 +96,8 @@ For help with individual R functions in the R utility, use the R command:
 For a full listing of all help topics for the R utility, use the R command: 
 
     > help(package="QoRTs");
+
+
 
 ##LEGAL:
 This software is "United States Government Work" under the terms of the United 

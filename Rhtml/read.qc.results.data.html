@@ -29,7 +29,9 @@ data files.
                        decoder.files, 
                        calc.DESeq2 = FALSE, 
                        calc.edgeR = FALSE, 
-                       debugMode)
+                       debugMode,
+                       autodetectMissingSamples = FALSE,
+                       skip.files = c())
                        
   completeAndCheckDecoder(decoder, decoder.files)
 </pre>
@@ -73,6 +75,18 @@ is stored.
 <td>
 
 <p>Logical. If TRUE, debugging data will be printed to the console.
+</p>
+</td></tr>
+<tr valign="top"><td><code>autodetectMissingSamples</code></td>
+<td>
+
+<p>Logical. If TRUE, automatically drop replicates for which the QC files cannot be found. By default this function will throw an error.
+</p>
+</td></tr>
+<tr valign="top"><td><code>skip.files</code></td>
+<td>
+
+<p>Character vector of QC data file titles to skip. This can be useful for performing a faster data load when only querying a subset of the available QC metrics. See examples below.
 </p>
 </td></tr>
 </table>
@@ -206,247 +220,706 @@ The technical-replicate decoder should have one row per unique.ID, with the foll
 <pre><code>## Note: no multi.mapped.read.pair.count column found. This column is optional, but without it (depending on how your aligner implements multi-mapping) multi-mapping rates might not be plotted.
 </code></pre>
 
-<pre><code>## reading QC.summary.txt files...
+<pre><code>## infile.dir = /mnt/nfs/gigantor/ifs/DCEG/Home/hartleys/R/x86_64-pc-linux-gnu-library/3.3/QoRTsExampleData/extdata//
+</code></pre>
+
+<pre><code>## scalaqc_file = QC.summary.txt
+</code></pre>
+
+<pre><code>## ..........
 </code></pre>
 
 <pre><code>## done.
 </code></pre>
 
-<pre><code>## [time: 2016-07-13 13:47:23],[elapsed: 0.03 secs]
+<pre><code>##    [time: 2017-02-14 17:39:28],[elapsed: 0.11 secs]
 </code></pre>
 
 <pre><code>## Autodetected Paired-End mode.
 </code></pre>
 
-<pre><code>## reading QC.gc.byPair.txt.gz files...
+<pre><code>## (File 1 of 42): QC.gc.byPair.txt.gz
+</code></pre>
+
+<pre><code>## ..........
 </code></pre>
 
 <pre><code>## done.
 </code></pre>
 
-<pre><code>## [time: 2016-07-13 13:47:24],[elapsed: 0.03 secs]
+<pre><code>##    [time: 2017-02-14 17:39:28],[elapsed: 0.08 secs]
 </code></pre>
 
-<pre><code>## reading QC.gc.byRead.txt.gz files...
+<pre><code>## (File 2 of 42): QC.gc.byRead.txt.gz
 </code></pre>
 
-<pre><code>## done.
-</code></pre>
-
-<pre><code>## [time: 2016-07-13 13:47:24],[elapsed: 0.03 secs]
-</code></pre>
-
-<pre><code>## reading QC.gc.byRead.vsBaseCt.txt.gz files...
+<pre><code>## ..........
 </code></pre>
 
 <pre><code>## done.
 </code></pre>
 
-<pre><code>## [time: 2016-07-13 13:47:24],[elapsed: 0.22 secs]
+<pre><code>##    [time: 2017-02-14 17:39:28],[elapsed: 0.07 secs]
 </code></pre>
 
-<pre><code>## reading QC.quals.r1.txt.gz files...
+<pre><code>## (File 3 of 42): QC.gc.byRead.vsBaseCt.txt.gz
 </code></pre>
 
-<pre><code>## done.
-</code></pre>
-
-<pre><code>## [time: 2016-07-13 13:47:24],[elapsed: 0.03 secs]
-</code></pre>
-
-<pre><code>## reading QC.quals.r2.txt.gz files...
+<pre><code>## ..........
 </code></pre>
 
 <pre><code>## done.
 </code></pre>
 
-<pre><code>## [time: 2016-07-13 13:47:24],[elapsed: 0.04 secs]
+<pre><code>##    [time: 2017-02-14 17:39:29],[elapsed: 0.53 secs]
 </code></pre>
 
-<pre><code>## reading QC.cigarOpDistribution.byReadCycle.R1.txt.gz files...
+<pre><code>## (File 4 of 42): QC.quals.r1.txt.gz
 </code></pre>
 
-<pre><code>## done.
-</code></pre>
-
-<pre><code>## [time: 2016-07-13 13:47:24],[elapsed: 0.16 secs]
-</code></pre>
-
-<pre><code>## reading QC.cigarOpDistribution.byReadCycle.R2.txt.gz files...
+<pre><code>## ..........
 </code></pre>
 
 <pre><code>## done.
 </code></pre>
 
-<pre><code>## [time: 2016-07-13 13:47:25],[elapsed: 0.41 secs]
+<pre><code>##    [time: 2017-02-14 17:39:29],[elapsed: 0.09 secs]
 </code></pre>
 
-<pre><code>## reading QC.cigarOpLengths.byOp.R1.txt.gz files...
+<pre><code>## (File 5 of 42): QC.quals.r2.txt.gz
 </code></pre>
 
-<pre><code>## done.
-</code></pre>
-
-<pre><code>## [time: 2016-07-13 13:47:25],[elapsed: 0.57 secs]
-</code></pre>
-
-<pre><code>## reading QC.cigarOpLengths.byOp.R2.txt.gz files...
+<pre><code>## ..........
 </code></pre>
 
 <pre><code>## done.
 </code></pre>
 
-<pre><code>## [time: 2016-07-13 13:47:26],[elapsed: 0.61 secs]
+<pre><code>##    [time: 2017-02-14 17:39:29],[elapsed: 0.09 secs]
 </code></pre>
 
-<pre><code>## reading QC.geneBodyCoverage.by.expression.level.txt.gz files...
+<pre><code>## (File 6 of 42): QC.cigarOpDistribution.byReadCycle.R1.txt.gz
 </code></pre>
 
-<pre><code>## done.
-</code></pre>
-
-<pre><code>## [time: 2016-07-13 13:47:26],[elapsed: 0.35 secs]
-</code></pre>
-
-<pre><code>## reading QC.geneCounts.txt.gz files...
+<pre><code>## ..........
 </code></pre>
 
 <pre><code>## done.
 </code></pre>
 
-<pre><code>## [time: 2016-07-13 13:47:27],[elapsed: 0.72 secs]
+<pre><code>##    [time: 2017-02-14 17:39:29],[elapsed: 0.21 secs]
 </code></pre>
 
-<pre><code>## reading QC.insert.size.txt.gz files...
+<pre><code>## (File 7 of 42): QC.cigarOpDistribution.byReadCycle.R2.txt.gz
 </code></pre>
 
-<pre><code>## done.
-</code></pre>
-
-<pre><code>## [time: 2016-07-13 13:47:27],[elapsed: 0.39 secs]
-</code></pre>
-
-<pre><code>## reading QC.NVC.raw.R1.txt.gz files...
+<pre><code>## ..........
 </code></pre>
 
 <pre><code>## done.
 </code></pre>
 
-<pre><code>## [time: 2016-07-13 13:47:28],[elapsed: 0.41 secs]
+<pre><code>##    [time: 2017-02-14 17:39:29],[elapsed: 0.2 secs]
 </code></pre>
 
-<pre><code>## reading QC.NVC.raw.R2.txt.gz files...
+<pre><code>## (File 8 of 42): QC.cigarOpLengths.byOp.R1.txt.gz
 </code></pre>
 
-<pre><code>## done.
-</code></pre>
-
-<pre><code>## [time: 2016-07-13 13:47:28],[elapsed: 0.39 secs]
-</code></pre>
-
-<pre><code>## reading QC.NVC.lead.clip.R1.txt.gz files...
+<pre><code>## ..........
 </code></pre>
 
 <pre><code>## done.
 </code></pre>
 
-<pre><code>## [time: 2016-07-13 13:47:29],[elapsed: 1 secs]
+<pre><code>##    [time: 2017-02-14 17:39:30],[elapsed: 0.34 secs]
 </code></pre>
 
-<pre><code>## reading QC.NVC.lead.clip.R2.txt.gz files...
+<pre><code>## (File 9 of 42): QC.cigarOpLengths.byOp.R2.txt.gz
 </code></pre>
 
-<pre><code>## done.
-</code></pre>
-
-<pre><code>## [time: 2016-07-13 13:47:31],[elapsed: 1 secs]
-</code></pre>
-
-<pre><code>## reading QC.NVC.tail.clip.R1.txt.gz files...
+<pre><code>## ..........
 </code></pre>
 
 <pre><code>## done.
 </code></pre>
 
-<pre><code>## [time: 2016-07-13 13:47:31],[elapsed: 0.76 secs]
+<pre><code>##    [time: 2017-02-14 17:39:30],[elapsed: 0.36 secs]
 </code></pre>
 
-<pre><code>## reading QC.NVC.tail.clip.R2.txt.gz files...
+<pre><code>## (File 10 of 42): QC.geneBodyCoverage.by.expression.level.txt.gz
 </code></pre>
 
-<pre><code>## done.
-</code></pre>
-
-<pre><code>## [time: 2016-07-13 13:47:32],[elapsed: 0.89 secs]
-</code></pre>
-
-<pre><code>## reading QC.NVC.minus.clipping.R1.txt.gz files...
+<pre><code>## ..........
 </code></pre>
 
 <pre><code>## done.
 </code></pre>
 
-<pre><code>## [time: 2016-07-13 13:47:32],[elapsed: 0.2 secs]
+<pre><code>##    [time: 2017-02-14 17:39:30],[elapsed: 0.08 secs]
 </code></pre>
 
-<pre><code>## reading QC.NVC.minus.clipping.R2.txt.gz files...
+<pre><code>## (File 11 of 42): QC.geneCounts.txt.gz
 </code></pre>
 
-<pre><code>## done.
-</code></pre>
-
-<pre><code>## [time: 2016-07-13 13:47:32],[elapsed: 0.07 secs]
-</code></pre>
-
-<pre><code>## reading QC.chromCount.txt.gz files...
+<pre><code>## ..........
 </code></pre>
 
 <pre><code>## done.
 </code></pre>
 
-<pre><code>## [time: 2016-07-13 13:47:32],[elapsed: 0.03 secs]
+<pre><code>##    [time: 2017-02-14 17:39:31],[elapsed: 0.27 secs]
 </code></pre>
 
-<pre><code>## reading QC.biotypeCounts.txt.gz files...
+<pre><code>## (File 12 of 42): QC.insert.size.txt.gz
 </code></pre>
 
-<pre><code>## done.
-</code></pre>
-
-<pre><code>## [time: 2016-07-13 13:47:33],[elapsed: 0.03 secs]
-</code></pre>
-
-<pre><code>## reading QC.geneBodyCoverage.byExpr.avgPct.txt.gz files...
+<pre><code>## ..........
 </code></pre>
 
 <pre><code>## done.
 </code></pre>
 
-<pre><code>## [time: 2016-07-13 13:47:33],[elapsed: 0.07 secs]
+<pre><code>##    [time: 2017-02-14 17:39:31],[elapsed: 0.17 secs]
+</code></pre>
+
+<pre><code>## (File 13 of 42): QC.NVC.raw.R1.txt.gz
+</code></pre>
+
+<pre><code>## ..........
+</code></pre>
+
+<pre><code>## done.
+</code></pre>
+
+<pre><code>##    [time: 2017-02-14 17:39:31],[elapsed: 0.16 secs]
+</code></pre>
+
+<pre><code>## (File 14 of 42): QC.NVC.raw.R2.txt.gz
+</code></pre>
+
+<pre><code>## ..........
+</code></pre>
+
+<pre><code>## done.
+</code></pre>
+
+<pre><code>##    [time: 2017-02-14 17:39:31],[elapsed: 0.17 secs]
+</code></pre>
+
+<pre><code>## (File 15 of 42): QC.NVC.lead.clip.R1.txt.gz
+</code></pre>
+
+<pre><code>## ..........
+</code></pre>
+
+<pre><code>## done.
+</code></pre>
+
+<pre><code>##    [time: 2017-02-14 17:39:33],[elapsed: 1 secs]
+</code></pre>
+
+<pre><code>## (File 16 of 42): QC.NVC.lead.clip.R2.txt.gz
+</code></pre>
+
+<pre><code>## ..........
+</code></pre>
+
+<pre><code>## done.
+</code></pre>
+
+<pre><code>##    [time: 2017-02-14 17:39:35],[elapsed: 1 secs]
+</code></pre>
+
+<pre><code>## (File 17 of 42): QC.NVC.tail.clip.R1.txt.gz
+</code></pre>
+
+<pre><code>## ..........
+</code></pre>
+
+<pre><code>## done.
+</code></pre>
+
+<pre><code>##    [time: 2017-02-14 17:39:36],[elapsed: 1 secs]
+</code></pre>
+
+<pre><code>## (File 18 of 42): QC.NVC.tail.clip.R2.txt.gz
+</code></pre>
+
+<pre><code>## ..........
+</code></pre>
+
+<pre><code>## done.
+</code></pre>
+
+<pre><code>##    [time: 2017-02-14 17:39:38],[elapsed: 1 secs]
+</code></pre>
+
+<pre><code>## (File 19 of 42): QC.NVC.minus.clipping.R1.txt.gz
+</code></pre>
+
+<pre><code>## ..........
+</code></pre>
+
+<pre><code>## done.
+</code></pre>
+
+<pre><code>##    [time: 2017-02-14 17:39:38],[elapsed: 0.16 secs]
+</code></pre>
+
+<pre><code>## (File 20 of 42): QC.NVC.minus.clipping.R2.txt.gz
+</code></pre>
+
+<pre><code>## ..........
+</code></pre>
+
+<pre><code>## done.
+</code></pre>
+
+<pre><code>##    [time: 2017-02-14 17:39:38],[elapsed: 0.18 secs]
+</code></pre>
+
+<pre><code>## (File 21 of 42): QC.chromCount.txt.gz
+</code></pre>
+
+<pre><code>## ..........
+</code></pre>
+
+<pre><code>## done.
+</code></pre>
+
+<pre><code>##    [time: 2017-02-14 17:39:38],[elapsed: 0.07 secs]
+</code></pre>
+
+<pre><code>## (File 22 of 42): QC.biotypeCounts.txt.gz
+</code></pre>
+
+<pre><code>## ..........
+</code></pre>
+
+<pre><code>## done.
+</code></pre>
+
+<pre><code>##    [time: 2017-02-14 17:39:39],[elapsed: 0.09 secs]
+</code></pre>
+
+<pre><code>## (File 23 of 42): QC.geneBodyCoverage.byExpr.avgPct.txt.gz
+</code></pre>
+
+<pre><code>## ..........
+</code></pre>
+
+<pre><code>## done.
+</code></pre>
+
+<pre><code>##    [time: 2017-02-14 17:39:39],[elapsed: 0.11 secs]
+</code></pre>
+
+<pre><code>## (File 24 of 42): QC.overlapCoverage.txt.gz
+</code></pre>
+
+<pre><code>## ..........
+</code></pre>
+
+<pre><code>## done.
+</code></pre>
+
+<pre><code>##    [time: 2017-02-14 17:39:39],[elapsed: 0.1 secs]
+</code></pre>
+
+<pre><code>## (File 25 of 42): QC.overlapMismatch.byRead.txt.gz
+</code></pre>
+
+<pre><code>## ..........
+</code></pre>
+
+<pre><code>## done.
+</code></pre>
+
+<pre><code>##    [time: 2017-02-14 17:39:39],[elapsed: 0.09 secs]
+</code></pre>
+
+<pre><code>## (File 26 of 42): QC.overlapMismatch.byScore.txt
+</code></pre>
+
+<pre><code>## ..........
+</code></pre>
+
+<pre><code>## done.
+</code></pre>
+
+<pre><code>##    [time: 2017-02-14 17:39:39],[elapsed: 0.41 secs]
+</code></pre>
+
+<pre><code>## (File 27 of 42): QC.overlapMismatch.byBase.txt.gz
+</code></pre>
+
+<pre><code>## ..........
+</code></pre>
+
+<pre><code>## done.
+</code></pre>
+
+<pre><code>##    [time: 2017-02-14 17:39:39],[elapsed: 0.1 secs]
+</code></pre>
+
+<pre><code>## (File 28 of 42): QC.overlapMismatch.byScoreAndBP.txt.gz
+</code></pre>
+
+<pre><code>## ..........
+</code></pre>
+
+<pre><code>## done.
+</code></pre>
+
+<pre><code>##    [time: 2017-02-14 17:39:44],[elapsed: 4 secs]
+</code></pre>
+
+<pre><code>## (File 29 of 42): QC.readLenDist.txt.gz
+</code></pre>
+
+<pre><code>## ..........
+</code></pre>
+
+<pre><code>## done.
+</code></pre>
+
+<pre><code>##    [time: 2017-02-14 17:39:44],[elapsed: 0.08 secs]
+</code></pre>
+
+<pre><code>## (File 30 of 42): QC.referenceMismatchCounts.txt.gz
+</code></pre>
+
+<pre><code>## ..........
+</code></pre>
+
+<pre><code>## done.
+</code></pre>
+
+<pre><code>##    [time: 2017-02-14 17:39:44],[elapsed: 0.1 secs]
+</code></pre>
+
+<pre><code>## (File 31 of 42): QC.referenceMismatchRaw.byReadStrand.txt
+</code></pre>
+
+<pre><code>## ..........
+</code></pre>
+
+<pre><code>## done.
+</code></pre>
+
+<pre><code>##    [time: 2017-02-14 17:39:44],[elapsed: 0.34 secs]
+</code></pre>
+
+<pre><code>## (File 32 of 42): QC.referenceMismatch.byScore.txt
+</code></pre>
+
+<pre><code>## ..........
+</code></pre>
+
+<pre><code>## done.
+</code></pre>
+
+<pre><code>##    [time: 2017-02-14 17:39:44],[elapsed: 0.11 secs]
+</code></pre>
+
+<pre><code>## (File 33 of 42): QC.referenceMismatch.byScoreAndBP.txt
+</code></pre>
+
+<pre><code>## ..........
+</code></pre>
+
+<pre><code>## done.
+</code></pre>
+
+<pre><code>##    [time: 2017-02-14 17:39:44],[elapsed: 0.19 secs]
+</code></pre>
+
+<pre><code>## (File 34 of 42): QC.mismatchSizeRates.txt.gz
+</code></pre>
+
+<pre><code>## ..........
+</code></pre>
+
+<pre><code>## done.
+</code></pre>
+
+<pre><code>##    [time: 2017-02-14 17:39:45],[elapsed: 0.54 secs]
+</code></pre>
+
+<pre><code>## (File 35 of 42): QC.FQ.gc.byRead.txt.gz
+</code></pre>
+
+<pre><code>## ..........
+</code></pre>
+
+<pre><code>## done.
+</code></pre>
+
+<pre><code>##    [time: 2017-02-14 17:39:45],[elapsed: 0.08 secs]
+</code></pre>
+
+<pre><code>## (File 36 of 42): QC.FQ.gc.byPair.txt.gz
+</code></pre>
+
+<pre><code>## ..........
+</code></pre>
+
+<pre><code>## done.
+</code></pre>
+
+<pre><code>##    [time: 2017-02-14 17:39:45],[elapsed: 0.08 secs]
+</code></pre>
+
+<pre><code>## (File 37 of 42): QC.FQ.gc.R1.txt.gz
+</code></pre>
+
+<pre><code>## ..........
+</code></pre>
+
+<pre><code>## done.
+</code></pre>
+
+<pre><code>##    [time: 2017-02-14 17:39:45],[elapsed: 0.1 secs]
+</code></pre>
+
+<pre><code>## (File 38 of 42): QC.FQ.gc.R2.txt.gz
+</code></pre>
+
+<pre><code>## ..........
+</code></pre>
+
+<pre><code>## done.
+</code></pre>
+
+<pre><code>##    [time: 2017-02-14 17:39:45],[elapsed: 0.1 secs]
+</code></pre>
+
+<pre><code>## (File 39 of 42): QC.FQ.NVC.R1.txt.gz
+</code></pre>
+
+<pre><code>## ..........
+</code></pre>
+
+<pre><code>## done.
+</code></pre>
+
+<pre><code>##    [time: 2017-02-14 17:39:45],[elapsed: 0.11 secs]
+</code></pre>
+
+<pre><code>## (File 40 of 42): QC.FQ.NVC.R2.txt.gz
+</code></pre>
+
+<pre><code>## ..........
+</code></pre>
+
+<pre><code>## done.
+</code></pre>
+
+<pre><code>##    [time: 2017-02-14 17:39:46],[elapsed: 0.12 secs]
+</code></pre>
+
+<pre><code>## (File 41 of 42): QC.FQ.quals.r1.txt.gz
+</code></pre>
+
+<pre><code>## ..........
+</code></pre>
+
+<pre><code>## done.
+</code></pre>
+
+<pre><code>##    [time: 2017-02-14 17:39:46],[elapsed: 0.18 secs]
+</code></pre>
+
+<pre><code>## (File 42 of 42): QC.FQ.quals.r2.txt.gz
+</code></pre>
+
+<pre><code>## ..........
+</code></pre>
+
+<pre><code>## done.
+</code></pre>
+
+<pre><code>##    [time: 2017-02-14 17:39:46],[elapsed: 0.09 secs]
 </code></pre>
 
 <pre><code>## calculating secondary data:
 </code></pre>
 
+<pre><code>## Calculating Quality Score Rates...
+</code></pre>
+
+<pre><code>## done. [time: 2017-02-14 17:39:46],[elapsed: 0 secs]
+</code></pre>
+
+<pre><code>## Calculating cumulative gene coverage, by replicate...
+</code></pre>
+
+<pre><code>## done. [time: 2017-02-14 17:39:46],[elapsed: 0.03 secs]
+</code></pre>
+
+<pre><code>## Calculating cumulative gene coverage, by sample...
+</code></pre>
+
+<pre><code>## done. [time: 2017-02-14 17:39:46],[elapsed: 0.01 secs]
+</code></pre>
+
+<pre><code>## Calculating Mapping Rates...
+</code></pre>
+
+<pre><code>## done. [time: 2017-02-14 17:39:46],[elapsed: 0.03 secs]
+</code></pre>
+
+<pre><code>## calculating normalization factors, by sample...
+</code></pre>
+
 <pre><code>## Calculating DESeq2 Normalization Factors (Geometric normalization)...
 </code></pre>
 
 <pre><code>## Calculating edgeR Normalization Factors (all edgeR normalizations)...
 </code></pre>
 
+<pre><code>## done. [time: 2017-02-14 17:40:08],[elapsed: 22 secs]
+</code></pre>
+
+<pre><code>## calculating normalization factors, by replicate...
+</code></pre>
+
 <pre><code>## Calculating DESeq2 Normalization Factors (Geometric normalization)...
 </code></pre>
 
 <pre><code>## Calculating edgeR Normalization Factors (all edgeR normalizations)...
 </code></pre>
 
-<pre><code>## debug 3B
+<pre><code>## done. [time: 2017-02-14 17:40:08],[elapsed: 0.15 secs]
+</code></pre>
+
+<pre><code>## calculating normalization factors, by sample/replicate...
+</code></pre>
+
+<pre><code>## done. [time: 2017-02-14 17:40:09],[elapsed: 0.1 secs]
+</code></pre>
+
+<pre><code>## Calculating summary stats...
+</code></pre>
+
+<pre><code>## done. [time: 2017-02-14 17:40:09],[elapsed: 0.53 secs]
+</code></pre>
+
+<pre><code>## Calculating overlap mismatch-size rates...
+</code></pre>
+
+<pre><code>## done. [time: 2017-02-14 17:40:10],[elapsed: 1 secs]
+</code></pre>
+
+<pre><code>## Calculating cumulative overlap mismatch-size rates...
+</code></pre>
+
+<pre><code>## done. [time: 2017-02-14 17:40:11],[elapsed: 1 secs]
+</code></pre>
+
+<pre><code>## Calculating overlap coverage Rates...
+</code></pre>
+
+<pre><code>## done. [time: 2017-02-14 17:40:11],[elapsed: 0.07 secs]
+</code></pre>
+
+<pre><code>## Calculating overlap coverage Rates By Read...
+</code></pre>
+
+<pre><code>## done. [time: 2017-02-14 17:40:12],[elapsed: 0.11 secs]
+</code></pre>
+
+<pre><code>## Calculating read length distribution...
+</code></pre>
+
+<pre><code>## done. [time: 2017-02-14 17:40:12],[elapsed: 0.07 secs]
+</code></pre>
+
+<pre><code>## Calculating overlap by AVG score...
+</code></pre>
+
+<pre><code>## done. [time: 2017-02-14 17:40:13],[elapsed: 0.84 secs]
+</code></pre>
+
+<pre><code>## Calculating overlap by MIN score...
+</code></pre>
+
+<pre><code>## done. [time: 2017-02-14 17:40:13],[elapsed: 0.4 secs]
+</code></pre>
+
+<pre><code>## Adding Min score error to summary tables...
+</code></pre>
+
+<pre><code>## done. [time: 2017-02-14 17:40:14],[elapsed: 0.61 secs]
+</code></pre>
+
+<pre><code>## Calculating overlap by R1 score...
+</code></pre>
+
+<pre><code>## done. [time: 2017-02-14 17:40:14],[elapsed: 0.41 secs]
+</code></pre>
+
+<pre><code>## Calculating overlap by R2 score...
+</code></pre>
+
+<pre><code>## done. [time: 2017-02-14 17:40:14],[elapsed: 0.39 secs]
+</code></pre>
+
+<pre><code>## Calculating referenceMismatchCounts stats...
+</code></pre>
+
+<pre><code>## done. [time: 2017-02-14 17:40:14],[elapsed: 0.02 secs]
+</code></pre>
+
+<pre><code>## Calculating referenceMismatch.byScore stats...
+</code></pre>
+
+<pre><code>## done. [time: 2017-02-14 17:40:14],[elapsed: 0.02 secs]
+</code></pre>
+
+<pre><code>## Calculating referenceMismatchRaw.byReadStrand stats...
+</code></pre>
+
+<pre><code>## done. [time: 2017-02-14 17:40:15],[elapsed: 0.88 secs]
+</code></pre>
+
+<pre><code>## Calculating referenceMismatch.byScoreAndBP stats...
+</code></pre>
+
+<pre><code>## done. [time: 2017-02-14 17:40:19],[elapsed: 3 secs]
+</code></pre>
+
+<pre><code>## Calculating summary table...
+</code></pre>
+
+<pre><code>## done. [time: 2017-02-14 17:40:19],[elapsed: 0.02 secs]
+</code></pre>
+
+<pre><code>## Calculating overlap mismatch combos...Calculating mismatch combo rates:...
+</code></pre>
+
+<pre><code>## done. [time: 2017-02-14 17:40:19],[elapsed: 0.09 secs]
+</code></pre>
+
+<pre><code>## Calculating overlapMismatch.byScoreAndBP stats...
+</code></pre>
+
+<pre><code>## done. [time: 2017-02-14 17:41:48],[elapsed: 89 secs]
+</code></pre>
+
+<pre><code>## done. [time: 2017-02-14 17:41:48],[elapsed: 89 secs]
+</code></pre>
+
+<pre><code>## Calculating NVC rates...
+</code></pre>
+
+<pre><code>## done. [time: 2017-02-14 17:41:54],[elapsed: 5 secs]
 </code></pre>
 
 <pre><code>## done.
 </code></pre>
 
-<pre><code>## [time: 2016-07-13 13:47:49],[elapsed: 16 secs]
+<pre><code>## [time: 2017-02-14 17:41:54],[elapsed: 128 secs]
 </code></pre>
 
 <pre><code class="r">  #Note that DESeq2 and edgeR are required in order to 
@@ -493,237 +966,1385 @@ The technical-replicate decoder should have one row per unique.ID, with the foll
 <pre><code>## Note: no multi.mapped.read.pair.count column found. This column is optional, but without it (depending on how your aligner implements multi-mapping) multi-mapping rates might not be plotted.
 </code></pre>
 
-<pre><code>## reading QC.summary.txt files...
+<pre><code>## infile.dir = /mnt/nfs/gigantor/ifs/DCEG/Home/hartleys/R/x86_64-pc-linux-gnu-library/3.3/QoRTsExampleData/extdata///ex/
+</code></pre>
+
+<pre><code>## scalaqc_file = QC.summary.txt
+</code></pre>
+
+<pre><code>## ....
 </code></pre>
 
 <pre><code>## done.
 </code></pre>
 
-<pre><code>## [time: 2016-07-13 13:47:49],[elapsed: 0.01 secs]
+<pre><code>##    [time: 2017-02-14 17:41:54],[elapsed: 0.03 secs]
 </code></pre>
 
 <pre><code>## Autodetected Paired-End mode.
 </code></pre>
 
-<pre><code>## reading QC.gc.byPair.txt.gz files...
+<pre><code>## (File 1 of 42): QC.gc.byPair.txt.gz
+</code></pre>
+
+<pre><code>## ....
 </code></pre>
 
 <pre><code>## done.
 </code></pre>
 
-<pre><code>## [time: 2016-07-13 13:47:49],[elapsed: 0.01 secs]
+<pre><code>##    [time: 2017-02-14 17:41:54],[elapsed: 0.02 secs]
 </code></pre>
 
-<pre><code>## reading QC.gc.byRead.txt.gz files...
+<pre><code>## (File 2 of 42): QC.gc.byRead.txt.gz
 </code></pre>
 
-<pre><code>## done.
-</code></pre>
-
-<pre><code>## [time: 2016-07-13 13:47:49],[elapsed: 0.01 secs]
-</code></pre>
-
-<pre><code>## reading QC.gc.byRead.vsBaseCt.txt.gz files...
+<pre><code>## ....
 </code></pre>
 
 <pre><code>## done.
 </code></pre>
 
-<pre><code>## [time: 2016-07-13 13:47:49],[elapsed: 0.05 secs]
+<pre><code>##    [time: 2017-02-14 17:41:54],[elapsed: 0.03 secs]
 </code></pre>
 
-<pre><code>## reading QC.quals.r1.txt.gz files...
+<pre><code>## (File 3 of 42): QC.gc.byRead.vsBaseCt.txt.gz
 </code></pre>
 
-<pre><code>## done.
-</code></pre>
-
-<pre><code>## [time: 2016-07-13 13:47:49],[elapsed: 0.01 secs]
-</code></pre>
-
-<pre><code>## reading QC.quals.r2.txt.gz files...
+<pre><code>## ....
 </code></pre>
 
 <pre><code>## done.
 </code></pre>
 
-<pre><code>## [time: 2016-07-13 13:47:49],[elapsed: 0.01 secs]
+<pre><code>##    [time: 2017-02-14 17:41:54],[elapsed: 0.12 secs]
 </code></pre>
 
-<pre><code>## reading QC.cigarOpDistribution.byReadCycle.R1.txt.gz files...
+<pre><code>## (File 4 of 42): QC.quals.r1.txt.gz
 </code></pre>
 
-<pre><code>## done.
-</code></pre>
-
-<pre><code>## [time: 2016-07-13 13:47:49],[elapsed: 0.02 secs]
-</code></pre>
-
-<pre><code>## reading QC.cigarOpDistribution.byReadCycle.R2.txt.gz files...
+<pre><code>## ....
 </code></pre>
 
 <pre><code>## done.
 </code></pre>
 
-<pre><code>## [time: 2016-07-13 13:47:49],[elapsed: 0.02 secs]
+<pre><code>##    [time: 2017-02-14 17:41:54],[elapsed: 0.02 secs]
 </code></pre>
 
-<pre><code>## reading QC.cigarOpLengths.byOp.R1.txt.gz files...
+<pre><code>## (File 5 of 42): QC.quals.r2.txt.gz
 </code></pre>
 
-<pre><code>## done.
-</code></pre>
-
-<pre><code>## [time: 2016-07-13 13:47:49],[elapsed: 0.04 secs]
-</code></pre>
-
-<pre><code>## reading QC.cigarOpLengths.byOp.R2.txt.gz files...
+<pre><code>## ....
 </code></pre>
 
 <pre><code>## done.
 </code></pre>
 
-<pre><code>## [time: 2016-07-13 13:47:49],[elapsed: 0.04 secs]
+<pre><code>##    [time: 2017-02-14 17:41:54],[elapsed: 0.02 secs]
 </code></pre>
 
-<pre><code>## reading QC.geneBodyCoverage.by.expression.level.txt.gz files...
+<pre><code>## (File 6 of 42): QC.cigarOpDistribution.byReadCycle.R1.txt.gz
 </code></pre>
 
-<pre><code>## done.
-</code></pre>
-
-<pre><code>## [time: 2016-07-13 13:47:49],[elapsed: 0.01 secs]
-</code></pre>
-
-<pre><code>## reading QC.geneCounts.txt.gz files...
+<pre><code>## ....
 </code></pre>
 
 <pre><code>## done.
 </code></pre>
 
-<pre><code>## [time: 2016-07-13 13:47:49],[elapsed: 0.06 secs]
+<pre><code>##    [time: 2017-02-14 17:41:54],[elapsed: 0.05 secs]
 </code></pre>
 
-<pre><code>## reading QC.insert.size.txt.gz files...
+<pre><code>## (File 7 of 42): QC.cigarOpDistribution.byReadCycle.R2.txt.gz
 </code></pre>
 
-<pre><code>## done.
-</code></pre>
-
-<pre><code>## [time: 2016-07-13 13:47:49],[elapsed: 0.01 secs]
-</code></pre>
-
-<pre><code>## reading QC.NVC.raw.R1.txt.gz files...
+<pre><code>## ....
 </code></pre>
 
 <pre><code>## done.
 </code></pre>
 
-<pre><code>## [time: 2016-07-13 13:47:49],[elapsed: 0.01 secs]
+<pre><code>##    [time: 2017-02-14 17:41:54],[elapsed: 0.05 secs]
 </code></pre>
 
-<pre><code>## reading QC.NVC.raw.R2.txt.gz files...
+<pre><code>## (File 8 of 42): QC.cigarOpLengths.byOp.R1.txt.gz
 </code></pre>
 
-<pre><code>## done.
-</code></pre>
-
-<pre><code>## [time: 2016-07-13 13:47:49],[elapsed: 0.01 secs]
-</code></pre>
-
-<pre><code>## reading QC.NVC.lead.clip.R1.txt.gz files...
+<pre><code>## ....
 </code></pre>
 
 <pre><code>## done.
 </code></pre>
 
-<pre><code>## [time: 2016-07-13 13:47:50],[elapsed: 0.29 secs]
+<pre><code>##    [time: 2017-02-14 17:41:54],[elapsed: 0.08 secs]
 </code></pre>
 
-<pre><code>## reading QC.NVC.lead.clip.R2.txt.gz files...
+<pre><code>## (File 9 of 42): QC.cigarOpLengths.byOp.R2.txt.gz
 </code></pre>
 
-<pre><code>## done.
-</code></pre>
-
-<pre><code>## [time: 2016-07-13 13:47:50],[elapsed: 0.17 secs]
-</code></pre>
-
-<pre><code>## reading QC.NVC.tail.clip.R1.txt.gz files...
+<pre><code>## ....
 </code></pre>
 
 <pre><code>## done.
 </code></pre>
 
-<pre><code>## [time: 2016-07-13 13:47:50],[elapsed: 0.15 secs]
+<pre><code>##    [time: 2017-02-14 17:41:55],[elapsed: 0.08 secs]
 </code></pre>
 
-<pre><code>## reading QC.NVC.tail.clip.R2.txt.gz files...
+<pre><code>## (File 10 of 42): QC.geneBodyCoverage.by.expression.level.txt.gz
 </code></pre>
 
-<pre><code>## done.
-</code></pre>
-
-<pre><code>## [time: 2016-07-13 13:47:50],[elapsed: 0.15 secs]
-</code></pre>
-
-<pre><code>## reading QC.NVC.minus.clipping.R1.txt.gz files...
+<pre><code>## ....
 </code></pre>
 
 <pre><code>## done.
 </code></pre>
 
-<pre><code>## [time: 2016-07-13 13:47:50],[elapsed: 0.02 secs]
+<pre><code>##    [time: 2017-02-14 17:41:55],[elapsed: 0.02 secs]
 </code></pre>
 
-<pre><code>## reading QC.NVC.minus.clipping.R2.txt.gz files...
+<pre><code>## (File 11 of 42): QC.geneCounts.txt.gz
 </code></pre>
 
-<pre><code>## done.
-</code></pre>
-
-<pre><code>## [time: 2016-07-13 13:47:50],[elapsed: 0.02 secs]
-</code></pre>
-
-<pre><code>## reading QC.chromCount.txt.gz files...
+<pre><code>## ....
 </code></pre>
 
 <pre><code>## done.
 </code></pre>
 
-<pre><code>## [time: 2016-07-13 13:47:50],[elapsed: 0.01 secs]
+<pre><code>##    [time: 2017-02-14 17:41:55],[elapsed: 0.06 secs]
 </code></pre>
 
-<pre><code>## reading QC.biotypeCounts.txt.gz files...
+<pre><code>## (File 12 of 42): QC.insert.size.txt.gz
 </code></pre>
 
-<pre><code>## done.
-</code></pre>
-
-<pre><code>## [time: 2016-07-13 13:47:50],[elapsed: 0.01 secs]
-</code></pre>
-
-<pre><code>## reading QC.geneBodyCoverage.byExpr.avgPct.txt.gz files...
+<pre><code>## ....
 </code></pre>
 
 <pre><code>## done.
 </code></pre>
 
-<pre><code>## [time: 2016-07-13 13:47:50],[elapsed: 0.01 secs]
+<pre><code>##    [time: 2017-02-14 17:41:55],[elapsed: 0.04 secs]
+</code></pre>
+
+<pre><code>## (File 13 of 42): QC.NVC.raw.R1.txt.gz
+</code></pre>
+
+<pre><code>## ....
+</code></pre>
+
+<pre><code>## done.
+</code></pre>
+
+<pre><code>##    [time: 2017-02-14 17:41:55],[elapsed: 0.04 secs]
+</code></pre>
+
+<pre><code>## (File 14 of 42): QC.NVC.raw.R2.txt.gz
+</code></pre>
+
+<pre><code>## ....
+</code></pre>
+
+<pre><code>## done.
+</code></pre>
+
+<pre><code>##    [time: 2017-02-14 17:41:55],[elapsed: 0.04 secs]
+</code></pre>
+
+<pre><code>## (File 15 of 42): QC.NVC.lead.clip.R1.txt.gz
+</code></pre>
+
+<pre><code>## ....
+</code></pre>
+
+<pre><code>## done.
+</code></pre>
+
+<pre><code>##    [time: 2017-02-14 17:41:55],[elapsed: 0.41 secs]
+</code></pre>
+
+<pre><code>## (File 16 of 42): QC.NVC.lead.clip.R2.txt.gz
+</code></pre>
+
+<pre><code>## ....
+</code></pre>
+
+<pre><code>## done.
+</code></pre>
+
+<pre><code>##    [time: 2017-02-14 17:41:56],[elapsed: 0.41 secs]
+</code></pre>
+
+<pre><code>## (File 17 of 42): QC.NVC.tail.clip.R1.txt.gz
+</code></pre>
+
+<pre><code>## ....
+</code></pre>
+
+<pre><code>## done.
+</code></pre>
+
+<pre><code>##    [time: 2017-02-14 17:41:56],[elapsed: 0.35 secs]
+</code></pre>
+
+<pre><code>## (File 18 of 42): QC.NVC.tail.clip.R2.txt.gz
+</code></pre>
+
+<pre><code>## ....
+</code></pre>
+
+<pre><code>## done.
+</code></pre>
+
+<pre><code>##    [time: 2017-02-14 17:41:56],[elapsed: 0.35 secs]
+</code></pre>
+
+<pre><code>## (File 19 of 42): QC.NVC.minus.clipping.R1.txt.gz
+</code></pre>
+
+<pre><code>## ....
+</code></pre>
+
+<pre><code>## done.
+</code></pre>
+
+<pre><code>##    [time: 2017-02-14 17:41:56],[elapsed: 0.04 secs]
+</code></pre>
+
+<pre><code>## (File 20 of 42): QC.NVC.minus.clipping.R2.txt.gz
+</code></pre>
+
+<pre><code>## ....
+</code></pre>
+
+<pre><code>## done.
+</code></pre>
+
+<pre><code>##    [time: 2017-02-14 17:41:56],[elapsed: 0.04 secs]
+</code></pre>
+
+<pre><code>## (File 21 of 42): QC.chromCount.txt.gz
+</code></pre>
+
+<pre><code>## ....
+</code></pre>
+
+<pre><code>## done.
+</code></pre>
+
+<pre><code>##    [time: 2017-02-14 17:41:56],[elapsed: 0.02 secs]
+</code></pre>
+
+<pre><code>## (File 22 of 42): QC.biotypeCounts.txt.gz
+</code></pre>
+
+<pre><code>## ....
+</code></pre>
+
+<pre><code>## done.
+</code></pre>
+
+<pre><code>##    [time: 2017-02-14 17:41:56],[elapsed: 0.02 secs]
+</code></pre>
+
+<pre><code>## (File 23 of 42): QC.geneBodyCoverage.byExpr.avgPct.txt.gz
+</code></pre>
+
+<pre><code>## ....
+</code></pre>
+
+<pre><code>## done.
+</code></pre>
+
+<pre><code>##    [time: 2017-02-14 17:41:56],[elapsed: 0.03 secs]
+</code></pre>
+
+<pre><code>## (File 24 of 42): QC.overlapCoverage.txt.gz
+</code></pre>
+
+<pre><code>## ....
+</code></pre>
+
+<pre><code>## done.
+</code></pre>
+
+<pre><code>##    [time: 2017-02-14 17:41:56],[elapsed: 0.03 secs]
+</code></pre>
+
+<pre><code>## (File 25 of 42): QC.overlapMismatch.byRead.txt.gz
+</code></pre>
+
+<pre><code>## ....
+</code></pre>
+
+<pre><code>## done.
+</code></pre>
+
+<pre><code>##    [time: 2017-02-14 17:41:56],[elapsed: 0.02 secs]
+</code></pre>
+
+<pre><code>## (File 26 of 42): QC.overlapMismatch.byScore.txt
+</code></pre>
+
+<pre><code>## ....
+</code></pre>
+
+<pre><code>## done.
+</code></pre>
+
+<pre><code>##    [time: 2017-02-14 17:41:57],[elapsed: 0.08 secs]
+</code></pre>
+
+<pre><code>## (File 27 of 42): QC.overlapMismatch.byBase.txt.gz
+</code></pre>
+
+<pre><code>## ....
+</code></pre>
+
+<pre><code>## done.
+</code></pre>
+
+<pre><code>##    [time: 2017-02-14 17:41:57],[elapsed: 0.02 secs]
+</code></pre>
+
+<pre><code>## (File 28 of 42): QC.overlapMismatch.byScoreAndBP.txt.gz
+</code></pre>
+
+<pre><code>## ....
+</code></pre>
+
+<pre><code>## done.
+</code></pre>
+
+<pre><code>##    [time: 2017-02-14 17:41:58],[elapsed: 0.96 secs]
+</code></pre>
+
+<pre><code>## (File 29 of 42): QC.readLenDist.txt.gz
+</code></pre>
+
+<pre><code>## ....
+</code></pre>
+
+<pre><code>## done.
+</code></pre>
+
+<pre><code>##    [time: 2017-02-14 17:41:58],[elapsed: 0.02 secs]
+</code></pre>
+
+<pre><code>## (File 30 of 42): QC.referenceMismatchCounts.txt.gz
+</code></pre>
+
+<pre><code>## ....
+</code></pre>
+
+<pre><code>## done.
+</code></pre>
+
+<pre><code>##    [time: 2017-02-14 17:41:58],[elapsed: 0.03 secs]
+</code></pre>
+
+<pre><code>## (File 31 of 42): QC.referenceMismatchRaw.byReadStrand.txt
+</code></pre>
+
+<pre><code>## ....
+</code></pre>
+
+<pre><code>## done.
+</code></pre>
+
+<pre><code>##    [time: 2017-02-14 17:41:58],[elapsed: 0.08 secs]
+</code></pre>
+
+<pre><code>## (File 32 of 42): QC.referenceMismatch.byScore.txt
+</code></pre>
+
+<pre><code>## ....
+</code></pre>
+
+<pre><code>## done.
+</code></pre>
+
+<pre><code>##    [time: 2017-02-14 17:41:58],[elapsed: 0.02 secs]
+</code></pre>
+
+<pre><code>## (File 33 of 42): QC.referenceMismatch.byScoreAndBP.txt
+</code></pre>
+
+<pre><code>## ....
+</code></pre>
+
+<pre><code>## done.
+</code></pre>
+
+<pre><code>##    [time: 2017-02-14 17:41:58],[elapsed: 0.05 secs]
+</code></pre>
+
+<pre><code>## (File 34 of 42): QC.mismatchSizeRates.txt.gz
+</code></pre>
+
+<pre><code>## ....
+</code></pre>
+
+<pre><code>## done.
+</code></pre>
+
+<pre><code>##    [time: 2017-02-14 17:41:58],[elapsed: 0.12 secs]
+</code></pre>
+
+<pre><code>## (File 35 of 42): QC.FQ.gc.byRead.txt.gz
+</code></pre>
+
+<pre><code>## ....
+</code></pre>
+
+<pre><code>## done.
+</code></pre>
+
+<pre><code>##    [time: 2017-02-14 17:41:58],[elapsed: 0.02 secs]
+</code></pre>
+
+<pre><code>## (File 36 of 42): QC.FQ.gc.byPair.txt.gz
+</code></pre>
+
+<pre><code>## ....
+</code></pre>
+
+<pre><code>## done.
+</code></pre>
+
+<pre><code>##    [time: 2017-02-14 17:41:58],[elapsed: 0.02 secs]
+</code></pre>
+
+<pre><code>## (File 37 of 42): QC.FQ.gc.R1.txt.gz
+</code></pre>
+
+<pre><code>## ....
+</code></pre>
+
+<pre><code>## done.
+</code></pre>
+
+<pre><code>##    [time: 2017-02-14 17:41:58],[elapsed: 0.02 secs]
+</code></pre>
+
+<pre><code>## (File 38 of 42): QC.FQ.gc.R2.txt.gz
+</code></pre>
+
+<pre><code>## ....
+</code></pre>
+
+<pre><code>## done.
+</code></pre>
+
+<pre><code>##    [time: 2017-02-14 17:41:58],[elapsed: 0.02 secs]
+</code></pre>
+
+<pre><code>## (File 39 of 42): QC.FQ.NVC.R1.txt.gz
+</code></pre>
+
+<pre><code>## ....
+</code></pre>
+
+<pre><code>## done.
+</code></pre>
+
+<pre><code>##    [time: 2017-02-14 17:41:58],[elapsed: 0.03 secs]
+</code></pre>
+
+<pre><code>## (File 40 of 42): QC.FQ.NVC.R2.txt.gz
+</code></pre>
+
+<pre><code>## ....
+</code></pre>
+
+<pre><code>## done.
+</code></pre>
+
+<pre><code>##    [time: 2017-02-14 17:41:58],[elapsed: 0.03 secs]
+</code></pre>
+
+<pre><code>## (File 41 of 42): QC.FQ.quals.r1.txt.gz
+</code></pre>
+
+<pre><code>## ....
+</code></pre>
+
+<pre><code>## done.
+</code></pre>
+
+<pre><code>##    [time: 2017-02-14 17:41:58],[elapsed: 0.02 secs]
+</code></pre>
+
+<pre><code>## (File 42 of 42): QC.FQ.quals.r2.txt.gz
+</code></pre>
+
+<pre><code>## ....
+</code></pre>
+
+<pre><code>## done.
+</code></pre>
+
+<pre><code>##    [time: 2017-02-14 17:41:58],[elapsed: 0.02 secs]
 </code></pre>
 
 <pre><code>## calculating secondary data:
 </code></pre>
 
-<pre><code>## debug 3B
+<pre><code>## Calculating Quality Score Rates...
+</code></pre>
+
+<pre><code>## done. [time: 2017-02-14 17:41:58],[elapsed: 0 secs]
+</code></pre>
+
+<pre><code>## Calculating cumulative gene coverage, by replicate...
+</code></pre>
+
+<pre><code>## done. [time: 2017-02-14 17:41:58],[elapsed: 0.01 secs]
+</code></pre>
+
+<pre><code>## Calculating cumulative gene coverage, by sample...
+</code></pre>
+
+<pre><code>## done. [time: 2017-02-14 17:41:58],[elapsed: 0 secs]
+</code></pre>
+
+<pre><code>## Calculating Mapping Rates...
+</code></pre>
+
+<pre><code>## done. [time: 2017-02-14 17:41:58],[elapsed: 0.01 secs]
+</code></pre>
+
+<pre><code>## calculating normalization factors, by sample...
+</code></pre>
+
+<pre><code>## done. [time: 2017-02-14 17:41:58],[elapsed: 0 secs]
+</code></pre>
+
+<pre><code>## calculating normalization factors, by replicate...
+</code></pre>
+
+<pre><code>## done. [time: 2017-02-14 17:41:58],[elapsed: 0 secs]
+</code></pre>
+
+<pre><code>## calculating normalization factors, by sample/replicate...
+</code></pre>
+
+<pre><code>## done. [time: 2017-02-14 17:41:58],[elapsed: 0 secs]
+</code></pre>
+
+<pre><code>## Calculating summary stats...
+</code></pre>
+
+<pre><code>## done. [time: 2017-02-14 17:41:58],[elapsed: 0.1 secs]
+</code></pre>
+
+<pre><code>## Calculating overlap mismatch-size rates...
+</code></pre>
+
+<pre><code>## done. [time: 2017-02-14 17:41:58],[elapsed: 0.21 secs]
+</code></pre>
+
+<pre><code>## Calculating cumulative overlap mismatch-size rates...
+</code></pre>
+
+<pre><code>## done. [time: 2017-02-14 17:41:59],[elapsed: 0.36 secs]
+</code></pre>
+
+<pre><code>## Calculating overlap coverage Rates...
+</code></pre>
+
+<pre><code>## done. [time: 2017-02-14 17:41:59],[elapsed: 0.02 secs]
+</code></pre>
+
+<pre><code>## Calculating overlap coverage Rates By Read...
+</code></pre>
+
+<pre><code>## done. [time: 2017-02-14 17:41:59],[elapsed: 0.03 secs]
+</code></pre>
+
+<pre><code>## Calculating read length distribution...
+</code></pre>
+
+<pre><code>## done. [time: 2017-02-14 17:41:59],[elapsed: 0.02 secs]
+</code></pre>
+
+<pre><code>## Calculating overlap by AVG score...
+</code></pre>
+
+<pre><code>## done. [time: 2017-02-14 17:41:59],[elapsed: 0.19 secs]
+</code></pre>
+
+<pre><code>## Calculating overlap by MIN score...
+</code></pre>
+
+<pre><code>## done. [time: 2017-02-14 17:41:59],[elapsed: 0.09 secs]
+</code></pre>
+
+<pre><code>## Adding Min score error to summary tables...
+</code></pre>
+
+<pre><code>## done. [time: 2017-02-14 17:41:59],[elapsed: 0.14 secs]
+</code></pre>
+
+<pre><code>## Calculating overlap by R1 score...
+</code></pre>
+
+<pre><code>## done. [time: 2017-02-14 17:41:59],[elapsed: 0.09 secs]
+</code></pre>
+
+<pre><code>## Calculating overlap by R2 score...
+</code></pre>
+
+<pre><code>## done. [time: 2017-02-14 17:42:00],[elapsed: 0.09 secs]
+</code></pre>
+
+<pre><code>## Calculating referenceMismatchCounts stats...
+</code></pre>
+
+<pre><code>## done. [time: 2017-02-14 17:42:00],[elapsed: 0 secs]
+</code></pre>
+
+<pre><code>## Calculating referenceMismatch.byScore stats...
+</code></pre>
+
+<pre><code>## done. [time: 2017-02-14 17:42:00],[elapsed: 0.01 secs]
+</code></pre>
+
+<pre><code>## Calculating referenceMismatchRaw.byReadStrand stats...
+</code></pre>
+
+<pre><code>## done. [time: 2017-02-14 17:42:00],[elapsed: 0.2 secs]
+</code></pre>
+
+<pre><code>## Calculating referenceMismatch.byScoreAndBP stats...
+</code></pre>
+
+<pre><code>## done. [time: 2017-02-14 17:42:01],[elapsed: 0.8 secs]
+</code></pre>
+
+<pre><code>## Calculating summary table...
+</code></pre>
+
+<pre><code>## done. [time: 2017-02-14 17:42:01],[elapsed: 0 secs]
+</code></pre>
+
+<pre><code>## Calculating overlap mismatch combos...Calculating mismatch combo rates:...
+</code></pre>
+
+<pre><code>## done. [time: 2017-02-14 17:42:01],[elapsed: 0.02 secs]
+</code></pre>
+
+<pre><code>## Calculating overlapMismatch.byScoreAndBP stats...
+</code></pre>
+
+<pre><code>## done. [time: 2017-02-14 17:42:21],[elapsed: 19 secs]
+</code></pre>
+
+<pre><code>## done. [time: 2017-02-14 17:42:21],[elapsed: 19 secs]
+</code></pre>
+
+<pre><code>## Calculating NVC rates...
+</code></pre>
+
+<pre><code>## done. [time: 2017-02-14 17:42:22],[elapsed: 1 secs]
 </code></pre>
 
 <pre><code>## done.
 </code></pre>
 
-<pre><code>## [time: 2016-07-13 13:47:50],[elapsed: 0.05 secs]
+<pre><code>## [time: 2017-02-14 17:42:22],[elapsed: 23 secs]
+</code></pre>
+
+<pre><code class="r">  #The list of available QC names for use with skip.files:
+  names(res@qc.data);
+</code></pre>
+
+<pre><code>##  [1] &quot;summary&quot;                             
+##  [2] &quot;gc.byPair&quot;                           
+##  [3] &quot;gc.byRead&quot;                           
+##  [4] &quot;gc.byRead.vsBaseCt&quot;                  
+##  [5] &quot;quals.r1&quot;                            
+##  [6] &quot;quals.r2&quot;                            
+##  [7] &quot;cigarOpDistribution.byReadCycle.R1&quot;  
+##  [8] &quot;cigarOpDistribution.byReadCycle.R2&quot;  
+##  [9] &quot;cigarOpLengths.byOp.R1&quot;              
+## [10] &quot;cigarOpLengths.byOp.R2&quot;              
+## [11] &quot;geneBodyCoverage.by.expression.level&quot;
+## [12] &quot;geneCounts&quot;                          
+## [13] &quot;insert.size&quot;                         
+## [14] &quot;NVC.raw.R1&quot;                          
+## [15] &quot;NVC.raw.R2&quot;                          
+## [16] &quot;NVC.lead.clip.R1&quot;                    
+## [17] &quot;NVC.lead.clip.R2&quot;                    
+## [18] &quot;NVC.tail.clip.R1&quot;                    
+## [19] &quot;NVC.tail.clip.R2&quot;                    
+## [20] &quot;NVC.minus.clipping.R1&quot;               
+## [21] &quot;NVC.minus.clipping.R2&quot;               
+## [22] &quot;chrom.counts&quot;                        
+## [23] &quot;biotype.counts&quot;                      
+## [24] &quot;geneBodyCoverage.pct&quot;                
+## [25] &quot;overlapCoverage&quot;                     
+## [26] &quot;overlapMismatch.byRead&quot;              
+## [27] &quot;overlapMismatch.byScore&quot;             
+## [28] &quot;overlapMismatchCombos&quot;               
+## [29] &quot;overlapMismatch.byScoreAndBP&quot;        
+## [30] &quot;readLenDist&quot;                         
+## [31] &quot;referenceMismatchCounts&quot;             
+## [32] &quot;referenceMismatchRaw.byReadStrand&quot;   
+## [33] &quot;referenceMismatch.byScore&quot;           
+## [34] &quot;referenceMismatch.byScoreAndBP&quot;      
+## [35] &quot;mismatchSizeRates&quot;                   
+## [36] &quot;FQ.gc.byRead&quot;                        
+## [37] &quot;FQ.gc.byPair&quot;                        
+## [38] &quot;FQ.gc.r1&quot;                            
+## [39] &quot;FQ.gc.r2&quot;                            
+## [40] &quot;FQ.NVC.R1&quot;                           
+## [41] &quot;FQ.NVC.R2&quot;                           
+## [42] &quot;FQ.quals.r1&quot;                         
+## [43] &quot;FQ.quals.r2&quot;
+</code></pre>
+
+<pre><code class="r">  #Skip some of the files using a command like this:
+  res.quick &lt;- read.qc.results.data(directory, 
+                              decoder = decoder.data,
+                              skip.files=c(
+                              &quot;QC.NVC.raw.R1.txt.gz&quot;,
+                              &quot;QC.NVC.raw.R2.txt.gz&quot;,
+                              &quot;QC.NVC.lead.clip.R1.txt.gz&quot;,
+                              &quot;QC.NVC.lead.clip.R2.txt.gz&quot;,
+                              &quot;QC.NVC.tail.clip.R1.txt.gz&quot;,
+                              &quot;QC.NVC.tail.clip.R2.txt.gz&quot;
+                              ));
+</code></pre>
+
+<pre><code>## Note: no multi.mapped.read.pair.count column found. This column is optional, but without it (depending on how your aligner implements multi-mapping) multi-mapping rates might not be plotted.
+</code></pre>
+
+<pre><code>## infile.dir = /mnt/nfs/gigantor/ifs/DCEG/Home/hartleys/R/x86_64-pc-linux-gnu-library/3.3/QoRTsExampleData/extdata//
+</code></pre>
+
+<pre><code>## scalaqc_file = QC.summary.txt
+</code></pre>
+
+<pre><code>## ..........
+</code></pre>
+
+<pre><code>## done.
+</code></pre>
+
+<pre><code>##    [time: 2017-02-14 17:42:22],[elapsed: 0.11 secs]
+</code></pre>
+
+<pre><code>## Autodetected Paired-End mode.
+</code></pre>
+
+<pre><code>## skipping 6 files.
+</code></pre>
+
+<pre><code>##    (&quot;QC.NVC.raw.R1.txt.gz&quot;,&quot;QC.NVC.raw.R2.txt.gz&quot;,&quot;QC.NVC.lead.clip.R1.txt.gz&quot;,&quot;QC.NVC.lead.clip.R2.txt.gz&quot;,&quot;QC.NVC.tail.clip.R1.txt.gz&quot;,&quot;QC.NVC.tail.clip.R2.txt.gz&quot;)
+</code></pre>
+
+<pre><code>## (File 1 of 36): QC.gc.byPair.txt.gz
+</code></pre>
+
+<pre><code>## ..........
+</code></pre>
+
+<pre><code>## done.
+</code></pre>
+
+<pre><code>##    [time: 2017-02-14 17:42:22],[elapsed: 0.08 secs]
+</code></pre>
+
+<pre><code>## (File 2 of 36): QC.gc.byRead.txt.gz
+</code></pre>
+
+<pre><code>## ..........
+</code></pre>
+
+<pre><code>## done.
+</code></pre>
+
+<pre><code>##    [time: 2017-02-14 17:42:22],[elapsed: 0.07 secs]
+</code></pre>
+
+<pre><code>## (File 3 of 36): QC.gc.byRead.vsBaseCt.txt.gz
+</code></pre>
+
+<pre><code>## ..........
+</code></pre>
+
+<pre><code>## done.
+</code></pre>
+
+<pre><code>##    [time: 2017-02-14 17:42:23],[elapsed: 0.51 secs]
+</code></pre>
+
+<pre><code>## (File 4 of 36): QC.quals.r1.txt.gz
+</code></pre>
+
+<pre><code>## ..........
+</code></pre>
+
+<pre><code>## done.
+</code></pre>
+
+<pre><code>##    [time: 2017-02-14 17:42:23],[elapsed: 0.09 secs]
+</code></pre>
+
+<pre><code>## (File 5 of 36): QC.quals.r2.txt.gz
+</code></pre>
+
+<pre><code>## ..........
+</code></pre>
+
+<pre><code>## done.
+</code></pre>
+
+<pre><code>##    [time: 2017-02-14 17:42:23],[elapsed: 0.09 secs]
+</code></pre>
+
+<pre><code>## (File 6 of 36): QC.cigarOpDistribution.byReadCycle.R1.txt.gz
+</code></pre>
+
+<pre><code>## ..........
+</code></pre>
+
+<pre><code>## done.
+</code></pre>
+
+<pre><code>##    [time: 2017-02-14 17:42:23],[elapsed: 0.19 secs]
+</code></pre>
+
+<pre><code>## (File 7 of 36): QC.cigarOpDistribution.byReadCycle.R2.txt.gz
+</code></pre>
+
+<pre><code>## ..........
+</code></pre>
+
+<pre><code>## done.
+</code></pre>
+
+<pre><code>##    [time: 2017-02-14 17:42:23],[elapsed: 0.19 secs]
+</code></pre>
+
+<pre><code>## (File 8 of 36): QC.cigarOpLengths.byOp.R1.txt.gz
+</code></pre>
+
+<pre><code>## ..........
+</code></pre>
+
+<pre><code>## done.
+</code></pre>
+
+<pre><code>##    [time: 2017-02-14 17:42:23],[elapsed: 0.34 secs]
+</code></pre>
+
+<pre><code>## (File 9 of 36): QC.cigarOpLengths.byOp.R2.txt.gz
+</code></pre>
+
+<pre><code>## ..........
+</code></pre>
+
+<pre><code>## done.
+</code></pre>
+
+<pre><code>##    [time: 2017-02-14 17:42:24],[elapsed: 0.36 secs]
+</code></pre>
+
+<pre><code>## (File 10 of 36): QC.geneBodyCoverage.by.expression.level.txt.gz
+</code></pre>
+
+<pre><code>## ..........
+</code></pre>
+
+<pre><code>## done.
+</code></pre>
+
+<pre><code>##    [time: 2017-02-14 17:42:24],[elapsed: 0.08 secs]
+</code></pre>
+
+<pre><code>## (File 11 of 36): QC.geneCounts.txt.gz
+</code></pre>
+
+<pre><code>## ..........
+</code></pre>
+
+<pre><code>## done.
+</code></pre>
+
+<pre><code>##    [time: 2017-02-14 17:42:24],[elapsed: 0.27 secs]
+</code></pre>
+
+<pre><code>## (File 12 of 36): QC.insert.size.txt.gz
+</code></pre>
+
+<pre><code>## ..........
+</code></pre>
+
+<pre><code>## done.
+</code></pre>
+
+<pre><code>##    [time: 2017-02-14 17:42:24],[elapsed: 0.17 secs]
+</code></pre>
+
+<pre><code>## (File 13 of 36): QC.NVC.minus.clipping.R1.txt.gz
+</code></pre>
+
+<pre><code>## ..........
+</code></pre>
+
+<pre><code>## done.
+</code></pre>
+
+<pre><code>##    [time: 2017-02-14 17:42:25],[elapsed: 0.18 secs]
+</code></pre>
+
+<pre><code>## (File 14 of 36): QC.NVC.minus.clipping.R2.txt.gz
+</code></pre>
+
+<pre><code>## ..........
+</code></pre>
+
+<pre><code>## done.
+</code></pre>
+
+<pre><code>##    [time: 2017-02-14 17:42:25],[elapsed: 0.16 secs]
+</code></pre>
+
+<pre><code>## (File 15 of 36): QC.chromCount.txt.gz
+</code></pre>
+
+<pre><code>## ..........
+</code></pre>
+
+<pre><code>## done.
+</code></pre>
+
+<pre><code>##    [time: 2017-02-14 17:42:25],[elapsed: 0.07 secs]
+</code></pre>
+
+<pre><code>## (File 16 of 36): QC.biotypeCounts.txt.gz
+</code></pre>
+
+<pre><code>## ..........
+</code></pre>
+
+<pre><code>## done.
+</code></pre>
+
+<pre><code>##    [time: 2017-02-14 17:42:25],[elapsed: 0.08 secs]
+</code></pre>
+
+<pre><code>## (File 17 of 36): QC.geneBodyCoverage.byExpr.avgPct.txt.gz
+</code></pre>
+
+<pre><code>## ..........
+</code></pre>
+
+<pre><code>## done.
+</code></pre>
+
+<pre><code>##    [time: 2017-02-14 17:42:25],[elapsed: 0.11 secs]
+</code></pre>
+
+<pre><code>## (File 18 of 36): QC.overlapCoverage.txt.gz
+</code></pre>
+
+<pre><code>## ..........
+</code></pre>
+
+<pre><code>## done.
+</code></pre>
+
+<pre><code>##    [time: 2017-02-14 17:42:25],[elapsed: 0.1 secs]
+</code></pre>
+
+<pre><code>## (File 19 of 36): QC.overlapMismatch.byRead.txt.gz
+</code></pre>
+
+<pre><code>## ..........
+</code></pre>
+
+<pre><code>## done.
+</code></pre>
+
+<pre><code>##    [time: 2017-02-14 17:42:25],[elapsed: 0.09 secs]
+</code></pre>
+
+<pre><code>## (File 20 of 36): QC.overlapMismatch.byScore.txt
+</code></pre>
+
+<pre><code>## ..........
+</code></pre>
+
+<pre><code>## done.
+</code></pre>
+
+<pre><code>##    [time: 2017-02-14 17:42:26],[elapsed: 0.36 secs]
+</code></pre>
+
+<pre><code>## (File 21 of 36): QC.overlapMismatch.byBase.txt.gz
+</code></pre>
+
+<pre><code>## ..........
+</code></pre>
+
+<pre><code>## done.
+</code></pre>
+
+<pre><code>##    [time: 2017-02-14 17:42:26],[elapsed: 0.12 secs]
+</code></pre>
+
+<pre><code>## (File 22 of 36): QC.overlapMismatch.byScoreAndBP.txt.gz
+</code></pre>
+
+<pre><code>## ..........
+</code></pre>
+
+<pre><code>## done.
+</code></pre>
+
+<pre><code>##    [time: 2017-02-14 17:42:30],[elapsed: 4 secs]
+</code></pre>
+
+<pre><code>## (File 23 of 36): QC.readLenDist.txt.gz
+</code></pre>
+
+<pre><code>## ..........
+</code></pre>
+
+<pre><code>## done.
+</code></pre>
+
+<pre><code>##    [time: 2017-02-14 17:42:30],[elapsed: 0.08 secs]
+</code></pre>
+
+<pre><code>## (File 24 of 36): QC.referenceMismatchCounts.txt.gz
+</code></pre>
+
+<pre><code>## ..........
+</code></pre>
+
+<pre><code>## done.
+</code></pre>
+
+<pre><code>##    [time: 2017-02-14 17:42:30],[elapsed: 0.1 secs]
+</code></pre>
+
+<pre><code>## (File 25 of 36): QC.referenceMismatchRaw.byReadStrand.txt
+</code></pre>
+
+<pre><code>## ..........
+</code></pre>
+
+<pre><code>## done.
+</code></pre>
+
+<pre><code>##    [time: 2017-02-14 17:42:31],[elapsed: 0.34 secs]
+</code></pre>
+
+<pre><code>## (File 26 of 36): QC.referenceMismatch.byScore.txt
+</code></pre>
+
+<pre><code>## ..........
+</code></pre>
+
+<pre><code>## done.
+</code></pre>
+
+<pre><code>##    [time: 2017-02-14 17:42:31],[elapsed: 0.09 secs]
+</code></pre>
+
+<pre><code>## (File 27 of 36): QC.referenceMismatch.byScoreAndBP.txt
+</code></pre>
+
+<pre><code>## ..........
+</code></pre>
+
+<pre><code>## done.
+</code></pre>
+
+<pre><code>##    [time: 2017-02-14 17:42:31],[elapsed: 0.19 secs]
+</code></pre>
+
+<pre><code>## (File 28 of 36): QC.mismatchSizeRates.txt.gz
+</code></pre>
+
+<pre><code>## ..........
+</code></pre>
+
+<pre><code>## done.
+</code></pre>
+
+<pre><code>##    [time: 2017-02-14 17:42:31],[elapsed: 0.57 secs]
+</code></pre>
+
+<pre><code>## (File 29 of 36): QC.FQ.gc.byRead.txt.gz
+</code></pre>
+
+<pre><code>## ..........
+</code></pre>
+
+<pre><code>## done.
+</code></pre>
+
+<pre><code>##    [time: 2017-02-14 17:42:31],[elapsed: 0.08 secs]
+</code></pre>
+
+<pre><code>## (File 30 of 36): QC.FQ.gc.byPair.txt.gz
+</code></pre>
+
+<pre><code>## ..........
+</code></pre>
+
+<pre><code>## done.
+</code></pre>
+
+<pre><code>##    [time: 2017-02-14 17:42:32],[elapsed: 0.08 secs]
+</code></pre>
+
+<pre><code>## (File 31 of 36): QC.FQ.gc.R1.txt.gz
+</code></pre>
+
+<pre><code>## ..........
+</code></pre>
+
+<pre><code>## done.
+</code></pre>
+
+<pre><code>##    [time: 2017-02-14 17:42:32],[elapsed: 0.08 secs]
+</code></pre>
+
+<pre><code>## (File 32 of 36): QC.FQ.gc.R2.txt.gz
+</code></pre>
+
+<pre><code>## ..........
+</code></pre>
+
+<pre><code>## done.
+</code></pre>
+
+<pre><code>##    [time: 2017-02-14 17:42:32],[elapsed: 0.07 secs]
+</code></pre>
+
+<pre><code>## (File 33 of 36): QC.FQ.NVC.R1.txt.gz
+</code></pre>
+
+<pre><code>## ..........
+</code></pre>
+
+<pre><code>## done.
+</code></pre>
+
+<pre><code>##    [time: 2017-02-14 17:42:32],[elapsed: 0.12 secs]
+</code></pre>
+
+<pre><code>## (File 34 of 36): QC.FQ.NVC.R2.txt.gz
+</code></pre>
+
+<pre><code>## ..........
+</code></pre>
+
+<pre><code>## done.
+</code></pre>
+
+<pre><code>##    [time: 2017-02-14 17:42:32],[elapsed: 0.12 secs]
+</code></pre>
+
+<pre><code>## (File 35 of 36): QC.FQ.quals.r1.txt.gz
+</code></pre>
+
+<pre><code>## ..........
+</code></pre>
+
+<pre><code>## done.
+</code></pre>
+
+<pre><code>##    [time: 2017-02-14 17:42:32],[elapsed: 0.09 secs]
+</code></pre>
+
+<pre><code>## (File 36 of 36): QC.FQ.quals.r2.txt.gz
+</code></pre>
+
+<pre><code>## ..........
+</code></pre>
+
+<pre><code>## done.
+</code></pre>
+
+<pre><code>##    [time: 2017-02-14 17:42:32],[elapsed: 0.09 secs]
+</code></pre>
+
+<pre><code>## calculating secondary data:
+</code></pre>
+
+<pre><code>## Calculating Quality Score Rates...
+</code></pre>
+
+<pre><code>## done. [time: 2017-02-14 17:42:32],[elapsed: 0 secs]
+</code></pre>
+
+<pre><code>## Calculating cumulative gene coverage, by replicate...
+</code></pre>
+
+<pre><code>## done. [time: 2017-02-14 17:42:32],[elapsed: 0.03 secs]
+</code></pre>
+
+<pre><code>## Calculating cumulative gene coverage, by sample...
+</code></pre>
+
+<pre><code>## done. [time: 2017-02-14 17:42:32],[elapsed: 0.01 secs]
+</code></pre>
+
+<pre><code>## Calculating Mapping Rates...
+</code></pre>
+
+<pre><code>## done. [time: 2017-02-14 17:42:32],[elapsed: 0.03 secs]
+</code></pre>
+
+<pre><code>## calculating normalization factors, by sample...
+</code></pre>
+
+<pre><code>## done. [time: 2017-02-14 17:42:32],[elapsed: 0 secs]
+</code></pre>
+
+<pre><code>## calculating normalization factors, by replicate...
+</code></pre>
+
+<pre><code>## done. [time: 2017-02-14 17:42:32],[elapsed: 0 secs]
+</code></pre>
+
+<pre><code>## calculating normalization factors, by sample/replicate...
+</code></pre>
+
+<pre><code>## done. [time: 2017-02-14 17:42:32],[elapsed: 0 secs]
+</code></pre>
+
+<pre><code>## Calculating summary stats...
+</code></pre>
+
+<pre><code>## done. [time: 2017-02-14 17:42:33],[elapsed: 0.49 secs]
+</code></pre>
+
+<pre><code>## Calculating overlap mismatch-size rates...
+</code></pre>
+
+<pre><code>## done. [time: 2017-02-14 17:42:34],[elapsed: 0.99 secs]
+</code></pre>
+
+<pre><code>## Calculating cumulative overlap mismatch-size rates...
+</code></pre>
+
+<pre><code>## done. [time: 2017-02-14 17:42:35],[elapsed: 1 secs]
+</code></pre>
+
+<pre><code>## Calculating overlap coverage Rates...
+</code></pre>
+
+<pre><code>## done. [time: 2017-02-14 17:42:35],[elapsed: 0.07 secs]
+</code></pre>
+
+<pre><code>## Calculating overlap coverage Rates By Read...
+</code></pre>
+
+<pre><code>## done. [time: 2017-02-14 17:42:35],[elapsed: 0.11 secs]
+</code></pre>
+
+<pre><code>## Calculating read length distribution...
+</code></pre>
+
+<pre><code>## done. [time: 2017-02-14 17:42:35],[elapsed: 0.07 secs]
+</code></pre>
+
+<pre><code>## Calculating overlap by AVG score...
+</code></pre>
+
+<pre><code>## done. [time: 2017-02-14 17:42:36],[elapsed: 0.84 secs]
+</code></pre>
+
+<pre><code>## Calculating overlap by MIN score...
+</code></pre>
+
+<pre><code>## done. [time: 2017-02-14 17:42:36],[elapsed: 0.4 secs]
+</code></pre>
+
+<pre><code>## Adding Min score error to summary tables...
+</code></pre>
+
+<pre><code>## done. [time: 2017-02-14 17:42:37],[elapsed: 0.59 secs]
+</code></pre>
+
+<pre><code>## Calculating overlap by R1 score...
+</code></pre>
+
+<pre><code>## done. [time: 2017-02-14 17:42:37],[elapsed: 0.42 secs]
+</code></pre>
+
+<pre><code>## Calculating overlap by R2 score...
+</code></pre>
+
+<pre><code>## done. [time: 2017-02-14 17:42:38],[elapsed: 0.39 secs]
+</code></pre>
+
+<pre><code>## Calculating referenceMismatchCounts stats...
+</code></pre>
+
+<pre><code>## done. [time: 2017-02-14 17:42:38],[elapsed: 0.02 secs]
+</code></pre>
+
+<pre><code>## Calculating referenceMismatch.byScore stats...
+</code></pre>
+
+<pre><code>## done. [time: 2017-02-14 17:42:38],[elapsed: 0.02 secs]
+</code></pre>
+
+<pre><code>## Calculating referenceMismatchRaw.byReadStrand stats...
+</code></pre>
+
+<pre><code>## done. [time: 2017-02-14 17:42:39],[elapsed: 0.87 secs]
+</code></pre>
+
+<pre><code>## Calculating referenceMismatch.byScoreAndBP stats...
+</code></pre>
+
+<pre><code>## done. [time: 2017-02-14 17:42:42],[elapsed: 3 secs]
+</code></pre>
+
+<pre><code>## Calculating summary table...
+</code></pre>
+
+<pre><code>## done. [time: 2017-02-14 17:42:42],[elapsed: 0.02 secs]
+</code></pre>
+
+<pre><code>## Calculating overlap mismatch combos...Calculating mismatch combo rates:...
+</code></pre>
+
+<pre><code>## done. [time: 2017-02-14 17:42:42],[elapsed: 0.09 secs]
+</code></pre>
+
+<pre><code>## Calculating overlapMismatch.byScoreAndBP stats...
+</code></pre>
+
+<pre><code>## done. [time: 2017-02-14 17:44:13],[elapsed: 90 secs]
+</code></pre>
+
+<pre><code>## done. [time: 2017-02-14 17:44:13],[elapsed: 90 secs]
+</code></pre>
+
+<pre><code>## Calculating NVC rates...
+</code></pre>
+
+<pre><code>## done. [time: 2017-02-14 17:44:13],[elapsed: 0.31 secs]
+</code></pre>
+
+<pre><code>## done.
+</code></pre>
+
+<pre><code>## [time: 2017-02-14 17:44:13],[elapsed: 100 secs]
 </code></pre>
 
 
-<hr /><div style="text-align: center;">[Package <em>QoRTs</em> version 1.1.8 <a href="00Index.html">Index</a>]</div>
+<hr /><div style="text-align: center;">[Package <em>QoRTs</em> version 1.2.11 <a href="00Index.html">Index</a>]</div>
 </body></html>
