@@ -1,65 +1,110 @@
 No implementation found for style `graphicx'
 No implementation found for style `framed'
-No implementation found for style `/home/hartleys/software-SL6/R/R3.2.3/lib/BiocStyle/resources/tex/Bioconductor'
+No implementation found for style `/mnt/nfs/gigantor/ifs/DCEG/Home/hartleys/R/x86_64-pc-linux-gnu-library/3.3/BiocStyle/resources/tex/Bioconductor'
 No implementation found for style `hyperref'
 No implementation found for style `upquote'
 
-QoRTs-vignette.tex is newer than QoRTs-vignette.aux: Please rerun latex.
+The QoRTs-vignette.aux file was not found, so sections will not be numbered 
+and cross-references will be shown as icons.
 
-Substitution of arg to newlabelxx delayed.
+No number for "PhredQualityScorePlots"
 
-QoRTs-vignette.tex is newer than QoRTs-vignette.bbl: Please rerun latex and bibtex.
+No number for "Compiledsummarymulti-plot"
 
-Failed to convert image /tmp/l2h17614/image009.ps
+No number for "GCBias"
 
-Failed to convert image /tmp/l2h17614/image011.ps
+No number for "ClippingProfile"
 
-Failed to convert image /tmp/l2h17614/image001.ps
+No number for "CigarOperationProfiles"
 
-Failed to convert image /tmp/l2h17614/image022.ps
+No number for "CigarLengthDistribution"
 
-Failed to convert image /tmp/l2h17614/image002.ps
+No number for "InsertSize"
 
-Failed to convert image /tmp/l2h17614/image014.ps
+No number for "N-Rateplot"
 
-Failed to convert image /tmp/l2h17614/image012.ps
+No number for "Gene-BodyCoverage"
 
-Failed to convert image /tmp/l2h17614/image010.ps
+No number for "CumulativeGeneDiversity"
 
-Failed to convert image /tmp/l2h17614/image004.ps
+No number for "Nucleotiderates,bycycle"
 
-Failed to convert image /tmp/l2h17614/image025.ps
+No number for "Alignednucleotiderates,bycycle"
 
-Failed to convert image /tmp/l2h17614/image020.ps
+No number for "Leading-clippednucleotiderates"
 
-Failed to convert image /tmp/l2h17614/image005.ps
+No number for "Trailing-clippednucleotiderates"
 
-Failed to convert image /tmp/l2h17614/image027.ps
+No number for "Geneassignmentrates"
 
-Failed to convert image /tmp/l2h17614/image023.ps
+No number for "Splicejunctionloci"
 
-Failed to convert image /tmp/l2h17614/image017.ps
+No number for "Numberofsplicejunctionevents"
 
-Failed to convert image /tmp/l2h17614/image003.ps
+No number for "Splicejunctionevents"
 
-Failed to convert image /tmp/l2h17614/image016.ps
+No number for "Proportionsofsplicejunctionevents"
 
-Failed to convert image /tmp/l2h17614/image024.ps
+No number for "Strandedness"
 
-Failed to convert image /tmp/l2h17614/image026.ps
+No number for "Mappingstats"
 
-Failed to convert image /tmp/l2h17614/image008.ps
+No number for "NormalizationFactors"
 
-Failed to convert image /tmp/l2h17614/image006.ps
+No number for "NormalizationFactorsvsTC"
 
-Failed to convert image /tmp/l2h17614/image018.ps
+No number for "Droprates"
 
-Failed to convert image /tmp/l2h17614/image021.ps
+No number for "BiotypeCoverage"
 
-Failed to convert image /tmp/l2h17614/image013.ps
+No number for "Readlengthdistribution"
 
-Failed to convert image /tmp/l2h17614/image007.ps
+No number for "RuntimePerformance"
 
-Failed to convert image /tmp/l2h17614/image015.ps
+No number for "OverlapCoverage"
 
-Failed to convert image /tmp/l2h17614/image019.ps
+No number for "OverlapMismatchByRead"
+
+No number for "OverlapMismatchSize"
+
+No number for "OverlapMismatchByQualityScore"
+
+No number for "OverlapMismatchByMinQualityScore"
+
+No number for "OverlapMismatchByBase"
+
+No number for "OOverlapMismatchByBase,AtQualityScore41"
+
+No number for "ReferenceMismatchRates,byScore"
+
+No number for "ReferenceMismatchRates,byBase"
+
+No number for "ReferenceMismatchRates,bybase,atscore41"
+
+No number for "AnexampleofaQCanomalydiscoveredincidentallyduringthedevelopmentofQoRTs."
+
+No number for "AnotherexampleofaQCanomalydiscoveredincidentallyduringthedevelopmentofQoRTs."
+
+No number for "AnexampleofsomeofthetracksthatcanbegeneratedviaQoRTs.Thefirsttrack(;SPMquot;CTRL_FWD;SPMquot;)showsthemeannormalizedcoveragedepthfor100-base-pairwindowsfortheforward(genomic)strand.Thesecondtrackrevealsthecoveragedepthonthenegativestrand(plottedasnegativevalues).Thethirdtrack(;SPMquot;CASEvCTRLJunctionCounts;SPMquot;)displaysthelocusIDforeachsplicejunction,alongwiththemeannormalizedcoveragebridgingthesplicejunctionlociincasesandcontrols.Notethatcasesandcontrolsarecoloreddistinctly,foreaseofuse."
+
+The bibliography file was not found.
+
+no reference for citation: QoRTs
+
+no reference for citation: STAR
+
+no reference for citation: GSNAP
+
+no reference for citation: TopHat2
+
+no reference for citation: DESeq
+
+no reference for citation: edgeR
+
+no reference for citation: DEXSeq
+
+no reference for citation: edgeRsoftware
+
+no reference for citation: edgeRGLM
+
+no reference for citation: DESeq2

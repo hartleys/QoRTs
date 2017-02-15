@@ -24,28 +24,28 @@ original version by:  Nikos Drakos, CBLU, University of Leeds
 <LINK REL="next" HREF="node6.html">
 </HEAD>
 
-<BODY > <div id=wrap>
+<BODY >
 <!--Navigation Panel-->
-<A NAME="tex2html229"
+<A NAME="tex2html248"
   HREF="node6.html">
 <IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next" SRC="next.png"></A> 
-<A NAME="tex2html225"
+<A NAME="tex2html244"
   HREF="QoRTs-vignette.html">
 <IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up" SRC="up.png"></A> 
-<A NAME="tex2html219"
+<A NAME="tex2html238"
   HREF="node4.html">
 <IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous" SRC="prev.png"></A> 
-<A NAME="tex2html227"
+<A NAME="tex2html246"
   HREF="node1.html">
 <IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents" SRC="contents.png"></A>  
 <BR>
-<B> Next:</B> <A NAME="tex2html230"
+<B> Next:</B> <A NAME="tex2html249"
   HREF="node6.html">Quick Start</A>
-<B> Up:</B> <A NAME="tex2html226"
+<B> Up:</B> <A NAME="tex2html245"
   HREF="QoRTs-vignette.html">QoRTs Package User Manual</A>
-<B> Previous:</B> <A NAME="tex2html220"
+<B> Previous:</B> <A NAME="tex2html239"
   HREF="node4.html">Installation</A>
- &nbsp; <B>  <A NAME="tex2html228"
+ &nbsp; <B>  <A NAME="tex2html247"
   HREF="node1.html">Contents</A></B> 
 <BR>
 <BR>
@@ -54,9 +54,9 @@ original version by:  Nikos Drakos, CBLU, University of Leeds
 <A NAME="CHILD_LINKS"><STRONG>Subsections</STRONG></A>
 
 <UL>
-<LI><A NAME="tex2html231"
+<LI><A NAME="tex2html250"
   HREF="node5.html#SECTION00051000000000000000">Alignment</A>
-<LI><A NAME="tex2html232"
+<LI><A NAME="tex2html251"
   HREF="node5.html#SECTION00052000000000000000">Sorting</A>
 </UL>
 <!--End of Table of Child-Links-->
@@ -76,10 +76,7 @@ Preparations
 Alignment
 </H2>
 <P>
-<FONT COLOR="#585858">QoRTs is designed to run on paired-ended or single-ended next-gen RNA-Seq data. The data must be aligned (or "mapped") to a reference genome before QoRTs can be run. RNA-Star[<A
- HREF="node12.html#STAR">6</A>], GSNAP[<A
- HREF="node12.html#GSNAP">7</A>], and TopHat2[<A
- HREF="node12.html#TopHat2">8</A>] are all popular and effective aligners for use with RNA-Seq data. The use of short-read or unspliced aligners such as BowTie, ELAND, BWA, or Novoalign is NOT recommended.
+<FONT COLOR="#585858">QoRTs is designed to run on paired-ended or single-ended next-gen RNA-Seq data. The data must be aligned (or "mapped") to a reference genome before QoRTs can be run. RNA-Star[#!STAR!#], GSNAP[#!GSNAP!#], and TopHat2[#!TopHat2!#] are all popular and effective aligners for use with RNA-Seq data. The use of short-read or unspliced aligners such as BowTie, ELAND, BWA, or Novoalign is NOT recommended.
 </FONT>
 <P>
 
@@ -114,33 +111,36 @@ novosort -n unsorted.bam &gt; sortedByName.bam
 <FONT COLOR="#585858">QoRTs also has a separate mode designed only for name-sorted samples, which can be activated using the "<code>--nameSorted</code>" option. Under certain conditions this may improve speed and reduce memory usage. Under typical conditions any improvement is trivial.
 </FONT>
 <P>
+<FONT COLOR="#585858"><I>In order to calculate the reference mismatch rate, the BAM files MUST be sorted by coordinate.</I> In addition, it is recommended that the genome fasta file be sorted in the same chromosome ordering as the BAM files.
+</FONT>
+<P>
 <HR>
 <!--Navigation Panel-->
-<A NAME="tex2html229"
+<A NAME="tex2html248"
   HREF="node6.html">
 <IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next" SRC="next.png"></A> 
-<A NAME="tex2html225"
+<A NAME="tex2html244"
   HREF="QoRTs-vignette.html">
 <IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up" SRC="up.png"></A> 
-<A NAME="tex2html219"
+<A NAME="tex2html238"
   HREF="node4.html">
 <IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous" SRC="prev.png"></A> 
-<A NAME="tex2html227"
+<A NAME="tex2html246"
   HREF="node1.html">
 <IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents" SRC="contents.png"></A>  
 <BR>
-<B> Next:</B> <A NAME="tex2html230"
+<B> Next:</B> <A NAME="tex2html249"
   HREF="node6.html">Quick Start</A>
-<B> Up:</B> <A NAME="tex2html226"
+<B> Up:</B> <A NAME="tex2html245"
   HREF="QoRTs-vignette.html">QoRTs Package User Manual</A>
-<B> Previous:</B> <A NAME="tex2html220"
+<B> Previous:</B> <A NAME="tex2html239"
   HREF="node4.html">Installation</A>
- &nbsp; <B>  <A NAME="tex2html228"
+ &nbsp; <B>  <A NAME="tex2html247"
   HREF="node1.html">Contents</A></B> 
 <!--End of Navigation Panel-->
 <ADDRESS>
 Dr Stephen William Hartley
-2016-07-13
+2017-02-15
 </ADDRESS>
-</div></BODY>
+</BODY>
 </HTML>

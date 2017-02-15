@@ -24,28 +24,28 @@ original version by:  Nikos Drakos, CBLU, University of Leeds
 <LINK REL="next" HREF="node9.html">
 </HEAD>
 
-<BODY > <div id=wrap>
+<BODY >
 <!--Navigation Panel-->
-<A NAME="tex2html268"
+<A NAME="tex2html287"
   HREF="node9.html">
 <IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next" SRC="next.png"></A> 
-<A NAME="tex2html264"
+<A NAME="tex2html283"
   HREF="QoRTs-vignette.html">
 <IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up" SRC="up.png"></A> 
-<A NAME="tex2html258"
+<A NAME="tex2html277"
   HREF="node7.html">
 <IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous" SRC="prev.png"></A> 
-<A NAME="tex2html266"
+<A NAME="tex2html285"
   HREF="node1.html">
 <IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents" SRC="contents.png"></A>  
 <BR>
-<B> Next:</B> <A NAME="tex2html269"
+<B> Next:</B> <A NAME="tex2html288"
   HREF="node9.html">Visualization</A>
-<B> Up:</B> <A NAME="tex2html265"
+<B> Up:</B> <A NAME="tex2html284"
   HREF="QoRTs-vignette.html">QoRTs Package User Manual</A>
-<B> Previous:</B> <A NAME="tex2html259"
+<B> Previous:</B> <A NAME="tex2html278"
   HREF="node7.html">Dataset Organization</A>
- &nbsp; <B>  <A NAME="tex2html267"
+ &nbsp; <B>  <A NAME="tex2html286"
   HREF="node1.html">Contents</A></B> 
 <BR>
 <BR>
@@ -54,7 +54,7 @@ original version by:  Nikos Drakos, CBLU, University of Leeds
 <A NAME="CHILD_LINKS"><STRONG>Subsections</STRONG></A>
 
 <UL>
-<LI><A NAME="tex2html270"
+<LI><A NAME="tex2html289"
   HREF="node8.html#SECTION00081000000000000000">Memory Usage</A>
 </UL>
 <!--End of Table of Child-Links-->
@@ -79,7 +79,7 @@ java -jar /path/to/jarfile/QoRTs.jar QC \
 </FONT></FONT></FONT></FONT>
 <P>
 <FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858">The bam processing tool includes numerous options. A full description of these options can be found in the online documentation of the jar utility<A NAME="tex2html10"
-  HREF="footnode.html#foot1578"><SUP>6</SUP></A>, or by entering the command:
+  HREF="footnode.html#foot1833"><SUP>6</SUP></A>, or by entering the command:
 </FONT></FONT></FONT></FONT><PRE>
 java -jar /path/to/jarfile/QoRTs.jar QC --man
 </PRE><FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858"></FONT></FONT></FONT>
@@ -101,7 +101,13 @@ java -jar /path/to/jarfile/QoRTs.jar QC --man
 <LI><I>Read Sorting:</I> For paired-end data reads must be sorted. By default, QoRTs can accept files sorted by name OR by position. Technically QoRTs will accept unsorted data, but the memory usage will be greatly increased.
 </LI>
 <LI><I>Single-end vs paired-end:</I> By default, QoRTs assumes the input bam file consists of paired-end data. For single-end data, the <code>--singleEnded</code> option must be used.
-  
+</LI>
+<LI><I>genome FASTA file:</I> By default, QoRTs skips reference mismatch metric calculations. For these calculations to be possible you must supply a genome fasta file using the <code>--genomeFA</code> parameter.
+</LI>
+<LI><I>raw reads FASTQ:</I> By default, QoRTs only operates on the aligned BAM data. However, it can optionally also generate some QC metrics for the raw unaligned reads if the raw FASTQ files are supplied using the <code>--rawfastq</code> parameter.
+</LI>
+<LI><I>Further documentation:</I> You can cause QoRTs to create a metric documentation file that documents all output files using the <code>--addFunction writeDocs</code> parameter.
+ 
 </LI>
 </UL><FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858"></FONT></FONT></FONT>
 <P>
@@ -149,31 +155,31 @@ java -Xmx16G -jar /path/to/jarfile/QoRTs.jar QC \
 <P>
 <FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858"></FONT></FONT></FONT><HR>
 <!--Navigation Panel-->
-<A NAME="tex2html268"
+<A NAME="tex2html287"
   HREF="node9.html">
 <IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next" SRC="next.png"></A> 
-<A NAME="tex2html264"
+<A NAME="tex2html283"
   HREF="QoRTs-vignette.html">
 <IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up" SRC="up.png"></A> 
-<A NAME="tex2html258"
+<A NAME="tex2html277"
   HREF="node7.html">
 <IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous" SRC="prev.png"></A> 
-<A NAME="tex2html266"
+<A NAME="tex2html285"
   HREF="node1.html">
 <IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents" SRC="contents.png"></A>  
 <BR>
-<B> Next:</B> <A NAME="tex2html269"
+<B> Next:</B> <A NAME="tex2html288"
   HREF="node9.html">Visualization</A>
-<B> Up:</B> <A NAME="tex2html265"
+<B> Up:</B> <A NAME="tex2html284"
   HREF="QoRTs-vignette.html">QoRTs Package User Manual</A>
-<B> Previous:</B> <A NAME="tex2html259"
+<B> Previous:</B> <A NAME="tex2html278"
   HREF="node7.html">Dataset Organization</A>
- &nbsp; <B>  <A NAME="tex2html267"
+ &nbsp; <B>  <A NAME="tex2html286"
   HREF="node1.html">Contents</A></B> 
 <!--End of Navigation Panel-->
 <ADDRESS>
 Dr Stephen William Hartley
-2016-07-13
+2017-02-15
 </ADDRESS>
-</div></BODY>
+</BODY>
 </HTML>
