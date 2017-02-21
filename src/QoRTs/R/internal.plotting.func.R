@@ -100,7 +100,7 @@ makePlot.outlierSlices <- function(
       
       for(i in 1:length(has.sample.plot)){
         curr.sample <- has.sample.plot[[i]];
-        cat(".");
+        message(".",appendLF=FALSE);
         colorBy <- res@decoder$lane.ID;
         names(colorBy) <- res@decoder$unique.ID;
         

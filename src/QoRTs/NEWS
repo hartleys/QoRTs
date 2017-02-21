@@ -1,12 +1,22 @@
+## v1.2.15:
+
+ * Added full support for custom output file prefixes (per request by c-guzman, see https://github.com/hartleys/QoRTs/issues/27).
+ Output file prefixes can now be set using the --outfilePrefix parameter in the QoRTs QC step, and can be loaded into the QoRTs R
+ companion package by including a column titled "qc.data.prefix" in the decoder.
+ * Migrated QoRTs build/testing pipeline to a different server.
+ 
 ## v1.2.0:
-HUGE UPDATE:
+HUGE update. Numerous new features have been added and are still undergoing beta testing. These new features may be subject to change in the next stable release.
+
+Among the changes:
 
  * Added support for whole-exome or whole-genome datasets in addition to RNA-Seq. (Maybe rename the tool?)
  * Added numerous metrics which may be relevant to variant calling.
+ * Intermediate file documentation: The raw QC metric files produced by QoRTs are now better documented. You can cause QoRTs QC to generate a documentation file using the parameter "--addFunctions writeDocs"
 
 Added an array of new metrics:
- * "Overlap Mismatch": various metrics relating to the rate at which overlapped paired-end reads are mismatching. Also calculates mismatch rates at specific qual scores.
- * "Reference Mismatch": various metrics relating to the rate at which reads have point-mismatches with the reference genome. Requires that a genome fasta file (via the --genomeFA parameter for the QoRTs QC step).
+ * "Overlap Mismatch": various metrics relating to the rate at which overlapped paired-end reads are found to mismatch one another. This can be used as a proxy for the sequencing error, since the two paired-end reads sequence the same physical cDNA fragment. Mismatch rates are calculated by base-swap type, by quality score, and by position in the reads.
+ * "Reference Mismatch": various metrics relating to the rate at which reads have point-mismatches with the reference genome. Requires that a genome fasta file (via the --genomeFA parameter for the QoRTs QC step). Mismatch rates are calculated by base-swap type, by quality score, and by position in the reads.
  * "On-Target Rate": For Exome data only. Uses a target bed file to calculate rate of on-target reads. Can also be used to filter reads to only on-target reads. Requires a target BED file (set via the --targetRegionBed parameter)
  * "Read Length Rates": Rates of observed read lengths. Useful if data is hard-trimmed prior to alignment.
  * Performance Plot: Plot shows the runtime performance of the QoRTs QC run.

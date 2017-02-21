@@ -9,11 +9,12 @@ DEFAULTDEBUGMODE <- TRUE;
 #Input can come in two forms:
 #(1) Single Decoder
 #    This requires a single "decoder" file, which MUST have the following column names:
-#    unique.ID	lane.ID	group.ID	sample.ID	qc.data.dir
-#       Other than these 4 required columns, it can have as many additional columns as desired. Column names must be unique.
-#       OPTIONAL FIELDS:
+#    unique.ID
+#    It can also have the following optional fields:
+#       lane.ID group.ID  sample.ID qc.data.dir qc.data.prefix
 #          input.read.pair.count: the # of input reads. this must be included for mapping rate to be calculated.
 #          multi.mapped.read.pair.count: the # of reads that were multi mapped by the aligner. this must be included for multi-mapping rate to be calculated.
+#       it can have as many additional columns as desired. Column names must be unique.
 #       RESERVED FIELDS: Do not name any field this:
 #          cycle.CT
 #          lanebam.ID (a synonym for unique.ID)
@@ -145,11 +146,18 @@ expandAndCheckDecoder <- function(decoder) {
     decoder$qc.data.dir = decoder$unique.ID;
   }
   
+  if(! ("qc.data.prefix" %in% names(decoder))){ 
+    message("column 'qc.data.prefix' not found in the decoder, assuming qc.data.prefix = \"\"");
+    decoder$qc.data.prefix = "";
+  }
+  
   decoder$qc.data.dir <- as.character(decoder$qc.data.dir);
   decoder$group.ID <- as.character(decoder$group.ID);
   decoder$lane.ID <- as.character(decoder$lane.ID);
   decoder$sample.ID <- as.character(decoder$sample.ID);
   decoder$unique.ID <- as.character(decoder$unique.ID);
+  decoder$qc.data.prefix <- as.character(decoder$qc.data.prefix);
+  
   
   #Now do checks for validity:
   
@@ -278,17 +286,30 @@ read.in.results.data.with.decoder <- function(decoder, infile.dir = "",
       stop("Fatal error: QoRTs run data not found! Use autodetectMissingSamples = TRUE to automatically skip these runs");
     }
   }
-
   
-  compFiles <- paste0(infile.dir,decoder$qc.data.dir,"/QC.QORTS_COMPLETED_OK");
+  compFiles <- paste0(infile.dir,decoder$qc.data.dir,"/",decoder$qc.data.prefix,"QC.QORTS_COMPLETED_OK");
+  #compFiles <- paste0(infile.dir,decoder$qc.data.dir,"/QC.QORTS_COMPLETED_OK");
   compFileExists <- file.exists(compFiles)
   if(any(! compFileExists)){
-    message("WARNING: QoRTs run may be incomplete! File not found: ",paste0(infile.dir,decoder$qc.data.dir[!compFileExists],"/QC.QORTS_COMPLETED_OK"),"!");
+    message("WARNING: QoRTs run may be incomplete! File not found: ",paste0(infile.dir,decoder$qc.data.dir[!compFileExists],"/",decoder$qc.data.prefix[!compFileExists],"QC.QORTS_COMPLETED_OK"),"!");
+    #message("WARNING: QoRTs run may be incomplete! File not found: ",paste0(infile.dir,decoder$qc.data.dir[!compFileExists],"/QC.QORTS_COMPLETED_OK"),"!");
     if(autodetectMissingSamples){
       message("      Skipping missing samples!");
       decoder <- decoder[compFileExists,,drop=FALSE];
     } else {
       #stop("Fatal error: QoRTs run data not found! Use autodetectMissingSamples = TRUE to automatically skip these runs");
+    }
+  }
+  
+  sumFiles <- paste0(infile.dir,decoder$qc.data.dir,"/",decoder$qc.data.prefix,"QC.summary.txt");
+  sumFileExists <- file.exists(sumFiles)
+  if(any(! sumFileExists)){
+    message("WARNING: QoRTs run may be incomplete! File not found: ",paste0(infile.dir,decoder$qc.data.dir[!sumFileExists],"/",decoder$qc.data.prefix[!sumFileExists],"QC.summary.txt"),"!");
+    if(autodetectMissingSamples){
+      message("      Skipping missing samples!");
+      decoder <- decoder[sumFileExists,,drop=FALSE];
+    } else {
+      stop("Fatal error: QoRTs run data not found! Use autodetectMissingSamples = TRUE to automatically skip these runs");
     }
   }
   
@@ -304,7 +325,7 @@ read.in.results.data.with.decoder <- function(decoder, infile.dir = "",
   names(lanebam.list) <- decoder$unique.ID
   
   qc.data.dir.list <- as.list(decoder$qc.data.dir);
-  names(qc.data.dir.list) <- decoder$unique.ID
+  names(qc.data.dir.list) <- decoder$unique.ID;
 
   if(debugMode) message("infile.dir = ",infile.dir);
   #if(debugMode) message("qc.data.dir.list = ",paste0(qc.data.dir.list,collapse=","));
@@ -313,7 +334,7 @@ read.in.results.data.with.decoder <- function(decoder, infile.dir = "",
   read.scalaqc.file.helper <- function(scalaqc_file, sep=""){
     if(debugMode) message(paste0("scalaqc_file = ",scalaqc_file), appendLF=FALSE);
     if(debugMode) ts <- timestamp();
-    out <- read.in.scalaQC.files(infile.dir,lanebam.list, qc.data.dir.list,scalaqc_file,sep=sep);
+    out <- read.in.scalaQC.files(infile.dir,lanebam.list, qc.data.dir.list, decoder$qc.data.prefix,scalaqc_file,sep=sep);
     if(debugMode) reportTimeAndDiff(ts,prefix="   ");
     out;
   }
@@ -351,7 +372,7 @@ read.in.results.data.with.decoder <- function(decoder, infile.dir = "",
   read.scalaqc.file.helper <- function(scalaqc_file, sep=""){
     if(debugMode) message(paste0("(File ",which(USE.LIST == scalaqc_file)," of ",length(USE.LIST),"): ",scalaqc_file), appendLF=FALSE);
     if(debugMode) ts <- timestamp();
-    out <- read.in.scalaQC.files(infile.dir,lanebam.list, qc.data.dir.list,scalaqc_file,sep=sep);
+    out <- read.in.scalaQC.files(infile.dir,lanebam.list, qc.data.dir.list,decoder$qc.data.prefix,scalaqc_file,sep=sep);
     if(debugMode) reportTimeAndDiff(ts,prefix="   ");
     out;
   }
@@ -419,7 +440,8 @@ QC_INTERNAL_SCALAQC_FILE_LIST <- list( gc.byPair = "QC.gc.byPair.txt.gz",
                                        FQ.NVC.R1 =    "QC.FQ.NVC.R1.txt.gz",
                                        FQ.NVC.R2 =    "QC.FQ.NVC.R2.txt.gz",
                                        FQ.quals.r1 =  "QC.FQ.quals.r1.txt.gz",
-                                       FQ.quals.r2 =  "QC.FQ.quals.r2.txt.gz"
+                                       FQ.quals.r2 =  "QC.FQ.quals.r2.txt.gz",
+                                       FQ.readLenDist = "QC.FQ.readLenDist.txt.gz"
                                        
                                        #,
                                        #spliceJunctionCounts.knownSplices = "scalaQC.spliceJunctionCounts.knownSplices.txt.gz"
@@ -451,7 +473,9 @@ QC_INTERNAL_SCALAQC_FILE_LIST_SINGLE_END <- list(
                                        mismatchSizeRates="QC.mismatchSizeRates.txt.gz",
                                        FQ.gc.byRead = "QC.FQ.gc.byRead.txt.gz",
                                        FQ.NVC.R1 =    "QC.FQ.NVC.R1.txt.gz",
-                                       FQ.quals.r1 =  "QC.FQ.quals.r1.txt.gz"
+                                       FQ.quals.r1 =  "QC.FQ.quals.r1.txt.gz",
+                                       FQ.readLenDist = "QC.FQ.readLenDist.txt.gz"
+                                       
                                        #,
                                        #spliceJunctionCounts.knownSplices = "scalaQC.spliceJunctionCounts.knownSplices.txt.gz"
                                        #spliceJunctionCounts.novelSplices = "scalaQC.spliceJunctionCounts.novelSplices.txt.gz"
@@ -487,9 +511,9 @@ find.compression.variant.helper <- function(f){
   }
 }
 
-read.in.scalaQC.files <- function(infile.prefix, lanebam.list, qc.data.dir.list, infile.suffix, sep = ""){
+read.in.scalaQC.files <- function(infile.prefix, lanebam.list, qc.data.dir.list, qc.data.prefix, infile.suffix, sep = ""){
   #message(paste0("reading ",infile.suffix," files"),appendLF=FALSE);
-  infiles <- find.compression.variant(paste0(infile.prefix,unlist(qc.data.dir.list),"/", infile.suffix));
+  infiles <- find.compression.variant(paste0(infile.prefix,unlist(qc.data.dir.list),"/",qc.data.prefix, infile.suffix));
   if(! is.na(infiles[1])){
     #print("!")
     for(i in 1:length(infiles)){

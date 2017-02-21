@@ -528,7 +528,7 @@ reportTimeAndDiff <- function(ts = NULL, prefix = ""){
 }
 
 runTimedFunction <- function(expr, title= "",debugMode = TRUE){
-    if(debugMode) cat(paste0(title,"..."));
+    if(debugMode) message(paste0(title,"..."),appendLF=FALSE);
     if(debugMode) ts <- timestamp();
     expr;
     if(debugMode) message(paste0("done. ",getTimeAndDiff(ts)))

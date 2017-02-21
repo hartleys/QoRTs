@@ -490,12 +490,13 @@ object runAllQC {
                                                         defaultValue = Some(10000)
                                                         ) ::
                                         
-                    new BinaryOptionArgument[List[String]](
+                    new BinaryArgument[String](
                                          name = "outfilePrefix", 
                                          arg = List("--outfilePrefix"), 
                                          valueName = "sampID",  
-                                         argDesc = "Prefix to be prepended to all output files. If this is set, all output files will use the format: \"outfiledir/prefix.QC.qcfilename.txt.gz\""+
-                                                   ""
+                                         argDesc = "Prefix to be prepended to all output files. If this is set, all output files will use the format: \"outfiledir/<prefix>QC.qcfilename.txt.gz\""+
+                                                   "",
+                                          defaultValue = Some("")
                                         ) ::      
                                         
 //DEPRECIATED or BETA OPTIONS:
@@ -664,7 +665,7 @@ object runAllQC {
           parser.get[Boolean]("keepOnTarget"),
           parser.get[Option[Double]]("randomSubsample"),
           parser.get[Option[Long]]("randomSeed"),
-          parser.get[Option[String]]("outfilePrefix"),
+          parser.get[String]("outfilePrefix"),
           parser.get[Int]("genomeBufferSize")
       );
       }
@@ -714,7 +715,7 @@ object runAllQC {
           keepOnTarget : Boolean,
           randomSubsample : Option[Double],
           randomSeed : Option[Long],
-          outfilePrefix : Option[String],
+          outfilePrefix : String,
           genomeBufferSize : Int){
     
     randomSeed match {
@@ -729,7 +730,7 @@ object runAllQC {
       reportln("Creating Directory: "+ outdir,"note");
       outDirFile.mkdir();
     }
-    val outfile = outdir + "/" + (if(outfilePrefix.isEmpty){""} else {outfilePrefix.get + "."}) + "QC";
+    val outfile = outdir + "/" + outfilePrefix + "QC";
     
     val logfile = outfile +"."+ internalUtils.stdUtils.getRandomString(12) + ".log";
     internalUtils.Reporter.init_completeLogFile(logfile);
@@ -797,7 +798,7 @@ object runAllQC {
       Set[String]("referenceMatch");
     })
     
-    reportln("Default functions: " + wrapSimpleLineWithIndent_staggered(defaultFunctonList.toList.sorted.mkString(", "), 68, "        ", ""),"debug");
+    //reportln("Default functions: " + wrapSimpleLineWithIndent_staggered(defaultFunctonList.toList.sorted.mkString(", "), 68, "        ", ""),"debug");
     
     val runFunc_initial = (if(runFunctions.isEmpty){
       (defaultFunctonList ++ addFunctions.toSet) -- dropFunctions.toSet;
@@ -848,7 +849,7 @@ object runAllQC {
     }
     
     //wrapSimpleLineWithIndent_staggered(line : String, width : Int, indent : String, firstLineIndent : String)
-    reportln("Running functions: " + wrapSimpleLineWithIndent_staggered(runFunc.toList.sorted.mkString(", "), 68, "        ", ""),"progress");
+    reportln("Running functions: " + wrapSimpleLineWithIndent_staggered(runFunc.toList.sorted(internalUtils.stdUtils.AlphabetOrdering).mkString(", "), 68, "        ", ""),"progress");
     
     //reportln("infile: " + infile , "note");
     //reportln("outfile: " + outfile , "note");
@@ -952,7 +953,8 @@ object runAllQC {
           targetRegionBed=targetRegionBed,
           stopAfterNReads=stopAfterNReads,
           genomeFA = genomeFA,dropOnTarget=dropOnTarget,keepOnTarget=keepOnTarget,randomSubsample=randomSubsample,
-          genomeBufferSize = genomeBufferSize)
+          genomeBufferSize = genomeBufferSize,
+          outfilePrefix = outfilePrefix)
     }
   }
   
@@ -995,7 +997,8 @@ object runAllQC {
                    dropOnTarget : Boolean,
                    keepOnTarget : Boolean,
                    randomSubsample : Option[Double],
-                   genomeBufferSize : Int
+                   genomeBufferSize : Int,
+                   outfilePrefix : String
                    ){
 
     
@@ -1479,6 +1482,7 @@ object runAllQC {
       report("Generating plots...","progress")
       fileConversionUtils.generatePlotsWithR.generateSimplePlots(
              qcdir = outdir,
+             qcprefix = outfilePrefix,
              uniqueID = trackTitlePrefix,
              makePng = generateMultiPlot,
              makePdf = generatePdfReport,

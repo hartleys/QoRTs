@@ -51,6 +51,12 @@ class genSimplePlots extends CommandLineRunUtil {
                                                         argDesc = "The ID of the replicate. This will be only used for the plot labels.", 
                                                         defaultValue = Some("Untitled")
                                                         ) :: 
+                    new BinaryArgument[String](   name = "prefix",
+                                                        arg = List("--prefix"),  
+                                                        valueName = "prefixString", 
+                                                        argDesc = "The prefix for output QC files", 
+                                                        defaultValue = Some("")
+                                                        ) ::      
                     new FinalArgument[String](
                                          name = "qcdataDir",
                                          valueName = "qcDataDir",
@@ -64,6 +70,7 @@ class genSimplePlots extends CommandLineRunUtil {
        if(out){
          generateSimplePlots(
              parser.get[String]("qcDir"),
+             parser.get[String]("prefix"),
              parser.get[String]("uniqueID"),
              ! parser.get[Boolean]("noPng"),
              parser.get[Boolean]("makePdf"),
@@ -73,7 +80,7 @@ class genSimplePlots extends CommandLineRunUtil {
      }
    }
   
-  def generateSimplePlots(qcdir : String, uniqueID : String, makePng : Boolean, makePdf : Boolean, makeSeparatePngs : Boolean) {
+  def generateSimplePlots(qcdir : String, qcprefix : String, uniqueID : String, makePng : Boolean, makePdf : Boolean, makeSeparatePngs : Boolean) {
     //val qcdir = outfileprefix.substring(0,outfileprefix.length - 2)
     
     if(makeSeparatePngs){
@@ -85,7 +92,7 @@ class genSimplePlots extends CommandLineRunUtil {
        }
     }
     
-    val rscriptString = makeRscriptString(qcdir, uniqueID, makePng,makePdf, makeSeparatePngs);
+    val rscriptString = makeRscriptString(qcdir, qcprefix, uniqueID, makePng,makePdf, makeSeparatePngs);
     val writer = openWriter(qcdir + "/QC.makeMultiplot.R");
     writer.write(rscriptString);
     writer.close();
@@ -121,13 +128,14 @@ class genSimplePlots extends CommandLineRunUtil {
     logwriter.close();
   }
   
-  def makeRscriptString(qcdir : String, uniqueID : String, makePng : Boolean, makePdf : Boolean, makeSeparatePngs : Boolean) : String = {
+  def makeRscriptString(qcdir : String, qcprefix : String, uniqueID : String, makePng : Boolean, makePdf : Boolean, makeSeparatePngs : Boolean) : String = {
     "# This is an automatically-generated R script designed to make a simple multiplot and/or pdf report for a sample.\n"+
     "message(\"STARTING...\");\n"+
     "library(QoRTs);\n"+
     "unique.ID <- c(\"" + uniqueID + "\");\n"+
     "qc.data.dir <- c(\"" + qcdir + "/\");\n"+
-    "decoder.raw <- data.frame(unique.ID = as.character(unique.ID), qc.data.dir = as.character(qc.data.dir));\n"+
+    "qc.data.prefix <- c(\""+ qcprefix + "\");\n"+
+    "decoder.raw <- data.frame(unique.ID = as.character(unique.ID), qc.data.dir = as.character(qc.data.dir), qc.data.prefix=as.character(qc.data.prefix),stringsAsFactors=FALSE);\n"+
     "decoder <- completeAndCheckDecoder(decoder = decoder.raw)\n"+
     "message(decoder);\n"+
     "message(lapply(names(decoder), function(n){ class(decoder[[n]]) }));\n"+
