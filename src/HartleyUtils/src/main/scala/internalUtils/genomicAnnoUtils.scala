@@ -83,6 +83,7 @@ object genomicAnnoUtils {
     }
   }*/
   
+ 
   class EfficientGenomeSeqContainer(infiles : Seq[String]){
     var initialReader = internalUtils.fileUtils.getLinesSmartUnzipFromSeq(infiles);
     
@@ -105,7 +106,7 @@ object genomicAnnoUtils {
     //  return (pos - bufferStart) / blockSize;
     //}
     
-    def getSeqForInterval(chrom : String, start : Int, end : Int) : String = {
+    def getSeqForInterval(chrom : String, start : Int, end : Int, truncate : Boolean = false) : String = {
       if(chrom != currChrom) {
         error("ERROR: EfficientGenomeSeqContainer: requested sequence for chromosome other than current chromosome!");
       }
@@ -125,13 +126,6 @@ object genomicAnnoUtils {
       val firstBlockIdx = startPos / blockSize
       val lastBlockIdx = (endPos-1) / blockSize
       
-      /*if(startPos % blockSize < 0 || endPos % blockSize < 0){
-        reportln("Encountered Negative pos?","note");
-        reportBufferStatus;
-        reportln("    start = "+start+", end = "+end+", firstBlockIdx = "+firstBlockIdx+", lastBlockIdx = "+lastBlockIdx,"note");
-        reportln("    startPos % blockSize = "+(startPos % blockSize)+", endPos % blockSize = "+(endPos % blockSize),"note");
-      }*/
-      
       val startOffset = startPos % blockSize;
       val endOffset = ((endPos-1) % blockSize) + 1;
       
@@ -143,7 +137,6 @@ object genomicAnnoUtils {
         return buffer(firstBlockIdx).substring(startOffset,blockSize) + buffer.slice(firstBlockIdx+1,lastBlockIdx).mkString("") + buffer(lastBlockIdx).substring(0,endOffset);
       }
       //buffer.substring(start - bufferStart,end - bufferStart);
-
     }
     
     var residualBuffer = "";
@@ -202,10 +195,10 @@ object genomicAnnoUtils {
             error("FATAL ERROR: Cannot find chromosome \""+chrom+"\" in genome FASTA file!")
           }
         }
-
+        
+        residualBuffer = "";
         bufferStart = 0;
         buffer = Vector[String]();
-
         
         if(currChrom != chrom){
           reportln("SKIPPING FASTA SEQUENCE FOR CHROMOSOME "+currChrom+" (probable cause: 0 reads found on chromosome, or bam/fasta mis-sorted)!","note");
@@ -240,10 +233,29 @@ object genomicAnnoUtils {
       maxBuffer = math.max(maxBuffer,buffer.length);
     }
     
+    def extendBufferToOrTruncate(end : Int) : Int = {
+      while(currIter.hasNext && bufferEnd < end){
+        buffer = buffer :+ getNextBlock();
+      }
+      bufferEnd;
+    }
+    
     def reportBufferStatus {
       reportln("   [GenomeSeqContainer Status: "+"buf:("+currChrom+":"+bufferStart+"-"+bufferEnd+") "+"n="+buffer.length+", "+"MaxSoFar="+maxBuffer+"]","debug");
     }
+    
+    def fullStatusDump() : String = {
+      return "EfficientGenomeSeqContainer.fullStatusDump(): \n"+
+             "currChrom = " +currChrom + "\n"+
+             "bufferStart = " +bufferStart + "\n"+
+             "bufferEnd = "+bufferEnd+"\n"+
+             "buffer.size = "+buffer.size+"\n"+
+             "residualBuffer = " +residualBuffer + "\n"+
+             "buffer:\n"+
+             buffer.mkString("\n");
+    }
   }
+  
   
   class EfficientGenomeSeqContainer_OLD(infiles : Seq[String]){
     val initialReader = internalUtils.fileUtils.getLinesSmartUnzipFromSeq(infiles);

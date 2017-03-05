@@ -93,9 +93,189 @@ object commonSeqUtils {
     s.map(reverseBaseCharMap(_));
   }
   
+  
+
+  
+  /******************************************************************************************************
+   * Amino Acid Translation:
+   ******************************************************************************************************/
+  
+  val AMINO_ACID_CODON_MAP : scala.collection.immutable.Map[String,String] = scala.collection.immutable.Map[String,String](
+      ("TTT","F"),
+      ("TTC","F"),
+      ("TTA","L"),
+      ("TTG","L"),
+      
+      ("CTT","L"),
+      ("CTC","L"),
+      ("CTA","L"),
+      ("CTG","L"),
+      
+      ("ATT","I"),
+      ("ATC","I"),
+      ("ATA","I"),
+      ("ATG","M"),
+      
+      ("GTT","V"),
+      ("GTC","V"),
+      ("GTA","V"),
+      ("GTG","V"),
+      
+      ("TCT","S"),
+      ("TCC","S"),
+      ("TCA","S"),
+      ("TCG","S"),
+      
+      ("CCT","P"),
+      ("CCC","P"),
+      ("CCA","P"),
+      ("CCG","P"),
+      
+      ("ACT","T"),
+      ("ACC","T"),
+      ("ACA","T"),
+      ("ACG","T"),
+      
+      ("GCT","A"),
+      ("GCC","A"),
+      ("GCA","A"),
+      ("GCG","A"),
+      
+      ("TAT","Y"),
+      ("TAC","Y"),
+      ("TAA","*"),
+      ("TAG","*"),
+      
+      ("CAT","H"),
+      ("CAC","H"),
+      ("CAA","Q"),
+      ("CAG","Q"),
+      
+      ("AAT","N"),
+      ("AAC","N"),
+      ("AAA","K"),
+      ("AAG","K"),
+      
+      ("GAT","D"),
+      ("GAC","D"),
+      ("GAA","E"),
+      ("GAG","E"),
+      
+      ("TGT","C"),
+      ("TGC","C"),
+      ("TGA","*"),
+      ("TGG","W"),
+      
+      ("CGT","R"),
+      ("CGC","R"),
+      ("CGA","R"),
+      ("CGG","R"),
+      
+      ("AGT","S"),
+      ("AGC","S"),
+      ("AGA","R"),
+      ("AGG","R"),
+      
+      ("GGT","G"),
+      ("GGC","G"),
+      ("GGA","G"),
+      ("GGG","G")
+  );
+  
+  val AMINO_ACID_ABBRIV_MAP : Map[String,(String,String)] = Map[String,(String,String)](
+      ("F",("Phe","Phenylalanine")),
+      ("L",("Leu","Leucine")),
+      ("I",("Ile","Isoleucine")),
+      ("M",("Met","Methionine")),
+      ("V",("Val","Valine")),
+      ("S",("Ser","Serine")),
+      ("P",("Pro","Proline")),
+      ("T",("Thr","Threonine")),
+      ("A",("Ala","Alanine")),
+      ("Y",("Tyr","Tyrosine")),
+      ("STOP",("STOP","STOP")),
+      ("*",("Stp","STOP")),
+      ("H",("His","Histidine")),
+      ("Q",("Gln","Glutamine")),
+      ("N",("Asn","Asparagine")),
+      ("K",("Lys","Lysine")),
+      ("D",("Asp","AsparticAcid")),
+      ("E",("Glu","GlutamicAcid")),
+      ("C",("Cys","Cysteine")),
+      ("W",("Trp","Tryptophan")),
+      ("R",("Arg","Arginine")),
+      ("G",("Gly","Glycine"))
+      );
+  
+  def getAminoAcidFromCode(aa : String, aaNameStyle : Int = 1, strict : Boolean = true) : String = {
+    if(aaNameStyle == 0) return aa;
+    AMINO_ACID_ABBRIV_MAP.get(aa) match {
+      case Some((short,full)) => {
+        if(aaNameStyle == 1) return short;
+        else return full;
+      }
+      case None => {
+        if(strict) error("Error: Unknown amino acid abbriv: "+aa);
+        if(aaNameStyle == 1) return "???";
+        else return "UnknownAminoAcid";
+      }
+    }
+  }
+  
+  def getAminoAcidFromCodon(codon : String, aaNameStyle : Int = 1, strict : Boolean = true) : String = {
+    AMINO_ACID_CODON_MAP.get(codon) match {
+      case Some(aa) => {
+        getAminoAcidFromCode(aa,aaNameStyle,strict = strict);
+      }
+      case None => {
+        return getAminoAcidFromCode("?",aaNameStyle,strict = strict);
+      }
+    }
+  }
+  
+  def getCodonIterator(iter : Iterator[Char]) : Iterator[String] = {
+    var buffer = "";
+    if(iter.hasNext) buffer = buffer + iter.next;
+    if(iter.hasNext) buffer = buffer + iter.next;
+    if(iter.hasNext) {
+      buffer = buffer + iter.next;
+    } else {
+      return Iterator[String]();
+    }
+    
+    if(! iter.hasNext){
+      return Iterator[String](buffer);
+    }
+    
+    return new Iterator[String]{
+      var buf = buffer;
+      var hn = true;
+      def hasNext : Boolean = hn;
+      def next : String = {
+        if(iter.hasNext) buffer = "" + iter.next;
+        if(iter.hasNext) buffer = buffer + iter.next;
+        if(iter.hasNext) buffer = buffer + iter.next;
+        if(buffer.size < 3) hn = false;
+        val out = buf;
+        buf = buffer;
+        out;
+      }
+    }
+  }
+  
+  def getAminoAcidFromSeq(seq : Iterable[Char], aaNameStyle : Int = 1, strict : Boolean = true) : Iterator[String] = {
+    val iter = getCodonIterator(seq.iterator);
+    iter.map(c => getAminoAcidFromCodon(c,aaNameStyle,strict));
+  }
+  
+  
+  
   /******************************************************************************************************
    * Holder and Helper Classes:
    ******************************************************************************************************/
+  
+  
+  
   
   /******************************************************************************************************
    * FASTQ's:
