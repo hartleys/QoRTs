@@ -1,0 +1,134 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
+
+<!--Converted with LaTeX2HTML 2008 (1.71)
+original version by:  Nikos Drakos, CBLU, University of Leeds
+* revised and updated by:  Marcus Hennecke, Ross Moore, Herb Swan
+* with significant contributions from:
+  Jens Lippmann, Marek Rouchal, Martin Wilck and others -->
+<HTML>
+<HEAD>
+<TITLE>Installation</TITLE>
+<META NAME="description" CONTENT="Installation">
+<META NAME="keywords" CONTENT="QoRTs-vignette">
+<META NAME="resource-type" CONTENT="document">
+<META NAME="distribution" CONTENT="global">
+
+<META NAME="Generator" CONTENT="LaTeX2HTML v2008">
+<META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
+
+<LINK REL="STYLESHEET" HREF="QoRTs-vignette.css">
+
+<LINK REL="next" HREF="node5.html">
+<LINK REL="previous" HREF="node3.html">
+<LINK REL="up" HREF="QoRTs-vignette.html">
+<LINK REL="next" HREF="node5.html">
+</HEAD>
+
+<BODY >
+<!--Navigation Panel-->
+<A NAME="tex2html242"
+  HREF="node5.html">
+<IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next" SRC="next.png"></A> 
+<A NAME="tex2html238"
+  HREF="QoRTs-vignette.html">
+<IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up" SRC="up.png"></A> 
+<A NAME="tex2html232"
+  HREF="node3.html">
+<IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous" SRC="prev.png"></A> 
+<A NAME="tex2html240"
+  HREF="node1.html">
+<IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents" SRC="contents.png"></A>  
+<BR>
+<B> Next:</B> <A NAME="tex2html243"
+  HREF="node5.html">Preparations</A>
+<B> Up:</B> <A NAME="tex2html239"
+  HREF="QoRTs-vignette.html">QoRTs Package User Manual</A>
+<B> Previous:</B> <A NAME="tex2html233"
+  HREF="node3.html">Requirements</A>
+ &nbsp; <B>  <A NAME="tex2html241"
+  HREF="node1.html">Contents</A></B> 
+<BR>
+<BR>
+<!--End of Navigation Panel-->
+<!--Table of Child-Links-->
+<A NAME="CHILD_LINKS"><STRONG>Subsections</STRONG></A>
+
+<UL>
+<LI><A NAME="tex2html244"
+  HREF="node4.html#SECTION00041000000000000000">Recommendations</A>
+</UL>
+<!--End of Table of Child-Links-->
+<HR>
+
+<H1><A NAME="SECTION00040000000000000000"></A>  <A NAME="sec:install"></A>
+<BR>
+Installation
+</H1>
+
+<P>
+QoRTs installation is easy, as it does not have and R package dependencies. You can download the latest version of the java jar file http://hartleys.github.io/QoRTs/QoRTs.jarhere. The jar file does not need to be installed, and is simply called directly. 
+
+<P>
+For example, to get the general help for the QoRTs jar utility, use the command:
+<PRE>
+java -jar /path/to/jarfile/QoRTs.jar --help
+</PRE>
+
+<P>
+The R companion package can be installed from inside R with the command:
+
+<P>
+
+<FONT COLOR="#585858">
+
+<DIV ALIGN="LEFT">
+<TT>
+ <FONT COLOR="#bc5a65"><B>install.packages</B></FONT><FONT COLOR="#585858">(</FONT><FONT COLOR="#317ecc">&#34;http://hartleys.github.io/QoRTs/QoRTs_LATEST.tar.gz&#34;</FONT><FONT COLOR="#585858">,</FONT>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<FONT COLOR="#55aa55">repos</FONT> <FONT COLOR="#585858">=</FONT> <FONT COLOR="#295f94"><B>NULL</B></FONT><FONT COLOR="#585858">,</FONT>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<FONT COLOR="#55aa55">type</FONT><FONT COLOR="#585858">=</FONT><FONT COLOR="#317ecc">&#34;source&#34;</FONT><FONT COLOR="#585858">)</FONT>
+<BR></TT>
+</DIV>
+
+<P>
+</FONT>
+<H2><A NAME="SECTION00041000000000000000"></A>  <A NAME="sec:recs"></A>
+<BR>
+Recommendations
+</H2>
+<P>
+<FONT COLOR="#585858"><I>Clipping:</I> For the purposes of Quality Control, it is generally best if reads are NOT hard-clipped prior to alignment. This is because hard clipping, espeically variable hard-clipping from both the start and end of reads, makes it impossible to determine sequencer cycle from the aligned bam files, which in turn can obfuscate cycle specific artifacts, biases, errors, and effects. If undesired sequence must be removed, it is generally preferred to replace such nucleotides with N's, as this preserves cycle information. Note that many advanced RNA-Seq aligners will "soft clip" nonmatching sequence that occurs on the read ends, so hard-clipping low quality sequence is generally unnessessary and may reduce mapping rate and accuracy.
+</FONT>
+<P>
+<FONT COLOR="#585858"><I>Replicates:</I> Using barcoding, it is possible to build a combined library of multiple distinct samples which can be run together on the sequencing machine and then demultiplexed afterward. In general, it is recommended that samples for a particular study be multiplexed and merged into "balanced" combined libraries, each containing equal numbers of each biological condition. If necessary, these combined libraries can be run across multiple sequencer lanes or runs to achieve the desired read depth on each sample.
+</FONT>
+<P>
+<HR>
+<!--Navigation Panel-->
+<A NAME="tex2html242"
+  HREF="node5.html">
+<IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next" SRC="next.png"></A> 
+<A NAME="tex2html238"
+  HREF="QoRTs-vignette.html">
+<IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up" SRC="up.png"></A> 
+<A NAME="tex2html232"
+  HREF="node3.html">
+<IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous" SRC="prev.png"></A> 
+<A NAME="tex2html240"
+  HREF="node1.html">
+<IMG WIDTH="65" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="contents" SRC="contents.png"></A>  
+<BR>
+<B> Next:</B> <A NAME="tex2html243"
+  HREF="node5.html">Preparations</A>
+<B> Up:</B> <A NAME="tex2html239"
+  HREF="QoRTs-vignette.html">QoRTs Package User Manual</A>
+<B> Previous:</B> <A NAME="tex2html233"
+  HREF="node3.html">Requirements</A>
+ &nbsp; <B>  <A NAME="tex2html241"
+  HREF="node1.html">Contents</A></B> 
+<!--End of Navigation Panel-->
+<ADDRESS>
+Hartley
+2017-03-09
+</ADDRESS>
+</BODY>
+</HTML>
