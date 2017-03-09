@@ -14,8 +14,62 @@ object stdUtils {
    * Utility Classes:
    */
   
-
- 
+  
+  /*
+   * Untested:
+   */
+  def getOrdering[A](x : Seq[A])(implicit ord : math.Ordering[A]) : Seq[Int] = {
+    x.zipWithIndex.sorted(new Ordering[(A,Int)]{ 
+      def compare(x : (A,Int), y : (A,Int)) : Int = ord.compare(x._1,y._1);
+    }).map(_._2);
+  }
+  
+  def getQuantileCutoffs[A](x : Seq[A], quantiles : Seq[Double])(implicit ord : math.Ordering[A]) : Seq[Option[A]] = {
+    val xsort = x.sorted(ord);
+    val qsort = quantiles.sorted;
+    return qsort.zipWithIndex.map{case (q,i) => {
+      val cutoffInt = (q * xsort.length.toDouble).toInt;
+      if(cutoffInt < xsort.length){
+        Some(xsort(cutoffInt));
+      } else {
+        None;
+      }
+    }}
+  }
+  def splitByQuantile[A](x : Seq[A], quantiles : Seq[Double])(implicit ord : math.Ordering[A]) : Seq[Seq[A]] = {
+    val xsort = x.sorted(ord);
+    val len = xsort.length.toDouble;
+    val qsort = quantiles.sorted;
+    val ividx = qsort.init.zip(qsort.tail).map{case (s,e) => {
+      ((s * len).toInt,(e*len).toInt)
+    }}.map{case (s,e) => {
+      (if(s < xsort.length){ xsort.indexOf(xsort(s)) }else{ xsort.length },
+       if(e < xsort.length){ xsort.indexOf(xsort(e)) }else{ xsort.length })
+    }}
+    ividx.map{case(s,e) => {
+      xsort.slice(s,e);
+    }}
+  }
+  def splitListByQuantileX[A,B](items : Seq[B], x : Seq[A], quantiles : Seq[Double])(implicit ord : math.Ordering[A]) : Seq[Set[B]] = {
+    val ordering = getOrdering(x); 
+    val xsort = ordering.map(x(_));
+    val itemSort = ordering.map(items(_));
+    val len = xsort.length.toDouble;
+    val qsort = quantiles.sorted;
+    val ividx = qsort.init.zip(qsort.tail).map{case (s,e) => {
+      ((s * len).toInt,(e*len).toInt)
+    }}.map{case (s,e) => {
+      (if(s < xsort.length){ xsort.indexOf(xsort(s)) }else{ xsort.length },
+       if(e < xsort.length){ xsort.indexOf(xsort(e)) }else{ xsort.length })
+    }}
+    ividx.map{ case(s,e) => {
+      itemSort.slice(s,e).toSet
+    }}
+  }
+  /*
+   * END untested
+   */
+  
   def generalizedTo(f : Int, t : Int) : Seq[Int] = {
     if(f == t) return (f until t);
     else if(f < t) return (f to t);

@@ -43,6 +43,8 @@ class qcGtfAnnotationBuilder(gtffile : String, flatgtffile : Option[String], str
   lazy val qcGetGeneCounts_spanArray : GenomicArrayOfSets[String] = qcGtfAnnotationBuilder.qcGetGeneCounts_geneArea_regions(stranded,gtffile, stdCodes).finalizeStepVectors;
   lazy val flatFeatureList : IndexedSeq[String] = qcGtfAnnotationBuilder.getFlatFeatureList(makeFlatReader, stranded, flatCodes);
   
+  lazy val geneMapStrict  : Map[String,TreeSet[GenomicInterval]] = qcGtfAnnotationBuilder.helper_calculateGeneAssignmentMap_strict(geneArray, strandedGeneArray);
+  
   lazy val geneLengthMap : GenMap[String,Int] = qcGtfAnnotationBuilder.getGeneLengthMap(geneArray);
   lazy val flatExonArray : GenomicArrayOfSets[String] = qcGtfAnnotationBuilder.makeFlatExonMap(stranded,makeFlatReader, flatCodes).finalizeStepVectors;
   lazy val flatGeneSet : Set[String] = qcGtfAnnotationBuilder.makeFlatGeneSet(flatExonArray);
@@ -121,6 +123,51 @@ object qcGtfAnnotationBuilder {
   /*
    * Misc other utils:
    */
+   
+  private def helper_calculateGeneAssignmentMap_strict(stdGeneArray : GenomicArrayOfSets[String], strandedGeneArray : GenomicArrayOfSets[String]) : Map[String, TreeSet[GenomicInterval]] = {
+
+    val badGeneSet = stdGeneArray.getSteps.foldLeft(Set[String]())( (soFar, curr) =>{
+      val (iv, geneSet) = curr;
+      if(geneSet.size > 1){
+        soFar ++ geneSet.toSet;
+      } else {
+        soFar;
+      }
+    });
+    //val allGeneSet =  geneArray.getSteps.foldLeft(Set[String]())( (soFar, curr) =>{
+    //  soFar ++ curr._2.toSet;
+    //});
+    
+    reportln("helper_calculateGeneAssignmentMap_strict. Found: " + strandedGeneArray.getValueSet.size + " genes in the supplied annotation.","debug");
+    reportln("helper_calculateGeneAssignmentMap_strict. Found: " + badGeneSet.size + " genes with ambiguous segments.","debug");
+    
+    val buf = strandedGeneArray.getSteps.foldLeft(  Map[String, TreeSet[GenomicInterval] ]() )( (soFar, curr) => {
+      val currIv = curr._1;
+      val currGeneSet = curr._2;
+      if(currGeneSet.size == 1){
+        val currGene = currGeneSet.head;
+        if(! badGeneSet.contains(currGene)){
+          soFar.get(currGene) match {
+            case Some(ts : TreeSet[GenomicInterval]) => soFar + ((currGene, ts + currIv ));
+            case None => soFar + ((currGene, TreeSet[GenomicInterval](currIv) ));
+          }
+        } else {
+          soFar;
+        }
+      } else {
+        soFar;
+      }
+    })
+    reportln("helper_calculateGeneAssignmentMap_strict. Found: " + buf.size + " genes after first-pass filtering","debug");
+
+    return buf.filter( (curr) => {
+      val (geneID, geneTree) = curr;
+      if(geneTree.size == 0) false;
+      else {
+        geneTree.forall( (c) => geneTree.head.chromName == c.chromName && geneTree.head.strand == c.strand );
+      }
+    });
+  }
   
   private def getFlatFeatureList(makeFlatReader : (() => Iterator[FlatGtfLine]), stranded  : Boolean, codes : GtfCodes) : IndexedSeq[String] = {
     makeFlatReader().foldLeft( IndexedSeq[String]() )( (soFar,gtfLine) =>{

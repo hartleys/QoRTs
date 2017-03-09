@@ -115,11 +115,11 @@ object qcGetGeneCounts {
    /*
    * FIX ME FOR STRANDEDNESS!!!!
    */
-  def makeGeneIntervalMap(intervalBreaks : Seq[Double], stdGeneArray : GenomicArrayOfSets[String], strandedGeneArray : GenomicArrayOfSets[String]) : Map[String, Vector[TreeSet[GenomicInterval]]] = {
+  def makeGeneIntervalMap(intervalBreaks : Seq[Double], stdGeneArray : GenomicArrayOfSets[String], strandedGeneArray : GenomicArrayOfSets[String], geneMapStrict :  Map[String,TreeSet[GenomicInterval]]) : Map[String, Vector[TreeSet[GenomicInterval]]] = {
     //val initialMap = geneSet.foldLeft( new scala.collection.immutable.HashMap[String,  TreeSet[GenomicInterval] ]() )((soFar,curr) =>{
     //  soFar + ((curr, new TreeSet[GenomicInterval]() ));
     //})
-    val geneMap = helper_calculateGeneAssignmentMap_strict(stdGeneArray, strandedGeneArray);
+    val geneMap = geneMapStrict // helper_calculateGeneAssignmentMap_strict(stdGeneArray, strandedGeneArray);
     reportln("making makeGeneIntervalMap for geneBody calculations. Found: " + geneMap.size + " acceptable genes for gene-body analysis.","debug");
     
     val geneLengths = geneMap.map((cg) => {
@@ -155,51 +155,7 @@ object qcGetGeneCounts {
     //  (geneID, new Array[Int](intervalCount));
     //}).toMap;
   }
-   
-  private def helper_calculateGeneAssignmentMap_strict(stdGeneArray : GenomicArrayOfSets[String], strandedGeneArray : GenomicArrayOfSets[String]) : Map[String, TreeSet[GenomicInterval]] = {
 
-    val badGeneSet = stdGeneArray.getSteps.foldLeft(Set[String]())( (soFar, curr) =>{
-      val (iv, geneSet) = curr;
-      if(geneSet.size > 1){
-        soFar ++ geneSet.toSet;
-      } else {
-        soFar;
-      }
-    });
-    //val allGeneSet =  geneArray.getSteps.foldLeft(Set[String]())( (soFar, curr) =>{
-    //  soFar ++ curr._2.toSet;
-    //});
-    
-    reportln("helper_calculateGeneAssignmentMap_strict. Found: " + strandedGeneArray.getValueSet.size + " genes in the supplied annotation.","debug");
-    reportln("helper_calculateGeneAssignmentMap_strict. Found: " + badGeneSet.size + " genes with ambiguous segments.","debug");
-    
-    val buf = strandedGeneArray.getSteps.foldLeft(  Map[String, TreeSet[GenomicInterval] ]() )( (soFar, curr) => {
-      val currIv = curr._1;
-      val currGeneSet = curr._2;
-      if(currGeneSet.size == 1){
-        val currGene = currGeneSet.head;
-        if(! badGeneSet.contains(currGene)){
-          soFar.get(currGene) match {
-            case Some(ts : TreeSet[GenomicInterval]) => soFar + ((currGene, ts + currIv ));
-            case None => soFar + ((currGene, TreeSet[GenomicInterval](currIv) ));
-          }
-        } else {
-          soFar;
-        }
-      } else {
-        soFar;
-      }
-    })
-    reportln("helper_calculateGeneAssignmentMap_strict. Found: " + buf.size + " genes after first-pass filtering","debug");
-
-    return buf.filter( (curr) => {
-      val (geneID, geneTree) = curr;
-      if(geneTree.size == 0) false;
-      else {
-        geneTree.forall( (c) => geneTree.head.chromName == c.chromName && geneTree.head.strand == c.strand );
-      }
-    });
-  }
   
   /*
    * Old note: FIX ME FOR STRANDEDNESS!!!!
@@ -271,7 +227,11 @@ object qcGetGeneCounts {
   val default_coverageLevelThresholds = Seq(("1.bottomHalf",0.5),("2.upperMidQuartile",0.75),("3.75to90",0.9),("4.high",1.0));
   
   //UNFINISHED?
-  def geneBody_calculateGeneBodyCoverage_summaries(writer : WriterUtil, writer2 : WriterUtil, geneBody_intervalBreaks : Seq[Double], coverageLevelThresholds : Seq[(String,Double)], geneBody_CoverageCountArrays : GenMap[String,Array[Int]], geneCounts : scala.collection.mutable.Map[String,Int]){
+  def geneBody_calculateGeneBodyCoverage_summaries(writer : WriterUtil, writer2 : WriterUtil, 
+                                                   geneBody_intervalBreaks : Seq[Double], 
+                                                   coverageLevelThresholds : Seq[(String,Double)], 
+                                                   geneBody_CoverageCountArrays : GenMap[String,Array[Int]], 
+                                                   geneCounts : scala.collection.mutable.Map[String,Int]){
     val geneBody_IntervalCount = geneBody_intervalBreaks.length - 1;
     val totalGeneBodyCoverage_simple = geneBody_CoverageCountArrays.foldLeft(repToSeq(0,geneBody_IntervalCount))((sofar, currPair) =>{
       (0 until sofar.length).map(i => {
@@ -408,61 +368,74 @@ class qcGetGeneCounts( stranded : Boolean,
   val geneArray : GenomicArrayOfSets[String] = anno_holder.geneArray;
   val strandedGeneArray : GenomicArrayOfSets[String] = anno_holder.strandedGeneArray;
   
-  val geneBody_IntervalCount : Int = geneBodyIntervalCount;
-  val geneBody_intervalBreaks = (0 to geneBody_IntervalCount).map(_.toDouble / geneBody_IntervalCount.toDouble).toSeq
+  lazy val geneBody_IntervalCount : Int = geneBodyIntervalCount;
+  lazy val geneBody_intervalBreaks = (0 to geneBody_IntervalCount).map(_.toDouble / geneBody_IntervalCount.toDouble).toSeq
   
   //Major change: fix genebody data for unstranded data:
-  val geneBody_CoverageIntervalMap = qcGetGeneCounts.makeGeneIntervalMap(geneBody_intervalBreaks, geneArray, strandedGeneArray);
+  lazy val geneBody_CoverageIntervalMap = qcGetGeneCounts.makeGeneIntervalMap(geneBody_intervalBreaks, geneArray, strandedGeneArray, anno_holder.geneMapStrict);
   //val geneBody_CoverageIntervalMap = qcGetGeneCounts.makeGeneIntervalMap(geneBody_intervalBreaks, strandedGeneArray);
   ////reportln("making geneBody_CoverageIntervalMap for geneBody calculations. Found: " + geneBody_CoverageIntervalMap.size + " acceptable genes.","debug");
-  val geneBody_CoverageCountArrays : scala.collection.mutable.Map[String,Array[Int]] = qcGetGeneCounts.makeGeneBodyCoverageCountArrays(geneBody_IntervalCount, geneBody_CoverageIntervalMap.keys);
+  lazy val geneBody_CoverageCountArrays : scala.collection.mutable.Map[String,Array[Int]] = qcGetGeneCounts.makeGeneBodyCoverageCountArrays(geneBody_IntervalCount, geneBody_CoverageIntervalMap.keys);
+  
+  lazy val geneLengthMap = anno_holder.geneMapStrict.map((cg) => {
+      val currGene : String = cg._1;
+      val currIvSet : TreeSet[GenomicInterval] = cg._2;
+      (currGene, currIvSet.foldLeft(0)((sum,curr) => sum + (curr.end - curr.start) ));
+  });
+  
+  val geneSizeQuantiles : Vector[Double] = Vector(0,0.25,0.5,0.75,1.0);
+  
+  lazy val geneBody_geneSizeQuartiles : Vector[Set[String]] = {
+      val geneList = geneLengthMap.keySet.toVector;
+      splitListByQuantileX(geneList,geneList.map(geneLengthMap(_)),geneSizeQuantiles).toVector
+  }
   
   //val mapLocation_CDS : GenomicArrayOfSets[String]
-  val geneArea_cdsArray = anno_holder.qcGetGeneCounts_cdsArray;
-  val geneArea_intronsArray = anno_holder.qcGetGeneCounts_intronArray;
+  lazy val geneArea_cdsArray = anno_holder.qcGetGeneCounts_cdsArray;
+  lazy val geneArea_intronsArray = anno_holder.qcGetGeneCounts_intronArray;
   
   //INITIALIZE COUNTERS:
-  val geneCounts : scala.collection.mutable.Map[String,Int] = qcGtfAnnotationBuilder.initializeCounter[String](geneArray.getValueSet);
+  lazy val geneCounts : scala.collection.mutable.Map[String,Int] = qcGtfAnnotationBuilder.initializeCounter[String](geneArray.getValueSet);
   
   //val utilCounts : scala.collection.mutable.Map[String,Int] = qcGtfAnnotationBuilder.initializeCounter[String](Set("_no_feature","_ambiguous"));
-  val geneArea_cdsCounts : scala.collection.mutable.Map[String,Int] = qcGtfAnnotationBuilder.initializeCounter[String](geneArray.getValueSet);
+  lazy val geneArea_cdsCounts : scala.collection.mutable.Map[String,Int] = qcGtfAnnotationBuilder.initializeCounter[String](geneArray.getValueSet);
   
-  val spanArray : GenomicArrayOfSets[String] = if(calcDetailedGeneCounts){
+  lazy val spanArray : GenomicArrayOfSets[String] = if(calcDetailedGeneCounts){
     anno_holder.qcGetGeneCounts_spanArray;
   } else {
     GenomicArrayOfSets[String](stranded);
   }
   
   //Advanced gene counts:
-  val geneArea_intronsCounts : scala.collection.mutable.Map[String,Int] = if(calcDetailedGeneCounts)  qcGtfAnnotationBuilder.initializeCounter[String](spanArray.getValueSet);
+  lazy val geneArea_intronsCounts : scala.collection.mutable.Map[String,Int] = if(calcDetailedGeneCounts)  qcGtfAnnotationBuilder.initializeCounter[String](spanArray.getValueSet);
                                                                           else  scala.collection.mutable.Map[String,Int]();
-  val geneArea_intronsAmbig : scala.collection.mutable.Map[String,Int] = if(calcDetailedGeneCounts)  qcGtfAnnotationBuilder.initializeCounter[String](spanArray.getValueSet);
+  lazy val geneArea_intronsAmbig : scala.collection.mutable.Map[String,Int] = if(calcDetailedGeneCounts)  qcGtfAnnotationBuilder.initializeCounter[String](spanArray.getValueSet);
                                                                           else  scala.collection.mutable.Map[String,Int]();
-  val geneArea_nearCounts : scala.collection.mutable.Map[String,Int] = if(calcDetailedGeneCounts)  qcGtfAnnotationBuilder.initializeCounter[String](spanArray.getValueSet);
+  lazy val geneArea_nearCounts : scala.collection.mutable.Map[String,Int] = if(calcDetailedGeneCounts)  qcGtfAnnotationBuilder.initializeCounter[String](spanArray.getValueSet);
                                                                           else  scala.collection.mutable.Map[String,Int]();
-  val geneArea_nearAmbig : scala.collection.mutable.Map[String,Int] = if(calcDetailedGeneCounts)  qcGtfAnnotationBuilder.initializeCounter[String](spanArray.getValueSet);
+  lazy val geneArea_nearAmbig : scala.collection.mutable.Map[String,Int] = if(calcDetailedGeneCounts)  qcGtfAnnotationBuilder.initializeCounter[String](spanArray.getValueSet);
                                                                           else  scala.collection.mutable.Map[String,Int]();
-  val geneArea_farCounts : scala.collection.mutable.Map[String,Int] = if(calcDetailedGeneCounts)  qcGtfAnnotationBuilder.initializeCounter[String](spanArray.getValueSet);
+  lazy val geneArea_farCounts : scala.collection.mutable.Map[String,Int] = if(calcDetailedGeneCounts)  qcGtfAnnotationBuilder.initializeCounter[String](spanArray.getValueSet);
                                                                           else  scala.collection.mutable.Map[String,Int]();
-  val geneArea_farAmbig : scala.collection.mutable.Map[String,Int] = if(calcDetailedGeneCounts)  qcGtfAnnotationBuilder.initializeCounter[String](spanArray.getValueSet);
+  lazy val geneArea_farAmbig : scala.collection.mutable.Map[String,Int] = if(calcDetailedGeneCounts)  qcGtfAnnotationBuilder.initializeCounter[String](spanArray.getValueSet);
                                                                           else  scala.collection.mutable.Map[String,Int]();
   
-  val geneArea_wrongStrandCts : scala.collection.mutable.Map[String,Int] = if(stranded && calcDetailedGeneCounts)  qcGtfAnnotationBuilder.initializeCounter[String](geneArray.getValueSet);
+  lazy val geneArea_wrongStrandCts : scala.collection.mutable.Map[String,Int] = if(stranded && calcDetailedGeneCounts)  qcGtfAnnotationBuilder.initializeCounter[String](geneArray.getValueSet);
                                                                            else  scala.collection.mutable.Map[String,Int]();
   
-  val geneArea_wrongStrandAmbig : scala.collection.mutable.Map[String,Int] = if(stranded && calcDetailedGeneCounts)  qcGtfAnnotationBuilder.initializeCounter[String](geneArray.getValueSet);
+  lazy val geneArea_wrongStrandAmbig : scala.collection.mutable.Map[String,Int] = if(stranded && calcDetailedGeneCounts)  qcGtfAnnotationBuilder.initializeCounter[String](geneArray.getValueSet);
                                                                                  else  scala.collection.mutable.Map[String,Int]();
   
-  val geneArea_wrongStrandAndIntron : scala.collection.mutable.Map[String,Int] = if(stranded && calcDetailedGeneCounts)  qcGtfAnnotationBuilder.initializeCounter[String](spanArray.getValueSet);
+  lazy val geneArea_wrongStrandAndIntron : scala.collection.mutable.Map[String,Int] = if(stranded && calcDetailedGeneCounts)  qcGtfAnnotationBuilder.initializeCounter[String](spanArray.getValueSet);
                                                                                  else  scala.collection.mutable.Map[String,Int]();
-  val geneArea_wrongStrandAndIntronAmbig : scala.collection.mutable.Map[String,Int] = if(stranded && calcDetailedGeneCounts)  qcGtfAnnotationBuilder.initializeCounter[String](spanArray.getValueSet);
+  lazy val geneArea_wrongStrandAndIntronAmbig : scala.collection.mutable.Map[String,Int] = if(stranded && calcDetailedGeneCounts)  qcGtfAnnotationBuilder.initializeCounter[String](spanArray.getValueSet);
                                                                                  else  scala.collection.mutable.Map[String,Int]();
   
   //val geneArea_wrongStrandOrIntron : scala.collection.mutable.Map[String,Int] = if(stranded && calcDetailedGeneCounts)  qcGtfAnnotationBuilder.initializeCounter[String](geneArea_intronsArray.getValueSet);
   //                                                                               else  scala.collection.mutable.Map[String,Int]();
   
-  val geneCounts_ambig : scala.collection.mutable.Map[String,Int] = qcGtfAnnotationBuilder.initializeCounter[String](geneArray.getValueSet);
-  val geneCounts_utr : scala.collection.mutable.Map[String,Int] = qcGtfAnnotationBuilder.initializeCounter[String](geneArray.getValueSet);
+  lazy val geneCounts_ambig : scala.collection.mutable.Map[String,Int] = qcGtfAnnotationBuilder.initializeCounter[String](geneArray.getValueSet);
+  lazy val geneCounts_utr : scala.collection.mutable.Map[String,Int] = qcGtfAnnotationBuilder.initializeCounter[String](geneArray.getValueSet);
   
   var readNoFeature : Int = 0;
   var readAmbiguous : Int = 0;

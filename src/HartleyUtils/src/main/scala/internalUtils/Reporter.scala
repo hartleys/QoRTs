@@ -275,6 +275,17 @@ object Reporter {
     loggers.map((logger) => logger.startReport(str,verb))
   }
   
+  
+  val warningCount = scala.collection.mutable.Map[String,Int]().withDefault((x : String) => 0);
+  def warning(str : String, warnType : String = "default", limit : Int = -1){
+    if(limit < 0 || warningCount(warnType) < limit){
+      reportln(str,"warn");
+    } else if(limit > 0 && warningCount(warnType) == limit){
+      reportln("(("+limit+"+ warnings of type "+warnType+". Further warnings of this type will be silent.))","warn");
+    }
+    warningCount(warnType) += 1;
+  }
+  
   def error(str : String){
     reportln("<====== FATAL ERROR! ======>","error");
     reportln("----------------------------","error");
@@ -284,9 +295,7 @@ object Reporter {
     stackTrace.map((ste) => reportln("        " + ste.toString, "error"))
     
     reportln("<==========================>","error");
-    
     closeLogs;
-    
     throw new Exception(str);
   }
   def error(e : Exception){
@@ -299,21 +308,19 @@ object Reporter {
     
     reportln("<==========================>","error");
     closeLogs;
-
     throw e;
   }
   
   def closeLogs() {
+    if(! warningCount.keys.isEmpty){
+      reportln("<------->","warn");
+      reportln("   Note: "+warningCount.keySet.map(warningCount(_)).sum+" Warnings Thrown:","warn");
+      warningCount.keySet.foreach(x => {
+        reportln("   "+warningCount(x)+"\t"+x,"warn");
+      })
+      reportln("<------->","warn");
+    }
     loggers.map((logger) => logger.close);
     loggers = List();
-    
-    inProgressFile match {
-      case Some(pf) => {
-        pf.delete();
-      }
-      case None => {
-        //do nothing!
-      }
-    }
   }
 }

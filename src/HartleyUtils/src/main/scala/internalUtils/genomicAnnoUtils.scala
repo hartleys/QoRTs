@@ -16,95 +16,32 @@ object genomicAnnoUtils {
   /*
    * Useful classes:
    */
+
+
   /*
-  class EfficientGenomeSeqContainerOLD(infiles : Seq[String]){
-    val seqIter = new GenomeSeqIterator(infiles);
+   * Useful classes:
+   */
+  abstract class EfficientGenomeSeqContainer { 
+    def currIter : Iterator[String];
+    //var remainderIter : Iterator[String];    
+    def switchToChrom(chrom : String);
     
-    def getCurrChrom = seqIter.getCurrChrom;
-    
-    var currChrom = seqIter.getCurrChrom;
-    var bufferStart = 0;
-    var buffer : String = "";
-    var maxBuffer : Int = buffer.length;
-    
-    def bufferEnd = bufferStart + buffer.length;
-    
-    def getSeqForInterval(chrom : String, start : Int, end : Int) : String = {
-      if(start < bufferStart){
-        error("Illegal backwards-read from genome fasta buffer! Are reads coordinate-sorted?");
-      }
-      if(end > bufferEnd){
-        extendBufferTo(end);
-      }
-      if(end > bufferEnd){
-        error("Illegal attempt to pull from beyond end of chromosome!");
-      }
-      maxBuffer = math.max(maxBuffer,buffer.length);
-      return buffer.substring(start - bufferStart,end - bufferStart);
-    }
-    def shiftBufferTo(chrom : String, start : Int){
-      if(chrom == currChrom){
-        if(start+1 > bufferEnd){
-          extendBufferTo(start+1);
-        }
-        if(bufferStart < start){
-          buffer = buffer.substring(start - bufferStart);
-          bufferStart = start;
-        } //else do nothing.
-      } else {
-        val oldChrom = currChrom;
-        seqIter.goToNextChrom(chrom);
-        bufferStart = 0;
-        buffer = seqIter.next._2;
-        currChrom = seqIter.getCurrChrom;
-        if(currChrom != chrom) error("Chromosomes mis-ordered in fasta file(s)! Must be given in the same order as found in the BAM file!\n"+
-                                     "   Looking for: \""+chrom+"\", found \""+oldChrom+"\" and then "+"\""+currChrom+"\"");
-      }
-      maxBuffer = math.max(maxBuffer,buffer.length);
-    }
-    def extendBufferTo(end : Int) : Boolean = {
-      //val initEnd = bufferStartPosition + buffer.length;
-      while(seqIter.hasNext && bufferEnd <= end){
-        val (chr,nxt) = seqIter.next;
-        if(nxt == ""){
-          return false;
-        }
-        buffer = buffer + nxt;
-        maxBuffer = math.max(maxBuffer,buffer.length);
-      }
-      return true;
-    }
-    
-    def reportBufferStatus {
-      reportln("EfficientGenomeSeqContainer Status: ","debug");
-      reportln("   "+currChrom+":"+bufferStart+"-"+bufferEnd,"debug");
-      reportln("   Buffer size: "+buffer.length,"debug");
-      reportln("   Max Buffer size: "+maxBuffer,"debug");
-    }
-  }*/
-  
- 
-  class EfficientGenomeSeqContainer(infiles : Seq[String]){
-    var initialReader = internalUtils.fileUtils.getLinesSmartUnzipFromSeq(infiles);
-    
-    var currChrom = initialReader.next().substring(1);
-    
+    var currChrom = "";
     var bufferStart = 0;
     var buffer : Vector[String] = Vector[String]();
     val blockSize = 1000;
     
     var maxBuffer : Int = buffer.length;
-    var chromList : List[String] = List[String](currChrom);
-    
-    var (currIter,remainderIter) = initialReader.span(line => line.charAt(0) != '>');
-    currIter = currIter.map(_.toUpperCase());
+    var chromList : List[String] = List[String]();
     
     def bufferEnd = bufferStart + buffer.length * blockSize;
-    //def bufferEnd = bufferStart + buffer.map(_.length).sum;
     
-    //def getBlockIdxForPosition(pos : Int) : Int = {
-    //  return (pos - bufferStart) / blockSize;
-    //}
+    
+    def clearBuffer(){
+        residualBuffer = "";
+        bufferStart = 0;
+        buffer = Vector[String]();
+    }
     
     def getSeqForInterval(chrom : String, start : Int, end : Int, truncate : Boolean = false) : String = {
       if(chrom != currChrom) {
@@ -136,16 +73,10 @@ object genomicAnnoUtils {
       } else {
         return buffer(firstBlockIdx).substring(startOffset,blockSize) + buffer.slice(firstBlockIdx+1,lastBlockIdx).mkString("") + buffer(lastBlockIdx).substring(0,endOffset);
       }
-      //buffer.substring(start - bufferStart,end - bufferStart);
     }
     
     var residualBuffer = "";
     def getNextBlock() : String = {
-      /*if(residualBuffer.length > blockSize){
-        val nextBlock = residualBuffer.substring(0,blockSize);
-        residualBuffer = residualBuffer.substring(blockSize);
-        return(nextBlock);
-      }*/
       var nextBlock = residualBuffer;
       while(currIter.hasNext && nextBlock.length < blockSize){
         nextBlock = nextBlock + currIter.next;
@@ -176,52 +107,10 @@ object genomicAnnoUtils {
           buffer = buffer.drop(blockIdx);
         } //else do nothing.
       } else {
-        if(remainderIter.hasNext()){
-          currChrom = remainderIter.next.substring(1);
-          val iterPair = remainderIter.span(line => line.charAt(0) != '>');
-          currIter = iterPair._1.map(_.toUpperCase());
-          remainderIter = iterPair._2;
-        } else {
-          if(allowRecycle){
-            reportln("Returning to start of genome FASTA file. NOTE: for optimal performance, sort the FASTA file so that the chromosomes appear in the same order as in the BAM files.","note");
-            initialReader = internalUtils.fileUtils.getLinesSmartUnzipFromSeq(infiles);
-            currChrom = initialReader.next().substring(1);
-            val iterPair = remainderIter.span(line => line.charAt(0) != '>');
-            currIter = iterPair._1.map(_.toUpperCase());
-            remainderIter = iterPair._2;
-            
-            shiftBufferTo(chrom, start, allowRecycle = false);
-          } else {
-            error("FATAL ERROR: Cannot find chromosome \""+chrom+"\" in genome FASTA file!")
-          }
-        }
-        
-        residualBuffer = "";
-        bufferStart = 0;
-        buffer = Vector[String]();
-        
-        if(currChrom != chrom){
-          reportln("SKIPPING FASTA SEQUENCE FOR CHROMOSOME "+currChrom+" (probable cause: 0 reads found on chromosome, or bam/fasta mis-sorted)!","note");
-          //if(chromList.contains(chrom)){
-          //  error("FATAL ERROR: BAM and BED files do not have the same chromosome ordering or BAM file is not properly sorted. Encountered BAM read from chromosome \""+chrom+"\", but have already passed this chromosome in the BED file.");
-          //}
-        } else {
-          reportln("Shifting to chromosome: "+currChrom+"!","note");
-        }
-        chromList = chromList ++ List[String](currChrom);
-        
+        switchToChrom(chrom);
         shiftBufferTo(chrom,start);
       }
     }
-    /*var bufferLengthAlertLimit = 10500;
-    val bufferLengthAlertUnit = 1000;
-    def checkBufferStat {
-      maxBuffer = math.max(maxBuffer,buffer.length);
-      if(maxBuffer > bufferLengthAlertLimit){
-        reportBufferStatus;
-        bufferLengthAlertLimit += bufferLengthAlertUnit;
-      }
-    }*/
     
     def extendBufferTo(end : Int) {
       while(currIter.hasNext && bufferEnd < end){
@@ -256,134 +145,67 @@ object genomicAnnoUtils {
     }
   }
   
-  
-  class EfficientGenomeSeqContainer_OLD(infiles : Seq[String]){
-    val initialReader = internalUtils.fileUtils.getLinesSmartUnzipFromSeq(infiles);
-    
-    var currChrom = initialReader.next().substring(1);
-    var bufferStart = 0;
-    var buffer : String = "";
-    var maxBuffer : Int = buffer.length;
-    var chromList : List[String] = List[String]();
-    
-    
-    var (currIter,remainderIter) = initialReader.span(line => line.charAt(0) != '>');
-    currIter = currIter.map(_.toUpperCase());
-    
-    def bufferEnd = bufferStart + buffer.length;
-    
-    def getSeqForInterval(chrom : String, start : Int, end : Int) : String = {
-      if(chrom != currChrom) {
-        error("ERROR: EfficientGenomeSeqContainer: requested sequence for chromosome other than current chromosome!");
-      }
-      
-      if(start < bufferStart){
-        reportln("ERROR: EfficientGenomeSeqContainer: Illegal request for sequence prior to current buffer limits!\n"+
-              "   request: "+chrom+":"+start+"-"+end,"note");
-        reportBufferStatus;
-        error("ERROR: EfficientGenomeSeqContainer: Illegal request for sequence prior to current buffer limits!");
-      }
-      if(bufferEnd < end){
-        extendBufferTo(end);
-      }
-      
-      buffer.substring(start - bufferStart,end - bufferStart);
+  def buildEfficientGenomeSeqContainer(infiles : Seq[String]) : EfficientGenomeSeqContainer = {
+    if(infiles.length == 1){
+      new EfficientGenomeSeqContainer_MFA(infiles.head);
+    } else {
+      new EfficientGenomeSeqContainer_FAList(infiles);
     }
-    def shiftBufferTo(chrom : String, start : Int){
-      if(chrom == currChrom){
-        if(bufferEnd < start){
-          //quickly skip through a region without compiling a sequence as you go:
-          bufferStart = bufferEnd;
-          buffer = "";
-          while(currIter.hasNext && bufferEnd < start){
-            bufferStart = bufferEnd;
-            buffer = currIter.next;
-          }
-          maxBuffer = math.max(maxBuffer,buffer.length);
-        } else if(bufferStart < start){
-          buffer = buffer.substring(start - bufferStart);
-          bufferStart = start;
-          maxBuffer = math.max(maxBuffer,buffer.length);
-        } //else do nothing.
-      } else {
-        currChrom = remainderIter.next.substring(1);
-        bufferStart = 0;
-        buffer = "";
-        val iterPair = remainderIter.span(line => line.charAt(0) != '>');
-        currIter = iterPair._1.map(_.toUpperCase());
-        remainderIter = iterPair._2;
-        
-        if(currChrom != chrom){
-          reportln("SKIPPING FASTA SEQUENCE FOR CHROMOSOME "+currChrom+" (probable cause: 0 reads found on chromosome, or bam/fasta mis-sorted)!","note");
-          if(chromList.contains(chrom)){
-            error("FATAL ERROR: BAM and BED files do not have the same chromosome ordering or BAM file is not properly sorted. Encountered BAM read from chromosome \""+chrom+"\", but have already passed this chromosome in the BED file.");
-          }
+  }
+  
+  class EfficientGenomeSeqContainer_MFA(infile : String) extends EfficientGenomeSeqContainer {
+    def switchToChrom(chrom : String){
+        var iterPair = remainderIter.span(line => line != (">"+chrom));
+        if(iterPair._2.hasNext){
+          iterPair = iterPair._2.drop(1).span(line => line.charAt(0) != '>');
         } else {
-          reportln("Shifting to chromosome: "+currChrom+"!","note");
+          iterPair = internalUtils.fileUtils.getLinesSmartUnzip(infile).span(line =>  line != (">"+chrom));
+          if(iterPair._2.hasNext){
+            reportln("Returning to start of genome FASTA file. NOTE: for optimal performance, sort the FASTA file so that the chromosomes appear in the same order as in the BAM files.","note");
+            iterPair = iterPair._2.drop(1).span(line => line.charAt(0) != '>');
+          } else {
+            error("FATAL ERROR: Cannot find chromosome \""+chrom+"\" in genome FASTA file!")
+          }
         }
-        chromList = chromList ++ List[String](currChrom);
-        
-        shiftBufferTo(chrom,start);
-      }
-    }
-    var bufferLengthAlertLimit = 10500;
-    val bufferLengthAlertUnit = 1000;
-    def checkBufferStat {
-      maxBuffer = math.max(maxBuffer,buffer.length);
-      if(maxBuffer > bufferLengthAlertLimit){
-        reportBufferStatus;
-        bufferLengthAlertLimit += bufferLengthAlertUnit;
-      }
+        reportln("Switching to Chromosome: " + chrom,"debug");
+        currentIter = iterPair._1.map(_.toUpperCase());
+        remainderIter = iterPair._2;
+        clearBuffer();
+        currChrom = chrom;
     }
     
-    def extendBufferTo(end : Int) {
-      while(currIter.hasNext && bufferEnd < end){
-        buffer = buffer + currIter.next;
-      }
-      if(bufferEnd < end){
-        error("ERROR: EfficientGenomeSeqContainer: Attempted to extend buffer beyond chromosome span!");
-      }
-      maxBuffer = math.max(maxBuffer,buffer.length);
-    }
+    var initialReader = internalUtils.fileUtils.getLinesSmartUnzip(infile);
+    currChrom = initialReader.next().substring(1);
+    chromList = List[String](currChrom);
     
-    def reportBufferStatus {
-      reportln("   [GenomeSeqContainer Status: "+"buf:("+currChrom+":"+bufferStart+"-"+bufferEnd+") "+"n="+buffer.length+", "+"MaxSoFar="+maxBuffer+"]","debug");
+    var (currentIter,remainderIter) = initialReader.span(line => line.charAt(0) != '>');
+    currentIter = currentIter.map(_.toUpperCase());
+    def currIter = currentIter;
+  }
+  
+  class EfficientGenomeSeqContainer_FAList(infiles : Seq[String]) extends EfficientGenomeSeqContainer {
+    val fastaMap : Map[String,String] = infiles.map(infile => {
+      (internalUtils.fileUtils.getLinesSmartUnzip(infile).next().tail,infile)
+    }).toMap;
+    var currentIter : Iterator[String] = Iterator()
+    
+    def currIter = currentIter;
+    def switchToChrom(chrom : String){
+        if(fastaMap.containsKey(chrom)){
+          currentIter = internalUtils.fileUtils.getLinesSmartUnzip(fastaMap(chrom)).drop(1).map(_.toUpperCase());
+          clearBuffer();
+          currChrom = chrom;
+        } else {
+          error("FATAL ERROR: Cannot find chromosome \""+chrom+"\" in genome FASTA list!")
+        }
     }
   }
   
-  class GenomeSeqIterator(infiles : Seq[String]) extends Iterator[(String,String)]{
-    var reader = internalUtils.fileUtils.getLinesSmartUnzipFromSeq(infiles);
-    var curr = reader.next();
-    var chrom = curr.substring(1);
-    
-    def getCurrChrom : String = chrom;
-    def hasNext : Boolean = reader.hasNext;
-    def next : (String,String) = {
-      curr = reader.next();
-      if(curr.charAt(0) != '>'){
-        return (chrom,curr.toUpperCase());
-      } else {
-        val oldChrom = chrom;
-        chrom = curr.substring(1);
-        return (oldChrom,"");
-      }
-    }
-    def goToNextChrom(chr : String) : Boolean = {
-      if(chr == chrom){
-        return true;
-      } else {
-        while(hasNext){
-          curr = reader.next();
-          if(curr.charAt(0) == '>'){
-            chrom = curr.substring(1);
-            return true;
-          }
-        }
-        return false;
-      }
-
-    }
-  }
+  /*
+   * 
+   */
+  
+  
   
 
   object GenomicArrayOfSets {

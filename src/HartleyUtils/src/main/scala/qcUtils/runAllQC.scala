@@ -464,7 +464,7 @@ object runAllQC {
                                        ) :: 
                     new UnaryArgument( name = "isRNASeq",
                                          arg = List("--RNA"), // name of value
-                                         argDesc = "Indicates that the data is RNA-Seq (the default: flag does nothing)."+
+                                         argDesc = "Indicates that the data is RNA-Seq (this is the default: flag does nothing)."+
                                                    "" // description
                                        ) :: 
 
@@ -472,24 +472,27 @@ object runAllQC {
                                          name = "genomeFA", 
                                          arg = List("--genomeFA"), 
                                          valueName = "chr.fa.gz[,chr2.fa,...]",  
-                                         argDesc = "Provides a genome fasta (or multiple fasta's) for the genome. "+
-                                                   "This is used by certain experimental sub-utilities. "+
+                                         argDesc = "Reference genome sequence. This can either be a single FASTA file with all the chromosomes included, or a comma-delimited list of fasta files with 1 chromosome each. "+
+                                                   "Note: IF multiple fasta files are specificed, each must contain ONLY ONE chromosome. "+
+                                                   "If a single multi-chromosome fasta file is specificed, performance will be improved if the chromosomes are in the same order as they are found in the BAM file, "+
+                                                   "however, this is not required. "+
+                                                   "The genomic sequence is used by certain experimental sub-utilities (currently only the referenceMatch utility). "+
                                                    "Comma delimited, no spaces. "+
-                                                   "Fasta files can be gzipped or zipped."+
+                                                   "Fasta files can be in plaintext, gzipped or zipped."+
                                                    ""
                                         ) ::                              
                                         
                     new BinaryArgument[Int](   name = "genomeBufferSize",
                                                         arg = List("--genomeBufferSize"),  
                                                         valueName = "val", 
-                                                        argDesc = "The size of the genome fasta buffer. If this is too small, then errors may randomly occur."+
+                                                        argDesc = "The size of the genome fasta buffer. Tuning this parameter may improve performance."+
                                                                   ""+
                                                                   ""+
                                                                   ""+
                                                                   "", 
                                                         defaultValue = Some(10000)
                                                         ) ::
-                                        
+
                     new BinaryArgument[String](
                                          name = "outfilePrefix", 
                                          arg = List("--outfilePrefix"), 

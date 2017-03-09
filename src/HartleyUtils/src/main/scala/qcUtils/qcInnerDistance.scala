@@ -480,6 +480,11 @@ class qcInnerDistance(annoHolder : qcGtfAnnotationBuilder, stranded : Boolean, f
     writer3.write("DROPPED_RevRead_Starts_Before_Fwd_And_Too_Many_Adaptor_Bases_Align_Limit_Is_"+qcInnerDistance.STAGGERED_ADAPTOR_ALIGNMENT_LIMIT+"	" +insertSizeMap_noOverlap(i) + "	"+insertSizeMap_staggeredOverlap(i) + "	"+insertSizeMap_partialOverlap(i)+"	"+insertSizeMap(i)+"\n");
     //i = qcInnerDistance.STAGGERED_FULL_BLOCK_OF_ADAPTOR_ALIGNED;
     //writer3.write("RevRead_Starts_Before_Fwd_And_RevRead_Splices_Before_Overlapping	"+"	" +insertSizeMap_noOverlap(i) + "	"+insertSizeMap_staggeredOverlap(i) + "	"+insertSizeMap_partialOverlap(i)+"	"+insertSizeMap(i)+"\n");
+    
+    val negativeSizeSeq = (sizeSeqBad.toSet -- Set(qcInnerDistance.STAGGERED_NO_OVERLAP,qcInnerDistance.OVERLAP_CIGAR_MISMATCH_PARTIAL_OVERLAP, qcInnerDistance.STAGGERED_TOO_MUCH_ADAPTOR_ALIGNED)).toSeq.sorted.reverse;
+    for(i <- negativeSizeSeq){
+      writer3.write(i+"\t" +insertSizeMap_noOverlap(i) + "\t"+insertSizeMap_staggeredOverlap(i) + "\t"+insertSizeMap_partialOverlap(i)+"\t"+insertSizeMap(i)+"\n");
+    }
     close(writer3);
     
     val numGood = sizeSeq.map(i => insertSizeMap(i)).sum;

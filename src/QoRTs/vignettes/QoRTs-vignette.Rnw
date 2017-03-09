@@ -136,7 +136,7 @@ A UCSC browser session produced in this pipeline is also \href{https://genome.uc
 \emph{Optional:} 
 
   \begin{itemize}
-    \item \emph{Reference Genome FASTA file}: In order to calculate reference mismatch rates, a genomic FASTA file is required. The chromosomes must be listed in the same order that they appear in the BAM file. In addition, the BAM file must be coordinate-sorted.
+    \item \emph{Reference Genome FASTA file}: In order to calculate reference mismatch rates, a genomic FASTA file is required. A list of single-chromosome FASTA files can also be provided. In addition, the BAM file must be coordinate-sorted.
     \item \emph{On-Target BED file}: For WES or similar, an on-target bed file can be supplied so that on-target stats can be calculated.
     \item \emph{Un-aligned FASTQ files}: In addition to processing the aligned BAM data, QoRTs can optionally be passed the raw unaligned FASTQ files as well. QoRTs will then calculate a number of QC metrics based on the raw fastq data.
   \end{itemize}
@@ -206,7 +206,7 @@ Running in the default mode, QoRTs will accept both name-sorted and position-sor
 
 QoRTs also has a separate mode designed only for name-sorted samples, which can be activated using the "\verb|--nameSorted|" option. Under certain conditions this may improve speed and reduce memory usage. Under typical conditions any improvement is trivial.
 
-\emph{In order to calculate the reference mismatch rate, the BAM files MUST be sorted by coordinate.} In addition, it is recommended that the genome fasta file be sorted in the same chromosome ordering as the BAM files.
+\emph{In order to calculate the reference mismatch rate, the BAM files MUST be sorted by coordinate.}
 
 %-----------------------------------------------------------
 \section{Quick Start}  \label{sec:quickstart}
@@ -222,7 +222,7 @@ java -Xmx4G -jar /path/to/jarfile/QoRTs.jar QC \
                    /qc/data/dir/path/
 \end{verbatim}
 
-Note: This command must be executed as a single line. Additional options may be required depending on the nature of the dataset. For single-ended data, the \verb|--singleEnded| option should be included. For strand-specific data, the \verb|--stranded| option should be included, and possibly also the \verb|--fr_secondStrand| option depending on the stranded library type. For position-sorted data, the \verb|--coordSorted| option should be used. See \ref{sec:initialProcessing}, or the QC utility documentation\footnote{Found  \href{http://hartleys.github.io/QoRTs/jarHtml/QC.html}{here}.} for more information on the available options.
+Note: This command must be executed as a single line. Additional options may be required depending on the nature of the dataset. For single-ended data, the \verb|--singleEnded| option should be included. For strand-specific data, the \verb|--stranded| option should be included, and possibly also the \verb|--fr_secondStrand| option depending on the stranded library type. In order to calculate the reference mismatch rate the BAM file must be coordinate sorted, otherwise it can be sorted by either coordinate or name. See \ref{sec:initialProcessing}, or the QC utility documentation\footnote{Found  \href{http://hartleys.github.io/QoRTs/jarHtml/QC.html}{here}.} for more information on the available options.
 
 If the genome fasta file and the raw unaligned fastq files are available, use the additional parameters:
 

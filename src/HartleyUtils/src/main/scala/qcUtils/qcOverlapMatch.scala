@@ -95,8 +95,8 @@ class qcOverlapMatch(readLen : Int, mismatchSamFile : Option[String],
   reportln("> Init OverlapMatch Utility","debug");
   
   val samwriter : Option[WriterUtil] = if(mismatchSamFile.isEmpty) None else Some(openWriterSmart(mismatchSamFile.get));
-  
-  val genomeSeq = if(genomeFa.isEmpty) null else new EfficientGenomeSeqContainer(genomeFa.get);
+   
+  val genomeSeq = if(genomeFa.isEmpty) null else buildEfficientGenomeSeqContainer(genomeFa.get);
   val bufferSize = genomeBufferSize;
   
   var ppoLengthMismatch = 0;
