@@ -1,0 +1,182 @@
+browser full all
+browser position chr14:107664321-107759974
+
+track CASEvCTRL_wiggle
+container multiWig
+aggregate transparentOverlay
+showSubtrackColorOnUi on
+shortLabel Avg Coverage CASEvCTRL
+longLabel Mean Normalized Coverage (CASE red, CTRL blue)
+boxedCgf on
+autoScale on
+visibility full
+alwaysZero on
+type bigWig
+
+        track CTRL_FWD_SUB
+        parent CASEvCTRL_wiggle
+        type bigWig
+        bigDataUrl tracks/CTRL.fwd.bw
+        color 0,0,180
+        altColor 0,0,180
+        
+        track CTRL_REV_SUB
+        parent CASEvCTRL_wiggle
+        type bigWig
+        bigDataUrl tracks/CTRL.rev.bw
+        color 0,0,180
+        altColor 0,0,180  
+
+        track CASE_FWD_SUB
+        parent CASEvCTRL_wiggle
+        type bigWig
+        bigDataUrl tracks/CASE.fwd.bw
+        color 180,0,0
+        altColor 180,0,0
+        
+        track CASE_REV_SUB
+        parent CASEvCTRL_wiggle
+        type bigWig
+        bigDataUrl tracks/CASE.rev.bw
+        color 180,0,0
+        altColor 180,0,0  
+
+track CASEvCTRL_Junctions
+shortLabel CASEvCTRL Junctions
+longLabel CASEvCTRL Mean Normalized Splice Junction coverage (CASE red, CTRL blue)
+description CASEvCTRL Mean Normalized Splice Junction coverage (CASE red, CTRL blue)
+visibility pack
+type bigBed 12 .
+bigDataUrl tracks/CASE.vs.CTRL.bb
+useScore 0
+itemRgb "On"
+
+track CASEvCTRL_orphanSJ
+shortLabel CASEvCTRL OrphanSJ
+longLabel CASEvCTRL Mean Normalized Orphan/Ambig SJ coverage (CASE red, CTRL blue)
+description CASEvCTRL Mean Normalized Orphan/Ambig SJ coverage (CASE red, CTRL blue)
+visibility pack
+type bigBed 12 .
+bigDataUrl tracks/CASE.vs.CTRL.orphan.bb
+useScore 0
+itemRgb "On"
+
+
+track JunctionSeq_EXONS
+shortLabel JS Exons
+longLabel JunctionSeq Exon Coverage (CASE red, CTRL blue)
+visibility pack
+type bigBed 12 .
+bigDataUrl tracks/JS.allGenes.exonCoverage.bb
+useScore 0
+itemRgb "On"
+
+track JunctionSeq_JUNCTIONS
+shortLabel JS Jnctns
+longLabel JunctionSeq Junction Coverage (CASE red, CTRL blue)
+visibility pack
+type bigBed 12 .
+bigDataUrl tracks/JS.allGenes.junctionCoverage.bb
+useScore 0
+itemRgb "On"
+
+track JunctionSeq_TEST
+shortLabel JS Sig p-vals
+longLabel JunctionSeq Significant features (With Adjusted p-values)
+visibility pack
+type bigBed 12 .
+bigDataUrl tracks/JS.sigGenes.pvalues.bb
+useScore 0
+itemRgb "On"
+
+track CTRL_FWD
+shortLabel CTRL_FWD
+longLabel CTRL Coverage, Fwd Strand
+type bigWig
+bigDataUrl tracks/CTRL.fwd.bw
+itemRgb on
+color 0,0,0
+altColor 0,0,0
+boxedCgf on
+autoScale on
+visibility hide
+alwaysZero on
+
+track CTRL_REV
+shortLabel CTRL_REV
+longLabel CTRL Coverage, Rev Strand
+type bigWig
+bigDataUrl tracks/CTRL.rev.bw
+itemRgb on
+color 0,0,0
+altColor 0,0,0
+boxedCgf on
+autoScale on
+visibility hide
+alwaysZero on
+
+track CASE_FWD
+shortLabel CASE_FWD
+longLabel CASE Coverage, Fwd Strand
+type bigWig
+bigDataUrl tracks/CASE.fwd.bw
+itemRgb on
+color 0,0,0
+altColor 0,0,0
+boxedCgf on
+autoScale on
+visibility hide
+alwaysZero on
+
+track CASE_REV
+shortLabel CASE_REV
+longLabel CASE Coverage, Rev Strand
+type bigWig
+bigDataUrl tracks/CASE.rev.bw
+itemRgb on
+color 0,0,0
+altColor 0,0,0
+boxedCgf on
+autoScale on
+visibility hide
+alwaysZero on
+
+
+
+
+track SAMP1_FWD
+shortLabel SAMP1_FWD
+longLabel SAMP1 Coverage, Fwd Strand
+type bigWig
+bigDataUrl tracks/SAMP1.fwd.bw
+itemRgb on
+color 0,0,0
+altColor 0,0,0
+boxedCgf on
+autoScale on
+visibility hide
+alwaysZero on
+
+track SAMP1_REV
+shortLabel SAMP1_REV
+longLabel SAMP1 Coverage, Rev Strand
+type bigWig
+bigDataUrl tracks/SAMP1.rev.bw
+itemRgb on
+color 0,0,0
+altColor 0,0,0
+boxedCgf on
+autoScale on
+visibility hide
+alwaysZero on
+
+track SAMP1_JCT
+shortLabel SAMP1_JCT
+longLabel SAMP1 Splice Junction Counts
+visibility pack
+type bigBed 12 .
+bigDataUrl tracks/SAMP1.bb
+useScore 0
+
+
+
