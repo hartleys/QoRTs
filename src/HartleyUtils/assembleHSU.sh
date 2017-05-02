@@ -16,4 +16,7 @@ then
   sed -i -e "s/^.*REPLACE_THIS_QORTS_VERSION_VARIABLE_WITH_VERSION_NUMBER.*/$QORTS_VERS_LINE/g" ./src/main/scala/runner/runner.scala
 fi
 
+export _JAVA_OPTIONS="-Xmx1000M -Xms500M -XX:ParallelGCThreads=1"
+export MALLOC_ARENA_MAX=1
+
 sbt < sbtAssemblyCommand.txt

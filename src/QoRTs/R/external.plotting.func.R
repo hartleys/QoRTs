@@ -21,7 +21,7 @@ makePlot.overlapMismatch.perRead <- function(plotter,plot.rates = TRUE,log.y = T
                                                   rasterize.plotting.area = FALSE, raster.height = 1000, raster.width = 1000,
                                                   plot = TRUE,
                                                   ...){
-  
+  res <- plotter$res
   plot.name <- "Num Mismatches per Read";
   readLabel <- if(singleEndMode){ "Reads" } else {"Read-Pairs"}
   
@@ -115,7 +115,7 @@ makePlot.overlapMismatch.size <- function(plotter,plot.rates = TRUE,log.y = TRUE
                                                   rasterize.plotting.area = FALSE, raster.height = 1000, raster.width = 1000,
                                                   plot = TRUE,
                                                   ...){
-   
+  res <- plotter$res
   plot.name <- "Overlap Mismatch Size Frequency";
   readLabel <- if(singleEndMode){ "Reads" } else {"Read-Pairs"}
   
@@ -207,7 +207,7 @@ makePlot.overlapMismatch.byQual.min <- function(plotter,plot.rates = TRUE,log.y 
                                                 rasterize.plotting.area = FALSE, raster.height = 1000, raster.width = 1000,
                                                 plot = TRUE,
                                                 ...){
-  
+  res <- plotter$res
   plot.name <- "Overlapping Mismatch by Min Qual";
   readLabel <- if(singleEndMode){ "Reads" } else {"Read-Pairs"}
   
@@ -289,6 +289,7 @@ makePlot.targetDistribution <- function(plotter,plot.rates = TRUE, plot.hist = T
                                       debugMode = DEFAULTDEBUGMODE,
                                       plot = TRUE,
                                       ...){
+  res <- plotter$res
   plot.name <- "Target Coverage";
   readLabel <- if(singleEndMode || (! byPair)){ "Reads" } else {"Read-Pairs"}
   
@@ -367,6 +368,7 @@ makePlot.targetDistribution <- function(plotter,plot.rates = TRUE, plot.hist = T
 
 ###########
 makePlot.runTimePerformance <- function(plotter,  debugMode = DEFAULTDEBUGMODE, singleEndMode = plotter$res@singleEnd,plot = TRUE, ...){
+  res <- plotter$res
   plot.name <- "QoRTs Runtime Performance";
   readLabel <- if(singleEndMode){ "Reads" } else {"Read-Pairs"}
   if(debugMode){ message("Starting: ",plot.name," plot."); }
@@ -448,6 +450,7 @@ makePlot.runTimePerformance <- function(plotter,  debugMode = DEFAULTDEBUGMODE, 
 
 ###########
 makePlot.onTarget.rates <- function(plotter,  debugMode = DEFAULTDEBUGMODE, singleEndMode = plotter$res@singleEnd,plot = TRUE, ...){
+  res <- plotter$res
   plot.name <- "On-Target Stats";
   readLabel <- if(singleEndMode){ "Reads" } else {"Read-Pairs"}
   
@@ -528,6 +531,7 @@ makePlot.onTarget.rates <- function(plotter,  debugMode = DEFAULTDEBUGMODE, sing
 
 
 makePlot.onTarget.counts <- function(plotter, y.counts.in.millions = TRUE, debugMode = DEFAULTDEBUGMODE, singleEndMode = plotter$res@singleEnd,plot = TRUE, ...){
+  res <- plotter$res
   plot.name <- "On-Target Count Stats";
   readLabel <- if(singleEndMode){ "Reads" } else {"Read-Pairs"}
   
@@ -611,7 +615,7 @@ makePlot.overlapMismatch.byQual.avg <- function(plotter,plot.rates = TRUE,log.y 
                                               rasterize.plotting.area = FALSE, raster.height = 1000, raster.width = 1000,
                                               plot = TRUE,
                                               ...){
-                                                  
+  res <- plotter$res                                              
   byTheoreticalErrorRate = FALSE 
   plot.name <- "Overlapping Mismatch by Avg Qual";
   readLabel <- if(singleEndMode){ "Reads" } else {"Read-Pairs"}
@@ -701,7 +705,7 @@ makePlot.overlapMismatch.byQual.read <- function(plotter,plot.rates = TRUE,noInd
                                               rasterize.plotting.area = FALSE, raster.height = 1000, raster.width = 1000,
                                               r2.buffer = NULL,plot = TRUE,
                                               ...){
-   
+  res <- plotter$res
   plot.name <- "Overlap Mismatch by Read Qual";
   readLabel <- if(singleEndMode){ "Reads" } else {"Read-Pairs"}
   
@@ -782,7 +786,7 @@ makePlot.referenceMismatch.byScore <- function(plotter,plot.rates = TRUE,
                                                 rasterize.plotting.area = FALSE, raster.height = 1000, raster.width = 1000,
                                                 r2.buffer = NULL,plot = TRUE,
                                                 ...){
-  
+  res <- plotter$res
   plot.name <- "Reference Mismatch by Read Qual";
   readLabel <- if(singleEndMode){ "Reads" } else {"Read-Pairs"}
   
@@ -888,10 +892,11 @@ makePlot.overlap.coverage <- function(plotter,plot.rates = TRUE,
                                       debugMode = DEFAULTDEBUGMODE,r2.buffer=NULL,
                                       plot = TRUE,
                                       ...){
+  res <- plotter$res
   plot.name <- "Overlap Coverage";
   readLabel <- if(singleEndMode){ "Reads" } else {"Read-Pairs"}
   
-  isPlottable <- (! is.null(res@calc.data[["overlapR1"]])) && (! singleEndMode);
+  isPlottable <- (! is.null(plotter$res@calc.data[["overlapR1"]])) && (! singleEndMode);
   if(! plot) return(isPlottable)
   
   if(debugMode){ message("Starting: ",plot.name," plot."); }
@@ -939,10 +944,11 @@ makePlot.readLengthDist   <- function(plotter,plot.rates = TRUE, plot.means = TR
                                       debugMode = DEFAULTDEBUGMODE,r2.buffer =NULL,
                                       plot = TRUE,
                                       ...){
+  res <- plotter$res
   plot.name <- "Read Length Distribution";
   readLabel <- if(singleEndMode){ "Reads" } else {"Read-Pairs"}
   
-  isPlottable <- ! is.null(res@calc.data[["readLenDistR1"]]);
+  isPlottable <- ! is.null(plotter$res@calc.data[["readLenDistR1"]]);
   if(! plot) return(isPlottable)
   
   if(debugMode){ message("Starting: ",plot.name," plot."); }
@@ -1031,6 +1037,7 @@ makePlot.referenceMismatch.perRead <- function(plotter,
                                              debugMode = DEFAULTDEBUGMODE, log.y = TRUE,
                                              singleEndMode = plotter$res@singleEnd, plot = TRUE,
                                              ...){
+  res <- plotter$res
   plot.name <- "Reference Mismatch Summary";
   readLabel <- if(singleEndMode){ "Reads" } else {"Read-Pairs"}
   if(debugMode){ message("Starting: ",plot.name," plot."); }
@@ -1105,10 +1112,11 @@ makePlot.referenceMismatch.byBase <- function(plotter,
                                              debugMode = DEFAULTDEBUGMODE, 
                                              singleEndMode = plotter$res@singleEnd, plot = TRUE,
                                              ...){
+  res <- plotter$res
   plot.name <- "Reference Mismatch Combinations";
   readLabel <- if(singleEndMode){ "Reads" } else {"Read-Pairs"}
   
-  isPlottable <- (! is.null(res@calc.data[["referenceMismatchCombos"]]));
+  isPlottable <- (! is.null(plotter$res@calc.data[["referenceMismatchCombos"]]));
   if(! plot) return(isPlottable)
   
   if(debugMode){ message("Starting: ",plot.name," plot."); }
@@ -1181,11 +1189,12 @@ makePlot.overlapMismatch.byBase <- function(plotter, noIndel = TRUE, plot.rates 
                                            y.rate.per.kb = FALSE, debugMode = DEFAULTDEBUGMODE, 
                                            draw.vert.dotted.lines = TRUE,
                                            singleEndMode = plotter$res@singleEnd, plot = TRUE,...){
+  res <- plotter$res
   plot.name <- "Overlap Mismatch Combinations";
   readLabel <- if(singleEndMode){ "Reads" } else {"Read-Pairs"}
   
   tableName <- "overlapMismatchCombos"
-  isPlottable <- (! is.null(res@calc.data[[tableName]])) && (! singleEndMode);
+  isPlottable <- (! is.null(plotter$res@calc.data[[tableName]])) && (! singleEndMode);
   if(! plot) return(isPlottable)
   
   if(debugMode){ message("Starting: ",plot.name," plot."); }
@@ -1300,7 +1309,7 @@ makePlot.overlapMismatch.byBase.atScore <- function(plotter,atScore = 41,overlap
                                         rasterize.plotting.area = FALSE, raster.height = 1000, raster.width = 1000,
                                         debugMode = DEFAULTDEBUGMODE,#r2.buffer = NULL,
                                         plot = TRUE,...){
-  
+  res <- plotter$res
   overlapScoreMethod <- match.arg(overlapScoreMethod);
   
   scoreMethodSymbol <- if(overlapScoreMethod == "pair") "==" else "<="
@@ -1309,7 +1318,7 @@ makePlot.overlapMismatch.byBase.atScore <- function(plotter,atScore = 41,overlap
   readLabel <- if(singleEndMode){ "Reads" } else {"Read-Pairs"}
   tableName <- "overlapMismatch.byScoreAndBP"
   
-  isPlottable <- (! is.null(res@qc.data[[tableName]])) && (! singleEndMode);
+  isPlottable <- (! is.null(plotter$res@qc.data[[tableName]])) && (! singleEndMode);
   if(! plot) return(isPlottable)
   
   if(debugMode){ message("Starting: ",plot.name," plot."); }
@@ -1377,7 +1386,7 @@ makePlot.referenceMismatch.byBase.atScore <- function(plotter,atScore = 41,
                                         rasterize.plotting.area = FALSE, raster.height = 1000, raster.width = 1000,
                                         debugMode = DEFAULTDEBUGMODE,
                                         plot = TRUE,...){
-  
+  res <- plotter$res
   forRead <- match.arg(forRead);
   
   scoreMethodSymbol <- "=="
@@ -1385,7 +1394,7 @@ makePlot.referenceMismatch.byBase.atScore <- function(plotter,atScore = 41,
   plot.name <- paste0(forRead," Ref Mismatches At Phred ",scoreMethodSymbol," ",atScore);
   readLabel <- if(singleEndMode){ "Reads" } else {"Read-Pairs"}
   tableName <- "referenceMismatch.byScoreAndBP"
-  data.table <- res@calc.data[[tableName]]
+  data.table <- plotter$res@calc.data[[tableName]]
   
   isPlottable <- (! is.null(data.table));
   if(! plot) return(isPlottable)
@@ -1458,6 +1467,7 @@ makePlot.overlapMismatch.byCycle   <- function(plotter,
                                         debugMode = DEFAULTDEBUGMODE,r2.buffer = NULL,
                                         plot = TRUE,
                                         ...){
+  res <- plotter$res
   plot.name <- "Overlap Mismatch by Read Cycle";
   readLabel <- if(singleEndMode){ "Reads" } else {"Read-Pairs"}
   
@@ -1519,7 +1529,7 @@ makePlot.referenceMismatch.byCycle <- function(plotter,
                                  r2.buffer = NULL,
                                  plot = TRUE,
                                  ...){
-
+  res <- plotter$res
   plot.name <- "Reference Mismatch by Read Cycle";
   readLabel <- if(singleEndMode){ "Reads" } else {"Read-Pairs"}
   isPlottable <- (! is.null(res@calc.data[["referenceMismatchCounts"]]));
@@ -1612,7 +1622,7 @@ makePlot.biotype.rates <- function(plotter,
                                    showTypes = NULL,
                                    plot = TRUE,
                                    ...){
-  
+  res <- plotter$res
   isPlottable <- ! (is.null(plotter$res@qc.data[["biotype.counts"]]))
   if(! plot) return(isPlottable);
 
@@ -1753,6 +1763,7 @@ makePlot.qual.pair <- function(plotter, y.name, r2.buffer = NULL, debugMode = DE
                                rasterize.plotting.area = FALSE, raster.height = 1000, raster.width = 1000, 
                                plot = TRUE,
                                ...) {
+  res <- plotter$res
   isPlottable <- ! (is.null(plotter$res@qc.data[["quals.r1"]]) )
   if(! plot) return(isPlottable);
 
@@ -1843,7 +1854,7 @@ makePlot.gc <- function(plotter, plot.medians = NULL, plot.means = TRUE, plotRat
                         debugMode = DEFAULTDEBUGMODE, singleEndMode = plotter$res@singleEnd, 
                         rasterize.plotting.area = FALSE, raster.height = 1000, raster.width = 1000, 
                         plot = TRUE,...){
-  
+  res <- plotter$res
   readLabel <- if(singleEndMode){ "Reads" } else {"Read-Pairs"}
   
   if(byPair & singleEndMode) stop("ERROR with makePlot.gc: byPair and singleEndMode cannot both be TRUE.");
@@ -1899,6 +1910,7 @@ makePlot.gc <- function(plotter, plot.medians = NULL, plot.means = TRUE, plotRat
 makePlot.gc.byRead <- function(plotter, plot.medians = NULL, plot.means = TRUE, plotRate = FALSE, debugMode = DEFAULTDEBUGMODE, singleEndMode = plotter$res@singleEnd, 
                                rasterize.plotting.area = FALSE, raster.height = 1000, raster.width = 1000,
                                plot = TRUE,...){
+  res <- plotter$res
   isPlottable <- ! (is.null(plotter$res@qc.data[["gc.byRead"]]) )
   if(! plot) return(isPlottable);
 
@@ -1939,6 +1951,7 @@ makePlot.clipping <- function(plotter, rate.per.million = FALSE, use.readLength.
                               r2.buffer = NULL , debugMode = DEFAULTDEBUGMODE, singleEndMode = plotter$res@singleEnd,
                               rasterize.plotting.area = FALSE, raster.height = 1000, raster.width = 1000,
                               plot = TRUE,...){
+  res <- plotter$res
   readLabel <- if(singleEndMode){ "Reads" } else {"Read-Pairs"}
   makePlot.cigarOp.byCycle(plotter,"SoftClip", r2.buffer = r2.buffer, rate.per.million = rate.per.million,use.readLength.denominator=use.readLength.denominator, singleEndMode = singleEndMode,debugMode=debugMode,
                            rasterize.plotting.area=rasterize.plotting.area,raster.height=raster.height,raster.width=raster.width,plot=plot, ... );
@@ -1953,7 +1966,7 @@ makePlot.cigarOp.byCycle <- function(plotter,op = c("SoftClip","Del","Ins","Hard
                                      debugMode = DEFAULTDEBUGMODE, singleEndMode = plotter$res@singleEnd,
                                      rasterize.plotting.area = FALSE, raster.height = 1000, raster.width = 1000,
                                      plot = TRUE,...){
-  
+  res <- plotter$res
   isPlottable <- ! (is.null(plotter$res@qc.data[["cigarOpDistribution.byReadCycle.R1"]]) )
   if(! plot) return(isPlottable);
   
@@ -2093,6 +2106,7 @@ makePlot.cigarOp.byCycle <- function(plotter,op = c("SoftClip","Del","Ins","Hard
 makePlot.insert.size <- function(plotter, calc.rate = TRUE, pct.cutoff = 0.98, plot.medians = TRUE, plot.means = NULL, debugMode = DEFAULTDEBUGMODE, singleEndMode = plotter$res@singleEnd, xlim = NULL,
                                  rasterize.plotting.area = FALSE, raster.height = 1000, raster.width = 1000,
                                  plot = TRUE,...){
+  res <- plotter$res
   isPlottable <- ! (singleEndMode || is.null(plotter$res@qc.data[["insert.size"]]))
   if(! plot) return(isPlottable);
 
@@ -2168,6 +2182,7 @@ makePlot.genebody <- function(plotter,
                   singleEndMode = plotter$res@singleEnd, 
                   rasterize.plotting.area = FALSE, raster.height = 1000, raster.width = 1000,
                   plot = TRUE,... ){
+  res <- plotter$res
   readLabel <- if(singleEndMode){ "Reads" } else {"Read-Pairs"}
   avgMethod <- match.arg(avgMethod);
   geneset <- match.arg(geneset);
@@ -2194,6 +2209,7 @@ makePlot.genebody.coverage.PCT <- function(plotter,
                     rasterize.plotting.area = FALSE, raster.height = 1000, raster.width = 1000, 
                     plot = TRUE,
                     ... ){
+  res <- plotter$res
   isPlottable <- ! (is.null(plotter$res@qc.data[["geneBodyCoverage.pct"]]) )
   if(! plot) return(isPlottable);
   
@@ -2265,6 +2281,7 @@ makePlot.genebody.coverage.TC <- function(plotter,
                     rasterize.plotting.area = FALSE, raster.height = 1000, raster.width = 1000, 
                     singleEndMode = plotter$res@singleEnd, 
                     plot = TRUE,... ){
+  res <- plotter$res
   isPlottable <- ! (is.null(plotter$res@qc.data[["geneBodyCoverage.by.expression.level"]]) )
   if(! plot) return(isPlottable);
 
@@ -2330,6 +2347,7 @@ makePlot.genebody.coverage.TC <- function(plotter,
 makePlot.genebody.coverage <- function(plotter, plot.medians = NULL, plot.means = TRUE, debugMode = DEFAULTDEBUGMODE, singleEndMode = plotter$res@singleEnd, 
                                        rasterize.plotting.area = FALSE, raster.height = 1000, raster.width = 1000,
                                        plot = TRUE,... ){
+  res <- plotter$res
   isPlottable <- ! (is.null(plotter$res@qc.data[["geneBodyCoverage.by.expression.level"]]) )
   if(! plot) return(isPlottable);
   
@@ -2381,6 +2399,7 @@ makePlot.genebody.coverage <- function(plotter, plot.medians = NULL, plot.means 
 makePlot.genebody.coverage.UMQuartile <- function(plotter, plot.medians = NULL, plot.means = TRUE, debugMode = DEFAULTDEBUGMODE, singleEndMode = plotter$res@singleEnd, 
                                                   rasterize.plotting.area = FALSE, raster.height = 1000, raster.width = 1000,
                                                   plot = TRUE,... ){
+  res <- plotter$res
   isPlottable <- ! (is.null(plotter$res@qc.data[["geneBodyCoverage.by.expression.level"]]) )
   if(! plot) return(isPlottable);
 
@@ -2427,6 +2446,7 @@ makePlot.genebody.coverage.UMQuartile <- function(plotter, plot.medians = NULL, 
 makePlot.genebody.coverage.lowExpress <- function(plotter, plot.medians = NULL, plot.means = TRUE, debugMode = DEFAULTDEBUGMODE, singleEndMode = plotter$res@singleEnd, 
                                                   rasterize.plotting.area = FALSE, raster.height = 1000, raster.width = 1000,
                                                   plot = TRUE,... ){
+  res <- plotter$res
   isPlottable <- ! (is.null(plotter$res@qc.data[["geneBodyCoverage.by.expression.level"]]) )
   if(! plot) return(isPlottable);
 
@@ -2477,6 +2497,7 @@ makePlot.missingness.rate <- function(plotter,  r2.buffer = NULL, debugMode = DE
                                       log.y = FALSE,ylim=NULL,
                                       plot = TRUE,...){
 
+  res <- plotter$res
   isPlottable <- ! (is.null(plotter$res@qc.data[["NVC.raw.R1"]]) )
   if(! plot) return(isPlottable);
   
@@ -2578,6 +2599,7 @@ makePlot.cigarLength.distribution <- function(plotter,op, r2.buffer = NULL, perM
                                               rasterize.plotting.area = FALSE, raster.height = 1000, raster.width = 1000, 
                                               plot = TRUE,...){
 
+  res <- plotter$res
   isPlottable <- ! (is.null(plotter$res@qc.data[["cigarOpLengths.byOp.R1"]]) )
   if(! plot) return(isPlottable);
   
@@ -2741,6 +2763,7 @@ makePlot.gene.cdf <- function(plotter, sampleWise = FALSE, plot.intercepts = TRU
                               rasterize.plotting.area = FALSE, raster.height = 1000, raster.width = 1000, singleEndMode = plotter$res@singleEnd,
                               plot = TRUE,
                               ...){
+  res <- plotter$res
   #plot.name <- "gene cdf";
   #if(debugMode){ message("Starting: ",plot.name," plot."); }
   #plotter.error.wrapper(plot.name, plotterFcn = function(){
@@ -2762,6 +2785,7 @@ makePlot.gene.cdf.bamWise <- function(plotter, plot.intercepts = TRUE, label.int
                                       rasterize.plotting.area = FALSE, raster.height = 1000, raster.width = 1000, singleEndMode = plotter$res@singleEnd,
                                       plot = TRUE,
                                       ...){
+  res <- plotter$res
   isPlottable <- ! (is.null(plotter$res@calc.data[["LANEBAM_GENE_CDF"]]) )
   if(! plot) return(isPlottable);
 
@@ -2787,6 +2811,7 @@ makePlot.gene.cdf.sampleWise <- function(plotter, plot.intercepts = TRUE, label.
                                          rasterize.plotting.area = FALSE, raster.height = 1000, raster.width = 1000, singleEndMode = plotter$res@singleEnd,
                                          plot = TRUE,
                                          ...){
+  res <- plotter$res
   isPlottable <- ! (is.null(plotter$res@calc.data[["SAMPLE_GENE_CDF"]]) )
   if(! plot) return(isPlottable);
   
@@ -2820,7 +2845,7 @@ makePlot.raw.NVC <- function(plotter,  r2.buffer = NULL,  points.highlighted = T
                          show.base.legend = TRUE, debugMode = DEFAULTDEBUGMODE, singleEndMode = plotter$res@singleEnd, 
                          useFQ = FALSE,
                          plot = TRUE,...){
-  
+  res <- plotter$res
   if(useFQ){
     data.list.r1 <- plotter$res@calc.data[["FQ.NVC.R1"]];
     data.list.r2 <- plotter$res@calc.data[["FQ.NVC.R2"]];
@@ -2903,6 +2928,7 @@ makePlot.minus.clipping.NVC <- function(plotter,  r2.buffer = NULL, points.highl
                                     rasterize.plotting.area = FALSE, raster.height = 1000, raster.width = 2000,
                                     show.base.legend = TRUE, debugMode = DEFAULTDEBUGMODE, singleEndMode = plotter$res@singleEnd,
                                     plot = TRUE,...){
+  res <- plotter$res
   isPlottable <- ! (is.null(plotter$res@qc.data[["NVC.minus.clipping.R1"]]) )
   if(! plot) return(isPlottable);
 
@@ -2981,6 +3007,7 @@ makePlot.NVC.lead.clip <- function(plotter, clip.amt = 10,  r2.buffer = clip.amt
                               rasterize.plotting.area = FALSE, raster.height = 1000, raster.width = 1000,
                               show.base.legend = TRUE, debugMode = DEFAULTDEBUGMODE, singleEndMode = plotter$res@singleEnd,
                               plot = TRUE,...){
+  res <- plotter$res
   isPlottable <- ! (is.null(plotter$res@qc.data[["NVC.lead.clip.R1"]]) )
   if(! plot) return(isPlottable);
   
@@ -3056,6 +3083,7 @@ makePlot.NVC.tail.clip <- function(plotter, clip.amt = 10,  r2.buffer = clip.amt
                                rasterize.plotting.area = FALSE, raster.height = 1000, raster.width = 1000,
                                show.base.legend = TRUE, debugMode = DEFAULTDEBUGMODE, singleEndMode = plotter$res@singleEnd, 
                                plot = TRUE,...){
+  res <- plotter$res
   isPlottable <- ! (is.null(plotter$res@qc.data[["NVC.tail.clip.R1"]]) )
   if(! plot) return(isPlottable);
 
@@ -3138,6 +3166,7 @@ makePlot.NVC.lead.clip.matchByClipPosition <- function(plotter, clip.amt = 10,  
                                                        show.base.legend = TRUE, load.results = TRUE, debugMode = DEFAULTDEBUGMODE,  singleEndMode = plotter$res@singleEnd,
                                                        plot = TRUE,
                                                        ...){
+  res <- plotter$res
   isPlottable <- !(is.null(plotter$res@qc.data[["NVC.lead.clip.R1"]]) )
   if(! plot) return(isPlottable);
 
@@ -3262,6 +3291,7 @@ makePlot.NVC.tail.clip.matchByClipPosition <- function(plotter, clip.amt = 10,  
                                                        show.base.legend = TRUE, debugMode = DEFAULTDEBUGMODE,  singleEndMode = plotter$res@singleEnd, 
                                                        plot = TRUE,...){
 
+  res <- plotter$res
   isPlottable <- !(is.null(plotter$res@qc.data[["NVC.lead.clip.R1"]]) )
   if(! plot) return(isPlottable);
 
@@ -3363,6 +3393,7 @@ makePlot.NVC.tail.clip.matchByClipPosition <- function(plotter, clip.amt = 10,  
 ####################################################################################
 
 makePlot.gene.assignment.rates <- function(plotter, debugMode = DEFAULTDEBUGMODE, singleEndMode = plotter$res@singleEnd, plot = TRUE,...) {
+  res <- plotter$res
   isPlottable <- !(is.null(plotter$res@qc.data[["summary"]]) | ! all(c("ReadPairs_UniqueGene","ReadPairs_AmbigGene","ReadPairs_NoGene","ReadPairs_NoGene_Intron","ReadPairs_NoGene_OneKbFromGene","ReadPairs_NoGene_TenKbFromGene", "ReadPairs_NoGene_MiddleOfNowhere","READ_PAIR_OK" ) %in% plotter$res@qc.data[["summary"]][[1]]$FIELD) )
   if(! plot) return(isPlottable);
 
@@ -3403,6 +3434,7 @@ makePlot.gene.assignment.rates <- function(plotter, debugMode = DEFAULTDEBUGMODE
 }
 ####  if(is.null(plotter$res@qc.data[["summary"]]) | ! all(c() %in% plotter$res@qc.data[["summary"]][[1]]$FIELD) ){
 makePlot.splice.junction.loci.counts <- function(plotter, calc.rate = FALSE, high.low.cutoff = 4, debugMode = DEFAULTDEBUGMODE, singleEndMode = plotter$res@singleEnd,plot = TRUE, ...){
+  res <- plotter$res
   isPlottable <- ! (is.null(plotter$res@qc.data[["summary"]]) | ! all(c("SpliceEvents_KnownLociWithFewReads","SpliceEvents_KnownLociWithManyReads","SpliceEvents_NovelLociWithFewReads","SpliceEvents_NovelLociWithManyReads") %in% plotter$res@qc.data[["summary"]][[1]]$FIELD) )
   if(! plot) return(isPlottable);
 
@@ -3458,6 +3490,7 @@ makePlot.splice.junction.loci.counts <- function(plotter, calc.rate = FALSE, hig
 }
 
 makePlot.splice.junction.event.ratesPerRead <- function(plotter, high.low.cutoff = 4, debugMode = DEFAULTDEBUGMODE, singleEndMode = plotter$res@singleEnd,plot = TRUE, ...){
+  res <- plotter$res
   isPlottable <- ! (is.null(plotter$res@qc.data[["summary"]]) | ! all(c("SpliceEvents_KnownLociWithFewReads","SpliceEvents_KnownLociWithManyReads","SpliceEvents_NovelLociWithFewReads","SpliceEvents_NovelLociWithManyReads") %in% plotter$res@qc.data[["summary"]][[1]]$FIELD) )
   if(! plot) return(isPlottable);
 
@@ -3511,6 +3544,7 @@ makePlot.splice.junction.event.ratesPerRead <- function(plotter, high.low.cutoff
 
 
 makePlot.splice.junction.event.proportions <- function(plotter, high.low.cutoff = 4, debugMode = DEFAULTDEBUGMODE, singleEndMode = plotter$res@singleEnd,plot = TRUE, ...){
+  res <- plotter$res
   isPlottable <- ! (is.null(plotter$res@qc.data[["summary"]]) | ! all(c("SpliceEvents_KnownLociWithFewReads","SpliceEvents_KnownLociWithManyReads","SpliceEvents_NovelLociWithFewReads","SpliceEvents_NovelLociWithManyReads") %in% plotter$res@qc.data[["summary"]][[1]]$FIELD) )
   if(! plot) return(isPlottable);
   
@@ -3576,6 +3610,7 @@ makePlot.splice.junction.event.proportions <- function(plotter, high.low.cutoff 
 
 
 makePlot.splice.junction.event.counts <- function(plotter, high.low.cutoff = 4, debugMode = DEFAULTDEBUGMODE, singleEndMode = plotter$res@singleEnd,plot = TRUE, ...){
+  res <- plotter$res
   isPlottable <- ! (is.null(plotter$res@qc.data[["summary"]]) | ! all(c("SpliceEvents_KnownLociWithFewReads","SpliceEvents_KnownLociWithManyReads","SpliceEvents_NovelLociWithFewReads","SpliceEvents_NovelLociWithManyReads") %in% plotter$res@qc.data[["summary"]][[1]]$FIELD) )
   if(! plot) return(isPlottable);
   
@@ -3632,7 +3667,7 @@ makePlot.splice.junction.event.counts <- function(plotter, high.low.cutoff = 4, 
 }
 
 makePlot.splice.junction.event.proportionsByType <- function(plotter, high.low.cutoff = 4, debugMode = DEFAULTDEBUGMODE, singleEndMode = plotter$res@singleEnd, plot = TRUE,...){
-    
+  res <- plotter$res 
   isPlottable <- ! (is.null(plotter$res@qc.data[["summary"]]) | ! all(c("SpliceEvents_KnownLociWithFewReads","SpliceEvents_KnownLociWithManyReads","SpliceEvents_NovelLociWithFewReads","SpliceEvents_NovelLociWithManyReads") %in% plotter$res@qc.data[["summary"]][[1]]$FIELD) )
   if(! plot) return(isPlottable);
     
@@ -3710,7 +3745,7 @@ makePlot.splice.junction.event.proportionsByType <- function(plotter, high.low.c
 
 
 makePlot.strandedness.test <- function(plotter, plot.target.boxes = FALSE, debugMode = DEFAULTDEBUGMODE, singleEndMode = plotter$res@singleEnd,plot = TRUE, ...){
-    
+  res <- plotter$res
   isPlottable <- ! (is.null(plotter$res@qc.data[["summary"]]) | ! all(c("StrandTest_frFirstStrand","StrandTest_frSecondStrand") %in% plotter$res@qc.data[["summary"]][[1]]$FIELD) )
   if(! plot) return(isPlottable);
     
@@ -3763,7 +3798,7 @@ makePlot.strandedness.test <- function(plotter, plot.target.boxes = FALSE, debug
 }})}
 
 makePlot.dropped.rates <- function(plotter, dropAlwaysZeroRows = FALSE, debugMode = DEFAULTDEBUGMODE, singleEndMode = plotter$res@singleEnd,plot = TRUE,...){
-
+  res <- plotter$res
     x.names <- c(#"DROPPED_UNALIGNED",
                  "DROPPED_NOT_PROPER_PAIR",
                  "DROPPED_READ_FAILS_VENDOR_QC",
@@ -3835,7 +3870,7 @@ makePlot.dropped.rates <- function(plotter, dropAlwaysZeroRows = FALSE, debugMod
 #c("total.reads","mapped.reads","mapping.rate","mm.reads","mm.rate")
 #names(plotter$res@calc.data)
 makePlot.mapping.rates <- function(plotter, plot.mm = NULL, y.counts.in.millions = TRUE, debugMode = DEFAULTDEBUGMODE, singleEndMode = plotter$res@singleEnd,plot = TRUE, ...){
-    
+    res <- plotter$res
   isPlottable <- ! is.null(plotter$res@calc.data[["map.rates"]])
   if(! plot) return(isPlottable);
     
@@ -4059,7 +4094,7 @@ makePlot.chrom.type.rates <- function(plotter,
                                   custom.chromosome.style.def.function = NULL,
                                   return.table = FALSE, debugMode = DEFAULTDEBUGMODE,  singleEndMode = plotter$res@singleEnd,plot = TRUE, ...){
                                       
-
+  res <- plotter$res
   isPlottable <- ! is.null(plotter$res@qc.data[["chrom.counts"]])
   if(! plot) return(isPlottable);
   
@@ -4176,7 +4211,7 @@ makePlot.chrom.type.rates <- function(plotter,
 }
 
 makePlot.norm.factors <- function(plotter, by.sample = TRUE, return.table = FALSE, debugMode = DEFAULTDEBUGMODE, singleEndMode = plotter$res@singleEnd,plot = TRUE, ...){
-
+  res <- plotter$res
   isPlottable <- ! is.null(plotter$res@calc.data[["norm.factors.bySample"]]) 
   if(! plot) return(isPlottable);
 
@@ -4228,7 +4263,7 @@ makePlot.norm.factors <- function(plotter, by.sample = TRUE, return.table = FALS
 }
 
 makePlot.norm.factors.vs.TC <- function(plotter, by.sample = TRUE, return.table = FALSE, debugMode = DEFAULTDEBUGMODE, singleEndMode = plotter$res@singleEnd,plot = TRUE, ...){
-
+  res <- plotter$res
 
   isPlottable <- ! is.null(plotter$res@calc.data[["norm.factors.bySample"]])
   if(! plot) return(isPlottable);
@@ -4289,7 +4324,7 @@ makePlot.norm.factors.vs.TC <- function(plotter, by.sample = TRUE, return.table 
 #INCOMPLETE!!!!!!
 #Placeholder for future functionality!
 makePlot.cigarMismatch <- function(plotter,debugMode = DEFAULTDEBUGMODE,  singleEndMode = plotter$res@singleEnd,plot = TRUE,...){
-    
+    res <- plotter$res
   isPlottable <- ! (is.null(plotter$res@qc.data[["summary"]]) | ! all(c("CigChk_staggered","CigChk_noAlignedOverlap") %in% plotter$res@qc.data[["summary"]][[1]]$FIELD) )
   if(! plot) return(isPlottable);
     
@@ -4326,7 +4361,7 @@ makePlot.cigarMismatch <- function(plotter,debugMode = DEFAULTDEBUGMODE,  single
 }
 #INCOMPLETE! Temporary placeholder for future functionality
 makePlot.splicing.mismatch <- function(plotter, debugMode = DEFAULTDEBUGMODE,  singleEndMode = plotter$res@singleEnd,plot = TRUE,... ){
-  
+  res <- plotter$res
   isPlottable <- ! is.null(plotter$res@qc.data[["insert.size"]])
   if(! plot) return(isPlottable);
   
@@ -4372,7 +4407,7 @@ makePlot.splicing.mismatch <- function(plotter, debugMode = DEFAULTDEBUGMODE,  s
 
 makePlot.legend.box <- function(plotter,debugMode = DEFAULTDEBUGMODE, singleEndMode = plotter$res@singleEnd, cex.legend = NULL, ncol = NULL,plot = TRUE, ...){
   plot.name <- "legend box";
-  
+  res <- plotter$res
   if(!plot) return(TRUE);
   
   plotter.error.wrapper(plot.name, plotterFcn = function(){
@@ -4441,6 +4476,7 @@ makePlot.legend.box <- function(plotter,debugMode = DEFAULTDEBUGMODE, singleEndM
 }
 
 makePlot.legend.over <- function(position, plotter, debugMode = DEFAULTDEBUGMODE, singleEndMode = plotter$res@singleEnd,ncol = NULL,plot = TRUE, ...) {
+  res <- plotter$res
   plotter.NVC <- plotter;
   internal.plot.legend(plotter, "lnpt", position,ncol=ncol, ...);
 }
