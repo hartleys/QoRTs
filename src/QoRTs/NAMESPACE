@@ -16,6 +16,7 @@ export(
  build.plotter.colorByLane,
  build.plotter.colorByGroup,
  build.plotter.basic,
+ build.plotter.advanced,
  
  #Specific Plots:
  makePlot.qual.pair,

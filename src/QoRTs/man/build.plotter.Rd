@@ -9,6 +9,7 @@
 \alias{build.plotter.colorBySample}
 \alias{build.plotter.basic}
 \alias{build.plotter.colorByX}
+\alias{build.plotter.advanced}
 \alias{QoRTs.default.plotting.params}
 \alias{plotter}
 \title{
@@ -41,11 +42,24 @@
                          color.by.title.name = color.by.name, 
                          plotter.params = list())
 
+  build.plotter.advanced(res, 
+                         colorBy = NULL,
+                         color.title = "?",
+                         highlightBy = NULL, 
+                         highlight = "CURR", 
+                         highlightTitle.singular = NULL,
+                         highlightTitle.plural = highlightTitle.singular,
+                         outgroup.title = "Other",
+                         plotter.params = list())
+
 }
 \arguments{
   \item{res}{
     A \code{QoRT_QC_Results} object, created by \code{\link{read.qc.results.data}}.
   }
+  
+
+  
   \item{curr.sample}{
     A character string. For the sample highlight summary plots,
     this should be the sample.ID of the sample that is to be
@@ -100,6 +114,28 @@
   \item{lane.column.name}{
     The name of the column in the decoder containing the "lane" names.
   }
+  
+  \item{colorBy}{
+    A named character vector. Each unique colorBy string will be assigned a unique color. The names of colorBy must match \code{res@decoder$unique.ID}, and must be in the same order.
+  }
+  \item{color.title}{
+    A character string. This is the title of the colorby category, used in the titles and figure legends.
+  }
+  \item{highlightBy}{
+    A named character vector. Used to determine which replicates to highlight. The names of colorBy must match \code{res@decoder$unique.ID}, and must be in the same order.
+  }
+  \item{highlight}{
+    A character string. Replicates where highlight equals highlightBy will be highlighted.
+  }
+  \item{highlightTitle.singular}{
+    A character string. The singular form of the name of the category highlighted.
+  }
+  \item{highlightTitle.plural}{
+    A character string. The plural form of the name of the category highlighted.
+  }
+  \item{outgroup.title}{
+    A character string. The description of the non-highlighted category. Used in the figure legends.
+  }
 }
 \value{
   A QoRT_Plotter reference object used to create QC summary plots. Depending on which plotter is used, samples/lane-bams can be organized by group, sample, lane, or any arbitrary variable found in the decoder.
@@ -130,6 +166,81 @@ plotter.HSCBL <- build.plotter.highlightSample.colorByLane("SAMP1",
                                                            res);
 makePlot.insert.size(plotter.HSCBL);
 makePlot.legend.over("topright",plotter.HSCBL);
+
+
+#FOR ADVANCED USERS:
+#  With the build.plotter.advanced function, you can
+#  set coloring and highlighting to match anything you
+#  want.
+#  The parameters are a little more complex...
+
+#In order to control color, you must create a named
+#  vector with names equal to the unique.ID's
+#  in the decoder, and in the same order:
+#  (this requirement is purely to prevent mistakes)
+
+#For example: to color each sample differently:
+colorBy <- res@decoder$sample.ID
+names(colorBy) <- res@decoder$unique.ID;
+
+plotter <- build.plotter.advanced(res, colorBy = colorBy);
+makePlot.insert.size(plotter);
+makePlot.legend.over("topright",plotter);
+
+#Now, to highlight a subgroup of the dataset, you
+#  must set the "highlightBy" parameter to a 
+#  named vector with names equal to the decoder 
+#  unique.ID's, and in the same order.
+#  (this requirement is purely to prevent mistakes)
+#Then you must tell the plotter which subgroup
+#  you want to highlight using the "highlight" 
+#  parameter.
+
+#For example, to highlight all lanebams in lane L1:
+highlightBy <- res@decoder$lane.ID
+names(highlightBy) <- res@decoder$unique.ID;
+
+plotter <- build.plotter.advanced(res, 
+                                 highlightBy = highlightBy,
+                                 highlight = "L1");
+makePlot.insert.size(plotter);
+makePlot.legend.over("topright",plotter);
+
+#Other parameters are available to change the title
+# and legends:
+plotter <- build.plotter.advanced(res, 
+                                 highlightBy = highlightBy,
+                                 highlight = "L1",
+                                 highlightTitle.singular = "Lane",
+                                 highlightTitle.plural  = "Lanes",
+                                 outgroup.title = "Other");
+makePlot.insert.size(plotter);
+makePlot.legend.over("topright",plotter);
+
+#You can also color and highlight together.
+#  If you do this, only the "highlighted" group will be
+#  colored, all the others will be colored gray and will be 
+#  drawn in the background. This can be useful for finding
+#  biases that are restricted to a subset of the data.
+
+plotter <- build.plotter.advanced(res, 
+  colorBy = colorBy,
+  highlightBy = highlightBy,
+  highlight = "L1",
+  color.title = "sample",
+  highlightTitle.singular = "Lane",
+  highlightTitle.plural = "Lanes",
+  outgroup.title = "Other"
+);
+makePlot.insert.size(plotter);
+makePlot.legend.over("topright",plotter);
+
+
+#You can make multiplots using a given plotter object by
+# using the "makeMultiPlot.withPlotter" function:
+
+#makeMultiPlot.withPlotter(plotter);
+
 }
 
 \seealso{

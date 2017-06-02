@@ -174,7 +174,7 @@ expandAndCheckDecoder <- function(decoder) {
     subsetDecoder <- decoder[ decoder$sample.ID == samp,];
     if(nrow(subsetDecoder) > 1){
       if(length(unique(subsetDecoder$group.ID)) != 1){
-        stop("Decoder error: sample ",samp," has inconsistent group.ID depending on decoder row: (",paste0(unique,collapse=","),")");
+        stop("Decoder error: sample ",samp," has inconsistent group.ID depending on decoder row: (sample.ID=",samp," found in: ",paste0(unique(subsetDecoder$group.ID),collapse=","),")");
       }
     }
   }

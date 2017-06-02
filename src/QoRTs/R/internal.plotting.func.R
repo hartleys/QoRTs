@@ -2416,14 +2416,16 @@ internal.plot.legend <- function(plotter, legend.type, legend.pos,
   } else if(plotter$plot.type == "colorByLane"){
   } else if(plotter$plot.type == "colorBySample"){ 
   } else if(plotter$plot.type == "colorByX"){ 
+  } else if(plotter$plot.type == "highlightByX"){ 
+
   } else if(plotter$plot.type == "colorByXhighlightByY"){ 
 
   } else if(plotter$plot.type == "summary"){
     #Do nothing. plot nothing.
     return("");
   } else {
-    #Do nothing. Plot nothing.
-    return("");
+    #???
+    #return("");
   }
 
 
@@ -2578,6 +2580,9 @@ internal.get.main.title.fragment <- function(plotter, plot.type){
   if(plotter$plot.type == "colorByGroup") return(paste0("\n",diff.text," by Group"));
   if(plotter$plot.type == "colorBySample") return(paste0("\n",diff.text," by Sample"));
   if(plotter$plot.type == "colorByX") return(paste0("\n",diff.text," by ",plotter$title.highlight.name));
+  if(plotter$plot.type == "highlightByX"){
+    return(paste0("\n",plotter$title.annotations[["highlight.by.title.name"]],"=",plotter$title.annotations[["highlight"]]," Highlighted"));
+  }
   if(plotter$plot.type == "colorByXhighlightByY"){
     #return(paste0("\n",plotter$title.annotations[["highlight"]]," Highlighted, ",diff.text," by ",plotter$title.annotations[["color.by.title.name"]]));
     return(paste0("\n",plotter$title.annotations[["highlight.by.title.name"]],"=",plotter$title.annotations[["highlight"]]," Highlighted, ",diff.text," by ",plotter$title.annotations[["color.by.title.name"]]));

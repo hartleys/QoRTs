@@ -1,5 +1,5 @@
-# QoRTs v1.2.37
-(Compiled Mon May  1 14:23:33 EDT 2017)
+# QoRTs v1.2.42
+(Compiled Fri Jun  2 12:23:55 EDT 2017)
 
 The [QoRTs software package](http://hartleys.github.io/QoRTs/) is a fast, efficient, and portable 
 multifunction toolkit designed to assist in

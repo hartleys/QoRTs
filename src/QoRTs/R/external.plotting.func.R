@@ -4413,7 +4413,9 @@ makePlot.legend.box <- function(plotter,debugMode = DEFAULTDEBUGMODE, singleEndM
   plotter.error.wrapper(plot.name, plotterFcn = function(){
     plotter.NVC <- plotter;
     plot(0,0,col="transparent",xlim=c(0,1),ylim=c(0,1), axes=F,xlab="",ylab="");
-
+    
+    diff.text <- "Colored/Marked";
+    
     #internal.plot.legend(plotter,"lines","bottomleft");
     #internal.plot.legend(plotter,"points","bottomright");
     if(is.null(plotter$title.annotations[["main.subtitle"]])){
@@ -4458,6 +4460,12 @@ makePlot.legend.box <- function(plotter,debugMode = DEFAULTDEBUGMODE, singleEndM
       #internal.plot.legend(plotter,"lnpt","bottom", ...);
     } else if(plotter$plot.type == "colorByX"){
       title.text <- paste0("Summary Plots, By ",plotter$title.highlight.name)
+      title.cex <- fit.character.vector(title.text);
+    } else if(plotter$plot.type == "highlightByX"){
+      title.text <- paste0("Summary Plots\n",plotter$title.annotations[["highlight.by.title.name"]],"=",plotter$title.annotations[["highlight"]]," Highlighted")
+      title.cex <- fit.character.vector(title.text);
+    } else if(plotter$plot.type == "colorByXhighlightByY"){
+      title.text <- paste0("Summary Plots\n",plotter$title.annotations[["highlight.by.title.name"]],"=",plotter$title.annotations[["highlight"]]," Highlighted\n",diff.text," by ",plotter$title.annotations[["color.by.title.name"]])
       title.cex <- fit.character.vector(title.text);
     } else {
       title.text <- paste0("Summary Plots, Custom");

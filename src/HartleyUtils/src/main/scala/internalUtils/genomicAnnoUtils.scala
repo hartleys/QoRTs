@@ -154,24 +154,27 @@ object genomicAnnoUtils {
   }
   
   class EfficientGenomeSeqContainer_MFA(infile : String) extends EfficientGenomeSeqContainer {
+    //Implementation note: It is important that you never read from remainderIter without first emptying currentIter!
+    // Otherwise scala attempts to store the currentIter values.
+    // This even remains true if there are no external references to the attached currentIter.
     def switchToChrom(chrom : String){
-        var iterPair = remainderIter.span(line => line != (">"+chrom));
-        if(iterPair._2.hasNext){
-          iterPair = iterPair._2.drop(1).span(line => line.charAt(0) != '>');
-        } else {
-          iterPair = internalUtils.fileUtils.getLinesSmartUnzip(infile).span(line =>  line != (">"+chrom));
-          if(iterPair._2.hasNext){
+        report("Switching to Chromosome: " + chrom + " ["+getDateAndTimeString+"] ... ","debug");
+        while(currentIter.hasNext) currentIter.next;
+        var iter = remainderIter.dropWhile(line => line != (">"+chrom));
+        if(! iter.hasNext){
+          iter = internalUtils.fileUtils.getLinesSmartUnzip(infile).dropWhile(line => line != (">"+chrom));
+          if(iter.hasNext){
             reportln("Returning to start of genome FASTA file. NOTE: for optimal performance, sort the FASTA file so that the chromosomes appear in the same order as in the BAM files.","note");
-            iterPair = iterPair._2.drop(1).span(line => line.charAt(0) != '>');
           } else {
             error("FATAL ERROR: Cannot find chromosome \""+chrom+"\" in genome FASTA file!")
           }
         }
-        reportln("Switching to Chromosome: " + chrom,"debug");
+        val iterPair = iter.drop(1).span(line => line.charAt(0) != '>');
         currentIter = iterPair._1.map(_.toUpperCase());
         remainderIter = iterPair._2;
         clearBuffer();
         currChrom = chrom;
+        report("done ["+getDateAndTimeString+"]\n","debug");
     }
     
     var initialReader = internalUtils.fileUtils.getLinesSmartUnzip(infile);

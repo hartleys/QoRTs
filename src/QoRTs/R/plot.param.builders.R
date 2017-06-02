@@ -114,6 +114,8 @@ build.plotter.colorBySample <- function(res, plotter.params = list()){
    final.params <- merge.plotting.params(defaultParams,plotter.params);
    compiled.params <- compile.plotting.params(final.params);
    
+   
+   
    return(build.plotter.color( 
                                             res = res, 
                                             compiled.params = compiled.params,
@@ -159,6 +161,108 @@ build.plotter.colorByX <- function(res, color.by.name, color.by.title.name = col
 
 #########################################################
 
+build.plotter.advanced <- function(res, 
+                                   colorBy = NULL,
+                                   color.title = "?",
+                                   highlightBy = NULL, 
+                                   highlight = "CURR", 
+                                   highlightTitle.singular = NULL,
+                                   highlightTitle.plural = highlightTitle.singular,
+                                   outgroup.title = "Other",
+                                   plotter.params = list()){
+  if(is.null(highlightBy) && is.null(colorBy)){
+    return(build.plotter.basic(res=res,plotter.params=plotter.params));
+  } else if(is.null(highlightBy)){
+    base.defaultParams <- QoRTs.default.plotting.params;
+    defaultParams <- merge.plotting.params(base.defaultParams,list(std.lines.alpha = 125));
+    final.params <- merge.plotting.params(defaultParams,plotter.params);
+    compiled.params <- compile.plotting.params(final.params);
+    
+    if(length(colorBy) == nrow(res@decoder) && any(names(colorBy) != res@decoder$unique.ID)){
+        stop("Error: colorBy vector must be named with unique ID's and be in the correct order!");
+    }
+    
+    colorBy <- ifelse(is.na(colorBy),"NA",colorBy);
+    
+    return(build.plotter.color(
+                                            res = res, 
+                                            compiled.params = compiled.params,
+                                            color.by = colorBy, 
+                                            plot.type = "colorByX",
+                                            color.by.title.name = color.title,
+                                            title.annotations = list( 
+                                                             color.by.title.name = color.title)
+                                            ));
+  } else if(is.null(colorBy)){
+    if(is.null(highlightTitle.singular)) highlightTitle.singular <- deparse(substitute(highlightBy));
+    if(is.null(highlightTitle.plural))   highlightTitle.plural <- highlightTitle.singular;
+  
+     if(length(highlightBy) == nrow(res@decoder) && any(names(highlightBy) != res@decoder$unique.ID)){
+        stop("Error: highlightBy vector must be named with unique.ID's and be in the same order as res@decoder$unique.ID");
+     }
+   
+     base.defaultParams <- QoRTs.default.plotting.params;
+     defaultParams <- merge.plotting.params(base.defaultParams,list());
+     final.params <- merge.plotting.params(defaultParams,plotter.params);
+     compiled.params <- compile.plotting.params(final.params);
+   
+     return(build.plotter.highlight(highlight, 
+                                  res = res, 
+                                  compiled.params = compiled.params,
+                                  highlight.by = highlightBy, 
+                                  plot.type = "highlightByX", 
+                                  offset.by = ifelse(highlightBy == highlight,"1","0"), 
+                                  merge.offset.outgroup = TRUE,
+                                    title.annotations = list(highlight=highlight, 
+                                                             highlight.by.name=highlightTitle.plural,
+                                                             highlight.by.title.name = highlightTitle.singular),
+                                  outgroup.name = paste0(outgroup.title),
+                                  highlightTitle.plural = highlightTitle.plural
+                                  ));
+  } else {
+    if(is.null(highlightTitle.singular)) highlightTitle.singular <- deparse(substitute(highlightBy));
+    if(is.null(highlightTitle.plural))   highlightTitle.plural <- highlightTitle.singular;
+  
+    base.defaultParams <- QoRTs.default.plotting.params;
+    defaultParams <- merge.plotting.params(base.defaultParams,list(std.lines.alpha = 125));
+    final.params <- merge.plotting.params(defaultParams,plotter.params);
+    compiled.params <- compile.plotting.params(final.params);
+  
+    if(length(colorBy) == nrow(res@decoder) && any(names(colorBy) != res@decoder$unique.ID)){
+        stop("Error: colorBy vector must be named with unique ID's and be in the correct order!");
+    }
+     if(length(highlightBy) == nrow(res@decoder) && any(names(highlightBy) != res@decoder$unique.ID)){
+        stop("Error: highlightBy vector must be named with unique.ID's and be in the same order as res@decoder$unique.ID");
+     }
+  
+    colorBy     <- ifelse(is.na(colorBy),"NA",colorBy);
+    highlightLogical <- f.na(highlightBy == highlight);
+    highlightBy[!highlightLogical] <- outgroup.title;
+  
+    color.highlighted.by <- colorBy;
+  
+    plotter <-
+    build.plotter.highlight.and.color(curr.highlight = highlight, 
+                                    res=res, 
+                                    compiled.params=compiled.params, 
+                                    highlight.by = highlightBy, 
+                                    color.highlighted.by = color.highlighted.by, 
+                                    title.annotations = list(highlight=highlight, 
+                                                             highlight.by.name=highlightTitle.plural,
+                                                             highlight.by.title.name = highlightTitle.singular, 
+                                                             color.by.title.name = color.title),
+                                    plot.type="colorByXhighlightByY", 
+                                    offset.by = color.highlighted.by, 
+                                    merge.offset.outgroup = TRUE, 
+                                    pch.matched.with.color = TRUE, 
+                                    highlighted.by.name = highlightTitle.plural)
+    return(plotter)
+  }
+}
+
+#########################################################
+#########################################################
+
 build.plotter.colorByVector <- function(res, colorBy, color.by.title.name = "?", plotter.params = list()){
   base.defaultParams <- QoRTs.default.plotting.params;
   defaultParams <- merge.plotting.params(base.defaultParams,list(std.lines.alpha = 125));
@@ -179,6 +283,7 @@ build.plotter.colorByVector <- function(res, colorBy, color.by.title.name = "?",
                                             plot.type = "colorByX",
                                             color.by.title.name = color.by.title.name));
 }
+
 
 build.plotter.colorAndHighlightByVector <- function(res, 
                                                     colorBy, 
@@ -216,6 +321,7 @@ build.plotter.colorAndHighlightByVector <- function(res,
                                     highlighted.by.name = highlight.by.name)
   return(plotter)
 }
+
 
 build.plotter.colorAndHighlightBySampleVector <- function(res, colorBy, color.by.title.name = "?",
                                                     highlightList,
@@ -320,6 +426,131 @@ build.plotter.basic.helper <- function(res, offset.by, compiled.params, plot.typ
                                            lines.lwd = rep(compiled.params@highlight.lines.lwd[1], lanebam.ct),
                                            lines.alpha = rep(compiled.params@highlight.lines.alpha[1], lanebam.ct),
                                            points.alpha = rep(compiled.params@highlight.points.alpha[1], lanebam.ct),
+                                           horiz.offsets = lanebam.offsets,
+                                           vert.offsets = lanebam.offsets,
+                                           stringsAsFactors=F
+  );
+  lanebam.params$lines.tcol  <- color2transparent(lanebam.params$lines.col,lanebam.params$lines.alpha);
+  lanebam.params$points.tcol <- color2transparent(lanebam.params$points.col,lanebam.params$points.alpha);
+  
+  plotParams <- generate.plotter(res = res, plot.type = plot.type, title.highlight.name = title.highlight.name, legend.params = legend.params, showLegend = showLegend, nvc.colors = nvc.colors, nvc.colors.light = nvc.colors.light, lanebam.params = lanebam.params,randomize.plot.order=compiled.params@randomize.plot.order,
+                                 title.annotations=c(title.annotations,compiled.params@plot.annotation))
+  return(plotParams);
+}
+
+##################################################################################################################
+##################################################################################################################
+##################################################################################################################
+
+
+build.plotter.advanced.internal <- function(curr.highlight, res, compiled.params, highlight.by, color.highlighted.by, plot.type, offset.by = color.highlighted.by, merge.offset.outgroup = TRUE, pch.matched.with.color = TRUE, highlighted.by.name = "Samples",title.annotations=list()){
+  if(! is.null(check.isValid(res))){
+    #THROW AN ERROR!
+    stop("Error parsing results: ", check.isValid(res));
+  }
+  if(length(highlight.by) != length(color.highlighted.by)) stop("error: length(highlight.by) != length(color.highlighted.by)\n   length(highlight.by) = ",length(highlight.by),", length(color.highlighted.by) = ",length(color.highlighted.by));
+  if(length(highlight.by) != length(res@decoder$unique.ID)) stop("error: length(highlight.by) != length(res@decoder$unique.ID)\n   length(highlight.by) = ",length(highlight.by),", length(res@decoder$unique.ID) = ",length(res@decoder$unique.ID));
+   if(! (curr.highlight %in% highlight.by)){
+      stop("FATAL ERROR! ","Cannot find highlighted element ", curr.highlight," in the highlight list!");
+   }
+  
+  #plotParams <- new("QoRT_Plotter");
+  #plotParams@res <- res;
+  #plotParams@plot.type <- plot.type;
+  title.highlight.name <- curr.highlight;
+  showLegend <- compiled.params@showLegend;
+  nvc.colors <- compiled.params@nvc.colors;
+  nvc.colors.light <- compiled.params@nvc.colors.light;
+  
+  is.highlighted <- highlight.by == curr.highlight;
+  lanebam.ct <- length(highlight.by);
+  hl.by.factor <- color.highlighted.by[is.highlighted ];
+  hl.by.factor.levels <- sort(unique(hl.by.factor));
+  
+  if(length(hl.by.factor.levels) > length(compiled.params@by.colors)) {
+    message("WARNING WARNING WARNING: Too many categories to color! (Max = ",length(compiled.params@by.colors),", curr = ",length(hl.by.factor.levels),") Add more colors? Falling back to a rainbow palette");
+    compiled.params@by.colors <- rainbow(length(hl.by.factor.levels));
+  } 
+  if(pch.matched.with.color){
+    if(length(hl.by.factor.levels) > length(compiled.params@by.pch)){
+      message("WARNING WARNING WARNING: Too many categories to mark distinct with pch! (Max = ",length(compiled.params@by.pch),", curr = ",length(hl.by.factor.levels),") Add more colors? Falling back to a repeating pattern.");
+      compiled.params@by.pch <- rep(compiled.params@by.pch, ceiling( length(hl.by.factor.levels) / length(compiled.params@by.pch)));
+    }
+    legend.points.pch <- compiled.params@by.pch[1:length(hl.by.factor.levels)];
+  } else {
+    legend.points.pch <- rep(compiled.params@highlight.points.pch[1], length(hl.by.factor.levels));
+  }
+
+  legend.params <- data.frame(name = c(hl.by.factor.levels, paste0("Other ",highlighted.by.name)),
+                                         lines.col = c(compiled.params@by.colors[1:length(hl.by.factor.levels)], compiled.params@highlight.color[2]),
+                                         lines.lty = c(rep(compiled.params@highlight.lines.lty[1],length(hl.by.factor.levels)), compiled.params@highlight.lines.lty[2]),
+                                         points.pch = c(legend.points.pch, compiled.params@highlight.points.pch[2]),
+                                         points.col = c(compiled.params@by.colors[1:length(hl.by.factor.levels)], compiled.params@highlight.color[2]),
+                                         stringsAsFactors=F
+  );
+  
+  lines.col <- sapply(1:lanebam.ct, FUN=function(i){
+    if(! is.highlighted[i]){ return(compiled.params@highlight.color[2]);
+    } else {return( legend.params$lines.col[ legend.params$name == color.highlighted.by[i] ] );}
+  });
+  points.col <- sapply(1:lanebam.ct, FUN=function(i){
+    if(! is.highlighted[i]){ return(compiled.params@highlight.color[2]);
+    } else {return( legend.params$points.col[ legend.params$name == color.highlighted.by[i] ] );}
+  });
+
+  if(pch.matched.with.color){
+    #message("!!!");
+    if(length(hl.by.factor.levels) > length(compiled.params@by.pch)) stop("to many categories in by.colors! Add more pch values to compiled.params@by.pch!");
+    points.pch <- sapply(1:lanebam.ct, FUN=function(i){
+      if(! is.highlighted[i]){ return(compiled.params@highlight.points.pch[2]);
+      } else {return( legend.params$points.pch[ legend.params$name == color.highlighted.by[i] ] );}
+    });
+    #message(paste("compiled.params@highlight.points.pch: ",compiled.params@highlight.points.pch,collapse=","));
+    #message(paste("compiled.params@highlight.points.pch: ",compiled.params@highlight.points.pch,collapse=","));
+    #message(paste("points.pch: ",points.pch,collapse=","));
+  } else {
+    points.pch <- ifelse(is.highlighted, compiled.params@highlight.points.pch[1], compiled.params@highlight.points.pch[2])
+  }
+
+
+  
+  if(merge.offset.outgroup){
+    offset.by.vals <- sort(unique(offset.by[is.highlighted]));
+    if( all(offset.by %in% offset.by.vals)){
+      offset.ct <- length(offset.by.vals) ;
+    } else {
+      offset.ct <- length(offset.by.vals) + 1;
+    }
+  } else {
+    offset.by.vals <- sort(unique(offset.by));
+    offset.ct <- length(offset.by.vals) ;
+  }
+  if(offset.ct %% 2 == 0){
+    offsets <- (((1:offset.ct) / (offset.ct)) );
+    offsets <- offsets - ( offsets[ offset.ct / 2  + 1] + offsets[ offset.ct / 2 ]  ) / 2
+  } else {
+    offsets <- (((1:offset.ct) / (offset.ct)) - 0.5  );
+    offsets <- offsets - offsets[ (offset.ct + 1) / 2 ];
+  }
+  
+  lanebam.offset.indices <- sapply(1:lanebam.ct, FUN=function(i){
+    if(any(offset.by.vals == offset.by[i])){
+      which(offset.by.vals == offset.by[i]);
+    } else {
+      offset.ct;
+    }
+  });
+  lanebam.offsets <- offsets[lanebam.offset.indices];
+
+  lanebam.params <- data.frame( plot.priority = ifelse(is.highlighted, 2,1),
+                                           unique.ID = res@decoder$unique.ID,
+                                           lines.col = lines.col,
+                                           points.col = points.col,
+                                           points.pch = points.pch,
+                                           lines.lty = ifelse(is.highlighted, compiled.params@highlight.lines.lty[1], compiled.params@highlight.lines.lty[2]),
+                                           lines.lwd = ifelse(is.highlighted, compiled.params@highlight.lines.lwd[1], compiled.params@highlight.lines.lwd[2]),
+                                           lines.alpha = ifelse(is.highlighted, compiled.params@highlight.lines.alpha[1], compiled.params@highlight.lines.alpha[2]),
+                                           points.alpha = ifelse(is.highlighted, compiled.params@highlight.points.alpha[1], compiled.params@highlight.points.alpha[2]),
                                            horiz.offsets = lanebam.offsets,
                                            vert.offsets = lanebam.offsets,
                                            stringsAsFactors=F
@@ -667,7 +898,9 @@ build.plotter.highlight.OLD <- function(curr.highlight, res, compiled.params, hi
 
 
 build.plotter.highlight <- function(curr.highlight, res, 
-                                    title.highlight.name=curr.highlight, compiled.params, highlight.by, plot.type, offset.by, merge.offset.outgroup = TRUE,title.annotations=list()){
+                                    title.highlight.name=curr.highlight, compiled.params, highlight.by, plot.type, offset.by, merge.offset.outgroup = TRUE,title.annotations=list(),
+                                    outgroup.name = "Other",
+                                    highlightTitle.plural = "Samples", highlightTitle.singular = "Sample"){
   if(! is.null(check.isValid(res))){
     #THROW AN ERROR!
     stop("Error parsing results: ", check.isValid(res));
@@ -691,7 +924,7 @@ build.plotter.highlight <- function(curr.highlight, res,
   is.highlighted <- highlight.by %in% curr.highlight;
   lanebam.ct <- length(highlight.by);
   
-  legend.params <- data.frame(name = c(title.highlight.name,"Other Samples"),
+  legend.params <- data.frame(name = c(title.highlight.name,paste0(outgroup.name," ",highlightTitle.plural)),
                                          lines.col = compiled.params@highlight.color,
                                          lines.lty = compiled.params@highlight.lines.lty,
                                          points.pch = compiled.params@highlight.points.pch,
