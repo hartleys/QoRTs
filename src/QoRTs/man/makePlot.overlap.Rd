@@ -42,6 +42,19 @@
                                 plot = TRUE,
                                 ...)
                                 
+  makePlot.overlapMismatch.byCycle(plotter,
+                                   plot.rates = TRUE, 
+                                   noIndel = TRUE, 
+                                   log.y = TRUE,
+                                   singleEndMode = plotter$res@singleEnd,
+                                   rasterize.plotting.area = FALSE, 
+                                   raster.height = 1000, 
+                                   raster.width = 1000,
+                                   debugMode,
+                                   r2.buffer,
+                                   plot = TRUE,
+                                   ...)
+  
   makePlot.overlapMismatch.byQual.min(plotter,
                                       plot.rates = TRUE,
                                       log.y = TRUE,
@@ -204,6 +217,7 @@
   plotter <- build.plotter.colorByGroup(res);
   makePlot.overlap.coverage(plotter)
   makePlot.overlapMismatch.size(plotter)
+  makePlot.overlapMismatch.byCycle(plotter)
   makePlot.overlapMismatch.byQual.min(plotter)
   makePlot.overlapMismatch.byQual.read(plotter)
   makePlot.overlapMismatch.byBase(plotter)

@@ -218,7 +218,7 @@ draw.logyaxis.stdScalePlot <- function(ylim, ylim.truncate, lwd, lwd.mini, tcl =
     ticks_log10 <-  ticks_log10[ticks_log10 >= ylim.truncate[1] & ticks_log10 <= ylim.truncate[2]];
   }
   
-  axis(side, at = decades_log10, labels=decade.labels, lwd = -1, lwd.ticks = lwd, tcl = tcl, las = 1, ...);
+  axis(side, at = decades_log10, labels=as.expression(decade.labels), lwd = -1, lwd.ticks = lwd, tcl = tcl, las = 1, ...);
   axis(side, at = ticks_log10, labels=FALSE, lwd = -1, lwd.ticks = lwd.mini, tcl = tcl / 2, ...);
 }
 
@@ -630,6 +630,8 @@ reportMemoryUsage <- function(res){
 ####################################################################################
 ###   Text fitting functions:
 
+AUTOFIT.ITERATION.LIMIT <- 100;
+
 title.autofit.main <- function(main = NULL, cex = par("cex.main"), ...){
   if(! is.null(main)){
     cex <- fit.title(title.text = main, cex.main = cex);
@@ -702,9 +704,11 @@ strheightSRT90 <- function(s, cex = NULL, ...){
 
 shrink.character.vector.VERT <- function(strs, curr.cex, max.height){
   curr.height <- max(strheightSRT90(strs, cex = curr.cex))
-  while(curr.height > max.height){
+  iterCt <- 0;
+  while(curr.height > max.height && iterCt < AUTOFIT.ITERATION.LIMIT){
     curr.cex <- curr.cex * 0.9
     curr.height <- max(strheightSRT90(strs, cex = curr.cex))
+    iterCt <- iterCt + 1;
   }
   return(curr.cex)
 }

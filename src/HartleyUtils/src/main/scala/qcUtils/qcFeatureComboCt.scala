@@ -11,7 +11,8 @@ import internalUtils.commandLineUI._;
 import internalUtils.commonSeqUtils._;
 import internalUtils.genomicAnnoUtils._;
 import internalUtils.GtfTool._;
-import scala.collection.JavaConversions._;
+//import scala.collection.JavaConversions._;
+import scala.collection.JavaConverters._;
 
 import internalUtils.genomicUtils._;
 import internalUtils.optionHolder._;
@@ -159,8 +160,8 @@ class qcFeatureComboCt(anno_holder : qcGtfAnnotationBuilder, stranded : Boolean,
     //                                 novelSplices.toVector.sorted
     //                               ));
     
-    val insertions = r1.getCigar().getCigarElements().filter(_.getOperator() == CigarOperator.INSERTION).map(_.getLength());
-    val deletions  = r1.getCigar().getCigarElements().filter(_.getOperator() == CigarOperator.DELETION).map(_.getLength());
+    val insertions = r1.getCigar().getCigarElements().asScala.filter(_.getOperator() == CigarOperator.INSERTION).map(_.getLength());
+    val deletions  = r1.getCigar().getCigarElements().asScala.filter(_.getOperator() == CigarOperator.DELETION).map(_.getLength());
     
     val indelTotal = insertions.sum + deletions.sum;
     val featureSet = readExonSet ++ knownSplices;

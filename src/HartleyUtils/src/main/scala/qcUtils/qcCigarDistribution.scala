@@ -8,8 +8,9 @@ import java.io.InputStream
 import java.io.ByteArrayInputStream
 import java.io.FileInputStream
 import java.io.File
-import scala.collection.JavaConversions._
+//import scala.collection.JavaConversions._
 import scala.collection.mutable.HashMap;
+import scala.collection.JavaConverters._;
 
 import net.sf.samtools._
 
@@ -70,9 +71,9 @@ object qcCigarDistribution {
     var readPos = 0;
     
     val elementList : List[CigarElement] = if(reverse) {
-      c.getCigarElements().toList.reverse;
+      c.getCigarElements().asScala.toList.reverse;
     } else {
-      c.getCigarElements().toList;
+      c.getCigarElements().asScala.toList;
     }
     
     for(ce : CigarElement <- elementList){

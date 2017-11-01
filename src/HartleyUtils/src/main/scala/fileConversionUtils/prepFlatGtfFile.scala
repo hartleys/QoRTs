@@ -9,7 +9,7 @@ import java.io.InputStream
 import java.io.ByteArrayInputStream
 import java.io.FileInputStream
 import java.io.File
-import scala.collection.JavaConversions._
+//import scala.collection.JavaConversions._
 import scala.collection.mutable.HashMap;
 
 import net.sf.samtools._
@@ -25,7 +25,7 @@ import internalUtils.commonSeqUtils._;
 import internalUtils.genomicUtils._;
 import internalUtils.genomicAnnoUtils._;
 import internalUtils.GtfTool._;
-import scala.collection.JavaConversions._
+//import scala.collection.JavaConversions._
 
 object prepFlatGtfFile {
 
@@ -178,7 +178,7 @@ object prepFlatGtfFile {
         txMap += (tx -> gene);
         txArray.addSpan(gtfLine.getGenomicInterval, tx);
         
-        if(geneInfoMap.containsKey(gene)){
+        if(geneInfoMap.contains(gene)){
           val (geneStrand, geneTxSet) = geneInfoMap(gene);
           val newStrand = if(geneStrand != strandedStrand){
             '.';
@@ -186,7 +186,7 @@ object prepFlatGtfFile {
             geneStrand;
           }
           
-          if(! geneTxSet.containsKey(tx) ){
+          if(! geneTxSet.contains(tx) ){
             geneInfoMap += ((gene, (newStrand, geneTxSet.updated(tx,strandedStrand))))
           }
         } else {
@@ -205,7 +205,7 @@ object prepFlatGtfFile {
        
       for((iv, txSet) <- txArray.getSteps(chromName,strand)){
         for(tx <- txSet){
-          if(lastExonTxMap.containsKey(tx)){
+          if(lastExonTxMap.contains(tx)){
             val prevExonEnd = lastExonTxMap(tx);
             if(iv.start != prevExonEnd){
               val spliceIV = new GenomicInterval(chromName,strand,prevExonEnd,iv.start);
@@ -403,7 +403,7 @@ object prepFlatGtfFile {
     reportln("    FlatteningGtf: Compiling Aggregate Info . . . ("+getDateAndTimeString+")","debug");
     val aggregateInfoMap = scala.collection.mutable.AnyRefMap[String, (Char, Int, Map[String,Char])]();
     for((g,a) <- aggregateGeneMap){
-       if(aggregateInfoMap.containsKey(a)){
+       if(aggregateInfoMap.contains(a)){
          val (geneStrand, geneTxMap) = geneInfoMap(g);
          val (aggregateStrand, geneCt, aggregateTxMap) = aggregateInfoMap(a);
          val newAggregateStrand = if(geneStrand != aggregateStrand){

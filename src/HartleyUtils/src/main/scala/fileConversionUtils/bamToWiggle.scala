@@ -8,7 +8,7 @@ import java.io.InputStream
 import java.io.ByteArrayInputStream
 import java.io.FileInputStream
 import java.io.File
-import scala.collection.JavaConversions._
+//import scala.collection.JavaConversions._
 
 import net.sf.samtools._
 
@@ -20,8 +20,10 @@ import internalUtils.commandLineUI._;
 import internalUtils.commonSeqUtils._;
 import internalUtils.genomicAnnoUtils._;
 import internalUtils.GtfTool._;
-import scala.collection.JavaConversions._;
+//import scala.collection.JavaConversions._;
 import internalUtils.optionHolder._;
+
+import scala.collection.JavaConverters._;
 
 import internalUtils.genomicUtils._;
 import qcUtils.QCUtility;
@@ -131,6 +133,18 @@ object bamToWiggle {
                                          argDesc =  "A comma delimited list of integers from 0-255, indicating the rgb color and alt-color for the wiggle file."+
                                                     "This is equivalent to using --additionalTrackOptions \"color=r,g,b altColor=r,g,b itemRgb=On\""
                                         ) ::
+                    new BinaryOptionArgument[Int](
+                                         name = "reservoirSample", 
+                                         arg = List("--reservoirSample"), 
+                                         valueName = "K",
+                                         argDesc =  "Perform reservoir sampling to select a random subsample of size K. This uses linear time with respect to numReads, and linear memory usage with respect to K."
+                                        ) ::
+                    new BinaryOptionArgument[Int](
+                                         name = "reservoirSeed", 
+                                         arg = List("--reservoirSeed"), 
+                                         valueName = "s",
+                                         argDesc =  "Random seed for use with reservoir sampling."
+                                        ) ::
                     new UnaryArgument(   name = "noTruncate", 
                                          arg = List("--noTruncate"), // name of value
                                          argDesc = "The UCSC tool wigToBigWig only allows wiggle files in which every window is of equal size. "+
@@ -234,7 +248,9 @@ object bamToWiggle {
              parser.get[String]("additionalTrackOptions"),
              ! parser.get[Boolean]("nameSorted"),
              parser.get[Int]("minMAPQ"),
-             parser.get[Boolean]("checkForAlignmentBlocks")
+             parser.get[Boolean]("checkForAlignmentBlocks"),
+             parser.get[Option[Int]]("reservoirSample"),
+             parser.get[Option[Int]]("reservoirSeed")
            );
          }
      }
@@ -260,7 +276,9 @@ object bamToWiggle {
       includeTrackDef : Boolean,
       rgbColor : Option[String],
       additionalTrackOptions : String,
-      coordSorted : Boolean, minMAPQ : Int, checkForAlignmentBlocks : Boolean){
+      coordSorted : Boolean, minMAPQ : Int, checkForAlignmentBlocks : Boolean,
+      reservoirSample : Option[Int],
+      reservoirSeed : Option[Int]){
     
     //registerGlobalParam[Boolean]("noGzipOutput", noGzipOutput);
     internalUtils.optionHolder.OPTION_noGzipOutput = noGzipOutput;
@@ -276,7 +294,14 @@ object bamToWiggle {
       else         reportln("QoRTs is Running in name-sorted mode.","note");
     }
     
-    val qcBTW : QcBamToWig = new QcBamToWig(trackName , chromLengthFile , noTruncate , windowSize , isSingleEnd, stranded , fr_secondStrand, sizeFactor, negativeReverseStrand, countPairsTogether , includeTrackDef, rgbColor, additionalTrackOptions);
+    val qcBTW : QCUtility[Unit] = reservoirSample match {
+      case None => {
+        new QcBamToWig(trackName , chromLengthFile , noTruncate , windowSize , isSingleEnd, stranded , fr_secondStrand, sizeFactor, negativeReverseStrand, countPairsTogether , includeTrackDef, rgbColor, additionalTrackOptions);
+      }
+      case Some(k) => {
+        new QcBamToWigReservoirSample(k,reservoirSeed,trackName , chromLengthFile , noTruncate , windowSize , isSingleEnd, stranded , fr_secondStrand, sizeFactor, negativeReverseStrand, countPairsTogether , includeTrackDef, rgbColor, additionalTrackOptions);
+      }
+    }
     
     standardStatusReport(initialTimeStamp);
     val postSetupStamp = TimeStampUtil();
@@ -300,7 +325,7 @@ object bamToWiggle {
     
   def runOnFile2(  
                    infile : String, 
-                   qcBTW : QcBamToWig,
+                   qcBTW : QCUtility[Unit],
                    testRun  :Boolean, 
                    keepMultiMapped : Boolean, 
                    readGroup : Option[String],
@@ -430,7 +455,7 @@ object bamToWiggle {
   }*/
   
   def getReadBlocks(r : SAMRecord) : Vector[(Int,Int)] = {
-    r.getAlignmentBlocks().toVector.map((block) => {
+    r.getAlignmentBlocks().asScala.toVector.map((block) => {
       (block.getReferenceStart() - 1, block.getReferenceStart() - 1 + block.getLength());
     });
   }
@@ -456,6 +481,130 @@ object bamToWiggle {
       }
     })
   }
+  
+
+  class QcBamToWigReservoirSample(
+                   K : Int, seed : Option[Int],
+                   trackName : String, chromLengthFile : String, 
+                   noTruncate : Boolean, windowSize : Int, 
+                   isSingleEnd: Boolean, stranded : Boolean,
+                   fr_secondStrand : Boolean, sizeFactor : Double, 
+                   negativeReverseStrand : Boolean, countPairsTogether : Boolean, 
+                   includeTrackDef : Boolean, rgbColor : Option[String],
+                   additionalTrackOptions : String) extends QCUtility[Unit] {
+    val rand = seed match{
+      case Some(s) => new scala.util.Random(s);
+      case None => new scala.util.Random();
+    }
+    
+    val chromMap : Map[(String,Char),Chrom] = genChrom(chromLengthFile, windowSize, stranded, ! noTruncate);
+    var unknownChromSet : Set[String] = Set[String]();
+    
+    val res = Array.ofDim[(String,Char,Vector[(Int,Int)])](K);
+    var n = 1;
+    
+    def runOnReadPair(r1 : SAMRecord, r2 : SAMRecord, readNum : Int){
+      if(isSingleEnd){
+        runOnRead(r1,readNum);
+      } else if(! countPairsTogether){
+        runOnRead(r1,readNum*2-1);
+        runOnRead(r2,readNum*2);
+      } else {
+        if(n <= K){
+          val chromName = r1.getReferenceName();
+          val strand = internalUtils.commonSeqUtils.getStrand(r1 , stranded , fr_secondStrand );
+          val blocks = getOverlappedPairBlocks(r1,r2);
+          res(readNum-1) = (chromName,strand,blocks);
+        } else {
+          val randNum = rand.nextInt(n) + 1;
+          if(randNum <= K){
+            val chromName = r1.getReferenceName();
+            val strand = internalUtils.commonSeqUtils.getStrand(r1 , stranded , fr_secondStrand );
+            val blocks = getOverlappedPairBlocks(r1,r2);
+            res(randNum-1) = (chromName,strand,blocks);
+          }
+        }
+        n = n + 1;
+      }
+    }
+    
+    def runOnRead(r : SAMRecord,readNum : Int){
+      if(readNum <= K){
+        val chromName = r.getReferenceName();
+        val strand = internalUtils.commonSeqUtils.getStrand(r , stranded , fr_secondStrand );
+        val blocks = getReadBlocks(r);
+        res(readNum-1) = (chromName,strand,blocks);
+      } else {
+        val randNum = rand.nextInt(readNum) + 1;
+        if(randNum <= K){
+          val chromName = r.getReferenceName();
+          val strand = internalUtils.commonSeqUtils.getStrand(r , stranded , fr_secondStrand );
+          val blocks = getReadBlocks(r);
+          res(randNum-1) = (chromName,strand,blocks);
+        }
+      }
+      n = n + 1;
+    }
+    
+    def writeOutput(outfile : String, summaryWriter : WriterUtil, docWriter : DocWriterUtil = null){
+      res.filter(_ != null).foreach{ case (chromName,strand,blocks) => {
+        chromMap.get((chromName,strand)) match {
+          case Some(chrom) => {
+            chrom.countBlocks(blocks);
+          }
+          case None => {
+            if(! unknownChromSet.contains(chromName)){
+              reportln("WARNING: Chromosome not found in the chromLengthFile: ["+chromName+","+strand+"]","deepDebug");
+              unknownChromSet += chromName;
+            }
+          }
+        }
+      }}
+      
+      val windowString = if(windowSize == 100) "" else (".Win"+windowSize.toString());
+      
+      if(stranded){
+        val writerF = openWriterSmart_viaGlobalParam(outfile + windowString + ".fwd.wig");
+        val writerR = openWriterSmart_viaGlobalParam(outfile + windowString + ".rev.wig");
+        val rgbColorString = if(rgbColor.isEmpty) " " else " color="+rgbColor.get+" altColor="+rgbColor.get +" itemRgb=On";
+        val additionalOptionsString = " "+additionalTrackOptions+" ";
+        if(includeTrackDef){
+          writerF.write("track name="+trackName+"_FWD type=wiggle_0 visibility=full"+rgbColorString+additionalOptionsString+"\n");
+          writerR.write("track name="+trackName+"_REV type=wiggle_0 visibility=full"+rgbColorString+additionalOptionsString+"\n");
+        }
+        
+        val sortedKeyList : Vector[(String,Char)] = chromMap.keySet.toVector.sorted
+        for(chromPairs <- sortedKeyList){
+          	val chrom = chromMap(chromPairs);
+	        if(chrom.chromStrand == '+'){
+	          writeChrom(chrom,writerF,sizeFactor,false);
+	        } else {
+	          writeChrom(chrom,writerR,sizeFactor,negativeReverseStrand);
+	        }
+        }
+        close(writerF);
+        close(writerR);
+      } else {
+        val writer = openWriterSmart_viaGlobalParam(outfile + windowString + ".unstranded.wig");
+        val rgbColorString = if(rgbColor.isEmpty) " " else " color="+rgbColor.get+" altColor="+rgbColor.get +" ";
+        val additionalOptionsString = " "+additionalTrackOptions+" ";
+        if(includeTrackDef){
+          writer.write("track name="+trackName+" type=wiggle_0 "+rgbColorString+" "+additionalOptionsString+"\n");
+        }
+        
+        val sortedKeyList : Vector[(String,Char)] = chromMap.keySet.toVector.sorted
+        for(chromPairs <- sortedKeyList){
+          val chrom = chromMap(chromPairs);
+	      writeChrom(chrom,writer,sizeFactor,false);
+        }
+        close(writer);
+      }
+    }
+    
+    def getUtilityName : String = "bamToWig";
+
+  }
+  
   
   
   class QcBamToWig(trackName : String, chromLengthFile : String, 

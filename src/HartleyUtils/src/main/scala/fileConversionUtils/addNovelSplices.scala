@@ -10,7 +10,7 @@ import internalUtils.commandLineUI._;
 import internalUtils.commonSeqUtils._;
 import internalUtils.genomicAnnoUtils._;
 import internalUtils.GtfTool._;
-import scala.collection.JavaConversions._;
+//import scala.collection.JavaConversions._;
 
 import internalUtils.genomicUtils._;
 import internalUtils.optionHolder._;

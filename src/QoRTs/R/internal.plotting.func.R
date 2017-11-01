@@ -2390,7 +2390,7 @@ makePlot.generic.points.right <- function(plot.name, tf.list, plotter, plot.type
 
 
 
-
+AUTOFIT.ITERATION.LIMIT <- 100;
 
 ########################################################################################################################
 ########################################################################################################################
@@ -2468,10 +2468,13 @@ internal.plot.legend <- function(plotter, legend.type, legend.pos,
       #isTooBig <- function(x){
       #  x$rect$w > abs(autofit.limits[1] - autofit.limits[2]) || x$rect$h > abs(autofit.limits[3] - autofit.limits[4]);
       #}
+      iterCt <- 0;
       if(isTooBig(x)){
         new.cex <- 1;
-        while(isTooBig(x)){
+        
+        while(isTooBig(x) && iterCt < AUTOFIT.ITERATION.LIMIT){
           new.cex <- new.cex * 0.9;
+          iterCt <- iterCt + 1;
           x <- legend(legend.pos,
                  legend=plotter$legend.params$name,
                  lty=plotter$legend.params$lines.lty, 
@@ -2486,9 +2489,10 @@ internal.plot.legend <- function(plotter, legend.type, legend.pos,
       } else {
         test.cex <- 1;
         new.cex <- 1;
-        while(! isTooBig(x)){
+        while(! isTooBig(x) && iterCt < AUTOFIT.ITERATION.LIMIT){
           new.cex <- test.cex;
           test.cex <- new.cex * 1.1;
+          iterCt <- iterCt + 1;
           x <- legend(legend.pos,
                  legend=plotter$legend.params$name,
                  lty=plotter$legend.params$lines.lty, 

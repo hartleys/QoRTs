@@ -7,8 +7,9 @@ import internalUtils.stdUtils._;
 import internalUtils.fileUtils._;
 import internalUtils.commandLineUI._;
 import java.io.File;
+import scala.collection.JavaConverters._;
 
-import scala.collection.JavaConversions._
+//import scala.collection.JavaConversions._
 
 object commonSeqUtils {
   
@@ -36,22 +37,23 @@ object commonSeqUtils {
   }
   
   def getTailClipping(r : SAMRecord) : Int = {
-    val lastCigarElement = r.getCigar().getCigarElements().last;
+    val cigElements = r.getCigar().getCigarElements().asScala
+    val lastCigarElement = cigElements.last;
     if(lastCigarElement.getOperator().equals(CigarOperator.SOFT_CLIP)){
       return lastCigarElement.getLength();
     } else if(lastCigarElement.getOperator().equals(CigarOperator.HARD_CLIP)){
-      val nextToLastCigarElement = r.getCigar().getCigarElements().takeRight(2).head;
+      val nextToLastCigarElement = cigElements.takeRight(2).head;
       if(nextToLastCigarElement.getOperator().equals(CigarOperator.SOFT_CLIP)){
         return nextToLastCigarElement.getLength();
       } else return 0;
     } else return 0;
   }
   def getLeadClipping(r : SAMRecord) : Int = {
-    val firstCigarElement = r.getCigar().getCigarElements().head;
+    val firstCigarElement = r.getCigar().getCigarElements().asScala.head;
     if(firstCigarElement.getOperator().equals(CigarOperator.SOFT_CLIP)){
       return firstCigarElement.getLength();
     } else if(firstCigarElement.getOperator().equals(CigarOperator.HARD_CLIP)){
-      val secondCigarElement = r.getCigar().getCigarElements().tail.head;
+      val secondCigarElement = r.getCigar().getCigarElements().asScala.tail.head;
       if(secondCigarElement.getOperator().equals(CigarOperator.SOFT_CLIP)){
         return secondCigarElement.getLength();
       } else return 0;
@@ -377,9 +379,9 @@ object commonSeqUtils {
    */
   def getCigarSeq(r : SAMRecord, reverse : Boolean) : Seq[CigarElement] = {
     if(reverse){
-      r.getCigar().getCigarElements().toVector.reverse;
+      r.getCigar().getCigarElements().asScala.toVector.reverse;
     } else {
-      r.getCigar().getCigarElements().toVector;
+      r.getCigar().getCigarElements().asScala.toVector;
     }
   }
   
@@ -399,7 +401,7 @@ object commonSeqUtils {
   def getUnclippedReadLength(r : SAMRecord) : Int = {
       val baseLength = r.getReadLength();
       if(! r.getReadUnmappedFlag()){
-        val cigar = r.getCigar().getCigarElements();
+        val cigar = r.getCigar().getCigarElements().asScala;
         val leftClip  = if(cigar.head.getOperator() == CigarOperator.HARD_CLIP) cigar.head.getLength() else 0;
         val rightClip = if(cigar.last.getOperator() == CigarOperator.HARD_CLIP) cigar.last.getLength() else 0;
         baseLength + leftClip + rightClip;
@@ -489,7 +491,7 @@ object commonSeqUtils {
   def getBasePairsWithH(r : SAMRecord, readLength : Int, assumeTailClipping : Boolean) : Seq[Byte] = {
     if(r.getReadNegativeStrandFlag()){
       val readBases = r.getReadBases().toVector.reverse;
-      val cigarElements = r.getCigar().getCigarElements()
+      val cigarElements = r.getCigar().getCigarElements().asScala
       val leadCigarElement = cigarElements.last;
       val tailCigarElement = cigarElements.head;
       
@@ -507,7 +509,7 @@ object commonSeqUtils {
       }
     } else {
       val readBases = r.getReadBases().toVector;
-      val cigarElements = r.getCigar().getCigarElements()
+      val cigarElements = r.getCigar().getCigarElements().asScala
       val leadCigarElement = cigarElements.head;
       val tailCigarElement = cigarElements.last;
       
@@ -535,7 +537,7 @@ object commonSeqUtils {
   }
   
   case class CigarHolder(cigar : Cigar, alignmentStart : Int, chromName : String, strand : Char){
-    lazy val cigOps : Stream[CigOp] = cigar.getCigarElements.toStream.scanLeft[(Int,Int,CigOp),Stream[(Int,Int,CigOp)]]( (alignmentStart,0,null) )( (startTriplet , ce) => {
+    lazy val cigOps : Stream[CigOp] = cigar.getCigarElements.asScala.toStream.scanLeft[(Int,Int,CigOp),Stream[(Int,Int,CigOp)]]( (alignmentStart,0,null) )( (startTriplet , ce) => {
       val (ref_start, read_start, prev) = startTriplet;
       val newOp = CigOp(ce, ref_start, read_start, chromName, strand);
       ((newOp.ref_end, newOp.read_end, newOp))
@@ -665,7 +667,7 @@ object commonSeqUtils {
     val header = reader.getFileHeader();
     
     // Check alignment software
-    val alignmentProgramList : List[SAMProgramRecord] = header.getProgramRecords().toList;
+    val alignmentProgramList : List[SAMProgramRecord] = header.getProgramRecords().asScala.toList;
     
     //Check for tophat 2, print note:
     alignmentProgramList.find( (pr : SAMProgramRecord) => pr.getId() == "TopHat" ) match {
@@ -686,7 +688,7 @@ object commonSeqUtils {
     }
     
     
-    val iter : Iterator[SAMRecord] = reader.iterator();
+    val iter : Iterator[SAMRecord] = reader.asScala.iterator;
     var peekRecords = Seq[SAMRecord]();
      
     for(i <- 0 until peekCount){
@@ -779,7 +781,7 @@ object commonSeqUtils {
     val numPeekReadsPaired : Int = peekRecords.count(r => r.getReadPairedFlag());
     val numPeekReadsPairMapped : Int = peekPairMapped.length;
     val peekReadNameSet : Set[String] = peekPairMapped.map(_.getReadName()).toSet;
-    val numPeekPairs : Int = peekReadNameSet.size();
+    val numPeekPairs : Int = peekReadNameSet.size;
     val numPeekPairsMatched : Int = peekReadNameSet.count( id => {
       peekPairMapped.count(r => r.getReadName() == id) == 2;
     });
@@ -1071,9 +1073,9 @@ object commonSeqUtils {
           }
           val nextName = readOrder.head;
           readOrder = readOrder.tail;
-          if(buffer.containsKey(nextName)) return buffer.remove(nextName).get;
+          if(buffer.contains(nextName)) return buffer.remove(nextName).get;
           
-          while(iter.hasNext && (! buffer.containsKey(nextName))){
+          while(iter.hasNext && (! buffer.contains(nextName))){
             addNextPairToBuffer;
             if(bufferWarningSize < buffer.size){
                 reportln("NOTE: Unmatched Read-PAIR-Buffer Size > "+bufferWarningSize+" [Mem usage:"+MemoryUtil.memInfo+"]","note");
@@ -1090,7 +1092,7 @@ object commonSeqUtils {
                 bufferWarningSize = bufferWarningSize * warningSizeMultiplier;
             }
           }
-          if(!buffer.containsKey(nextName)){
+          if(!buffer.contains(nextName)){
             internalUtils.Reporter.error("ERROR ERROR ERROR: Reached end of bam file, there are "+(pairContainer.size+1)+" orphaned reads, which are marked as having a mapped pair, but no corresponding pair is found in the bam file. \n(Example Orphaned Read Name: "+nextName+")");
           }
           

@@ -2,8 +2,9 @@ import AssemblyKeys._
 
 assemblySettings
 
-scalaVersion := "2.11.1"
+scalaVersion := "2.12.4"
 
+scalacOptions := Seq("-unchecked", "-deprecation")
 
 jarName in assembly := "QoRTs.jar"
 

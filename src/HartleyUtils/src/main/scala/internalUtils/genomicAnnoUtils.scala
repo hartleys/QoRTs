@@ -9,7 +9,8 @@ import internalUtils.Reporter._;
 import internalUtils.commonSeqUtils._;
 import internalUtils.genomicAnnoUtils._;
 import internalUtils.GtfTool._;
-import scala.collection.JavaConversions._
+//import scala.collection.JavaConversions._
+import scala.collection.JavaConverters._;
 
 object genomicAnnoUtils {
 
@@ -19,7 +20,7 @@ object genomicAnnoUtils {
 
 
   /*
-   * Useful classes:
+   * Useful classes: 
    */
   abstract class EfficientGenomeSeqContainer { 
     def currIter : Iterator[String];
@@ -194,7 +195,7 @@ object genomicAnnoUtils {
     
     def currIter = currentIter;
     def switchToChrom(chrom : String){
-        if(fastaMap.containsKey(chrom)){
+        if(fastaMap.contains(chrom)){
           currentIter = internalUtils.fileUtils.getLinesSmartUnzip(fastaMap(chrom)).drop(1).map(_.toUpperCase());
           clearBuffer();
           currChrom = chrom;

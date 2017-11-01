@@ -9,7 +9,8 @@ import internalUtils.commandLineUI._;
 import internalUtils.commonSeqUtils._;
 import internalUtils.genomicAnnoUtils._;
 import internalUtils.GtfTool._;
-import scala.collection.JavaConversions._;
+//import scala.collection.JavaConversions._;
+import scala.collection.JavaConverters._;
 
 import internalUtils.genomicUtils._;
 import internalUtils.optionHolder._;
@@ -297,8 +298,8 @@ class qcCigarMatch(readLen : Int) extends QCUtility[Unit] {
       //Count NO_OVERLAP
     } else {
       //COUNT OVERLAP
-      val bf : Vector[AlignmentBlock] = rf.getAlignmentBlocks().toVector;
-      val br : Vector[AlignmentBlock] = rr.getAlignmentBlocks().toVector;      
+      val bf : Vector[AlignmentBlock] = rf.getAlignmentBlocks().asScala.toVector;
+      val br : Vector[AlignmentBlock] = rr.getAlignmentBlocks().asScala.toVector;      
       val blocksOverlap = bf.exists( a => br.exists( b => qcCigarMatch.doBlocksIntersect(a,b) )  );
       if(! blocksOverlap){
         misOverlap += 1;  

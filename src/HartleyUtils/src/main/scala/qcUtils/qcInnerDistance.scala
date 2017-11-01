@@ -9,8 +9,9 @@ import java.io.InputStream
 import java.io.ByteArrayInputStream
 import java.io.FileInputStream
 import java.io.File
-import scala.collection.JavaConversions._
+//import scala.collection.JavaConversions._
 import scala.collection.immutable.HashMap;
+import scala.collection.JavaConverters._;
 
 import net.sf.samtools._
 
@@ -193,7 +194,7 @@ object qcInnerDistance {
   }
   
   def getInsertSize_staggeredOverlap(rf : SAMRecord, rr : SAMRecord) : Int = {
-    val clipF = rf.getAlignmentBlocks.head.getReadStart() - 1;
+    val clipF = rf.getAlignmentBlocks.asScala.head.getReadStart() - 1;
     //val clipR = rr.getAlignmentBlocks.head.getReadStart() - 1;
     
     val startF = getAlignmentStart(rf);
@@ -271,7 +272,7 @@ object qcInnerDistance {
   }
   
   def getReadLengthToIntersect(rFirst : SAMRecord, rLast : SAMRecord) : Int = {
-    val abFirst = rFirst.getAlignmentBlocks.toSeq;
+    val abFirst = rFirst.getAlignmentBlocks.asScala.toSeq;
     val startLast = getAlignmentStart(rLast);
     //val clipLast = getLeadClipping(rLast);
     for(ab <- abFirst){
@@ -312,8 +313,8 @@ object qcInnerDistance {
    * (lengthToIntersect, overlapAmt, overlapSpliceCt, code)
    */  
   def getReadLengthToIntersectAndOtherInfo(r1 : SAMRecord, r2 : SAMRecord) : (Int, Int, Int, String) = {
-    val r1blocks = r1.getAlignmentBlocks.toVector;
-    val r2blocks = r2.getAlignmentBlocks.toVector;
+    val r1blocks = r1.getAlignmentBlocks.asScala.toVector;
+    val r2blocks = r2.getAlignmentBlocks.asScala.toVector;
     val (r1start, r1end) = ( getAlignmentStart(r1), getAlignmentEnd(r1) );
     val (r2start, r2end) = ( getAlignmentStart(r2), getAlignmentEnd(r2) );
     //val clipLast = getLeadClipping(rLast);

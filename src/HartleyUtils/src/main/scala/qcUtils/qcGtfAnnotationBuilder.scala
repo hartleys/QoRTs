@@ -4,7 +4,7 @@ import internalUtils.commonSeqUtils._;
 import internalUtils.genomicUtils._;
 import internalUtils.genomicAnnoUtils._;
 import internalUtils.GtfTool._;
-import scala.collection.JavaConversions._
+//import scala.collection.JavaConversions._
 import internalUtils.Reporter._;
 import internalUtils.stdUtils._;
 import internalUtils.fileUtils._;
@@ -12,6 +12,7 @@ import internalUtils.commandLineUI._;
 
 import scala.collection.immutable.TreeSet;
 import internalUtils.optionHolder._;
+import scala.collection.JavaConverters._;
 
 import scala.collection.GenMap;
 
@@ -211,7 +212,7 @@ object qcGtfAnnotationBuilder {
       //if(gtfLine.featureType == codes.STD_EXON_TYPE_CODE){
       if(! geneOpt.isEmpty){
         val geneID = geneOpt.get;
-        if(! out.containsKey(geneID)){
+        if(! out.contains(geneID)){
           gtfLine.getAttribute(codes.BIOTYPE_ATTRIBUTE_KEY) match {
             case Some(b) => {
               bioset += b;

@@ -10,7 +10,8 @@ import internalUtils.commandLineUI._;
 import internalUtils.commonSeqUtils._;
 import internalUtils.genomicAnnoUtils._;
 import internalUtils.GtfTool._;
-import scala.collection.JavaConversions._;
+//import scala.collection.JavaConversions._;
+import scala.collection.JavaConverters._;
 
 import internalUtils.genomicUtils._;
 
@@ -94,7 +95,7 @@ object qcGetGeneCounts {
   } 
   
   private def helper_findReadIntervalCoverage(r : SAMRecord, intervalVector : Vector[TreeSet[GenomicInterval]]) : Set[Int] = {
-    return r.getAlignmentBlocks.iterator.foldLeft( Set[Int]() )( (sofar, currBlock) => {
+    return r.getAlignmentBlocks.asScala.iterator.foldLeft( Set[Int]() )( (sofar, currBlock) => {
       val (start,end) = (currBlock.getReferenceStart() - 1, currBlock.getReferenceStart - 1 + currBlock.getLength());
       sofar ++ helper_findSpanIntervalCoverage(start,end,intervalVector);
     });

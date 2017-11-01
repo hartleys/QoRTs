@@ -10,7 +10,8 @@ import internalUtils.commonSeqUtils._;
 import internalUtils.genomicAnnoUtils._; 
 
 import net.sf.samtools._
-import scala.collection.JavaConversions._;
+//import scala.collection.JavaConversions._;
+import scala.collection.JavaConverters._;
 
 
 object genomicUtils {
@@ -48,7 +49,7 @@ object genomicUtils {
   
   def getGenomicIntervalsFromRead(r : SAMRecord, stranded : Boolean, fr_secondStrand : Boolean) : Iterator[GenomicInterval] = {
     val strand = getStrand(r,stranded,fr_secondStrand);
-    val blocks : Iterator[AlignmentBlock] = r.getAlignmentBlocks().iterator;
+    val blocks : Iterator[AlignmentBlock] = r.getAlignmentBlocks().asScala.iterator;
     val chromName = r.getReferenceName();
      
     return new Iterator[GenomicInterval](){
@@ -66,7 +67,7 @@ object genomicUtils {
       else if(rawStrand == '+') '-';
       else '+';
     } 
-    val blocks : Iterator[AlignmentBlock] = r.getAlignmentBlocks().iterator;
+    val blocks : Iterator[AlignmentBlock] = r.getAlignmentBlocks().asScala.iterator;
     val chromName = r.getReferenceName();
     
     return new Iterator[GenomicInterval](){
