@@ -14,7 +14,7 @@ Revised Sat Mar  4 13:22:59 EST 2017
  * [v1.2.25](./archive/v1.2.25/index.html) (Unstable)
  * [v1.2.26](./archive/v1.2.26/index.html) (Unstable)
  * [v1.2.37](./archive/v1.2.37/index.html) (Unstable)
-[v1.3.0](./archive/v1.3.0/index.html) (Current Release)
+[v1.3.6](./archive/v1.3.6/index.html) (Current Release)
 
 <!--RELEASEAREAEND-->
 
