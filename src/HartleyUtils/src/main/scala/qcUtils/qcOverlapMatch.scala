@@ -557,13 +557,13 @@ qualBins.map(q => {
   }
   
   def calcRefMismatches(chrom : String, i : Int,r : SAMRecord, cb : Vector[CigarBlock], mismatchArray : Array[Array[Array[Array[Array[Int]]]]]) : Boolean = {
-    val seqIter = cb.foldLeft(Vector[((Char,Char),Int)]()){ (soFar,c) => {
+    val seqIter = cb.flatMap{ c => {
       genomeSeq.getSeqForInterval(chrom,c.refStart,c.refEnd).toVector.zip(
           getSeqStringFromBlock(r,c).toVector
       ).zip(c.readStart until (c.readStart + c.len) );
       //(refSeq + genomeSeq.getSeqForInterval(chrom,c.refStart,c.refEnd),readSeq+getSeqStringFromBlock(r1,c))
     }};
-    val mismatches = seqIter.filter{case ((refchar,readchar),pos) => {readchar != 'N' && refchar != readchar}};
+    val mismatches = seqIter.filter{case ((refchar,readchar),pos) => {readchar != 'N' && refchar != 'N' && refchar != readchar}};
     
     //DEBUGGING:
     if((! mismatches.isEmpty) && (! samwriter.isEmpty)){

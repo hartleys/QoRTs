@@ -850,11 +850,11 @@ object commonSeqUtils {
     
   //}
   
-  def samRecordPairIterator_resorted(iter : Iterator[SAMRecord], verbose : Boolean = true, testCutoff : Int = -1, ignoreSecondary : Boolean = true) : Iterator[(SAMRecord,SAMRecord)] = {
-
+  def samRecordPairIterator_resorted(iter : Iterator[SAMRecord], verbose : Boolean = true, testCutoff : Int = -1, ignoreSecondary : Boolean = true, prefilterImproperPairs : Boolean = false) : Iterator[(SAMRecord,SAMRecord)] = {
+    val keepImproperPairs : Boolean = ! prefilterImproperPairs;
     if(ignoreSecondary){
        presetProgressReporters.wrapIterator_readPairs(getSRPairIterResorted(iter.filter((read : SAMRecord) => {
-           (! read.getNotPrimaryAlignmentFlag()) && (! getMateUnmappedFlag(read)) && (! read.getReadUnmappedFlag())
+           (keepImproperPairs || (read.getReadPairedFlag() && read.getProperPairFlag())) && (! read.getNotPrimaryAlignmentFlag()) && (! getMateUnmappedFlag(read)) && (! read.getReadUnmappedFlag())
          })), verbose, testCutoff);
     } else {
       error("FATAL ERROR: Using non-primary read mappings is not currently implemented!");
@@ -862,21 +862,23 @@ object commonSeqUtils {
     }
   }
   
-  def samRecordPairIterator_unsorted(iter : Iterator[SAMRecord], verbose : Boolean = true, testCutoff : Int = -1, ignoreSecondary : Boolean = true) : Iterator[(SAMRecord,SAMRecord)] = {
-
+  def samRecordPairIterator_unsorted(iter : Iterator[SAMRecord], verbose : Boolean = true, testCutoff : Int = -1, ignoreSecondary : Boolean = true, prefilterImproperPairs : Boolean = false) : Iterator[(SAMRecord,SAMRecord)] = {
+    val keepImproperPairs : Boolean = ! prefilterImproperPairs;
     if(ignoreSecondary){
        presetProgressReporters.wrapIterator_readPairs(getSRPairIterUnsorted(iter.filter((read : SAMRecord) => {
-           (! read.getNotPrimaryAlignmentFlag()) && (! getMateUnmappedFlag(read)) && (! read.getReadUnmappedFlag())
+           (keepImproperPairs || (read.getReadPairedFlag() && read.getProperPairFlag())) && (! read.getNotPrimaryAlignmentFlag()) && (! getMateUnmappedFlag(read)) && (! read.getReadUnmappedFlag())
          })), verbose, testCutoff);
     } else {
       error("FATAL ERROR: Using non-primary read mappings is not currently implemented!");
       return null;
     }
   }
-  def samRecordPairIterator_withMulti(iter : Iterator[SAMRecord], verbose : Boolean = true, testCutoff : Int = -1, ignoreSecondary : Boolean = true) : Iterator[(SAMRecord,SAMRecord)] = {
+  def samRecordPairIterator_withMulti(iter : Iterator[SAMRecord], verbose : Boolean = true, testCutoff : Int = -1, ignoreSecondary : Boolean = true, prefilterImproperPairs : Boolean = false) : Iterator[(SAMRecord,SAMRecord)] = {
+    val keepImproperPairs : Boolean = ! prefilterImproperPairs;
+
     if(ignoreSecondary){
       presetProgressReporters.wrapIterator_readPairs(getSRPairIter(iter.filter((read : SAMRecord) => {
-        (! read.getNotPrimaryAlignmentFlag()) && (! getMateUnmappedFlag(read)) && (! read.getReadUnmappedFlag())
+        (keepImproperPairs || (read.getReadPairedFlag() && read.getProperPairFlag())) && (! read.getNotPrimaryAlignmentFlag()) && (! getMateUnmappedFlag(read)) && (! read.getReadUnmappedFlag())
       })), verbose, testCutoff);
     } else {
       error("FATAL ERROR: Using non-primary read mappings is not currently implemented!");
@@ -986,6 +988,12 @@ object commonSeqUtils {
         
         while((! pairContainer.contains(curr.getReadName())) && iter.hasNext) {
           pairContainer(curr.getReadName()) = curr;
+          if(curr.getReadPairedFlag() && (! curr.getProperPairFlag())){
+                  warning("NOTE: qorts has detected a read flagged \"improperly paired\"! Some aligners allow \n"+
+                           "paired reads to match to different chromosomes, \n"+
+                           "which can cause errors in QoRTs as it attempts to perform a pairwise coordinate sort. \n"+
+                           "You might need to rerun QoRTs with the --prefilterImproperPairs parameter!","IMPROPER_PAIR",1);
+          }
           if(pairContainerWarningSize < pairContainer.size){
               reportln("NOTE: Unmatched Read Buffer Size > "+pairContainerWarningSize+" [Mem usage:"+MemoryUtil.memInfo+"]","note");
               if(pairContainerWarningSize == initialPairContainerWarningSize){
@@ -1016,7 +1024,7 @@ object commonSeqUtils {
   }
 
 
-  private def getSRPairIterResorted(iter : Iterator[SAMRecord]) : Iterator[(SAMRecord,SAMRecord)] = {
+  private def getSRPairIterResorted(iter : Iterator[SAMRecord], strict : Boolean = true) : Iterator[(SAMRecord,SAMRecord)] = {
     reportln("Starting getSRPairIterResorted...","debug");
     
     val initialPairContainerWarningSize = 100000;
@@ -1037,6 +1045,7 @@ object commonSeqUtils {
         def bufferHasNext : Boolean = iter.hasNext;
         def addNextPairToBuffer {
           var curr = iter.next;
+          var searchCt = 0;
           while((! pairContainer.contains(curr.getReadName())) && iter.hasNext) {
             readOrder = readOrder :+ curr.getReadName();
             pairContainer(curr.getReadName()) = curr;
@@ -1054,11 +1063,26 @@ object commonSeqUtils {
                 }
                 pairContainerWarningSize = pairContainerWarningSize * warningSizeMultiplier;
             }
+            searchCt = searchCt + 1;
             curr = iter.next;            
           }
           
-          if(! pairContainer.contains(curr.getReadName()) ){
-            internalUtils.Reporter.error("ERROR ERROR ERROR: Reached end of bam file, there are "+(pairContainer.size+1)+" orphaned reads, which are marked as having a mapped pair, but no corresponding pair is found in the bam file. \n(Example Orphaned Read Name: "+curr.getReadName()+")");
+          if((! pairContainer.contains(curr.getReadName())) ){
+            if(strict){
+              internalUtils.Reporter.error("ERROR ERROR ERROR  (636): Reached end of bam file, there are "+(pairContainer.size+1)+" orphaned reads, "+
+                                           "which are marked as having a mapped pair, but no "+
+                                           "corresponding pair is found in the bam file. \n"+
+                                           "(Example Orphaned Read Name: "+curr.getReadName()+")\n"+
+                                           "(Read line: "+curr.getSAMString()+")"
+                                           );
+            } else {
+              internalUtils.Reporter.warning("ERROR ERROR ERROR  (636): Reached end of bam file, there are "+(pairContainer.size+1)+" orphaned reads, "+
+                                           "which are marked as having a mapped pair, but no "+
+                                           "corresponding pair is found in the bam file. \n"+
+                                           "(Example Orphaned Read Name: "+curr.getReadName()+")\n"+
+                                           "(Read line: "+curr.getSAMString()+")","UNPAIRED_READ",-1
+                                           );
+              }
           }
           val rB = pairContainer.remove(curr.getReadName()).get;
           
@@ -1074,11 +1098,22 @@ object commonSeqUtils {
           val nextName = readOrder.head;
           readOrder = readOrder.tail;
           if(buffer.contains(nextName)) return buffer.remove(nextName).get;
+          var searchCt = 0;
           
           while(iter.hasNext && (! buffer.contains(nextName))){
             addNextPairToBuffer;
             if(bufferWarningSize < buffer.size){
-                reportln("NOTE: Unmatched Read-PAIR-Buffer Size > "+bufferWarningSize+" [Mem usage:"+MemoryUtil.memInfo+"]","note");
+                val nextSamRead = pairContainer(nextName);
+                reportln("NOTE: Unsorted Read-PAIR-Buffer Size > "+bufferWarningSize+" [Mem usage:"+MemoryUtil.memInfo+"]\n"+
+                         "  Currently searching for read: " + nextName + " for "+searchCt + " iterations."+
+                         "  Searching for read: "+nextName+" "+nextSamRead.getReferenceName()+":"+nextSamRead.getAlignmentStart()+"-"+nextSamRead.getAlignmentEnd+" "+nextSamRead.getFlags()+"\n"+
+                         "  Current unmatched-pair-buffer status: "+pairContainer.size,"note");
+                if( nextSamRead.getReadPairedFlag() && (! nextSamRead.getProperPairFlag()) ){
+                  reportln("NOTE: current-search read is flagged \"improperly paired\"! Some aligners allow \n"+
+                           "paired reads to match to different chromosomes, \n"+
+                           "which can cause errors in QoRTs as it attempts to perform a pairwise coordinate sort. \n"+
+                           "You might need to rerun QoRTs with the --prefilterImproperPairs parameter!","warn");
+                }
                 if(bufferWarningSize == initialPairContainerWarningSize){
                   reportln("    (This is generally not a problem, but if this increases further then OutOfMemoryExceptions\n"+
                            "    may occur.\n"+
@@ -1091,6 +1126,7 @@ object commonSeqUtils {
                 }
                 bufferWarningSize = bufferWarningSize * warningSizeMultiplier;
             }
+            searchCt = searchCt + 1;
           }
           if(!buffer.contains(nextName)){
             internalUtils.Reporter.error("ERROR ERROR ERROR: Reached end of bam file, there are "+(pairContainer.size+1)+" orphaned reads, which are marked as having a mapped pair, but no corresponding pair is found in the bam file. \n(Example Orphaned Read Name: "+nextName+")");

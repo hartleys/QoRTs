@@ -10,10 +10,76 @@ import internalUtils.Reporter._;
 
 object stdUtils {
 
+  /**************************************************************************************************************************
+   * Simple sugars:
+   **************************************************************************************************************************/
+  
+  def getOrFunc[A,B](x : Option[A], orelse : B)(fun : (A) => B) : B = {
+    x match {
+      case Some(a) => {
+        fun(a);
+      }
+      case None => {
+        orelse;
+      }
+    }
+  }
+  
+  /**************************************************************************************************************************
+   * Math:
+   **************************************************************************************************************************/
+  
+  def getAllPossiblePairs(n : Int, includeIdentityPair : Boolean = false) : Seq[(Int,Int)] = {
+    if(includeIdentityPair){
+      (0 until n).flatMap{ i => {
+        (i until n).map{ j => {
+          (i,j)
+        }}
+      }}
+    } else {
+      (0 until n).flatMap{ i => {
+        (i+1 until n).map{ j => {
+          (i,j)
+        }}
+      }}
+    }
+  }
+  
+  case class ReservoirSampler[A](K : Int, seed : Option[Int] = None)(implicit arg0: scala.reflect.ClassTag[A]){
+    val reservoir : Array[A] = arg0.newArray(K);
+    val rand : scala.util.Random = seed match {
+      case Some(s) => new scala.util.Random(s);
+      case None => new scala.util.Random();
+    }
+    var n : Int = 1;
+    def sample(a : A){
+      if(n <= K){
+        reservoir(n-1) = a;
+      } else {
+        val r = rand.nextInt(n)+1;
+        if(r <= K){
+          reservoir(r-1) = a;
+        }
+      }
+      n = n + 1;
+    }
+    def getSample : Array[A] = {
+      reservoir.filter(_ != null);
+    }
+  }
+  
+  def getFirstDigitOfInt(x : Int) : Int = {
+    val xs = x.toString();
+    if(xs.head == '-'){
+      string2int(xs.charAt(1).toString());
+    } else {
+      string2int(xs.head.toString());
+    }
+  }
+  
   /*
    * Utility Classes:
    */
-  
   
   /*
    * Untested:
@@ -69,6 +135,54 @@ object stdUtils {
   /*
    * END untested
    */
+  
+  def addIteratorCloseAction[A](iter : Iterator[A], closeAction : (() => Unit)) : Iterator[A] = {
+    new Iterator[A] {
+      //var isOpen = true;
+      def next = {
+        val out = iter.next;
+        if(! iter.hasNext){
+          closeAction();
+        }
+        out
+      }
+      def hasNext = iter.hasNext;
+    }
+  }
+  def addIteratorCloseAction[A](iter : Iterator[A], closeAction : ((A) => Unit)) : Iterator[A] = {
+    new Iterator[A] {
+      //var isOpen = true;
+      def next = {
+        val out = iter.next;
+        if(! iter.hasNext){
+          closeAction(out);
+        }
+        out
+      }
+      def hasNext = iter.hasNext;
+    }
+  }
+  
+  
+  def addQuotesIfNeeded(s : String) : String = {
+    if(s.length == 0){
+      return "\"\""
+    } else if(s.head == '\"' && s.last == '\"'){
+      return s;
+    } else {
+      return "\"" + s + "\"";
+    }
+  }
+  
+  
+  def trimBrackets(s : String) : String = {
+    var out = s;
+    if(s.length == 0) return out;
+    if(s.head == '[') out = out.tail;
+    if(s.length == 0) return out;
+    if(s.last == ']') out = out.init;
+    return out;
+  }
   
   def generalizedTo(f : Int, t : Int) : Seq[Int] = {
     if(f == t) return (f until t);
@@ -131,6 +245,22 @@ object stdUtils {
   /**************************************************************************************************************************
    * Specialty:
    **************************************************************************************************************************/
+  def circularIterator[A]( lst : Seq[A] ) : Iterator[A] = {
+    new Iterator[A] {
+      var i = 0;
+      def next : A = {
+        if(i < lst.length){
+          i = i + 1
+          lst(i-1);
+        } else {
+          i = 1;
+          lst(0);
+        }
+      }
+      def hasNext = true;
+    }
+  }
+  
   
   def calculateGeometricSizeFactorsForMatrix(m : Seq[Seq[Int]], verbose : Boolean = true) : Vector[Double] = {
     if(verbose) reportln(">   Calculating size factors","debug");
@@ -220,9 +350,31 @@ object stdUtils {
   def getDateAndTimeString : String = {
     return STANDARD_DATE_AND_TIME_FORMATTER.format(java.util.Calendar.getInstance().getTime());
   }
-   
+  def getDateAndTimeStringFromDate(d : java.util.Date) : String = {
+    return STANDARD_DATE_AND_TIME_FORMATTER.format(d);
+  }
+  def nanoTimeDifferenceFormat(nanos : Long, verbose : Boolean = false) : String = {
+      val time = nanos / 1000000;
+      val millis_col = zeroPad( (time % 1000).toInt , 4);
+      val secs = time / 1000;
+      val secs_col = zeroPad( (secs % 60).toInt , 2);
+      val mins = secs / 60;
+      val mins_col = zeroPad( (mins % 60).toInt , 2);
+      val hours = mins / 60;
+      val hours_col = zeroPad( (hours % 24).toInt , 2);
+      val days = hours / 24;
+      
+      if(days > 0 && verbose) return ""+days+" days "+hours_col+":"+mins_col+":"+secs_col+"."+millis_col;
+      else ""+hours_col+":"+mins_col+":"+secs_col+"."+millis_col;
+  }
+  
+   //TimeStampUtil.timeDifferenceFormatter(time)
   object TimeStampUtil {
     def apply() : TimeStampUtil = new TimeStampUtil(java.util.Calendar.getInstance.getTimeInMillis());
+    
+    def timeDifferenceFormatterNanos(time : Long) : String = {
+      timeDifferenceFormatter(time / 1000000);
+    }
     
     def timeDifferenceFormatter(time : Long) : String = {
       val millis_col = zeroPad( (time % 1000).toInt , 4);
@@ -270,7 +422,314 @@ object stdUtils {
   /**************************************************************************************************************************
    * Sequence/iterator utilities:
    **************************************************************************************************************************/
+  
+  def groupBySpan_OLD[A,B](iter : Iterator[A])(f : (A => B)) : Iterator[Vector[A]] = {
+    var currIter = iter;
+    
+    return new Iterator[Vector[A]]{
+      def hasNext : Boolean = currIter.hasNext;
+      def next : Vector[A] = {
+        val nextA = currIter.next;
+        val nextB = f(nextA);
+        val (curr,remain) = currIter.span(c => f(c) == nextB);
+        val out = nextA +: curr.toVector;
+        currIter = remain;
+        out;
+      }
+    }
+  }
+  
+  def groupBySpan[A,B](iter : BufferedIterator[A])(f : (A => B)) : Iterator[Seq[A]] = {
+    //var currIter = iter;
+    return new Iterator[Seq[A]]{
+      def hasNext : Boolean = iter.hasNext;
+      def next : Seq[A] = {
+        //val nextA = currIter.next;
+        val nextB = f(iter.head);
+        extractWhile(iter)(a => f(a) == nextB)
+      }
+    }
+  }
+  def extractWhile[A](iter : BufferedIterator[A])(f : (A => Boolean)) : Vector[A] = {
+      var out = scala.collection.mutable.Queue[A]();
+      while(iter.hasNext && f(iter.head)){
+        out += iter.next;
+      }
+      return out.toVector;
+  }
+  def skipWhile[A](iter : BufferedIterator[A])(f : (A => Boolean)){
+    while(iter.hasNext && f(iter.head)){
+      iter.next;
+    }
+  }
+  /*
+  def chainSpanIterator[A](iter : BufferedIterator[A])(f : A => Boolean) : (BufferedIterator[A],BufferedIterator[A]) = {
+    if(! iter.hasNext){
+      (new BufferedIterator[A](),new BufferedIterator[A]())
+    } else {
+      if(! f(iter.head)){
+        (new BufferedIterator[A](),iter);
+      } else {
+        new BufferedIterator[A]{
+          
+          def hasNext : Boolean
+          def head : A
+          def next : A
+        }
+      }
+    }
 
+  }*/
+  //(iter : BufferedIterator[A])(p : (A) => B)
+  /*
+  abstract class BatchIterator[A] extends BufferedIterator[A] {
+    def hasNext : Boolean
+    def next : A
+    def head : A
+    def hasNextBatch : Boolean
+    def switchBatch : Unit
+  }
+  class EmptyBatchIterator[A] extends BatchIterator[A]{
+    def hasNext : Boolean = false;
+    def next : A = Iterator[A]().next;
+    def head : A = Iterator[A]().next;
+    def hasNextBatch : Boolean = false
+    def switchBatch {
+      //do nothing
+    }
+  }
+  class getBatchIterator[A](iter : BufferedIterator[A])(p : (A) => Boolean) : BatchIterator[A] = {
+    if(! iter.hasNext){
+      return EmptyBatchIterator[A];
+    }
+    var h : A = iter.head;
+    var ph : Boolean = p(iter.head);
+    
+    def hasNext : Boolean = iter.hasNext && ph;
+    def next : A = {
+      iter.next();
+    }
+    def head : A
+    def hasNextBatch : Boolean
+    def switchBatch{
+      
+    }
+    
+  }
+  
+  
+  abstract class ChainSpanIterator[A] extends BufferedIterator[A] {
+    def hasNext : Boolean
+    def next : A
+    def head : A
+    def master : ChainSpanIteratorMaster[A]
+  }
+  
+  class ChainSpanIteratorMaster[A](iter : BufferedIterator[A])(p : (A) => Boolean){
+    val currIter : ChainSpanIterator[A]
+    val remainderIter : ChainSpanIterator[A]
+    
+  }
+  
+  def chainSpannableIterator[A](iter : BufferedIterator[A]) : BufferedIterator[A] = new BufferedIterator[A]{
+    def hasNext : Boolean = iter.hasNext;
+    def head : A = iter.head;
+    def next : A = iter.next;
+    
+    override def span(p : (A) => Boolean) : (BufferedIterator[A],BufferedIterator[A]) = {
+      
+    }
+  }*/
+  
+  
+  /*class SpannedIterator[A](iter : BufferedIterator[A])(f : A => Boolean) {
+    def currIter : BufferedIterator[A];
+    def remainder : BufferedIterator[A] = BufferedIterator[A]{
+      
+      def hasNext : Boolean
+      def head : A
+      def next : A
+      override def span
+    }
+    
+    
+  }*/
+  
+  def skipWhileWithProgress[A](iter : BufferedIterator[A], targetSec : Int = 60)(f : (A => Boolean), reportFunc : (A => String) = (a : A) => ""){
+    var iterCt = 0;
+    var dotCt = -1;
+    val startTime = System.nanoTime();
+           // val elapsedSec = (currTime - lastLineTime) / 1000000000;
+    while(iter.hasNext && f(iter.head)){
+      iterCt += 1;
+      val n = iter.next;
+      if(dotCt == -1 && (System.nanoTime() - startTime) / 1000000000 > targetSec){
+        dotCt = iterCt
+        report("(dot="+dotCt+") [.","progress");
+      } else if(dotCt != -1 && iterCt % dotCt == 0){
+        if(iterCt % (dotCt * 5) == 0){
+          report(".]"+reportFunc(n)+"[","progress");
+        } else {
+          report(".","progress");
+        }
+      }
+      
+    }
+    report("]\n","progress");
+  }
+  
+  def skipWhileCt[A](iter : BufferedIterator[A])(f : (A => Boolean)) : Int = {
+    var ct = 0;
+    while(iter.hasNext && f(iter.head)){
+      ct = ct + 1;
+      iter.next;
+    }
+    ct;
+  }
+  
+  
+  def flattenIterators[A](ii : Iterator[Iterator[A]]) : Iterator[A] = {
+    val iif = ii.filter(i => i.hasNext);
+    if(! iif.hasNext){
+      return Iterator[A]();
+    } else {
+      var currIter = iif.next;
+      return new Iterator[A]{
+        def hasNext : Boolean = currIter.hasNext
+        def next : A = {
+          val next = currIter.next;
+          if((! currIter.hasNext) && iif.hasNext){
+            currIter = iif.next;
+          }
+          next;
+        }
+      }
+    }
+  }
+  
+  abstract class BenchmarkIterator[A] extends Iterator[A] {
+    var ns : Long = 0;
+    var i = 0;
+    def next : A;
+    def hasNext : Boolean;
+    //def head : A;
+    def iterCt : Int = i;
+    def nanosElapsed : Long = ns
+    def reset(){
+        ns = 0;
+        i = 0;
+    }
+    def getStatusString() : String = {
+      "["+i+"]/["+nanoTimeDifferenceFormat(ns)+"]"
+    }
+  }
+  
+  def benchMap[A,B](iter : Iterator[A])(f : A => B) : BenchmarkIterator[B] = {
+    new BenchmarkIterator[B] {
+
+      def next : B = {
+        i += 1;
+        val nInput = iter.next;
+        val t0 = System.nanoTime();
+        val n = f(nInput);
+        val t1 = System.nanoTime();
+        ns += (t1 - t0)
+        n;
+      }
+      def hasNext : Boolean = iter.hasNext;
+
+    }
+  }
+  val EmptyIterator : Iterator[Nothing] = new Iterator[Nothing]{
+        def hasNext: Boolean = false
+        def next(): Nothing = throw new NoSuchElementException("next on empty iterator")
+  }
+
+  def benchFlatMap[A,B](iter : Iterator[A])(f : A => scala.collection.GenTraversableOnce[B]) : BenchmarkIterator[B] = {
+    new BenchmarkIterator[B] {
+      var nsGrp : Long = 0;
+      private var cur : Iterator[B] = EmptyIterator
+      //private def nextCur() { cur = f(iter.next()).toIterator }
+      private def nextCur(){
+        i += 1;
+        val nInput = iter.next;
+        val t0 = System.nanoTime();
+        val n = f(nInput).toIterator;
+        val t1 = System.nanoTime();
+        ns += (t1 - t0)
+        nsGrp += (t1 - t0);
+        cur = n;
+      }
+      def hasNext: Boolean = {
+        // Equivalent to cur.hasNext || self.hasNext && { nextCur(); hasNext }
+        // but slightly shorter bytecode (better JVM inlining!)
+        while(!cur.hasNext) {
+          if(! iter.hasNext ) return false
+          nextCur()
+        }
+        true
+      }
+      def next(): B = {
+        if(hasNext){
+          val t0 = System.nanoTime();
+          val n = cur.next();
+          val t1 = System.nanoTime();
+          ns += (t1 - t0)
+          n;
+        } else {
+          throw new NoSuchElementException("next on empty iterator")
+        }
+      }
+      override def reset(){
+        ns = 0;
+        i = 0;
+        nsGrp = 0;
+      }
+      override def getStatusString() : String = {
+        "["+i+"]/["+nanoTimeDifferenceFormat(ns)+"]["+nanoTimeDifferenceFormat(nsGrp)+"/"+nanoTimeDifferenceFormat(ns-nsGrp)+"]"
+      }
+    }
+  }
+  
+  
+  
+  /*def groupBySpan_OLD[A,B](iter : Iterator[A])(f : (A => B)) : Iterator[Seq[A]] = {
+    var currIter = iter;
+    
+    return new Iterator[Seq[A]]{
+      def hasNext : Boolean = currIter.hasNext;
+      def next : Seq[A] = {
+        val nextA = currIter.next;
+        val nextB = f(nextA);
+        val (curr,remain) = spanVector(currIter)(c => f(c) == nextB);
+        val out = nextA +: curr;
+        currIter = remain;
+        out;
+      }
+    }
+  }*/
+  def spanVector_OLD[A](iter : Iterator[A])(f : (A => Boolean)) : (Vector[A],Iterator[A]) = {
+    if(iter.hasNext){
+      var out = Vector[A]();
+      var curr = iter.next;
+      if(f(curr)){
+          out = out :+ curr;
+      }
+      while(iter.hasNext && f(curr)){
+        curr = iter.next;
+        if(f(curr)){
+          out = out :+ curr;
+        }
+      }
+      if(f(curr)){
+        return (out,iter);
+      } else {
+        return (out,Iterator(curr) ++ iter);
+      }
+    } else {
+      return (Vector[A](),iter);
+    }
+  }
   
   object AlphabetOrderingChar extends Ordering[Char] {
     def compare(x : Char, y : Char) : Int = {
@@ -350,7 +809,13 @@ object stdUtils {
     return (( peek ,  itr ));
   }
 
-
+  case class DummyIterator[A](v : A) extends Iterator[A] {
+    def hasNext : Boolean = true;
+    def next : A = v;
+  }
+  def DummyStream[A](v : A) : Stream[A] = {
+    DummyIterator(v).toStream;
+  }
 
   
   def transposeMatrix[A](m : Seq[Seq[A]]) : Seq[Seq[A]] = {
@@ -382,31 +847,42 @@ object stdUtils {
       }
     }
   }
+  def filterWithCount[A >: Null](iter : Iterator[A],filterFunction : (A => Boolean)) : IterWithCount[A] = {
+    if(iter.hasNext){
+      new FilterWithCountNonEmpty(iter,filterFunction);
+    } else {
+      new FilterWithCountEmpty();
+    }
+  }
+  
+  abstract class IterWithCount[A >: Null] extends Iterator[A] {
+    def next : A
+    def hasNext : Boolean
+    def getCt : Int
+  }
+  
+  class FilterWithCountEmpty[A >: Null]() extends IterWithCount[A] {
+    def next : A = null;
+    def hasNext : Boolean = false;
+    def getCt : Int = 0;
+  }
+  class FilterWithCountNonEmpty[A >: Null](iter : Iterator[A], filterFunction : (A => Boolean)) extends IterWithCount[A] {
+    private var biter = iter.buffered;
+    private val skipFunction = (a : A) => ! filterFunction(a)
+    private var dropCt : Int = skipWhileCt[A](biter)(skipFunction);
+    private var (nextHolder,iterHasNext) : (A,Boolean) = if(iter.hasNext) (iter.next,true) else (null,false);
     
-  class filterWithCount[A](iter : Iterator[A], filterFunction : (A => Boolean)) extends Iterator[A] {
-    private val nextHolder : Array[Option[A]] = Array.ofDim[Option[A]](1);
-    private var dropCt : Int = 0;
-    
-    def getDropCt : Int = dropCt;
-    def hasNext : Boolean = ! nextHolder(0).isEmpty;
+    def getCt : Int = dropCt;
+    def hasNext : Boolean = iterHasNext;
     def next : A = {
-      val out = nextHolder(0).get;
+      val out = nextHolder;
+      dropCt = dropCt + skipWhileCt[A](biter)(skipFunction);
       if(iter.hasNext){
-        var curr = iter.next;
-        while(! filterFunction(curr)){
-          if(! iter.hasNext){
-            nextHolder(0) = None;
-            return(out);
-          }
-          dropCt += 1;
-          curr = iter.next;
-        }
-        nextHolder(0) = Some(curr);
-        return(out);
+        nextHolder = iter.next;
       } else {
-        nextHolder(0) = None;
-        return(out);
+        iterHasNext = false;
       }
+      return(out);
         
     }
   }
@@ -501,6 +977,236 @@ object stdUtils {
     }
   }
   
+  abstract class AdvancedIteratorProgressReporter[A] {
+    def reportProgress(iterCt : Int, a : A);
+    
+    def reportStart(iterCt : Int, a : A) = {
+      //reportProgress(iterCt,a);
+      //default: do nothing!
+    }
+    def reportEnd(iterCt : Int, a : A) = {
+      //reportProgress(iterCt,a);
+      //default: do nothing!
+    }
+  }
+  case class AdvancedIteratorProgressReporter_ThreeLevel[A](elementTitle : String, 
+                                                            dotThreshold : Int, 
+                                                            dotSpaceThreshold : Int , 
+                                                            dotNewlineThreshold : Int, 
+                                                            reportFunction : ((A,Int) => String) = ((a : A,i : Int) => "")) extends AdvancedIteratorProgressReporter[A]  {
+    def reportProgress(iterCt : Int, a : A){
+      if(iterCt % dotThreshold == 0){ if(iterCt % dotSpaceThreshold == 0) { if(iterCt % dotNewlineThreshold == 0) report(".["+iterCt+" "+elementTitle+" processed] [Time: "+getDateAndTimeString+"] "+reportFunction(a,iterCt)+"\n","progress"); else report(". ","progress"); } else { report(".","progress");}}
+    }
+  }
+  case class AdvancedIteratorProgressReporter_ThreeLevelAccel[A](elementTitle : String, 
+                                                                 accelFactor : Int = 10,
+                                                                 maxAccel : Int = 1000,
+                                                                 var dotThreshold : Int = 1,
+                                                                 var dotSpaceThreshold : Int = 5,
+                                                                 var dotNewlineThreshold : Int = 10,
+                                                                 reportFunction : ((A,Int) => String) = ((a : A,i : Int) => "")) extends AdvancedIteratorProgressReporter[A]  {
+    var accel = 1;
+    var space = "x";
+    
+    def reportProgress(iterCt : Int, a : A){
+      if(iterCt % dotThreshold == 0){
+        if(iterCt % dotSpaceThreshold == 0) { if(iterCt % dotNewlineThreshold == 0){ 
+          if(accel < maxAccel){
+            accel = accel * accelFactor;
+            dotThreshold        = dotThreshold  * accelFactor;
+            dotSpaceThreshold   = dotSpaceThreshold  * accelFactor;
+            dotNewlineThreshold = dotNewlineThreshold * accelFactor;
+          } else if(space == "x"){
+            space = "";
+          }
+          report(".["+iterCt+" "+elementTitle+" processed] [Time: "+getDateAndTimeString+"] "+reportFunction(a,iterCt)+"\n"+space,"progress");
+        } else report(". ","progress");} else { 
+          report(".","progress");
+        }
+      }
+    }
+  }
+  case class AdvancedIteratorProgressReporter_ThreeLevelAuto_OLD[A](elementTitle : String = "lines", lineSec : Int = 300,
+                                                                 reportFunction : ((A,Int) => String) = ((a : A,i : Int) => ""),
+                                                                 linePrefix : String = "") extends AdvancedIteratorProgressReporter[A]  {
+    var accel = 1;
+    var space = "x";
+    val accelFactor : Int = 10
+    val accelFactors : Iterator[Float] = circularIterator(Seq(2.0.toFloat,2.5.toFloat,2.0.toFloat));
+    var dotThreshold : Int = 1
+    var dotSpaceThreshold : Int = 5
+    var dotNewlineThreshold : Int = 20
+    
+    var lastLineTime = System.nanoTime();
+    var lastLineLen = 1.0;
+    var i = 1;
+    
+    def bufferProgressBar(bufferChar : String = "x"){
+        val numX = (i % dotNewlineThreshold) / dotThreshold;
+        val numSpaces = numX / 5;
+        val numFinalX = numX % 5;
+        space = repString("xxxxx ",numSpaces) + repString("x",numFinalX);
+        
+    }
+    
+    def reportProgress(iterCt : Int, a : A){
+      if(i == 1) report(linePrefix,"progress");
+      i = iterCt;
+      if(iterCt % dotThreshold == 0){ 
+        if(iterCt % dotSpaceThreshold == 0) { 
+          if(iterCt % dotNewlineThreshold == 0){ 
+            val currTime = System.nanoTime();
+            val elapsedSec = (currTime - lastLineTime) / 1000000000;
+            val accelerate = elapsedSec.toDouble / lastLineLen < lineSec;
+            space = "";
+            if(accelerate){
+              //accel = accel * accelFactor;
+              dotThreshold = math.round(dotThreshold.toFloat * accelFactors.next)
+              dotSpaceThreshold = dotThreshold * 5;
+              dotNewlineThreshold = dotThreshold * 20;
+              //dotThreshold        = dotThreshold  * accelFactor;
+              //dotSpaceThreshold   = dotSpaceThreshold  * accelFactor;
+              //dotNewlineThreshold = dotNewlineThreshold * accelFactor;
+              val numX = (iterCt % dotNewlineThreshold) / dotThreshold;
+              lastLineLen = (20-numX).toDouble / 20.toDouble;
+              val numSpaces = numX / 5;
+              val numFinalX = numX % 5;
+              space = repString("xxxxx ",numSpaces) + repString("x",numFinalX);
+            }
+            lastLineTime = currTime;
+            report(".["+iterCt+" "+elementTitle+" processed] [Time: "+getDateAndTimeString+"] ("+elapsedSec+"s)"+reportFunction(a,iterCt)+"\n"+
+                   {if(accelerate) "                       [AutoProgressReporter: "+dotThreshold+" "+elementTitle+" per dot] [TargetTime = "+lineSec+"s]"+"\n" else ""}+
+                   linePrefix +
+                   space,"progress");
+          } else report(". ","progress");
+        } else { 
+          report(".","progress");
+        }
+      }
+    }
+  }
+  
+
+  case class AdvancedIteratorProgressReporter_ThreeLevelAuto[A](elementTitle : String = "lines", lineSec : Int = 60,
+                                                                 reportFunction : ((A,Int) => String) = ((a : A,i : Int) => "")) extends AdvancedIteratorProgressReporter[A]  {
+    var accel = 1;
+    var space = "x";
+    val accelFactor : Int = 10
+    val accelFactors : Iterator[Float] = circularIterator(Seq(2.0.toFloat,2.5.toFloat,2.0.toFloat));
+    var dotThreshold : Int = 1
+    var dotSpaceThreshold : Int = 5
+    var dotNewlineThreshold : Int = 20
+    
+    var lastLineTime = System.nanoTime();
+    var lastLineLen = 1.0;
+    var i = 1;
+    
+    var lastLineNum = 20;
+    val BURN_IN_CT = 200;
+    var startNanos = System.nanoTime();
+    
+    def bufferProgressBar(bufferChar : String = "x"){
+        val numX = (i % dotNewlineThreshold) / dotThreshold;
+        val numSpaces = numX / 5;
+        val numFinalX = numX % 5;
+        space = repString("xxxxx ",numSpaces) + repString("x",numFinalX);
+    }
+    
+    def reportProgress(iterCt : Int, a : A){
+      i = iterCt;
+      if(i == BURN_IN_CT){
+        startNanos = System.nanoTime();
+        progressReport(iterCt,"["+iterCt+" "+elementTitle+" processed] BURN IN TIME COMPLETE [Time: "+getDateAndTimeString+"] "+reportFunction(a,iterCt));
+      }
+      if(iterCt % dotThreshold == 0){
+        val numX = if(i % dotNewlineThreshold == 0) 20 else (i % dotNewlineThreshold) / dotThreshold;
+        progressDot(i = numX, dotsPerGroup = 5, groupsPerLine = 4, blankSpacer = "-", verb = "progress");
+        
+        if(iterCt % dotNewlineThreshold == 0){
+            val currTime = System.nanoTime();
+            val elapsedSec = (currTime - lastLineTime) / 1000000000;
+            val elapsedMillis = (currTime - lastLineTime) / 1000000;
+            val elapsedMilliString = zeroPad(  (elapsedMillis % 1000).toInt, cols = 3);
+            val linesPerSec   = (lastLineNum.toDouble) / (elapsedMillis.toDouble / 1000.toDouble);
+            
+            val speedString = if(linesPerSec < 10){
+              val linesPerMin = (lastLineNum * 60).toDouble / (elapsedMillis.toDouble / 1000.toDouble);
+              ((math.rint(linesPerMin * 100)) / 100) +" "+elementTitle+ " per min";
+            } else if(linesPerSec < 1000){
+              ((math.rint(linesPerSec * 100)) / 100) +" "+elementTitle+ " per sec";
+            } else {
+              math.round(linesPerSec) +" "+elementTitle+ " per sec";
+            }
+            val accelerate = elapsedSec.toDouble / lastLineLen < lineSec;
+            if(accelerate){
+              dotThreshold = math.round(dotThreshold.toFloat * accelFactors.next)
+              dotSpaceThreshold = dotThreshold * 5;
+              dotNewlineThreshold = dotThreshold * 20;
+            }
+            val newNumX = (i % dotNewlineThreshold) / dotThreshold;
+            lastLineLen = (20-newNumX).toDouble / 20.toDouble;
+            lastLineNum = dotNewlineThreshold - (iterCt % dotNewlineThreshold);
+            lastLineTime = currTime;
+            progressReport(iterCt,"["+iterCt+" "+elementTitle+" processed] [Time: "+getDateAndTimeString+"] ("+elapsedSec+"."+elapsedMilliString+"s; "+speedString+"; Elapsed="+nanoTimeDifferenceFormat(currTime - startNanos)+")"+reportFunction(a,iterCt));
+            if(accelerate){
+              reportln("[AutoProgressReporter: "+dotThreshold+" "+elementTitle+" per dot] [TargetTime = "+lineSec+"s]","progress")
+            }
+            startProgressLine(blankSpaces = newNumX, spacer = "x", groupSpacer = " ", dotsPerGroup = 5, groupsPerLine = 4, verb = "progress")
+        }
+      }
+    }
+    var initTime = System.nanoTime();
+    override def reportStart(iterCt : Int, a : A){
+      progressReport(iterCt,"[STARTING ITERATION:] [Time: "+getDateAndTimeString+"]"+reportFunction(a,iterCt));
+      val currTime = System.nanoTime();
+      lastLineTime = currTime;
+      initTime = currTime;
+    }
+    override def reportEnd(iterCt : Int, a : A){
+      val currTime = System.nanoTime();
+      val elapsedMillis = (currTime - initTime) / 1000000;
+      val elapsedString = TimeStampUtil.timeDifferenceFormatterNanos(currTime - initTime);
+      val linesPerSec   = (iterCt.toDouble) / (elapsedMillis.toDouble / 1000.toDouble);
+      
+      val speedString = if(linesPerSec < 10){
+              val linesPerMin = (iterCt * 60).toDouble / (elapsedMillis.toDouble / 1000.toDouble);
+              ((math.rint(linesPerMin * 100)) / 100) +" "+elementTitle+ " per min";
+      } else if(linesPerSec < 1000){
+              ((math.rint(linesPerSec * 100)) / 100) +" "+elementTitle+ " per sec";
+      } else {
+              math.round(linesPerSec) +" "+elementTitle+ " per sec";
+      }
+      progressReport(iterCt,"[FINISHED ITERATION: "+iterCt+" "+elementTitle+" processed] [Time: "+getDateAndTimeString+"] (Elapsed: "+elapsedString+"; "+speedString+")"+reportFunction(a,iterCt));
+    }
+  }
+  
+  def wrapIteratorWithAdvancedProgressReporter2[B]( iter : Iterator[B] , ipr : AdvancedIteratorProgressReporter[B] ) : Iterator[B] = {
+    iter.zip(Iterator.from(1)).map{case (b,i) => {
+      ipr.reportProgress(i,b);
+      b;
+    }}
+  }
+  
+  def wrapIteratorWithAdvancedProgressReporter[B]( iter : Iterator[B] , ipr : AdvancedIteratorProgressReporter[B] ) : Iterator[B] = {
+    //iter.zip(Iterator.from(1)).map{case (b,i) => {
+    //  ipr.reportProgress(i,b);
+    //  b;
+    //}}
+    new Iterator[B]{
+      var i = 1;
+      def hasNext : Boolean = iter.hasNext;
+      def next : B = {
+        val n = iter.next;
+        if(i == 1) ipr.reportStart(i,n);
+        ipr.reportProgress(i,n);
+        if(! hasNext) ipr.reportEnd(i,n);
+        i = i + 1;
+        n;
+      }
+    }
+  }
+  
+  
   def wrapIteratorWithProgressReporter[B]( iter : Iterator[B] , ipr : IteratorProgressReporter ) : Iterator[B] = {
     new Iterator[B]{
       var iterCt = 0;
@@ -527,6 +1233,8 @@ object stdUtils {
   /**************************************************************************************************************************
    * String conversion:
    **************************************************************************************************************************/
+  
+  
   
   def escapeToMarkdown(s : String) : String = {
     escapifyString(s, List("`","\\*","_","\\{","\\}","\\[","\\]","\\(","\\)","\\#","\\+","-","\\.","!"));
@@ -560,6 +1268,8 @@ object stdUtils {
   /**************************************************************************************************************************
    * String formatting
    **************************************************************************************************************************/
+  
+  
   
   def indentifyLines(s : String, indent : String) : String = {
     indent + s.split("\n").toVector.mkString("\n" + indent) + (if(s.charAt(s.length - 1) == '\n') "\n" else "");
@@ -612,7 +1322,23 @@ object stdUtils {
       return null;
     }
   }
-
+  
+  def convertIntToShortStringForm(i : Int, byteStyle : Boolean = false, fullStyle : Boolean = false) : String = {
+    val sRaw = i.toString();
+    val sign = if(sRaw.head == '-') "-" else "";
+    val s = if(sRaw.head == '-') sRaw.tail else sRaw;
+    val numZeroPad = sRaw.reverse.takeWhile(_ == '0').length;
+    if(numZeroPad < 3){
+      return sRaw;
+    } else if(numZeroPad < 6){
+      return sign + s.dropRight(3) + ( if(byteStyle){ "k" } else if(fullStyle){ " thousand" } else { "k" } )
+    } else if(numZeroPad < 9){
+      return sign + s.dropRight(6) + ( if(byteStyle){ "M" } else if(fullStyle){ " million" } else { "M" } )
+    } else {
+      return sign + s.dropRight(9) + ( if(byteStyle){ "G" } else if(fullStyle){ " billion" } else { "b" } )
+    }
+    
+  } 
   
   /**************************************************************************************************************************
    * Line formatting:
@@ -721,14 +1447,271 @@ object stdUtils {
       return v;
     } else {
       val vpar = v.par;
-      vpar.tasksupport = new scala.collection.parallel.ForkJoinTaskSupport(new scala.concurrent.forkjoin.ForkJoinPool(numThreads));
+      //vpar.tasksupport = new scala.collection.parallel.ForkJoinTaskSupport(new scala.concurrent.forkjoin.ForkJoinPool(numThreads));
       vpar;
     }
   } 
   
 
+  /**************************************************************************************************************************
+   * Min Option:
+   **************************************************************************************************************************/
+  
+  def minOption[T](x : Option[T],y : Option[T])(implicit ord : Ordering[T]) : Option[T] = {
+    x match {
+      case Some(xi) => {
+        y match {
+          case Some(yi) => {
+            if( ord.compare(xi,yi) <= 0) Some(xi);
+            else Some(yi);
+          }
+          case None => {
+            Some(xi);
+          }
+        }
+      }
+      case None => {
+        y match {
+          case Some(yi) => {
+            Some(yi);
+          }
+          case None => {
+            None;
+          }
+        }
+      }
+    }
+  }
+  def maxOption[T](x : Option[T],y : Option[T])(implicit ord : Ordering[T]) : Option[T] = {
+    x match {
+      case Some(xi) => {
+        y match {
+          case Some(yi) => {
+            if( ord.compare(xi,yi) <= 0) Some(yi);
+            else Some(xi);
+          }
+          case None => {
+            Some(xi);
+          }
+        }
+      }
+      case None => {
+        y match {
+          case Some(yi) => {
+            Some(yi);
+          }
+          case None => {
+            None;
+          }
+        }
+      }
+    }
+  }
+  
+  /*
+  def minOption(x: Option[Int], y : Option[Int]) : Option[Int] = {
+    x match {
+      case Some(xi) => {
+        y match {
+          case Some(yi) => {
+            Some(math.min(xi,yi));
+          }
+          case None => {
+            Some(xi);
+          }
+        }
+      }
+      case None => {
+        y match {
+          case Some(yi) => {
+            Some(yi);
+          }
+          case None => {
+            None;
+          }
+        }
+      }
+    }
+  }
+  def minOption(x: Option[Float], y : Option[Float]) : Option[Float] = {
+    x match {
+      case Some(xi) => {
+        y match {
+          case Some(yi) => {
+            Some(math.min(xi,yi));
+          }
+          case None => {
+            Some(xi);
+          }
+        }
+      }
+      case None => {
+        y match {
+          case Some(yi) => {
+            Some(yi);
+          }
+          case None => {
+            None;
+          }
+        }
+      }
+    }
+  }
+  def minOption(x: Option[Double], y : Option[Double]) : Option[Double] = {
+    x match {
+      case Some(xi) => {
+        y match {
+          case Some(yi) => {
+            Some(math.min(xi,yi));
+          }
+          case None => {
+            Some(xi);
+          }
+        }
+      }
+      case None => {
+        y match {
+          case Some(yi) => {
+            Some(yi);
+          }
+          case None => {
+            None;
+          }
+        }
+      }
+    }
+  }
+  def minOption(x: Option[Long], y : Option[Long]) : Option[Long] = {
+    x match {
+      case Some(xi) => {
+        y match {
+          case Some(yi) => {
+            Some(math.min(xi,yi));
+          }
+          case None => {
+            Some(xi);
+          }
+        }
+      }
+      case None => {
+        y match {
+          case Some(yi) => {
+            Some(yi);
+          }
+          case None => {
+            None;
+          }
+        }
+      }
+    }
+  }*/
 
-
+  /**************************************************************************************************************************
+   * Max Option:
+   **************************************************************************************************************************/
+  
+  
+  /*
+  def maxOption(x: Option[Int], y : Option[Int]) : Option[Int] = {
+    x match {
+      case Some(xi) => {
+        y match {
+          case Some(yi) => {
+            Some(math.max(xi,yi));
+          }
+          case None => {
+            Some(xi);
+          }
+        }
+      }
+      case None => {
+        y match {
+          case Some(yi) => {
+            Some(yi);
+          }
+          case None => {
+            None;
+          }
+        }
+      }
+    }
+  }
+  def maxOption(x: Option[Float], y : Option[Float]) : Option[Float] = {
+    x match {
+      case Some(xi) => {
+        y match {
+          case Some(yi) => {
+            Some(math.max(xi,yi));
+          }
+          case None => {
+            Some(xi);
+          }
+        }
+      }
+      case None => {
+        y match {
+          case Some(yi) => {
+            Some(yi);
+          }
+          case None => {
+            None;
+          }
+        }
+      }
+    }
+  }
+  def maxOption(x: Option[Double], y : Option[Double]) : Option[Double] = {
+    x match {
+      case Some(xi) => { 
+        y match {
+          case Some(yi) => {
+            Some(math.max(xi,yi));
+          }
+          case None => {
+            Some(xi);
+          }
+        }
+      }
+      case None => {
+        y match {
+          case Some(yi) => {
+            Some(yi);
+          }
+          case None => {
+            None;
+          }
+        }
+      }
+    }
+  }
+  
+  def maxOption(x: Option[Long], y : Option[Long]) : Option[Long] = {
+    x match {
+      case Some(xi) => {
+        y match {
+          case Some(yi) => {
+            Some(math.max(xi,yi));
+          }
+          case None => {
+            Some(xi);
+          }
+        }
+      }
+      case None => {
+        y match {
+          case Some(yi) => {
+            Some(yi);
+          }
+          case None => {
+            None;
+          }
+        }
+      }
+    }
+  }
+  
+  
+  */
 }
 
 

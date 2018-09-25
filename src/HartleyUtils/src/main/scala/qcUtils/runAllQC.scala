@@ -348,7 +348,14 @@ object runAllQC {
                                                  ""+
                                                  ""
                                        ) ::
-
+                    new UnaryArgument( name = "prefilterImproperPairs",
+                                       arg = List("--prefilterImproperPairs"), // name of value
+                                       argDesc = "If this parameter is used, QoRTs will ignore all reads that lack the 0x2 flag, which "+
+                                                 "indicates that the read is properly paired. It will not attempt to match such reads into pairs. "+
+                                                 "This option may be necessary with certain aligners (including BWA). Note that if this filter is used, "+
+                                                 "QoRTs will not tally improperly paired reads."+
+                                                 ""
+                                       ) ::
                     new BinaryArgument[Int](   name = "adjustPhredScore",
                                                         arg = List("--adjustPhredScore"),  
                                                         valueName = "val", 
@@ -669,7 +676,8 @@ object runAllQC {
           parser.get[Option[Double]]("randomSubsample"),
           parser.get[Option[Long]]("randomSeed"),
           parser.get[String]("outfilePrefix"),
-          parser.get[Int]("genomeBufferSize")
+          parser.get[Int]("genomeBufferSize"),
+          prefilterImproperPairs = parser.get[Boolean]("prefilterImproperPairs")
       );
       }
     }
@@ -719,7 +727,8 @@ object runAllQC {
           randomSubsample : Option[Double],
           randomSeed : Option[Long],
           outfilePrefix : String,
-          genomeBufferSize : Int){
+          genomeBufferSize : Int,
+          prefilterImproperPairs : Boolean){
     
     randomSeed match {
       case Some(seed) => scala.util.Random.setSeed(seed);
@@ -957,7 +966,8 @@ object runAllQC {
           stopAfterNReads=stopAfterNReads,
           genomeFA = genomeFA,dropOnTarget=dropOnTarget,keepOnTarget=keepOnTarget,randomSubsample=randomSubsample,
           genomeBufferSize = genomeBufferSize,
-          outfilePrefix = outfilePrefix)
+          outfilePrefix = outfilePrefix,
+          prefilterImproperPairs = prefilterImproperPairs)
     }
   }
   
@@ -1001,7 +1011,8 @@ object runAllQC {
                    keepOnTarget : Boolean,
                    randomSubsample : Option[Double],
                    genomeBufferSize : Int,
-                   outfilePrefix : String
+                   outfilePrefix : String,
+                   prefilterImproperPairs : Boolean
                    ){
 
     
@@ -1065,9 +1076,9 @@ object runAllQC {
     val variableReadLen = readLength != minReadLength || (! maxReadLength.isEmpty);
      
     if(samFileAttributes.allReadsMarkedPaired & isSingleEnd) reportln("   WARNING WARNING WARNING! Running in single-end mode, but reads appear to be paired-end! Errors may follow.\n"+
-                                                                      "           Strongly recommend removing the '--isSingleEnd' option!","warn");
+                                                                      "           Strongly recommend removing the '--singleEnded' option!","warn");
     if(samFileAttributes.allReadsMarkedSingle & (! isSingleEnd)) reportln("   WARNING WARNING WARNING! Running in paired-end mode, but reads appear to be single-end! Errors may follow.\n"+
-                                                                          "           Strongly recommend using the '--isSingleEnd' option","warn");
+                                                                          "           Strongly recommend using the '--singleEnded' option","warn");
     if(samFileAttributes.mixedSingleAndPaired) reportln("   WARNING WARNING WARNING! Data appears to be a mixture of single-end and paired-end reads!\n"+
                                                         "           QoRTs was not designed to function under these conditions. Errors may follow!","warn");
     
@@ -1120,7 +1131,11 @@ object runAllQC {
       if(isSortedByPosition){
         reportln("   Sorting Note: Reads are sorted by position "+isOkNote,"note");
       } else {
-        reportln("   Sorting Note: Reads are not sorted by position "+isOkNote,"note");
+        if(runFunc.contains("referenceMatch")){
+          reportln("   Sorting Note: Reads are NOT sorted by position! Position-sorting is REQUIRED for the referenceMismatch module to function properly. Errors may follow.","note");
+        } else {
+          reportln("   Sorting Note: Reads are not sorted by position "+isOkNote,"note");
+        }
       }
       
       //Samtools sorts in an odd way! Delete name sort check:
@@ -1138,16 +1153,16 @@ object runAllQC {
       } else {
         if(unsorted){
           if(runFunc.contains("referenceMatch")){
-             if(testRun) samRecordPairIterator_resorted(recordIter, true, testRunLineCt) else samRecordPairIterator_resorted(recordIter)
+             if(testRun) samRecordPairIterator_resorted(recordIter, true, testRunLineCt, prefilterImproperPairs = prefilterImproperPairs) else samRecordPairIterator_resorted(recordIter, prefilterImproperPairs = prefilterImproperPairs)
           } else {
-             //if(testRun) samRecordPairIterator_unsorted(recordIter, true, testRunLineCt) else samRecordPairIterator_unsorted(recordIter)
-             if(testRun) samRecordPairIterator_resorted(recordIter, true, testRunLineCt) else samRecordPairIterator_resorted(recordIter)
+             if(testRun) samRecordPairIterator_unsorted(recordIter, true, testRunLineCt, prefilterImproperPairs = prefilterImproperPairs) else samRecordPairIterator_unsorted(recordIter, prefilterImproperPairs = prefilterImproperPairs)
+             //if(testRun) samRecordPairIterator_resorted(recordIter, true, testRunLineCt, prefilterImproperPairs = prefilterImproperPairs) else samRecordPairIterator_resorted(recordIter, prefilterImproperPairs = prefilterImproperPairs)
           }
         // Faster noMultiMapped running is DEPRECIATED!
         //} else if(noMultiMapped){
         //  if(testRun) samRecordPairIterator(recordIter, true, 200000) else samRecordPairIterator(recordIter)
         } else {
-          if(testRun) samRecordPairIterator_withMulti(recordIter, true, testRunLineCt) else samRecordPairIterator_withMulti(recordIter)
+          if(testRun) samRecordPairIterator_withMulti(recordIter, true, testRunLineCt, prefilterImproperPairs = prefilterImproperPairs) else samRecordPairIterator_withMulti(recordIter, prefilterImproperPairs = prefilterImproperPairs)
         }
       }
     

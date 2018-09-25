@@ -1,6 +1,6 @@
 Package: QoRTs
-Version: 1.3.0
-Date: 2017-10-20
+Version: 1.3.6
+Date: 2018-09-25
 Title: Quality of RNA-seq Tool
 Authors@R: c(person("Stephen Hartley, PhD", "Developer", role = c("aut", "cre"),
                      email = "QoRTs-contact@list.nih.gov"))

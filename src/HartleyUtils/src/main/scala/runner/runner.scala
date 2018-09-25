@@ -9,22 +9,22 @@ import internalUtils.commandLineUI._;
 
 object runner {
   
-  final val QORTS_VERSION = "1.3.0"; // REPLACE_THIS_QORTS_VERSION_VARIABLE_WITH_VERSION_NUMBER          (note this exact text is used in a search-and-replace. Do not change it.)
-  final val QORTS_COMPILE_DATE = "Fri Oct 20 11:56:37 EDT 2017"; // REPLACE_THIS_QORTS_DATE_VARIABLE_WITH_DATE          (note this exact text is used in a search-and-replace. Do not change it.)
-  final val QORTS_COMPILE_TIME : Long = 1508514997; // REPLACE_THIS_QORTS_DATE_VARIABLE_WITH_TIME          (note this exact text is used in a search-and-replace. Do not change it.)
+  val QORTS_VERSION = "1.3.6"; // REPLACE_THIS_QORTS_VERSION_VARIABLE_WITH_VERSION_NUMBER          (note this exact text is used in a search-and-replace. Do not change it.)
+  val QORTS_COMPILE_DATE = "Tue Sep 25 11:21:46 EDT 2018"; // REPLACE_THIS_QORTS_DATE_VARIABLE_WITH_DATE          (note this exact text is used in a search-and-replace. Do not change it.)
+  val QORTS_COMPILE_TIME : Long = 1537888906; // REPLACE_THIS_QORTS_DATE_VARIABLE_WITH_TIME          (note this exact text is used in a search-and-replace. Do not change it.)
 
-  final val QORTS_MAJOR_VERSION = QORTS_VERSION.split("\\.")(0);
-  final val QORTS_MINOR_VERSION = QORTS_VERSION.split("\\.")(1);
-  final val QORTS_PATCH_VERSION = QORTS_VERSION.split("-")(0).split("\\+")(0).split("\\.")(2);
+   val QORTS_MAJOR_VERSION = QORTS_VERSION.split("\\.")(0);
+   val QORTS_MINOR_VERSION = QORTS_VERSION.split("\\.")(1);
+   val QORTS_PATCH_VERSION = QORTS_VERSION.split("-")(0).split("\\+")(0).split("\\.")(2);
   
   //final val FOR_HELP_STRING = "For help, use command: "
   
-  final val Runner_ThisProgramsExecutableJarFileName : String = "QoRTs.jar";
-  final val allowDepreciated : Boolean = true;
-  final val COMMAND_MAX_LENGTH = 30;
+   val Runner_ThisProgramsExecutableJarFileName : String = "QoRTs.jar";
+   val allowDepreciated : Boolean = true;
+   val COMMAND_MAX_LENGTH = 30;
   
   //Command name -> (execution call, summary, syntax)
-  final val utilCommandList : Map[String, () => CommandLineRunUtil] = 
+   val utilCommandList : Map[String, () => CommandLineRunUtil] = 
       Map( //NOTE: All commands MUST be of length < COMMAND_MAX_LENGTH!
            ("QC" -> (() => new qcUtils.runAllQC.allQC_runner)),
            ("makeFlatGff" -> (() => new fileConversionUtils.prepFlatGtfFile.prepFlatGtfFile_runner)),
@@ -45,19 +45,20 @@ object runner {
            //(("bamToWiggle", ((fileConversionUtils.bamToWiggle.run(_)),"",""))),
            //(("sumWiggles", ((fileConversionUtils.SumWigglesFast.run(_)),"","")))
          )
-  final val sortedCommandList : Seq[(String, () => CommandLineRunUtil)] = utilCommandList.toVector.sortBy(_._2().priority);
+   val sortedCommandList : Seq[(String, () => CommandLineRunUtil)] = utilCommandList.toVector.sortBy(_._2().priority);
          
          
-  final val helpCommandList : Map[String, () => CommandLineRunUtil] = 
+   val helpCommandList : Map[String, () => CommandLineRunUtil] = 
     (internalUtils.commandLineUI.HELP_COMMAND_LIST ++ internalUtils.commandLineUI.MANUAL_COMMAND_LIST).map( (c : String) => {
       (c, (() => new helpDocs()));
     }).toMap;
   
-  final val commandList = utilCommandList ++ helpCommandList;
+   val commandList = utilCommandList ++ helpCommandList;
          
-  final val depreciated_commandList : Map[String, () => CommandLineRunUtil] = 
+   val depreciated_commandList : Map[String, () => CommandLineRunUtil] = 
      Map(
-         ("makeBedFromGtf" -> (() => new fileConversionUtils.makeBedFromGtf.converter))
+         ("makeBedFromGtf" -> (() => new fileConversionUtils.makeBedFromGtf.converter)),
+         ("filterBamFile" -> (() => new fileConversionUtils.filterBamFile.cmdFilterBam))
          );
 
   def main(args: Array[String]){

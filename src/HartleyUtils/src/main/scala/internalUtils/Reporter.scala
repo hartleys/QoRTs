@@ -40,6 +40,7 @@ object Reporter {
       }
     }
     
+    
     /*
      * Do not use the below functions:
      */
@@ -238,6 +239,31 @@ object Reporter {
     }
   }
   
+  var PROGRESS_NEEDS_NEWLINE = true;
+  def progressReport(i : Int, s : String, verb : String = "progress"){
+    report("] " + (s +: getProgressReportStrings(i).map{s => "      "+s} ).mkString("\n")+"\n",verb=verb);
+  }
+  def progressDot(i : Int, dotsPerGroup : Int = 5, groupsPerLine : Int = 4, blankSpacer : String = "-", verb : String = "progress"){
+    if(PROGRESS_NEEDS_NEWLINE){
+      startProgressLine(i-1,dotsPerGroup = dotsPerGroup, groupsPerLine = groupsPerLine, verb=verb,spacer = blankSpacer);
+      PROGRESS_NEEDS_NEWLINE = false;
+    }
+    if(i != (groupsPerLine * dotsPerGroup) && i % dotsPerGroup == 0){
+      report(". ",verb);
+    } else {
+      report(".",verb);
+    }
+    
+  }
+  def startProgressLine(blankSpaces : Int, spacer : String = "x", groupSpacer : String = " ", dotsPerGroup : Int = 5, groupsPerLine : Int = 4, verb : String = "progress"){
+    var out = "[";
+    var grpNum = blankSpaces / dotsPerGroup;
+    out = out + stdUtils.repString(stdUtils.repString(spacer,dotsPerGroup)+groupSpacer,grpNum);
+    out = out + stdUtils.repString(spacer,blankSpaces % dotsPerGroup);
+    report(out,verb);
+  }
+  
+  
   /*
    * Reporting options:
    */
@@ -285,6 +311,17 @@ object Reporter {
     }
     warningCount(warnType) += 1;
   }
+  val noticeCount = scala.collection.mutable.Map[String,Int]().withDefault((x : String) => 0);
+  def notice(str : String, warnType : String = "default", limit : Int = -1){
+    val warnCt = noticeCount(warnType)
+    if(limit < 0 || warnCt <= limit){
+      PROGRESS_NEEDS_NEWLINE = true;
+      reportln("  #### NOTE ("+warnType+" "+(warnCt+1)+"):","warn");
+      reportln("    >> "+str.split("\n").mkString("\n    >> "),"warn");
+      if(limit > 0 && warnCt == limit) reportln("       (("+limit+"+ notices of type "+warnType+". Further warnings of this type will be silent.))","warn");
+    }
+    noticeCount(warnType) += 1;
+  }
   
   def error(str : String){
     reportln("<====== FATAL ERROR! ======>","error");
@@ -320,7 +357,31 @@ object Reporter {
       })
       reportln("<------->","warn");
     }
+    if(! noticeCount.keys.isEmpty){
+      reportln("<------->","note");
+      reportln("   Note: "+noticeCount.keySet.map(noticeCount(_)).sum+" Notices Thrown:","note");
+      noticeCount.keySet.foreach(x => {
+        reportln("   "+noticeCount(x)+"\t"+x,"note");
+      })
+      reportln("<------->","note");
+    }  
     loggers.map((logger) => logger.close);
     loggers = List();
   }
+  
+  var PROGRESS_REPORT_FUNCTIONS : Vector[(Int) => String] = Vector();
+  
+  def getProgressReportStrings(i : Int) : Vector[String] = {
+    PROGRESS_REPORT_FUNCTIONS.map{f => {
+      f(i)
+    }}
+  }
+  def addProgressReportFunction(f : (Int) => String){
+    PROGRESS_REPORT_FUNCTIONS = PROGRESS_REPORT_FUNCTIONS :+ f;
+  }
+  def clearProgressReportFunctions(){
+    PROGRESS_REPORT_FUNCTIONS = Vector()
+  }
+  
+  
 }

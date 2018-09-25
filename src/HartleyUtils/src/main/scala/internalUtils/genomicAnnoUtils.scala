@@ -49,6 +49,14 @@ object genomicAnnoUtils {
         error("ERROR: EfficientGenomeSeqContainer: requested sequence for chromosome other than current chromosome!");
       }
       
+      if(start < 0){
+        if(end < 0){
+          return repString("N",end-start);
+        } else {
+          return repString("N",-start) + getSeqForInterval(chrom=chrom,start=0,end=end,truncate=truncate);
+        }
+      }
+      
       if(start < bufferStart){
         reportln("ERROR: EfficientGenomeSeqContainer: Illegal request for sequence prior to current buffer limits!\n"+
               "   request: "+chrom+":"+start+"-"+end,"note");
@@ -158,34 +166,54 @@ object genomicAnnoUtils {
     //Implementation note: It is important that you never read from remainderIter without first emptying currentIter!
     // Otherwise scala attempts to store the currentIter values.
     // This even remains true if there are no external references to the attached currentIter.
-    def switchToChrom(chrom : String){
-        report("Switching to Chromosome: " + chrom + " ["+getDateAndTimeString+"] ... ","debug");
-        while(currentIter.hasNext) currentIter.next;
-        var iter = remainderIter.dropWhile(line => line != (">"+chrom));
-        if(! iter.hasNext){
-          iter = internalUtils.fileUtils.getLinesSmartUnzip(infile).dropWhile(line => line != (">"+chrom));
-          if(iter.hasNext){
-            reportln("Returning to start of genome FASTA file. NOTE: for optimal performance, sort the FASTA file so that the chromosomes appear in the same order as in the BAM files.","note");
-          } else {
-            error("FATAL ERROR: Cannot find chromosome \""+chrom+"\" in genome FASTA file!")
-          }
-        }
-        val iterPair = iter.drop(1).span(line => line.charAt(0) != '>');
-        currentIter = iterPair._1.map(_.toUpperCase());
-        remainderIter = iterPair._2;
-        clearBuffer();
-        currChrom = chrom;
-        report("done ["+getDateAndTimeString+"]\n","debug");
+    def parseChromLine(line : String) : String = {
+      if(line.head != '>'){
+        error("genome fasta file \""+infile+"\" appears mal-formatted! Chromsome line does not start with '>'!:\nOffending line: \""+line+"\"")
+      }
+      line.tail.split("\\s+",2)(0)
     }
     
-    var initialReader = internalUtils.fileUtils.getLinesSmartUnzip(infile);
-    currChrom = initialReader.next().substring(1);
+    def switchToChrom(chrom : String){
+        report("Switching to Chromosome: " + chrom + " ["+getDateAndTimeString+"] ... ","debug");
+        clearBuffer();
+        switchToChrom(chrom,true);
+        report("    found chrom "+chrom+" ["+getDateAndTimeString+"]\n","debug");
+    }
+    def switchToChrom(chrom : String,circleBack : Boolean){
+          while(chrom != currChrom && reader.hasNext){
+            reportln("   Skipping chrom \""+currChrom+"\" in genome fasta...","debug");
+            skipWhile(reader)(line => line.charAt(0) != '>')
+            if(reader.hasNext){
+              currChrom = parseChromLine(reader.next);
+              if(chrom != currChrom) reportln("   Skipping chrom \""+currChrom+"\" in genome fasta...","debug");
+            }
+          }
+          if(circleBack && currChrom != chrom){
+             notice("Returning to start of genome FASTA file. NOTE: for optimal performance, sort the FASTA file so that the chromosomes appear in the same order as in the BAM files.","LOOPED_GENOME_FASTA",-1);
+             reader = internalUtils.fileUtils.getLinesSmartUnzip(infile).buffered
+             currChrom = parseChromLine(reader.next);
+             switchToChrom(chrom,false);
+          }
+    }
+    var reader = internalUtils.fileUtils.getLinesSmartUnzip(infile).buffered;
+    if(! reader.hasNext){
+      error("genome fasta file \""+infile+"\" appears to be empty!")
+    }
+    if(reader.head.head != '>'){
+      error("genome fasta file \""+infile+"\" appears mal-formatted! First line does not start with '>'!:\nOffending line: \""+reader+"\"")
+    }
+    currChrom = reader.next().substring(1);
     chromList = List[String](currChrom);
-    
-    var (currentIter,remainderIter) = initialReader.span(line => line.charAt(0) != '>');
-    currentIter = currentIter.map(_.toUpperCase());
+    val currentIter = new BufferedIterator[String]{
+      def hasNext = reader.hasNext && reader.head.charAt(0) != '>';
+      def next = reader.next.toUpperCase();
+      def head = reader.head;
+    }
+    //var (currentIter,remainderIter) = initialReader.span(line => line.charAt(0) != '>');
+    //currentIter = currentIter.map(_.toUpperCase());
     def currIter = currentIter;
   }
+  
   
   class EfficientGenomeSeqContainer_FAList(infiles : Seq[String]) extends EfficientGenomeSeqContainer {
     val fastaMap : Map[String,String] = infiles.map(infile => {

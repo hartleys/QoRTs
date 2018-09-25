@@ -20,3 +20,5 @@ export _JAVA_OPTIONS="-Xmx1000M -Xms500M -XX:ParallelGCThreads=1"
 export MALLOC_ARENA_MAX=1
 
 sbt < sbtAssemblyCommand.txt
+
+cp target/scala-2.12/QoRTs.jar ./
