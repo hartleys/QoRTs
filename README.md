@@ -16,7 +16,7 @@ If you use QoRTs and find it helpful, you can cite it in your publications as:
 
 Hartley SW, Mullikin JC. [**QoRTs: a comprehensive toolset for quality control and data processing of RNA-Seq experiments.**](http://www.ncbi.nlm.nih.gov/pmc/articles/PMC4506620/) [*BMC Bioinformatics.*](http://www.biomedcentral.com/bmcbioinformatics) doi: 10.1186/s12859-015-0670-5
 
-##HELP AND DOCUMENTATION:
+## HELP AND DOCUMENTATION:
 **Additional help and documentation is available online 
 [here](http://hartleys.github.io/QoRTs/index.html).** 
 
@@ -24,9 +24,9 @@ If you have a question, encounter an error, or have a feature request, we recomm
 
 Alternatively, the creator and maintainer of QoRTs can be reached by emailing "QoRTs-contact" (at) list.nih.gov.
 
-##LEGAL:
+## LEGAL:
 This software is "United States Government Work" under the terms of the United 
-States Copyright Act. It was written as part of the authors’ official duties 
+States Copyright Act. It was written as part of the authorsâ€™ official duties 
 for the United States Government and thus QoRT Package User Manual cannot be 
 copyrighted. This software is freely available to the public for use without a 
 copyright notice. Restrictions cannot be placed on its present or future use.
